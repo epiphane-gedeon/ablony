@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "2762433205",
+    "project_id": "ablony-a5db9",
+    "storage_bucket": "ablony-a5db9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2762433205:android:7faf7535e9abf78e3ad4fc",
+        "android_client_info": {
+          "package_name": "com.example.ablony"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH6dy7zGcgvXUdALv6l8Km8GvndcDIcNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
