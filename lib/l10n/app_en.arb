@@ -178,7 +178,7 @@
   "@emailSignupEmailPlaceholder": {"description": "Email placeholder"},
   "emailSignupPassword": "Password",
   "@emailSignupPassword": {"description": "Password field label"},
-  "emailSignupPasswordPlaceholder": "Create a password",contain
+  "emailSignupPasswordPlaceholder": "Create a password",
   "@emailSignupPasswordPlaceholder": {"description": "Password placeholder"},
   "emailSignupPasswordHint": "It must contain at least 8 carachters, including at least one digit, one uppercase letter and one special character.",
   "@emailSignupPasswordHint": {"description": "Password hint"},
