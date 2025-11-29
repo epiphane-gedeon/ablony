@@ -342,6 +342,7 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
         text: l10n.loginEmail,
         onTap: () {
           Navigator.of(context).pop();
+          context.push('/auth/signup/email');
         },
         underline: false,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(

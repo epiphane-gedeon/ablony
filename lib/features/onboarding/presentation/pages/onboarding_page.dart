@@ -402,6 +402,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           ),
 
           // Espacement de 12px entre les deux boutons
+        // Espacement de 12px entre les deux boutons
           const SizedBox(height: 12),
 
           // ============================================================
@@ -411,10 +412,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           SecondaryButton(
             text: l10n.loginButton,
             onPressed: () {
-              // TODO: Ajouter la navigation vers la page de connexion
-              // Exemple : Navigator.of(context).push(
-              //   MaterialPageRoute(builder: (context) => const LoginPage()),
-              // );
+              // Navigation vers la page de connexion
+              context.push('/auth/login');
             },
           ),
         ],

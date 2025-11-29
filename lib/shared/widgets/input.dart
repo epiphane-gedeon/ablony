@@ -342,6 +342,7 @@ class _InputState extends State<Input> {
             // Message d'erreur personnalisé
             errorText: widget.errorLabel,
             errorStyle: TextStyle(color: defaultErrorBorderColor, fontSize: 12),
+            errorMaxLines: 3, // Permet d'afficher les messages d'erreur sur plusieurs lignes
 
             // Padding interne
             contentPadding:

@@ -15,5 +15,7 @@
 /// ```
 
 export 'username_page.dart';
+export 'email_signup_screen.dart';
+export 'login_screen.dart';
 export 'captcha_page.dart';
 export 'country_selection_page.dart';
