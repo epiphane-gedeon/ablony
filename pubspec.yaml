@@ -1,6 +1,6 @@
 name: ablony
-description: "A new Flutter project."
-publish_to: 'none'
+description: "Ablony"
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -9,17 +9,73 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+  # ============================================================
+  # FIREBASE - Backend et authentification
+  # ============================================================
   firebase_core: ^4.2.1
-  flutter_riverpod: ^3.0.3
   firebase_auth: ^6.1.2
   cloud_firestore: ^6.1.0
+
+  # ============================================================
+  # AUTHENTIFICATION SOCIALE
+  # ============================================================
+  # Connexion avec Google (Android, iOS, Web)
+  google_sign_in: ^6.2.1
+  # Connexion avec Facebook (Android, iOS, Web)
+  flutter_facebook_auth: ^6.0.4
+  # Connexion avec Apple (iOS, macOS uniquement)
+  sign_in_with_apple: ^6.1.3
+
+  # ============================================================
+  # GESTION D'ÉTAT ET NAVIGATION
+  # ============================================================
+  flutter_riverpod: ^3.0.3
   go_router: ^17.0.0
+  # Simplification des comparaisons d'objets (pour les entités)
+  equatable: ^2.0.7
+
+  # ============================================================
+  # UI ET THÈME
+  # ============================================================
   google_fonts: ^6.3.2
+  flutter_svg: ^2.0.10+1
+
+  # ============================================================
+  # SÉCURITÉ
+  # ============================================================
+  # Google reCAPTCHA v2 pour la vérification anti-bot
+  webview_flutter: ^4.10.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
 
 flutter:
   uses-material-design: true
+  generate: true
+
+  # Déclaration des assets (images, icônes, fichiers)
+  assets:
+    # Images
+    - assets/images/
+    # Icônes
+    - assets/icons/
+
+# Configuration de l'icône de l'application
+flutter_launcher_icons:
+  android: true
+  ios: true
+  web:
+    generate: true
+  image_path: "assets/images/favicon.png"
+  # Couleur de fond pour l'icône adaptative Android
+  adaptive_icon_background: "#2385AE"
+  adaptive_icon_foreground: "assets/images/favicon.png"
+  # Supprime le canal alpha pour iOS (requis par l'App Store)
+  remove_alpha_ios: true

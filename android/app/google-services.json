@@ -12,7 +12,20 @@
           "package_name": "com.example.ablony"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "2762433205-4e87knanpqa0ikm0u9ns79vaa18pbghc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ablony",
+            "certificate_hash": "e92b736f3141d7170c9a2e1995001589fce087d6"
+          }
+        },
+        {
+          "client_id": "2762433205-qd3fesoffe98hk9oto62151mgdg235f1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAH6dy7zGcgvXUdALv6l8Km8GvndcDIcNA"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2762433205-qd3fesoffe98hk9oto62151mgdg235f1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "2762433205-46oi9rgq668r56370k0qrfshkb4277gs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ablony"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,0 +1,168 @@
+{
+  "@@locale": "en",
+  
+  "languageFrench": "French",
+  "@languageFrench": {
+    "description": "French language name"
+  },
+
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language name"
+  },
+
+  "skip": "Skip",
+  "@skip": {
+    "description": "Button to skip onboarding"
+  },
+
+  "onboardingCatchPhrase1": "Buy and sell",
+  "@onboardingCatchPhrase1": {
+    "description": "First line of the slogan"
+  },
+
+  "onboardingCatchPhrase2": "easily.",
+  "@onboardingCatchPhrase2": {
+    "description": "Second line of the slogan"
+  },
+
+  "signUpButton": "Sign up on Ablony",
+  "@signUpButton": {
+    "description": "Sign up button"
+  },
+
+  "loginButton": "I already have an account",
+  "@loginButton": {
+    "description": "Login button"
+  },
+
+  "aboutAblony": "About Ablony: ",
+  "@aboutAblony": {
+    "description": "About link text"
+  },
+
+  "ourPlatform": "Our platform",
+  "@ourPlatform": {
+    "description": "Platform link"
+  },
+
+  "changeLanguage": "Change language",
+  "@changeLanguage": {
+    "description": "Language selection dialog title"
+  },
+
+  "validate": "Validate",
+  "@validate": {
+    "description": "Validation button"
+  },
+
+  "close": "Close",
+  "@close": {
+    "description": "Close button"
+  },
+
+  "pageNotFound": "Page not found",
+  "@pageNotFound": {
+    "description": "404 error page title"
+  },
+
+  "pageNotFoundMessage": "The route \"{route}\" does not exist.",
+  "@pageNotFoundMessage": {
+    "description": "404 error message with route",
+    "placeholders": {
+      "route": {
+        "type": "String",
+        "example": "/unknown"
+      }
+    }
+  },
+
+  "backToHome": "Back to home",
+  "@backToHome": {
+    "description": "Button to go back to home"
+  }
+  ,
+  "registerTitle": "Sign up",
+  "@registerTitle": {"description": "Sign up page title"},
+  "usernameLabel": "Username",
+  "@usernameLabel": {"description": "Username field label"},
+  "usernamePlaceholder": "john-doe",
+  "@usernamePlaceholder": {"description": "Username field placeholder"},
+  "usernameRequired": "Username is required",
+  "@usernameRequired": {"description": "Error for required username field"},
+  "usernameMinLength": "Minimum 3 characters",
+  "@usernameMinLength": {"description": "Error for minimum username length"},
+  "usernameMaxLength": "Maximum 30 characters",
+  "@usernameMaxLength": {"description": "Error for maximum username length"},
+  "usernameFormatError": "Invalid format (letters, numbers, - and _ only)",
+  "@usernameFormatError": {"description": "Error for username format"},
+  "usernameSuggestion": "We suggest this username:",
+  "@usernameSuggestion": {"description": "Username suggestion text"},
+  "marketingEmailMessage": "I want to receive personalized offers and the latest updates from Ablony by email.",
+  "@marketingEmailMessage": {"description": "Marketing email checkbox message"},
+  "termsPrefix": "By signing up, you confirm that you accept the ",
+  "@termsPrefix": {"description": "Terms prefix"},
+  "termsTitle": "Ablony Terms & Conditions",
+  "@termsTitle": {"description": "Terms link"},
+  "privacyPrefix": ", have read the ",
+  "@privacyPrefix": {"description": "Privacy policy prefix"},
+  "privacyTitle": "Privacy Policy",
+  "@privacyTitle": {"description": "Privacy policy link"},
+  "termsAge": " and are at least 18 years old.",
+  "@termsAge": {"description": "Minimum age for registration"},
+  "continueButton": "Continue",
+  "@continueButton": {"description": "Continue registration button"},
+  "problemLink": "A problem?",
+  "@problemLink": {"description": "Help link for registration"},
+
+  "loginTitle": "Sign up on Ablony",
+  "@loginTitle": {"description": "Login flow title"},
+  "loginSubtitleApple": "Use your Apple ID, it's faster.",
+  "@loginSubtitleApple": {"description": "Apple subtitle"},
+  "loginSubtitleGoogle": "Use your Google account, it's faster.",
+  "@loginSubtitleGoogle": {"description": "Google subtitle"},
+  "loginAppleError": "Failed to sign in with Apple",
+  "@loginAppleError": {"description": "Apple sign-in error"},
+  "loginGoogleError": "Failed to sign in with Google",
+  "@loginGoogleError": {"description": "Google sign-in error"},
+  "loginFacebookError": "Failed to sign in with Facebook",
+  "@loginFacebookError": {"description": "Facebook sign-in error"},
+  "loginApple": "Continue with Apple",
+  "@loginApple": {"description": "Apple button"},
+  "loginGoogle": "Continue with Google",
+  "@loginGoogle": {"description": "Google button"},
+  "loginFacebook": "Continue with Facebook",
+  "@loginFacebook": {"description": "Facebook button"},
+  "loginOr": "or",
+  "@loginOr": {"description": "Or separator"},
+  "loginEmail": "Continue with an email address",
+  "@loginEmail": {"description": "Email link"},
+  "loginBusiness": "Are you a business? ",
+  "@loginBusiness": {"description": "Business text"},
+  "loginBusinessMore": "Learn more",
+  "@loginBusinessMore": {"description": "Business link"},
+
+  "homeTitle": "Ablony",
+  "@homeTitle": {"description": "Home page title"},
+  "homeWelcome": "Hello World! 🎉",
+  "@homeWelcome": {"description": "Welcome message on home"},
+  "homeSubtitle": "Welcome to Ablony!",
+  "@homeSubtitle": {"description": "Home subtitle"},
+  "homeSuccess": "Registration completed successfully.",
+  "@homeSuccess": {"description": "Registration success message"},
+
+  "countryTitle": "Where do you live?",
+  "@countryTitle": {"description": "Country selection page title"},
+  "countrySubtitle": "Select your country to personalize your experience.",
+  "@countrySubtitle": {"description": "Country selection page subtitle"},
+  "countryLoading": "Finalizing your registration...",
+  "@countryLoading": {"description": "Registration loading text"},
+  "countryErrorGeneric": "An error occurred. Please try again.",
+  "@countryErrorGeneric": {"description": "Generic registration error"},
+  "countryErrorNetwork": "Network issue. Please check your connection.",
+  "@countryErrorNetwork": {"description": "Network registration error"},
+  "countryErrorUsername": "Username is already taken.",
+  "@countryErrorUsername": {"description": "Username already taken error"},
+  "countryInfo": "You can change your country and city later in your settings.",
+  "@countryInfo": {"description": "Info text for changing country/city"}
+}

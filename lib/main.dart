@@ -4,8 +4,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
+import 'core/providers/locale_provider.dart';
+import 'core/navigation/app_router.dart';
+import 'l10n/app_localizations.dart';
 
 /// Fonction principale qui lance l'application.
 /// Marqée async car elle initialise Firebase de manière asynchrone.
@@ -17,18 +22,24 @@ void main() async {
   // (Android, iOS, Web, etc.)
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Lance l'application
-  runApp(const MainApp());
+  // Lance l'application avec Riverpod pour la gestion d'état
+  runApp(const ProviderScope(child: MainApp()));
 }
 
 /// Widget racine de l'application Ablony.
-/// Configure MaterialApp avec le thème et la page d'accueil.
-class MainApp extends StatelessWidget {
+/// Configure MaterialApp avec le thème, la localisation et la page d'accueil.
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Observer la locale actuelle depuis le provider
+    final locale = ref.watch(localeProvider);
+
+    // Observer le router configuré avec go_router
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
       // Titre de l'application (visible dans le gestionnaire de tâches)
       title: 'Ablony',
 
@@ -38,8 +49,26 @@ class MainApp extends StatelessWidget {
       // Cache le bandeau "Debug" en haut à droite
       debugShowCheckedModeBanner: false,
 
-      // Page d'accueil temporaire (sera remplacée par le routeur plus tard)
-      home: const Scaffold(body: Center(child: Text('Salut tout le monde !'))),
+      // Configuration de la localisation
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      // Langues supportées par l'application
+      supportedLocales: const [
+        Locale('fr'), // Français
+        Locale('en'), // Anglais
+      ],
+
+      // Langue actuelle de l'application
+      locale: locale,
+
+      // Configuration du router go_router
+      // Remplace 'home' pour gérer la navigation avec des routes nommées
+      routerConfig: router,
     );
   }
 }

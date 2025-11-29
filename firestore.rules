@@ -1,0 +1,107 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================================
+    // FONCTIONS UTILITAIRES
+    // ============================================================
+    
+    /// Vérifie si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /// Vérifie si l'utilisateur est le propriétaire de la ressource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    /// Vérifie si l'utilisateur a un profil complet
+    function hasCompleteProfile() {
+      return isAuthenticated() 
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.country != null;
+    }
+    
+    // ============================================================
+    // COLLECTION : users
+    // ============================================================
+    // Gère les profils utilisateurs
+    match /users/{userId} {
+      // Lecture : Tout le monde peut voir les profils publics
+      allow read: if true;
+      
+      // Création : Uniquement l'utilisateur authentifié peut créer son propre profil
+      // Vérifie que l'UID correspond et que les champs obligatoires sont présents
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['uid', 'email', 'username', 'authProvider', 'country'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.username is string
+        && request.resource.data.username.size() >= 3
+        && request.resource.data.username.size() <= 30
+        && request.resource.data.acceptedTerms == true;
+      
+      // Mise à jour : Uniquement le propriétaire peut modifier son profil
+      // Empêche la modification des champs sensibles
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.authProvider == resource.data.authProvider
+        && request.resource.data.createdAt == resource.data.createdAt;
+      
+      // Suppression : Uniquement le propriétaire (et dans le futur, les admins)
+      allow delete: if isOwner(userId);
+    }
+    
+    // ============================================================
+    // COLLECTION : usernames
+    // ============================================================
+    // Gère la réservation des noms d'utilisateur (unicité)
+    match /usernames/{username} {
+      // Lecture : Accessible à tous pour vérifier la disponibilité
+      allow read: if true;
+      
+      // Création : Uniquement lors de la création du profil utilisateur
+      // Vérifie que le username correspond à celui du profil
+      // Note: On ne vérifie PAS l'existence de users/{uid} car la création se fait en transaction
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid;
+      
+      // Mise à jour : Impossible (les usernames ne changent pas après création)
+      // Note : Pour changer de username, il faut supprimer l'ancien et créer un nouveau
+      allow update: if false;
+      
+      // Suppression : Uniquement le propriétaire (pour changer de username)
+      allow delete: if isAuthenticated() 
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // ============================================================
+    // COLLECTION : products (à implémenter plus tard)
+    // ============================================================
+    // match /products/{productId} {
+    //   allow read: if true;
+    //   allow create: if hasCompleteProfile();
+    //   allow update, delete: if isOwner(resource.data.sellerId);
+    // }
+    
+    // ============================================================
+    // COLLECTION : messages (à implémenter plus tard)
+    // ============================================================
+    // match /conversations/{conversationId} {
+    //   allow read, write: if isAuthenticated() 
+    //     && request.auth.uid in resource.data.participants;
+    // }
+    
+    // ============================================================
+    // RÈGLE PAR DÉFAUT : TOUT REFUSER
+    // ============================================================
+    // Toute collection non définie est interdite
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "@@locale": "fr",
+  
+  "languageFrench": "Français",
+  "@languageFrench": {
+    "description": "Nom de la langue française"
+  },
+
+  "languageEnglish": "Anglais",
+  "@languageEnglish": {
+    "description": "Nom de la langue anglaise"
+  },
+
+  "skip": "Ignorer",
+  "@skip": {
+    "description": "Bouton pour ignorer l'onboarding"
+  },
+
+  "onboardingCatchPhrase1": "Achetez et vendez",
+  "@onboardingCatchPhrase1": {
+    "description": "Première ligne du slogan"
+  },
+
+  "onboardingCatchPhrase2": "facilement.",
+  "@onboardingCatchPhrase2": {
+    "description": "Deuxième ligne du slogan"
+  },
+
+  "signUpButton": "S'inscrire sur Ablony",
+  "@signUpButton": {
+    "description": "Bouton d'inscription"
+  },
+
+  "loginButton": "J'ai déjà un compte",
+  "@loginButton": {
+    "description": "Bouton de connexion"
+  },
+
+  "aboutAblony": "À propos d'Ablony : ",
+  "@aboutAblony": {
+    "description": "Texte du lien à propos"
+  },
+
+  "ourPlatform": "Notre plateforme",
+  "@ourPlatform": {
+    "description": "Lien vers la plateforme"
+  },
+
+  "changeLanguage": "Changer la langue",
+  "@changeLanguage": {
+    "description": "Titre du dialogue de sélection de langue"
+  },
+
+  "validate": "Valider",
+  "@validate": {
+    "description": "Bouton de validation"
+  },
+
+  "close": "Fermer",
+  "@close": {
+    "description": "Bouton de fermeture"
+  },
+
+  "pageNotFound": "Page non trouvée",
+  "@pageNotFound": {
+    "description": "Titre de la page d'erreur 404"
+  },
+
+  "pageNotFoundMessage": "La route \"{route}\" n'existe pas.",
+  "@pageNotFoundMessage": {
+    "description": "Message d'erreur 404 avec la route",
+    "placeholders": {
+      "route": {
+        "type": "String",
+        "example": "/unknown"
+      }
+    }
+  },
+
+  "backToHome": "Retour à l'accueil",
+  "@backToHome": {
+    "description": "Bouton pour retourner à l'accueil"
+  }
+  ,
+  "registerTitle": "S'inscrire",
+  "@registerTitle": {"description": "Titre de la page d'inscription"},
+  "usernameLabel": "Nom d'utilisateur",
+  "@usernameLabel": {"description": "Label du champ username"},
+  "usernamePlaceholder": "john-doe",
+  "@usernamePlaceholder": {"description": "Placeholder du champ username"},
+  "usernameRequired": "Le nom d'utilisateur est obligatoire",
+  "@usernameRequired": {"description": "Erreur champ username obligatoire"},
+  "usernameMinLength": "Minimum 3 caractères",
+  "@usernameMinLength": {"description": "Erreur longueur minimale username"},
+  "usernameMaxLength": "Maximum 30 caractères",
+  "@usernameMaxLength": {"description": "Erreur longueur maximale username"},
+  "usernameFormatError": "Format invalide (lettres, chiffres, - et _ uniquement)",
+  "@usernameFormatError": {"description": "Erreur format username"},
+  "usernameSuggestion": "Nous te suggérons ce nom d'utilisateur :",
+  "@usernameSuggestion": {"description": "Texte suggestion username"},
+  "marketingEmailMessage": "Je souhaite recevoir par e-mail des offres personnalisées et les dernières mises à jour d'Ablony.",
+  "@marketingEmailMessage": {"description": "Message checkbox marketing email"},
+  "termsPrefix": "En t'inscrivant, tu confirmes que tu acceptes les ",
+  "@termsPrefix": {"description": "Préfixe CGU"},
+  "termsTitle": "Termes & Conditions de Ablony",
+  "@termsTitle": {"description": "Lien CGU"},
+  "privacyPrefix": ", avoir lu la ",
+  "@privacyPrefix": {"description": "Préfixe politique de confidentialité"},
+  "privacyTitle": "Politique de confidentialité",
+  "@privacyTitle": {"description": "Lien politique de confidentialité"},
+  "termsAge": " et avoir au moins 18 ans.",
+  "@termsAge": {"description": "Âge minimum inscription"},
+  "continueButton": "Continuer",
+  "@continueButton": {"description": "Bouton continuer inscription"},
+  "problemLink": "Un problème ?",
+  "@problemLink": {"description": "Lien aide inscription"},
+
+  "loginTitle": "S'inscrire sur Ablony",
+  "@loginTitle": {"description": "Titre du flow de connexion"},
+  "loginSubtitleApple": "Utilise ton identifiant Apple, c'est plus rapide.",
+  "@loginSubtitleApple": {"description": "Sous-titre Apple"},
+  "loginSubtitleGoogle": "Utilise ton compte Google, c'est plus rapide.",
+  "@loginSubtitleGoogle": {"description": "Sous-titre Google"},
+  "loginAppleError": "Échec de la connexion avec Apple",
+  "@loginAppleError": {"description": "Erreur connexion Apple"},
+  "loginGoogleError": "Échec de la connexion avec Google",
+  "@loginGoogleError": {"description": "Erreur connexion Google"},
+  "loginFacebookError": "Échec de la connexion avec Facebook",
+  "@loginFacebookError": {"description": "Erreur connexion Facebook"},
+  "loginApple": "Continuer avec Apple",
+  "@loginApple": {"description": "Bouton Apple"},
+  "loginGoogle": "Continuer avec Google",
+  "@loginGoogle": {"description": "Bouton Google"},
+  "loginFacebook": "Continuer avec Facebook",
+  "@loginFacebook": {"description": "Bouton Facebook"},
+  "loginOr": "ou",
+  "@loginOr": {"description": "Séparateur ou"},
+  "loginEmail": "Continuer avec une adresse e-mail",
+  "@loginEmail": {"description": "Lien email"},
+  "loginBusiness": "Tu es une entreprise ? ",
+  "@loginBusiness": {"description": "Texte entreprise"},
+  "loginBusinessMore": "En savoir plus",
+  "@loginBusinessMore": {"description": "Lien entreprise"},
+
+  "homeTitle": "Ablony",
+  "@homeTitle": {"description": "Titre de la page d'accueil"},
+  "homeWelcome": "Hello World! 🎉",
+  "@homeWelcome": {"description": "Message de bienvenue sur la home"},
+  "homeSubtitle": "Bienvenue sur Ablony !",
+  "@homeSubtitle": {"description": "Sous-titre de la home"},
+  "homeSuccess": "L'inscription est terminée avec succès.",
+  "@homeSuccess": {"description": "Message de succès inscription"},
+
+  "countryTitle": "Où habites-tu ?",
+  "@countryTitle": {"description": "Titre de la page de sélection du pays"},
+  "countrySubtitle": "Sélectionne ton pays pour personnaliser ton expérience.",
+  "@countrySubtitle": {"description": "Sous-titre de la page de sélection du pays"},
+  "countryLoading": "Finalisation de ton inscription...",
+  "@countryLoading": {"description": "Texte du loader inscription"},
+  "countryErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@countryErrorGeneric": {"description": "Erreur générique inscription"},
+  "countryErrorNetwork": "Problème de connexion. Vérifiez votre réseau.",
+  "@countryErrorNetwork": {"description": "Erreur réseau inscription"},
+  "countryErrorUsername": "Le nom d'utilisateur est déjà pris.",
+  "@countryErrorUsername": {"description": "Erreur username déjà pris"},
+  "countryInfo": "Tu pourras modifier ton pays et ta ville plus tard dans tes paramètres.",
+  "@countryInfo": {"description": "Texte info modification pays/ville"}
+}
