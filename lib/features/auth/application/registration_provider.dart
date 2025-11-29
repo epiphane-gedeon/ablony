@@ -401,6 +401,81 @@ class RegistrationNotifier extends Notifier<RegistrationState> {
   }
 
   // ============================================================
+  // FLOW ABLONY : INSCRIPTION EMAIL COMBINÉE
+  // ============================================================
+
+  /// Démarre l'inscription par email (Flow Ablony).
+  ///
+  /// Cette méthode combine plusieurs étapes :
+  /// 1. Création du compte Firebase Auth (email/password)
+  /// 2. Enregistrement du username et des préférences
+  /// 3. Passage direct à l'étape Country (saute username et captcha)
+  ///
+  /// **Paramètres :**
+  /// - [email] : Adresse email de l'utilisateur
+  /// - [password] : Mot de passe (min 7 caractères, 1 chiffre)
+  /// - [username] : Nom d'utilisateur choisi
+  /// - [acceptedTerms] : Acceptation des CGU (doit être true)
+  /// - [marketingEmailsEnabled] : Consentement marketing (optionnel)
+  ///
+  /// **Retour :**
+  /// - `true` si l'inscription réussit
+  /// - `false` en cas d'erreur (message dans state.errorMessage)
+  ///
+  /// **Exemple :**
+  /// ```dart
+  /// final success = await registrationNotifier.startEmailSignUp(
+  ///   email: 'user@example.com',
+  ///   password: 'password123',
+  ///   username: 'john-doe',
+  ///   acceptedTerms: true,
+  ///   marketingEmailsEnabled: false,
+  /// );
+  /// if (success) {
+  ///   context.go('/auth/country');
+  /// }
+  /// ```
+  Future<bool> startEmailSignUp({
+    required String email,
+    required String password,
+    required String username,
+    required bool acceptedTerms,
+    required bool marketingEmailsEnabled,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      // 1. Créer le compte Firebase
+      final user = await _authRepository.signUpWithEmail(
+        email: email,
+        password: password,
+      );
+
+      // 2. Initialiser le state avec TOUTES les infos collectées
+      state = RegistrationState(
+        uid: user.uid,
+        email: user.email,
+        username: username,
+        acceptedTerms: acceptedTerms,
+        marketingEmailsEnabled: marketingEmailsEnabled,
+        authProvider: AuthProvider.email,
+        // On passe directement à l'étape Country car on a déjà le username
+        status: RegistrationStatus.country,
+        isLoading: false,
+      );
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        status: RegistrationStatus.error,
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
+      );
+      return false;
+    }
+  }
+
+  // ============================================================
   // MISE À JOUR DES DONNÉES DU FLOW
   // ============================================================
 

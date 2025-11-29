@@ -183,4 +183,88 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get countryInfo =>
       'Tu pourras modifier ton pays et ta ville plus tard dans tes paramètres.';
+
+  @override
+  String get emailSignupTitle => 'Inscris-toi';
+
+  @override
+  String get emailSignupUsername => 'Nom d\'utilisateur';
+
+  @override
+  String get emailSignupUsernamePlaceholder => 'Choisis un nom d\'utilisateur';
+
+  @override
+  String get emailSignupEmail => 'Email';
+
+  @override
+  String get emailSignupEmailPlaceholder => 'Ton adresse email';
+
+  @override
+  String get emailSignupPassword => 'Mot de passe';
+
+  @override
+  String get emailSignupPasswordPlaceholder => 'Crée un mot de passe';
+
+  @override
+  String get emailSignupPasswordHint =>
+      'Il doit contenir 7 lettres minimum, dont au moins un chiffre.';
+
+  @override
+  String get emailSignupMarketing =>
+      'Je souhaite recevoir par e-mail des offres personnalisées et les dernières mises à jour d\'Ablony.';
+
+  @override
+  String get emailSignupTermsError =>
+      'Tu dois accepter les conditions pour continuer';
+
+  @override
+  String get emailSignupUsernameRequired => 'Le nom d\'utilisateur est requis';
+
+  @override
+  String get emailSignupUsernameMinLength =>
+      'Le nom d\'utilisateur doit contenir au moins 3 caractères';
+
+  @override
+  String get emailSignupEmailRequired => 'L\'email est requis';
+
+  @override
+  String get emailSignupEmailInvalid => 'Veuillez entrer un email valide';
+
+  @override
+  String get emailSignupPasswordRequired => 'Le mot de passe est requis';
+
+  @override
+  String get emailSignupPasswordMinLength =>
+      'Le mot de passe doit contenir au moins 7 caractères';
+
+  @override
+  String get emailSignupPasswordNoDigit =>
+      'Le mot de passe doit contenir au moins un chiffre';
+
+  @override
+  String get loginScreenTitle => 'Connecte-toi';
+
+  @override
+  String get loginScreenIdentifier => 'Identifiant ou adresse email';
+
+  @override
+  String get loginScreenIdentifierPlaceholder => 'Entre ton email ou pseudo';
+
+  @override
+  String get loginScreenPassword => 'Mot de passe';
+
+  @override
+  String get loginScreenPasswordPlaceholder => 'Ton mot de passe';
+
+  @override
+  String get loginScreenSubmit => 'Se connecter';
+
+  @override
+  String get loginScreenForgotPassword => 'Tu as oublié ton mot de passe ?';
+
+  @override
+  String get loginScreenIdentifierRequired => 'Ce champ est requis';
+
+  @override
+  String get loginScreenPasswordRequired => 'Le mot de passe est requis';
 }

@@ -190,7 +190,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ============================================================
       if (!isAuthenticated) {
         // Liste des routes publiques accessibles sans authentification
-        const publicRoutes = ['/', '/onboarding'];
+        const publicRoutes = [
+          '/',
+          '/onboarding',
+          '/auth/signup/email',
+          '/auth/login',
+        ];
 
         // Si l'utilisateur essaie d'accéder à une route protégée
         if (!publicRoutes.contains(location)) {
@@ -205,7 +210,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ============================================================
       if (isAuthenticated && !isProfileComplete) {
         // Routes autorisées pour compléter le profil
-        const authRoutes = ['/auth/username', '/auth/country'];
+        const authRoutes = [
+          '/auth/username',
+          '/auth/country',
+          '/auth/signup/email',
+        ];
 
         // Si l'utilisateur n'est pas sur une route d'auth
         if (!authRoutes.contains(location)) {
@@ -225,6 +234,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           '/splash', // Au cas où elle est appelée par son nom
           '/onboarding',
           '/auth/username',
+          '/auth/signup/email',
+          '/auth/login',
           '/auth/country',
         ];
 
@@ -290,6 +301,28 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'username',
             name: 'username',
             builder: (context, state) => const UsernamePage(),
+          ),
+
+          // ====================================================
+          // INSCRIPTION PAR EMAIL (FLOW ABLONY)
+          // ====================================================
+          /// Page d'inscription par email (Image 2).
+          /// Formulaire combiné : username + email + password + CGU
+          GoRoute(
+            path: 'signup/email',
+            name: 'signup_email',
+            builder: (context, state) => const EmailSignUpScreen(),
+          ),
+
+          // ====================================================
+          // CONNEXION
+          // ====================================================
+          /// Page de connexion pour utilisateurs existants (Image 3).
+          /// Email/username + password
+          GoRoute(
+            path: 'login',
+            name: 'login',
+            builder: (context, state) => const LoginScreen(),
           ),
 
           // ...captcha step removed...

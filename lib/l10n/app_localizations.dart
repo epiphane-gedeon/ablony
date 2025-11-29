@@ -427,6 +427,162 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Tu pourras modifier ton pays et ta ville plus tard dans tes paramètres.'**
   String get countryInfo;
+
+  /// Titre de la page d'inscription email
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscris-toi'**
+  String get emailSignupTitle;
+
+  /// Label champ username
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom d\'utilisateur'**
+  String get emailSignupUsername;
+
+  /// Placeholder username
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis un nom d\'utilisateur'**
+  String get emailSignupUsernamePlaceholder;
+
+  /// Label champ email
+  ///
+  /// In fr, this message translates to:
+  /// **'Email'**
+  String get emailSignupEmail;
+
+  /// Placeholder email
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton adresse email'**
+  String get emailSignupEmailPlaceholder;
+
+  /// Label champ mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get emailSignupPassword;
+
+  /// Placeholder mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Crée un mot de passe'**
+  String get emailSignupPasswordPlaceholder;
+
+  /// Indication mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Il doit contenir 7 lettres minimum, dont au moins un chiffre.'**
+  String get emailSignupPasswordHint;
+
+  /// Checkbox marketing
+  ///
+  /// In fr, this message translates to:
+  /// **'Je souhaite recevoir par e-mail des offres personnalisées et les dernières mises à jour d\'Ablony.'**
+  String get emailSignupMarketing;
+
+  /// Erreur CGU non acceptées
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu dois accepter les conditions pour continuer'**
+  String get emailSignupTermsError;
+
+  /// Erreur username requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom d\'utilisateur est requis'**
+  String get emailSignupUsernameRequired;
+
+  /// Erreur longueur min username
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom d\'utilisateur doit contenir au moins 3 caractères'**
+  String get emailSignupUsernameMinLength;
+
+  /// Erreur email requis
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'email est requis'**
+  String get emailSignupEmailRequired;
+
+  /// Erreur email invalide
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez entrer un email valide'**
+  String get emailSignupEmailInvalid;
+
+  /// Erreur mot de passe requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe est requis'**
+  String get emailSignupPasswordRequired;
+
+  /// Erreur longueur min mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe doit contenir au moins 7 caractères'**
+  String get emailSignupPasswordMinLength;
+
+  /// Erreur pas de chiffre dans mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe doit contenir au moins un chiffre'**
+  String get emailSignupPasswordNoDigit;
+
+  /// Titre de la page de connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecte-toi'**
+  String get loginScreenTitle;
+
+  /// Label champ identifiant
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant ou adresse email'**
+  String get loginScreenIdentifier;
+
+  /// Placeholder identifiant
+  ///
+  /// In fr, this message translates to:
+  /// **'Entre ton email ou pseudo'**
+  String get loginScreenIdentifierPlaceholder;
+
+  /// Label champ mot de passe connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get loginScreenPassword;
+
+  /// Placeholder mot de passe connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton mot de passe'**
+  String get loginScreenPasswordPlaceholder;
+
+  /// Bouton de connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get loginScreenSubmit;
+
+  /// Lien mot de passe oublié
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as oublié ton mot de passe ?'**
+  String get loginScreenForgotPassword;
+
+  /// Erreur identifiant requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce champ est requis'**
+  String get loginScreenIdentifierRequired;
+
+  /// Erreur mot de passe requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe est requis'**
+  String get loginScreenPasswordRequired;
 }
 
 class _AppLocalizationsDelegate

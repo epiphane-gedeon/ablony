@@ -179,4 +179,87 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get countryInfo =>
       'You can change your country and city later in your settings.';
+
+  @override
+  String get emailSignupTitle => 'Sign up';
+
+  @override
+  String get emailSignupUsername => 'Username';
+
+  @override
+  String get emailSignupUsernamePlaceholder => 'Choose a username';
+
+  @override
+  String get emailSignupEmail => 'Email';
+
+  @override
+  String get emailSignupEmailPlaceholder => 'Your email address';
+
+  @override
+  String get emailSignupPassword => 'Password';
+
+  @override
+  String get emailSignupPasswordPlaceholder => 'Create a password';
+
+  @override
+  String get emailSignupPasswordHint =>
+      'It must contain at least 7 letters, including at least one digit.';
+
+  @override
+  String get emailSignupMarketing =>
+      'I want to receive personalized offers and the latest updates from Ablony by email.';
+
+  @override
+  String get emailSignupTermsError => 'You must accept the terms to continue';
+
+  @override
+  String get emailSignupUsernameRequired => 'Username is required';
+
+  @override
+  String get emailSignupUsernameMinLength =>
+      'Username must be at least 3 characters';
+
+  @override
+  String get emailSignupEmailRequired => 'Email is required';
+
+  @override
+  String get emailSignupEmailInvalid => 'Please enter a valid email';
+
+  @override
+  String get emailSignupPasswordRequired => 'Password is required';
+
+  @override
+  String get emailSignupPasswordMinLength =>
+      'Password must be at least 7 characters';
+
+  @override
+  String get emailSignupPasswordNoDigit =>
+      'Password must contain at least one digit';
+
+  @override
+  String get loginScreenTitle => 'Log in';
+
+  @override
+  String get loginScreenIdentifier => 'Identifier or email address';
+
+  @override
+  String get loginScreenIdentifierPlaceholder => 'Enter your email or username';
+
+  @override
+  String get loginScreenPassword => 'Password';
+
+  @override
+  String get loginScreenPasswordPlaceholder => 'Your password';
+
+  @override
+  String get loginScreenSubmit => 'Log in';
+
+  @override
+  String get loginScreenForgotPassword => 'Forgot your password?';
+
+  @override
+  String get loginScreenIdentifierRequired => 'This field is required';
+
+  @override
+  String get loginScreenPasswordRequired => 'Password is required';
 }
