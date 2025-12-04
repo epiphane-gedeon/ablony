@@ -44,7 +44,14 @@ import '../../application/providers.dart';
 /// );
 /// ```
 class LoginFlowSheet extends ConsumerStatefulWidget {
-  const LoginFlowSheet({super.key});
+  /// Si true, affiche le titre "Se connecter" et redirige vers /auth/login.
+  /// Si false (défaut), affiche "S'inscrire" et redirige vers /auth/signup/email.
+  final bool isLogin;
+
+  const LoginFlowSheet({
+    super.key,
+    this.isLogin = false,
+  });
 
   @override
   ConsumerState<LoginFlowSheet> createState() => _LoginFlowSheetState();
@@ -65,7 +72,7 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
       height: screenHeight * 0.5,
       decoration: BoxDecoration(
         // Fond blanc du thème
-        color: AppColors.background,
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -95,7 +102,7 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
                   // TITRE
                   // ============================================================
                   Text(
-                    l10n.loginTitle,
+                    widget.isLogin ? l10n.loginTitleLogin : l10n.loginTitle,
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -171,7 +178,7 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
           // Bouton fermer (X)
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(Icons.close, color: AppColors.textPrimary),
+            icon: Icon(Icons.close, color: Theme.of(context).iconTheme.color),
             iconSize: 28,
           ),
         ],
@@ -195,9 +202,14 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
       final success = await registrationNotifier.signInWithApple();
       if (mounted) {
         setState(() => _isLoading = false);
+        final status = ref.read(registrationProvider).status;
+        
         if (success) {
           Navigator.of(context).pop();
           context.go('/auth/username');
+        } else if (status == RegistrationStatus.completed) {
+          Navigator.of(context).pop();
+          // La redirection vers /home est gérée automatiquement par le routeur
         } else {
           _showError(l10n.loginAppleError);
         }
@@ -226,9 +238,14 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
       final success = await registrationNotifier.signInWithGoogle();
       if (mounted) {
         setState(() => _isLoading = false);
+        final status = ref.read(registrationProvider).status;
+
         if (success) {
           Navigator.of(context).pop();
           context.go('/auth/username');
+        } else if (status == RegistrationStatus.completed) {
+          Navigator.of(context).pop();
+          // La redirection vers /home est gérée automatiquement par le routeur
         } else {
           _showError(l10n.loginGoogleError);
         }
@@ -257,9 +274,14 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
       final success = await registrationNotifier.signInWithFacebook();
       if (mounted) {
         setState(() => _isLoading = false);
+        final status = ref.read(registrationProvider).status;
+
         if (success) {
           Navigator.of(context).pop();
           context.go('/auth/username');
+        } else if (status == RegistrationStatus.completed) {
+          Navigator.of(context).pop();
+          // La redirection vers /home est gérée automatiquement par le routeur
         } else {
           _showError(l10n.loginFacebookError);
         }
@@ -299,7 +321,7 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
     final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
-        Expanded(child: Divider(color: AppColors.textSecondary, thickness: 1)),
+        Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
@@ -342,11 +364,15 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
         text: l10n.loginEmail,
         onTap: () {
           Navigator.of(context).pop();
-          context.push('/auth/signup/email');
+          if (widget.isLogin) {
+            context.push('/auth/login');
+          } else {
+            context.push('/auth/signup/email');
+          }
         },
         underline: false,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.primary,
+          color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -368,7 +394,7 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
           underline: true,
           style: Theme.of(
             context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.primary),
+          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary),
         ),
       ],
     );

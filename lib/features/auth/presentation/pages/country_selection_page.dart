@@ -178,13 +178,13 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
 
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
           onPressed: _isLoading ? null : () => context.pop(),
         ),
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: SafeArea(
@@ -199,7 +199,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
               Text(
                 l10n.countryTitle,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.headlineMedium?.color,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -207,7 +207,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
               Text(
                 l10n.countrySubtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
               SizedBox(height: screenHeight * 0.04),
@@ -217,7 +217,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircularProgressIndicator(color: AppColors.primary),
+                            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
                             SizedBox(height: screenHeight * 0.02),
                             Text(
                               l10n.countryLoading,
@@ -263,7 +263,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
                       child: Text(
                         l10n.countryInfo,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                         ),
                       ),
                     ),
@@ -313,13 +313,13 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
         child: Container(
           padding: EdgeInsets.all(screenWidth * 0.04), // 4% de padding
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               // Border bleu si sélectionné, gris sinon
               color: isSelected
-                  ? AppColors.primary
-                  : AppColors.textSecondary.withOpacity(0.2),
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).dividerColor,
               width: isSelected ? 2 : 1,
             ),
             boxShadow: [
@@ -366,7 +366,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
                       country.name,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.titleMedium?.color,
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.005),
@@ -374,7 +374,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
                     Text(
                       '${country.mainCity} • ${country.currencyCode}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                     ),
                   ],

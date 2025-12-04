@@ -1,0 +1,214 @@
+[
+    {
+        "id": "brand",
+        "name": "Marque",
+        "type": "select",
+        "values": [
+            "Nike",
+            "Adidas",
+            "Zara",
+            "H&M",
+            "Gucci",
+            "Prada",
+            "Louis Vuitton",
+            "Dior",
+            "Chanel",
+            "Hermès",
+            "Lacoste",
+            "Tommy Hilfiger",
+            "Calvin Klein",
+            "Ralph Lauren",
+            "Versace",
+            "Armani",
+            "Burberry",
+            "Balenciaga",
+            "Off-White",
+            "Supreme",
+            "Autre"
+        ],
+        "isRequired": true,
+        "helpText": "Sélectionnez la marque du produit",
+        "order": 1,
+        "isActive": true
+    },
+    {
+        "id": "size_haut",
+        "name": "Taille",
+        "type": "select",
+        "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "XXXL"
+        ],
+        "isRequired": true,
+        "helpText": "Taille pour hauts, chemises, pulls, vestes",
+        "order": 2,
+        "isActive": true
+    },
+    {
+        "id": "size_bas",
+        "name": "Taille",
+        "type": "select",
+        "values": [
+            "28",
+            "30",
+            "32",
+            "34",
+            "36",
+            "38",
+            "40",
+            "42",
+            "44",
+            "46"
+        ],
+        "isRequired": true,
+        "helpText": "Taille pour pantalons, shorts, jupes",
+        "order": 2,
+        "isActive": true
+    },
+    {
+        "id": "size_chaussures",
+        "name": "Pointure",
+        "type": "select",
+        "values": [
+            "35",
+            "36",
+            "37",
+            "38",
+            "39",
+            "40",
+            "41",
+            "42",
+            "43",
+            "44",
+            "45",
+            "46",
+            "47"
+        ],
+        "isRequired": true,
+        "helpText": "Pointure des chaussures",
+        "order": 2,
+        "isActive": true
+    },
+    {
+        "id": "color",
+        "name": "Couleur",
+        "type": "select",
+        "values": [
+            "Noir",
+            "Blanc",
+            "Gris",
+            "Beige",
+            "Marron",
+            "Bleu",
+            "Bleu marine",
+            "Bleu clair",
+            "Rouge",
+            "Rose",
+            "Violet",
+            "Vert",
+            "Vert kaki",
+            "Jaune",
+            "Orange",
+            "Multicolore",
+            "Doré",
+            "Argenté"
+        ],
+        "isRequired": true,
+        "helpText": "Couleur principale du produit",
+        "order": 3,
+        "isActive": true
+    },
+    {
+        "id": "material",
+        "name": "Matière",
+        "type": "select",
+        "values": [
+            "Coton",
+            "Polyester",
+            "Laine",
+            "Soie",
+            "Lin",
+            "Jean",
+            "Cuir",
+            "Daim",
+            "Synthétique",
+            "Velours",
+            "Cachemire",
+            "Viscose",
+            "Autre"
+        ],
+        "isRequired": false,
+        "helpText": "Matière principale du produit",
+        "order": 4,
+        "isActive": true
+    },
+    {
+        "id": "dress_length",
+        "name": "Longueur",
+        "type": "select",
+        "values": [
+            "Court",
+            "Mi-long",
+            "Long"
+        ],
+        "isRequired": false,
+        "helpText": "Longueur de la robe ou jupe",
+        "order": 5,
+        "isActive": true
+    },
+    {
+        "id": "bag_type",
+        "name": "Type de sac",
+        "type": "select",
+        "values": [
+            "Sac à main",
+            "Sac à dos",
+            "Pochette",
+            "Tote bag",
+            "Sac bandoulière",
+            "Sac de voyage",
+            "Sacoche"
+        ],
+        "isRequired": false,
+        "helpText": "Type de sac",
+        "order": 5,
+        "isActive": true
+    },
+    {
+        "id": "jewelry_type",
+        "name": "Type de bijou",
+        "type": "select",
+        "values": [
+            "Collier",
+            "Bracelet",
+            "Boucles d'oreilles",
+            "Bague",
+            "Broche",
+            "Montre bracelet"
+        ],
+        "isRequired": false,
+        "helpText": "Type de bijou",
+        "order": 5,
+        "isActive": true
+    },
+    {
+        "id": "watch_movement",
+        "name": "Mouvement",
+        "type": "select",
+        "values": [
+            "Quartz",
+            "Automatique",
+            "Manuel",
+            "Numérique"
+        ],
+        "isRequired": false,
+        "helpText": "Type de mouvement de la montre",
+        "order": 5,
+        "isActive": true
+    }
+]

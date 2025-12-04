@@ -1,97 +1,178 @@
 /// Fichier: app_colors.dart
 /// Description: Définit toutes les couleurs utilisées dans l'application Ablony.
-/// Ce fichier centralise la palette de couleurs pour maintenir une cohérence
-/// visuelle à travers toute l'application.
+/// Ce fichier centralise la palette de couleurs pour les thèmes clair et sombre.
 ///
 /// Couleurs principales:
-/// - Bleu (#2385AE): Couleur primaire de la marque
-/// - Blanc (#FFFFFF): Couleur secondaire pour les fonds et textes sur bleu
+/// - Mode clair: Bleu (#2385AE), fond blanc
+/// - Mode sombre: Bleu clair (#64B5F6), fond noir Material Design
 
 import 'package:flutter/material.dart';
 
 /// Classe statique contenant toutes les couleurs de l'application Ablony.
-/// Utilise un constructeur privé pour empêcher l'instanciation.
+/// Supporte les thèmes clair et sombre avec des palettes adaptées.
 class AppColors {
-  // Constructeur privé pour empêcher l'instanciation de cette classe utilitaire
+  // Constructeur privé pour empêcher l'instanciation
   AppColors._();
 
   // ============================================================================
-  // COULEURS PRINCIPALES
+  // COULEURS MODE CLAIR (LIGHT)
   // ============================================================================
 
-  /// Couleur primaire de l'application - Bleu Ablony
-  /// Utilisée pour les boutons principaux, liens, et éléments interactifs
-  static const Color primary = Color(0xFF2385AE);
+  /// Couleur primaire - Bleu Ablony
+  static const Color lightPrimary = Color(0xFF2385AE);
 
-  /// Couleur blanche pure
-  /// Utilisée pour les fonds, textes sur fond bleu, et espaces négatifs
-  static const Color white = Color(0xFFFFFFFF);
+  /// Couleur primaire claire
+  static const Color lightPrimaryLight = Color(0xFF4A9DC4);
 
-  // ============================================================================
-  // VARIATIONS DU BLEU PRINCIPAL
-  // ============================================================================
+  /// Couleur primaire foncée
+  static const Color lightPrimaryDark = Color(0xFF1A6890);
 
-  /// Version plus claire du bleu principal
-  /// Utilisée pour les états de survol (hover) et les éléments secondaires
-  static const Color primaryLight = Color(0xFF4A9DC4);
+  /// Fond principal
+  static const Color lightBackground = Color(0xFFFFFFFF);
 
-  /// Version plus foncée du bleu principal
-  /// Utilisée pour les états actifs et les ombres colorées
-  static const Color primaryDark = Color(0xFF1A6890);
+  /// Surface (cartes, modales)
+  static const Color lightSurface = Color(0xFFFFFFFF);
 
-  // ============================================================================
-  // COULEURS DE TEXTE
-  // ============================================================================
+  /// Surface variante (inputs, zones différenciées)
+  static const Color lightSurfaceVariant = Color(0xFFF5F5F5);
 
-  /// Couleur du texte principal - Noir
-  /// Utilisée pour tous les textes importants et titres
-  static const Color textPrimary = Color(0xFF000000);
+  /// Texte principal
+  static const Color lightTextPrimary = Color(0xFF000000);
 
-  /// Couleur du texte secondaire - Gris moyen
-  /// Utilisée pour les sous-titres, descriptions et textes de moindre importance
-  static const Color textSecondary = Color(0xFF757575);
+  /// Texte secondaire
+  static const Color lightTextSecondary = Color(0xFF757575);
 
-  /// Couleur du texte sur fond bleu - Blanc
-  /// Utilisée pour les textes sur les boutons et éléments avec fond bleu
-  static const Color textOnPrimary = white;
+  /// Texte sur couleur primaire
+  static const Color lightTextOnPrimary = Color(0xFFFFFFFF);
+
+  /// Bordures
+  static const Color lightBorder = Color(0xFFBDBDBD);
+
+  /// Séparateurs
+  static const Color lightDivider = Color(0xFFE0E0E0);
 
   // ============================================================================
-  // COULEURS DE FOND
+  // COULEURS MODE SOMBRE (DARK)
   // ============================================================================
 
-  /// Couleur de fond principale de l'application
-  static const Color background = white;
+  /// Couleur primaire - Bleu clair pour meilleur contraste
+  static const Color darkPrimary = Color(0xFF2385AE);
 
-  /// Couleur des surfaces (cartes, modales, etc.)
-  static const Color surface = white;
+  /// Couleur primaire claire
+  static const Color darkPrimaryLight = Color(0xFF90CAF9);
 
-  /// Couleur des surfaces de variante - Gris très clair
-  /// Utilisée pour les champs de saisie et zones légèrement différenciées
-  static const Color surfaceVariant = Color(0xFFF5F5F5);
+  /// Couleur primaire foncée
+  static const Color darkPrimaryDark = Color(0xFF42A5F5);
+
+  /// Fond principal - Material Design dark
+  static const Color darkBackground = Color(0xFF121212);
+
+  /// Surface élevée
+  static const Color darkSurface = Color(0xFF1E1E1E);
+
+  /// Surface variante (inputs, cartes)
+  static const Color darkSurfaceVariant = Color(0xFF2C2C2C);
+
+  /// Texte principal
+  static const Color darkTextPrimary = Color(0xFFE0E0E0);
+
+  /// Texte secondaire
+  static const Color darkTextSecondary = Color(0xFFB0B0B0);
+
+  /// Texte sur couleur primaire
+  static const Color darkTextOnPrimary = Color(0xFF000000);
+
+  /// Bordures
+  static const Color darkBorder = Color(0xFF3A3A3A);
+
+  /// Séparateurs
+  static const Color darkDivider = Color(0xFF2A2A2A);
 
   // ============================================================================
-  // COULEURS SYSTÈME (États et notifications)
+  // COULEURS SYSTÈME (Identiques pour les deux thèmes)
   // ============================================================================
 
-  /// Couleur pour les messages d'erreur et actions destructives
+  /// Couleur d'erreur
   static const Color error = Color(0xFFD32F2F);
 
-  /// Couleur pour les messages de succès et confirmations
+  /// Couleur de succès
   static const Color success = Color(0xFF388E3C);
 
-  /// Couleur pour les avertissements et alertes
+  /// Couleur d'avertissement
   static const Color warning = Color(0xFFF57C00);
 
-  /// Couleur pour les messages d'information
-  static const Color info = primary;
+  /// Couleur d'information
+  static const Color info = Color(0xFF2196F3);
 
   // ============================================================================
-  // COULEURS DE BORDURE ET SÉPARATEURS
+  // MÉTHODES HELPER POUR OBTENIR LES COULEURS SELON LE THÈME
   // ============================================================================
 
-  /// Couleur des séparateurs et lignes de division
-  static const Color divider = Color(0xFFE0E0E0);
+  /// Retourne la couleur primaire selon le mode
+  static Color primaryFor(Brightness brightness) =>
+      brightness == Brightness.dark ? darkPrimary : lightPrimary;
 
-  /// Couleur des bordures des éléments
-  static const Color border = Color(0xFFBDBDBD);
+  /// Retourne la couleur de fond selon le mode
+  static Color backgroundFor(Brightness brightness) =>
+      brightness == Brightness.dark ? darkBackground : lightBackground;
+
+  /// Retourne la couleur de surface selon le mode
+  static Color surfaceFor(Brightness brightness) =>
+      brightness == Brightness.dark ? darkSurface : lightSurface;
+
+  /// Retourne la couleur de surface variante selon le mode
+  static Color surfaceVariantFor(Brightness brightness) =>
+      brightness == Brightness.dark ? darkSurfaceVariant : lightSurfaceVariant;
+
+  /// Retourne la couleur de texte principal selon le mode
+  static Color textPrimaryFor(Brightness brightness) =>
+      brightness == Brightness.dark ? darkTextPrimary : lightTextPrimary;
+
+  /// Retourne la couleur de texte secondaire selon le mode
+  static Color textSecondaryFor(Brightness brightness) =>
+      brightness == Brightness.dark ? darkTextSecondary : lightTextSecondary;
+
+  /// Retourne la couleur de bordure selon le mode
+  static Color borderFor(Brightness brightness) =>
+      brightness == Brightness.dark ? darkBorder : lightBorder;
+
+  // ============================================================================
+  // COMPATIBILITÉ RÉTROACTIVE (pour transition progressive)
+  // ============================================================================
+
+  /// Couleur primaire (défaut: mode clair)
+  static const Color primary = lightPrimary;
+
+  /// Couleur blanche
+  static const Color white = Color(0xFFFFFFFF);
+
+  /// Couleur primaire claire (défaut: mode clair)
+  static const Color primaryLight = lightPrimaryLight;
+
+  /// Couleur primaire foncée (défaut: mode clair)
+  static const Color primaryDark = lightPrimaryDark;
+
+  /// Texte principal (défaut: mode clair)
+  static const Color textPrimary = lightTextPrimary;
+
+  /// Texte secondaire (défaut: mode clair)
+  static const Color textSecondary = lightTextSecondary;
+
+  /// Texte sur primaire (défaut: mode clair)
+  static const Color textOnPrimary = lightTextOnPrimary;
+
+  /// Fond (défaut: mode clair)
+  static const Color background = lightBackground;
+
+  /// Surface (défaut: mode clair)
+  static const Color surface = lightSurface;
+
+  /// Surface variante (défaut: mode clair)
+  static const Color surfaceVariant = lightSurfaceVariant;
+
+  /// Bordure (défaut: mode clair)
+  static const Color border = lightBorder;
+
+  /// Séparateur (défaut: mode clair)
+  static const Color divider = lightDivider;
 }

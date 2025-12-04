@@ -109,16 +109,16 @@ class CustomCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Couleurs par défaut
-    final defaultActiveColor = activeColor ?? AppColors.primary;
+    // Couleurs par défaut depuis le thème
+    final defaultActiveColor = activeColor ?? Theme.of(context).colorScheme.primary;
     final defaultMessageStyle =
         messageStyle ??
         Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: enabled ? AppColors.textPrimary : AppColors.textSecondary,
+          color: enabled ? Theme.of(context).textTheme.bodyMedium?.color : Theme.of(context).textTheme.bodySmall?.color,
         );
     final defaultErrorStyle =
         errorStyle ??
-        Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.error);
+        Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error);
 
     return Padding(
       padding: padding ?? EdgeInsets.zero,
@@ -136,7 +136,7 @@ class CustomCheckbox extends StatelessWidget {
                 value: value,
                 onChanged: enabled ? onChanged : null,
                 activeColor: defaultActiveColor,
-                checkColor: checkColor ?? AppColors.white,
+                checkColor: checkColor ?? Theme.of(context).colorScheme.onPrimary,
                 shape:
                     shape ??
                     RoundedRectangleBorder(

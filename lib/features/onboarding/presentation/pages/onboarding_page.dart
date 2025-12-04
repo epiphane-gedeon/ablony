@@ -75,8 +75,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      // Fond blanc pour l'écran
-      backgroundColor: AppColors.background,
+      // Fond adapté au thème (blanc en clair, noir en sombre)
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       // SafeArea évite que le contenu ne passe sous la barre de statut
       body: SafeArea(
@@ -158,7 +158,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             },
             child: Row(
               children: [
-                Icon(Icons.language, color: AppColors.textPrimary),
+                Icon(Icons.language, color: Theme.of(context).iconTheme.color),
                 const SizedBox(width: 8),
                 Text(
                   currentLocale.languageCode == 'fr'
@@ -166,7 +166,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                       : l10n.languageEnglish,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                Icon(Icons.arrow_drop_down, color: AppColors.textPrimary),
+                Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
               ],
             ),
           ),
@@ -201,6 +201,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         _buildScrollingRow(
           controller: _topRowController,
           reverse: false, // false = défile vers la gauche
+          // Liste des images pour la première ligne (1 à 5)
+          images: [
+            'assets/images/1.jpg',
+            'assets/images/2.jpg',
+            'assets/images/3.jpg',
+            'assets/images/4.jpg',
+            'assets/images/5.jpg',
+          ],
         ),
 
         // Espacement entre les deux lignes
@@ -212,6 +220,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         _buildScrollingRow(
           controller: _bottomRowController,
           reverse: true, // true = défile vers la droite
+          // Liste des images pour la deuxième ligne (6 à 10)
+          images: [
+            'assets/images/6.jpg',
+            'assets/images/7.jpg',
+            'assets/images/8.jpg',
+            'assets/images/9.jpg',
+            'assets/images/10.jpg',
+          ],
         ),
       ],
     );
@@ -227,6 +243,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   Widget _buildScrollingRow({
     required AnimationController controller,
     required bool reverse,
+    required List<String> images, // Liste des chemins d'images à afficher
   }) {
     final screenHeight = MediaQuery.of(context).size.height;
     // Hauteur adaptable : 22% de la hauteur de l'écran pour chaque ligne
@@ -234,8 +251,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
 
     // Largeur d'une carte + espacement (adaptée à la hauteur)
     final cardWidth = rowHeight * 0.6 + 12.0; // ratio 0.6 + espacement
-    // Nombre de cartes à afficher (assez pour remplir l'écran + buffer)
-    const cardCount = 10;
+    // Nombre de cartes à afficher (basé sur la taille de la liste d'images)
+    final cardCount = images.length;
     // Largeur totale d'un cycle complet
     final totalWidth = cardWidth * cardCount;
 
@@ -256,7 +273,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                   children: List.generate(cardCount, (index) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
-                      child: _buildProductCard(),
+                      // Passe le chemin de l'image correspondante à la carte
+                      child: _buildProductCard(images[index]),
                     );
                   }),
                 ),
@@ -268,7 +286,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                   children: List.generate(cardCount, (index) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
-                      child: _buildProductCard(),
+                      // Passe le chemin de l'image correspondante à la carte
+                      child: _buildProductCard(images[index]),
                     );
                   }),
                 ),
@@ -282,6 +301,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
 
   /// Construit une carte de produit individuelle.
   ///
+  /// [imagePath] : Le chemin de l'image à afficher (ex: 'assets/images/1.jpg')
+  ///
   /// Pour modifier :
   /// - La taille : changer width et height
   /// - Les coins arrondis : modifier borderRadius
@@ -289,7 +310,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   ///
   /// Pour ajouter de vraies images :
   /// Remplacer le Container par Image.asset() avec ClipRRect
-  Widget _buildProductCard() {
+  Widget _buildProductCard(String imagePath) {
     final screenHeight = MediaQuery.of(context).size.height;
     // Hauteur de la carte : 22% de la hauteur de l'écran
     final cardHeight = screenHeight * 0.22;
@@ -300,30 +321,29 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       width: cardWidth,
       height: cardHeight,
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant, // Fond gris clair
+        color: Theme.of(context).colorScheme.surfaceContainerHighest, // Fond adapté au thème
         borderRadius: BorderRadius.circular(16), // Coins arrondis
       ),
-      // Icône temporaire (en attendant les vraies images)
-      child: Center(
-        child: Icon(
-          Icons.image_outlined,
-          color: AppColors.textSecondary,
-          size:
-              cardHeight * 0.3, // Taille de l'icône adaptée (30% de la hauteur)
+      // Affiche l'image avec des coins arrondis
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover, // L'image couvre tout l'espace sans déformation
+          errorBuilder: (context, error, stackTrace) {
+            // Fallback en cas d'erreur de chargement : icône par défaut
+            return Center(
+              child: Icon(
+                Icons.image_outlined,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+                size:
+                    cardHeight * 0.3, // Taille de l'icône adaptée (30% de la hauteur)
+              ),
+            );
+          },
         ),
       ),
     );
-
-    // Pour utiliser de vraies images, remplacez par :
-    // return ClipRRect(
-    //   borderRadius: BorderRadius.circular(16),
-    //   child: Image.asset(
-    //     'assets/images/onboarding/produit_${index % 10 + 1}.png',
-    //     width: 110,
-    //     height: 140,
-    //     fit: BoxFit.cover,
-    //   ),
-    // );
   }
 
   /// Construit le texte accrocheur principal.
@@ -412,8 +432,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           SecondaryButton(
             text: l10n.loginButton,
             onPressed: () {
-              // Navigation vers la page de connexion
-              context.push('/auth/login');
+              // Affiche le bottom sheet du flow d'authentification en mode connexion
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const LoginFlowSheet(isLogin: true),
+              );
             },
           ),
         ],

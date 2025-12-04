@@ -4,7 +4,7 @@ publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.10.0
 
 dependencies:
   flutter:
@@ -19,6 +19,7 @@ dependencies:
   firebase_core: ^4.2.1
   firebase_auth: ^6.1.2
   cloud_firestore: ^6.1.0
+  firebase_storage: ^13.0.4
 
   # ============================================================
   # AUTHENTIFICATION SOCIALE
@@ -43,12 +44,14 @@ dependencies:
   # ============================================================
   google_fonts: ^6.3.2
   flutter_svg: ^2.0.10+1
+  image_picker: ^1.0.7
 
   # ============================================================
   # SÉCURITÉ
   # ============================================================
   # Google reCAPTCHA v2 pour la vérification anti-bot
   webview_flutter: ^4.10.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

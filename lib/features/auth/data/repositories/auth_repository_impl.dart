@@ -754,14 +754,42 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signOut() async {
     try {
-      // Déconnexion de tous les providers
-      await Future.wait([
-        _firebaseAuth.signOut(),
-        _googleSignIn.signOut(),
-        _facebookAuth.logOut(),
-      ]);
+      // Récupérer l'utilisateur actuel pour savoir quel provider a été utilisé
+      final user = _firebaseAuth.currentUser;
+
+      if (user != null) {
+        // Vérifier les providers utilisés pour cette connexion
+        final providers = user.providerData.map((info) => info.providerId).toList();
+
+        // Déconnexion Google si utilisé
+        if (providers.contains('google.com')) {
+          try {
+            await _googleSignIn.signOut();
+            print('✅ Déconnexion Google réussie');
+          } catch (e) {
+            print('⚠️ Erreur déconnexion Google (ignorée): $e');
+          }
+        }
+
+        // Déconnexion Facebook si utilisé
+        if (providers.contains('facebook.com')) {
+          try {
+            await _facebookAuth.logOut();
+            print('✅ Déconnexion Facebook réussie');
+          } catch (e) {
+            print('⚠️ Erreur déconnexion Facebook (ignorée): $e');
+          }
+        }
+
+        // Note: Apple Sign In n'a pas besoin de déconnexion explicite
+        // car il utilise uniquement Firebase Auth
+      }
+
+      // Le plus important : Firebase Auth (toujours nécessaire)
+      await _firebaseAuth.signOut();
+      print('✅ Déconnexion Firebase réussie');
     } catch (e) {
-      throw Exception('Erreur lors de la déconnexion : $e');
+      throw Exception('Erreur lors de la déconnexion Firebase : $e');
     }
   }
 

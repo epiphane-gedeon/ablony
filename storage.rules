@@ -1,0 +1,75 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules pour Ablony
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ============================================================
+    // FONCTIONS UTILITAIRES
+    // ============================================================
+    
+    /// Vérifie si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /// Vérifie si l'utilisateur est le propriétaire
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    /// Vérifie si le fichier est une image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    /// Vérifie la taille du fichier (max 5MB)
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // ============================================================
+    // IMAGES DE PRODUITS
+    // ============================================================
+    // Structure : products/{userId}/{productId}/image_{0-5}.jpg
+    match /products/{userId}/{productId}/{imageFile} {
+      // Lecture : Accessible à tous (images publiques)
+      allow read: if true;
+      
+      // Écriture : Uniquement le propriétaire
+      // Vérifie que c'est une image et que la taille est valide
+      allow write: if isOwner(userId)
+        && isImage()
+        && isValidSize()
+        && imageFile.matches('image_[0-5]\\.(jpg|jpeg|png|webp)');
+      
+      // Suppression : Uniquement le propriétaire
+      allow delete: if isOwner(userId);
+    }
+    
+    // ============================================================
+    // PHOTOS DE PROFIL
+    // ============================================================
+    // Structure : users/{userId}/profile.jpg
+    match /users/{userId}/profile.{extension} {
+      // Lecture : Accessible à tous
+      allow read: if true;
+      
+      // Écriture : Uniquement le propriétaire
+      allow write: if isOwner(userId)
+        && isImage()
+        && isValidSize()
+        && extension.matches('(jpg|jpeg|png|webp)');
+      
+      // Suppression : Uniquement le propriétaire
+      allow delete: if isOwner(userId);
+    }
+    
+    // ============================================================
+    // RÈGLE PAR DÉFAUT : TOUT REFUSER
+    // ============================================================
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

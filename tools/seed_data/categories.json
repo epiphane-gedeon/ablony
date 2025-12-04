@@ -1,0 +1,18 @@
+[
+  {
+    "id": "femme",
+    "name": "Femme",
+    "children": ["haut_femme", "bas_femme", "chaussures_femme", "accessoires_femme"],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "homme",
+    "name": "Homme",
+    "children": ["haut_homme", "bas_homme", "chaussures_homme", "accessoires_homme"],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  }
+]
