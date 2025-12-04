@@ -238,7 +238,7 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -248,7 +248,7 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: SafeArea(
@@ -268,10 +268,10 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
                   controller: _usernameController,
                   validator: _validateUsername,
                   borderRadius: 12,
-                  textColor: AppColors.textPrimary,
-                  borderColor: AppColors.textSecondary,
-                  focusedBorderColor: AppColors.primary,
-                  fillColor: AppColors.background,
+                  textColor: null, // Utilise la couleur du thème
+                  borderColor: null, // Utilise la couleur du thème
+                  focusedBorderColor: null, // Utilise la couleur du thème
+                  fillColor: null, // Utilise la couleur du thème
                   textInputAction: TextInputAction.done,
                   autocorrect: false,
                   enableSuggestions: false,

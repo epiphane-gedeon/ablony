@@ -8,6 +8,10 @@ import '../../features/auth/application/providers.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/search/presentation/pages/search_page.dart';
+import '../../features/messages/presentation/pages/messages_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../core/layout/main_layout.dart';
 import 'router_notifier.dart';
 
 /// Configuration du routeur de l'application avec go_router.
@@ -195,6 +199,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           '/onboarding',
           '/auth/signup/email',
           '/auth/login',
+          '/home', // Permettre l'accès à la home sans être connecté
         ];
 
         // Si l'utilisateur essaie d'accéder à une route protégée
@@ -342,14 +347,64 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ============================================================
-      // ROUTE : HOME (PAGE D'ACCUEIL PRINCIPALE)
+      // NAVIGATION PRINCIPALE (BOTTOM BAR)
       // ============================================================
-      /// Page d'accueil pour les utilisateurs authentifiés.
-      /// Affiche "Hello World" pour l'instant.
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        builder: (context, state) => const HomePage(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainLayout(navigationShell: navigationShell);
+        },
+        branches: [
+          // 1. ACCUEIL
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                name: 'home',
+                builder: (context, state) => const HomePage(),
+              ),
+            ],
+          ),
+          // 2. RECHERCHER
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/search',
+                name: 'search',
+                builder: (context, state) => const SearchPage(),
+              ),
+            ],
+          ),
+          // 3. VENDRE (Placeholder pour l'index, géré par le layout)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/sell',
+                name: 'sell',
+                builder: (context, state) => const SizedBox.shrink(),
+              ),
+            ],
+          ),
+          // 4. MESSAGES
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/messages',
+                name: 'messages',
+                builder: (context, state) => const MessagesPage(),
+              ),
+            ],
+          ),
+          // 5. PROFIL
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                name: 'profile',
+                builder: (context, state) => const ProfilePage(),
+              ),
+            ],
+          ),
+        ],
       ),
 
       // ============================================================

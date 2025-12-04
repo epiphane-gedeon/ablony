@@ -1,0 +1,527 @@
+[
+    {
+        "id": "haut_femme",
+        "name": "Haut",
+        "parentId": "femme",
+        "children": [
+            "chemise_femme",
+            "tshirt_femme",
+            "debardeur_femme",
+            "pull_femme",
+            "veste_femme"
+        ],
+        "attributes": [],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "bas_femme",
+        "name": "Bas",
+        "parentId": "femme",
+        "children": [
+            "pantalon_femme",
+            "jupe_femme",
+            "short_femme",
+            "robe_femme"
+        ],
+        "attributes": [],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "chaussures_femme",
+        "name": "Chaussures",
+        "parentId": "femme",
+        "children": [
+            "baskets_femme",
+            "sandales_femme",
+            "talons_femme"
+        ],
+        "attributes": [],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "accessoires_femme",
+        "name": "Accessoires",
+        "parentId": "femme",
+        "children": [
+            "sac_femme",
+            "bijoux_femme",
+            "casquette_femme",
+            "ceinture_femme"
+        ],
+        "attributes": [],
+        "order": 4,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "chemise_femme",
+        "name": "Chemise",
+        "parentId": "haut_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "tshirt_femme",
+        "name": "T-shirt",
+        "parentId": "haut_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "debardeur_femme",
+        "name": "Débardeur",
+        "parentId": "haut_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "pull_femme",
+        "name": "Pull",
+        "parentId": "haut_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 4,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "veste_femme",
+        "name": "Veste",
+        "parentId": "haut_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 5,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "pantalon_femme",
+        "name": "Pantalon",
+        "parentId": "bas_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_bas",
+            "color",
+            "material"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "jupe_femme",
+        "name": "Jupe",
+        "parentId": "bas_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_bas",
+            "color",
+            "material",
+            "dress_length"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "short_femme",
+        "name": "Short",
+        "parentId": "bas_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_bas",
+            "color",
+            "material"
+        ],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "robe_femme",
+        "name": "Robe",
+        "parentId": "bas_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material",
+            "dress_length"
+        ],
+        "order": 4,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "baskets_femme",
+        "name": "Baskets",
+        "parentId": "chaussures_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_chaussures",
+            "color"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "sandales_femme",
+        "name": "Sandales",
+        "parentId": "chaussures_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_chaussures",
+            "color"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "talons_femme",
+        "name": "Talons",
+        "parentId": "chaussures_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_chaussures",
+            "color"
+        ],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "sac_femme",
+        "name": "Sac",
+        "parentId": "accessoires_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color",
+            "material",
+            "bag_type"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "bijoux_femme",
+        "name": "Bijoux",
+        "parentId": "accessoires_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color",
+            "jewelry_type"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "casquette_femme",
+        "name": "Casquette",
+        "parentId": "accessoires_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color"
+        ],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "ceinture_femme",
+        "name": "Ceinture",
+        "parentId": "accessoires_femme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color",
+            "material"
+        ],
+        "order": 4,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "haut_homme",
+        "name": "Haut",
+        "parentId": "homme",
+        "children": [
+            "chemise_homme",
+            "tshirt_homme",
+            "pull_homme",
+            "veste_homme"
+        ],
+        "attributes": [],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "bas_homme",
+        "name": "Bas",
+        "parentId": "homme",
+        "children": [
+            "pantalon_homme",
+            "short_homme"
+        ],
+        "attributes": [],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "chaussures_homme",
+        "name": "Chaussures",
+        "parentId": "homme",
+        "children": [
+            "baskets_homme",
+            "sandales_homme"
+        ],
+        "attributes": [],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "accessoires_homme",
+        "name": "Accessoires",
+        "parentId": "homme",
+        "children": [
+            "sac_homme",
+            "montre_homme",
+            "casquette_homme",
+            "ceinture_homme"
+        ],
+        "attributes": [],
+        "order": 4,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "chemise_homme",
+        "name": "Chemise",
+        "parentId": "haut_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "tshirt_homme",
+        "name": "T-shirt",
+        "parentId": "haut_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "pull_homme",
+        "name": "Pull",
+        "parentId": "haut_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "veste_homme",
+        "name": "Veste",
+        "parentId": "haut_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_haut",
+            "color",
+            "material"
+        ],
+        "order": 4,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "pantalon_homme",
+        "name": "Pantalon",
+        "parentId": "bas_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_bas",
+            "color",
+            "material"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "short_homme",
+        "name": "Short",
+        "parentId": "bas_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_bas",
+            "color",
+            "material"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "baskets_homme",
+        "name": "Baskets",
+        "parentId": "chaussures_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_chaussures",
+            "color"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "sandales_homme",
+        "name": "Sandales",
+        "parentId": "chaussures_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "size_chaussures",
+            "color"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "sac_homme",
+        "name": "Sac",
+        "parentId": "accessoires_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color",
+            "material",
+            "bag_type"
+        ],
+        "order": 1,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "montre_homme",
+        "name": "Montre",
+        "parentId": "accessoires_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color",
+            "watch_movement"
+        ],
+        "order": 2,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "casquette_homme",
+        "name": "Casquette",
+        "parentId": "accessoires_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color"
+        ],
+        "order": 3,
+        "iconUrl": null,
+        "isActive": true
+    },
+    {
+        "id": "ceinture_homme",
+        "name": "Ceinture",
+        "parentId": "accessoires_homme",
+        "children": [],
+        "attributes": [
+            "brand",
+            "color",
+            "material"
+        ],
+        "order": 4,
+        "iconUrl": null,
+        "isActive": true
+    }
+]

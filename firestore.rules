@@ -80,13 +80,50 @@ service cloud.firestore {
     }
     
     // ============================================================
-    // COLLECTION : products (à implémenter plus tard)
+    // COLLECTION : config (categories, subcategories, attributes)
     // ============================================================
-    // match /products/{productId} {
-    //   allow read: if true;
-    //   allow create: if hasCompleteProfile();
-    //   allow update, delete: if isOwner(resource.data.sellerId);
-    // }
+    // Configuration des catégories et attributs produits
+    // Lecture publique, écriture admin uniquement
+    match /config/{document=**} {
+      // Lecture : Accessible à tous pour afficher les catégories
+      allow read: if true;
+      
+      // Écriture : Réservé aux admins (à implémenter avec custom claims)
+      // Pour l'instant, on bloque toute écriture (gestion via console Firebase)
+      allow write: if false;
+    }
+    
+    // ============================================================
+    // COLLECTION : products
+    // ============================================================
+    // Gère les produits mis en vente
+    match /products/{productId} {
+      // Lecture : Tout le monde peut voir les produits actifs
+      allow read: if true;
+      
+      // Création : Utilisateur authentifié avec profil complet
+      // Vérifie que le vendeur est bien l'utilisateur connecté
+      allow create: if hasCompleteProfile()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.keys().hasAll(['title', 'description', 'price', 'imageUrls', 'condition', 'categoryId', 'subcategoryId'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && request.resource.data.imageUrls is list
+        && request.resource.data.imageUrls.size() >= 1
+        && request.resource.data.imageUrls.size() <= 6;
+      
+      // Mise à jour : Uniquement le vendeur peut modifier son produit
+      // Empêche la modification du vendeur et de la date de création
+      allow update: if isOwner(resource.data.sellerId)
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.createdAt == resource.data.createdAt;
+      
+      // Suppression : Uniquement le vendeur
+      allow delete: if isOwner(resource.data.sellerId);
+    }
     
     // ============================================================
     // COLLECTION : messages (à implémenter plus tard)

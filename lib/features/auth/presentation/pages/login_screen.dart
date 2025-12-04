@@ -86,16 +86,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           l10n.loginScreenTitle,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
           onPressed: () => context.pop(),
         ),
       ),
@@ -158,7 +158,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     },
                     child: Text(
                       l10n.loginScreenForgotPassword,
-                      style: const TextStyle(color: AppColors.primary),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                 ),

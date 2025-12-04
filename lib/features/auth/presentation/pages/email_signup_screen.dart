@@ -109,16 +109,16 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           l10n.emailSignupTitle,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
           onPressed: () => context.pop(),
         ),
       ),
@@ -174,7 +174,7 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
                 Text(
                   l10n.emailSignupPasswordHint,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                 ),
                 const SizedBox(height: 32),
@@ -189,7 +189,7 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
                   },
                   message: l10n.emailSignupMarketing,
                   messageStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                 ),
                 const SizedBox(height: 16),
@@ -210,23 +210,23 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
                     text: TextSpan(
                       text: l10n.termsPrefix,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
                           ),
                       children: [
                         TextSpan(
                           text: l10n.termsTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             decoration: TextDecoration.underline,
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           // TODO: Add tap handler for terms
                         ),
                         TextSpan(text: l10n.privacyPrefix),
                         TextSpan(
                           text: l10n.privacyTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             decoration: TextDecoration.underline,
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           // TODO: Add tap handler for privacy policy
                         ),
@@ -260,7 +260,7 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
                     },
                     child: Text(
                       l10n.problemLink,
-                      style: const TextStyle(color: AppColors.primary),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                 ),

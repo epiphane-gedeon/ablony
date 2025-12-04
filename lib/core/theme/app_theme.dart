@@ -435,4 +435,274 @@ class AppTheme {
       ),
     );
   }
+
+  // ============================================================================
+  // THÈME SOMBRE (DARK)
+  // ============================================================================
+
+  /// Retourne le thème sombre de l'application.
+  /// Optimisé pour une utilisation en faible luminosité avec des couleurs adaptées.
+  static ThemeData get darkTheme {
+    return ThemeData(
+      // Active Material Design 3
+      useMaterial3: true,
+      brightness: Brightness.dark,
+
+      // ========================================================================
+      // COULEURS PRINCIPALES
+      // ========================================================================
+
+      primaryColor: AppColors.darkPrimary,
+      scaffoldBackgroundColor: AppColors.darkBackground,
+
+      // ========================================================================
+      // SCHÉMA DE COULEURS (Color Scheme)
+      // ========================================================================
+
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.darkPrimary,
+        onPrimary: AppColors.darkTextOnPrimary,
+        secondary: AppColors.darkPrimaryLight,
+        onSecondary: AppColors.darkTextOnPrimary,
+        error: AppColors.error,
+        onError: AppColors.white,
+        surface: AppColors.darkSurface,
+        onSurface: AppColors.darkTextPrimary,
+        surfaceContainerHighest: AppColors.darkSurfaceVariant,
+      ),
+
+      // ========================================================================
+      // TYPOGRAPHIE - Police Be Vietnam Pro
+      // ========================================================================
+
+      textTheme: GoogleFonts.beVietnamProTextTheme(ThemeData.dark().textTheme).copyWith(
+        displayLarge: GoogleFonts.beVietnamPro(
+          fontSize: 57,
+          fontWeight: FontWeight.w700,
+          color: AppColors.darkTextPrimary,
+        ),
+        displayMedium: GoogleFonts.beVietnamPro(
+          fontSize: 45,
+          fontWeight: FontWeight.w700,
+          color: AppColors.darkTextPrimary,
+        ),
+        displaySmall: GoogleFonts.beVietnamPro(
+          fontSize: 36,
+          fontWeight: FontWeight.w600,
+          color: AppColors.darkTextPrimary,
+        ),
+        headlineLarge: GoogleFonts.beVietnamPro(
+          fontSize: 32,
+          fontWeight: FontWeight.w600,
+          color: AppColors.darkTextPrimary,
+        ),
+        headlineMedium: GoogleFonts.beVietnamPro(
+          fontSize: 28,
+          fontWeight: FontWeight.w600,
+          color: AppColors.darkTextPrimary,
+        ),
+        headlineSmall: GoogleFonts.beVietnamPro(
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          color: AppColors.darkTextPrimary,
+        ),
+        titleLarge: GoogleFonts.beVietnamPro(
+          fontSize: 22,
+          fontWeight: FontWeight.w500,
+          color: AppColors.darkTextPrimary,
+        ),
+        titleMedium: GoogleFonts.beVietnamPro(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.darkTextPrimary,
+        ),
+        titleSmall: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.darkTextPrimary,
+        ),
+        bodyLarge: GoogleFonts.beVietnamPro(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: AppColors.darkTextPrimary,
+        ),
+        bodyMedium: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: AppColors.darkTextPrimary,
+        ),
+        bodySmall: GoogleFonts.beVietnamPro(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: AppColors.darkTextSecondary,
+        ),
+        labelLarge: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.darkTextPrimary,
+        ),
+        labelMedium: GoogleFonts.beVietnamPro(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.darkTextPrimary,
+        ),
+        labelSmall: GoogleFonts.beVietnamPro(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: AppColors.darkTextSecondary,
+        ),
+      ),
+
+      // ========================================================================
+      // THÈME DE L'APPBAR
+      // ========================================================================
+
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.darkSurface,
+        foregroundColor: AppColors.darkTextPrimary,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.beVietnamPro(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: AppColors.darkTextPrimary,
+        ),
+      ),
+
+      // ========================================================================
+      // THÈME DES BOUTONS ELEVÉS
+      // ========================================================================
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.darkPrimary,
+          foregroundColor: AppColors.darkTextOnPrimary,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: GoogleFonts.beVietnamPro(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+      // ========================================================================
+      // THÈME DES BOUTONS OUTLINED
+      // ========================================================================
+
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.darkPrimary,
+          side: const BorderSide(color: AppColors.darkPrimary, width: 1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: GoogleFonts.beVietnamPro(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+      // ========================================================================
+      // THÈME DES BOUTONS TEXTE
+      // ========================================================================
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.darkPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          textStyle: GoogleFonts.beVietnamPro(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+      // ========================================================================
+      // THÈME DES CHAMPS DE SAISIE
+      // ========================================================================
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.darkSurfaceVariant,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.darkPrimary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        hintStyle: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          color: AppColors.darkTextSecondary,
+        ),
+        labelStyle: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          color: AppColors.darkTextSecondary,
+        ),
+      ),
+
+      // ========================================================================
+      // THÈME DES CARTES
+      // ========================================================================
+
+      cardTheme: CardThemeData(
+        color: AppColors.darkSurface,
+        elevation: 4,
+        shadowColor: Colors.black.withValues(alpha: 0.3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+
+      // ========================================================================
+      // THÈME DES SÉPARATEURS
+      // ========================================================================
+
+      dividerTheme: const DividerThemeData(
+        color: AppColors.darkDivider,
+        thickness: 1,
+        space: 1,
+      ),
+
+      // ========================================================================
+      // THÈME DES ICÔNES
+      // ========================================================================
+
+      iconTheme: const IconThemeData(
+        color: AppColors.darkTextPrimary,
+        size: 24,
+      ),
+
+      // ========================================================================
+      // THÈME DU BOUTON D'ACTION FLOTTANT (FAB)
+      // ========================================================================
+
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.darkPrimary,
+        foregroundColor: AppColors.darkTextOnPrimary,
+        elevation: 4,
+      ),
+    );
+  }
 }

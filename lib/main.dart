@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/locale_provider.dart';
+import 'core/providers/theme_provider.dart';
 import 'core/navigation/app_router.dart';
 import 'l10n/app_localizations.dart';
 
@@ -36,6 +37,9 @@ class MainApp extends ConsumerWidget {
     // Observer la locale actuelle depuis le provider
     final locale = ref.watch(localeProvider);
 
+    // Observer le mode de thème actuel
+    final themeMode = ref.watch(themeProvider);
+
     // Observer le router configuré avec go_router
     final router = ref.watch(routerProvider);
 
@@ -43,10 +47,20 @@ class MainApp extends ConsumerWidget {
       // Titre de l'application (visible dans le gestionnaire de tâches)
       title: 'Ablony',
 
-      // Applique le thème personnalisé de l'application
+      // Thème clair
       theme: AppTheme.lightTheme,
 
-      // Cache le bandeau "Debug" en haut à droite
+      // Thème sombre
+      darkTheme: AppTheme.darkTheme,
+
+      // Mode de thème (system/light/dark)
+      themeMode: themeMode,
+
+      // Animation de transition entre les thèmes
+      themeAnimationDuration: const Duration(milliseconds: 300),
+      themeAnimationCurve: Curves.easeInOut,
+
+      // Cache le bandeau \"Debug\" en haut à droite
       debugShowCheckedModeBanner: false,
 
       // Configuration de la localisation

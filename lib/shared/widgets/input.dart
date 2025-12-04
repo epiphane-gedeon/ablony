@@ -261,7 +261,7 @@ class _InputState extends State<Input> {
       return IconButton(
         icon: Icon(
           _obscureText ? Icons.visibility_off : Icons.visibility,
-          color: AppColors.textSecondary,
+          color: Theme.of(context).iconTheme.color,
         ),
         onPressed: () {
           setState(() {
@@ -277,12 +277,12 @@ class _InputState extends State<Input> {
   @override
   Widget build(BuildContext context) {
     // Couleurs par défaut depuis le thème
-    final defaultTextColor = widget.textColor ?? AppColors.textPrimary;
-    final defaultBorderColor = widget.borderColor ?? AppColors.textSecondary;
+    final defaultTextColor = widget.textColor ?? Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textPrimary;
+    final defaultBorderColor = widget.borderColor ?? Theme.of(context).dividerColor;
     final defaultFocusedBorderColor =
-        widget.focusedBorderColor ?? AppColors.primary;
-    final defaultErrorBorderColor = widget.errorBorderColor ?? Colors.red;
-    final defaultFillColor = widget.fillColor ?? AppColors.background;
+        widget.focusedBorderColor ?? Theme.of(context).colorScheme.primary;
+    final defaultErrorBorderColor = widget.errorBorderColor ?? Theme.of(context).colorScheme.error;
+    final defaultFillColor = widget.fillColor ?? Theme.of(context).colorScheme.surfaceContainerHighest;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +327,7 @@ class _InputState extends State<Input> {
             hintStyle:
                 widget.placeholderStyle ??
                 TextStyle(
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                   fontSize: widget.fontSize,
                 ),
 
