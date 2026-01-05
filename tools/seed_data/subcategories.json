@@ -65,6 +65,7 @@
         "parentId": "haut_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -80,6 +81,7 @@
         "parentId": "haut_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -95,6 +97,7 @@
         "parentId": "haut_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -110,6 +113,7 @@
         "parentId": "haut_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -125,6 +129,7 @@
         "parentId": "haut_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -140,6 +145,7 @@
         "parentId": "bas_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_bas",
             "color",
@@ -155,6 +161,7 @@
         "parentId": "bas_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_bas",
             "color",
@@ -171,6 +178,7 @@
         "parentId": "bas_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_bas",
             "color",
@@ -186,6 +194,7 @@
         "parentId": "bas_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -202,6 +211,7 @@
         "parentId": "chaussures_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_chaussures",
             "color"
@@ -216,6 +226,7 @@
         "parentId": "chaussures_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_chaussures",
             "color"
@@ -230,6 +241,7 @@
         "parentId": "chaussures_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_chaussures",
             "color"
@@ -244,6 +256,7 @@
         "parentId": "accessoires_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color",
             "material",
@@ -259,6 +272,7 @@
         "parentId": "accessoires_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color",
             "jewelry_type"
@@ -273,6 +287,7 @@
         "parentId": "accessoires_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color"
         ],
@@ -286,6 +301,7 @@
         "parentId": "accessoires_femme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color",
             "material"
@@ -356,6 +372,7 @@
         "parentId": "haut_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -371,6 +388,7 @@
         "parentId": "haut_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -386,6 +404,7 @@
         "parentId": "haut_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -401,6 +420,7 @@
         "parentId": "haut_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_haut",
             "color",
@@ -416,6 +436,7 @@
         "parentId": "bas_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_bas",
             "color",
@@ -431,6 +452,7 @@
         "parentId": "bas_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_bas",
             "color",
@@ -446,6 +468,7 @@
         "parentId": "chaussures_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_chaussures",
             "color"
@@ -460,6 +483,7 @@
         "parentId": "chaussures_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "size_chaussures",
             "color"
@@ -474,6 +498,7 @@
         "parentId": "accessoires_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color",
             "material",
@@ -489,6 +514,7 @@
         "parentId": "accessoires_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color",
             "watch_movement"
@@ -503,6 +529,7 @@
         "parentId": "accessoires_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color"
         ],
@@ -516,6 +543,7 @@
         "parentId": "accessoires_homme",
         "children": [],
         "attributes": [
+            "condition",
             "brand",
             "color",
             "material"

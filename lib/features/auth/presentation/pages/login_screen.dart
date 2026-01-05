@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/input.dart';
@@ -35,8 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    // Reset controller state when leaving the screen
-    ref.read(loginControllerProvider.notifier).reset();
+    // Ne pas utiliser ref dans dispose() car le widget est démonté
+    // La réinitialisation du controller se fera automatiquement
     super.dispose();
   }
 
@@ -51,7 +50,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// 3. La navigation est automatique via AppRouter
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      final success = await ref.read(loginControllerProvider.notifier).login(
+      final success = await ref
+          .read(loginControllerProvider.notifier)
+          .login(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -95,7 +96,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).iconTheme.color,
+          ),
           onPressed: () => context.pop(),
         ),
       ),
@@ -158,7 +162,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     },
                     child: Text(
                       l10n.loginScreenForgotPassword,
-                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -175,7 +181,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     },
                     child: Text(
                       l10n.problemLink,
-                      style: const TextStyle(color: AppColors.primary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),

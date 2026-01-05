@@ -267,5 +267,351 @@
   "color": "Color",
   "@color": {"description": "Color attribute"},
   "material": "Material",
-  "@material": {"description": "Material attribute"}
+  "@material": {"description": "Material attribute"},
+  "length": "Length",
+  "@length": {"description": "Length attribute"},
+  "bagType": "Bag type",
+  "@bagType": {"description": "Bag type attribute"},
+  "jewelType": "Jewelry type",
+  "@jewelType": {"description": "Jewelry type attribute"},
+  "movement": "Movement",
+  "@movement": {"description": "Movement attribute"},
+  "selectCondition": "Select a condition",
+  "@selectCondition": {"description": "Condition selection placeholder"},
+  "searchCategory": "Search a category",
+  "@searchCategory": {"description": "Category search placeholder"},
+  "selectSubcategory": "Select a subcategory",
+  "@selectSubcategory": {"description": "Subcategory selection placeholder"},
+  "publishing": "Publishing...",
+  "@publishing": {"description": "Publishing in progress message"},
+  "priceWithoutShipping": "Price without shipping",
+  "@priceWithoutShipping": {"description": "Price without shipping label"},
+
+  "productPublishedSuccess": "Product published successfully! 🎉",
+  "@productPublishedSuccess": {
+    "description": "Success message after product publication"
+  },
+  "productPublishError": "An error occurred while publishing",
+  "@productPublishError": {
+    "description": "Generic error message during publication"
+  },
+  "userNotConnected": "User not connected",
+  "@userNotConnected": {
+    "description": "Error when user is not authenticated"
+  },
+  "imageUploadError": "Error uploading images",
+  "@imageUploadError": {
+    "description": "Error during image upload to Firebase Storage"
+  },
+
+  "ok": "OK",
+  "@ok": {
+    "description": "Confirmation button"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button to retry after an error"
+  },
+
+  "currency": "FCFA",
+  "@currency": {
+    "description": "Currency unit (CFA Franc)"
+  },
+
+  "selectAttributePlaceholder": "Select {attributeName}",
+  "@selectAttributePlaceholder": {
+    "description": "Generic placeholder for attribute selection (used dynamically)",
+    "placeholders": {
+      "attributeName": {
+        "type": "String",
+        "example": "Brand"
+      }
+    }
+  },
+  "enterAttributePlaceholder": "Enter {attributeName}",
+  "@enterAttributePlaceholder": {
+    "description": "Generic placeholder for attribute text input (used dynamically)",
+    "placeholders": {
+      "attributeName": {
+        "type": "String",
+        "example": "Brand"
+      }
+    }
+  },
+
+  "indicateYourPrice": "Indicate your price",
+  "@indicateYourPrice": {
+    "description": "Label for price input field"
+  },
+  "priceFormatPlaceholder": "0.00 FCFA",
+  "@priceFormatPlaceholder": {
+    "description": "Placeholder for price input showing format (0.00 FCFA)"
+  },
+  "validatePrice": "Validate",
+  "@validatePrice": {
+    "description": "Button label to confirm price entry"
+  },
+
+  "searchPlaceholder": "Search...",
+  "@searchPlaceholder": {
+    "description": "Placeholder for search bar in selection screens"
+  },
+
+  "categoryFemme": "Women",
+  "@categoryFemme": {
+    "description": "Category name for women's items"
+  },
+  "categoryHomme": "Men",
+  "@categoryHomme": {
+    "description": "Category name for men's items"
+  },
+  "seeAll": "See all",
+  "@seeAll": {
+    "description": "Filter option to see all products"
+  },
+
+  "subcategoryHaut": "Top",
+  "@subcategoryHaut": {"description": "Subcategory: Top clothing"},
+  "subcategoryBas": "Bottom",
+  "@subcategoryBas": {"description": "Subcategory: Bottom clothing"},
+  "subcategoryChaussures": "Shoes",
+  "@subcategoryChaussures": {"description": "Subcategory: Shoes"},
+  "subcategoryAccessoires": "Accessories",
+  "@subcategoryAccessoires": {"description": "Subcategory: Accessories"},
+  "subcategoryChemise": "Shirt",
+  "@subcategoryChemise": {"description": "Subcategory: Shirt"},
+  "subcategoryTshirt": "T-shirt",
+  "@subcategoryTshirt": {"description": "Subcategory: T-shirt"},
+  "subcategoryDebardeur": "Tank top",
+  "@subcategoryDebardeur": {"description": "Subcategory: Tank top"},
+  "subcategoryPull": "Sweater",
+  "@subcategoryPull": {"description": "Subcategory: Sweater"},
+  "subcategoryVeste": "Jacket",
+  "@subcategoryVeste": {"description": "Subcategory: Jacket"},
+  "subcategoryPantalon": "Pants",
+  "@subcategoryPantalon": {"description": "Subcategory: Pants"},
+  "subcategoryJupe": "Skirt",
+  "@subcategoryJupe": {"description": "Subcategory: Skirt"},
+  "subcategoryShort": "Shorts",
+  "@subcategoryShort": {"description": "Subcategory: Shorts"},
+  "subcategoryRobe": "Dress",
+  "@subcategoryRobe": {"description": "Subcategory: Dress"},
+  "subcategoryBaskets": "Sneakers",
+  "@subcategoryBaskets": {"description": "Subcategory: Sneakers"},
+  "subcategorySandales": "Sandals",
+  "@subcategorySandales": {"description": "Subcategory: Sandals"},
+  "subcategoryTalons": "Heels",
+  "@subcategoryTalons": {"description": "Subcategory: Heels"},
+  "subcategorySac": "Bag",
+  "@subcategorySac": {"description": "Subcategory: Bag"},
+  "subcategoryBijoux": "Jewelry",
+  "@subcategoryBijoux": {"description": "Subcategory: Jewelry"},
+  "subcategoryCasquette": "Cap",
+  "@subcategoryCasquette": {"description": "Subcategory: Cap"},
+  "subcategoryCeinture": "Belt",
+  "@subcategoryCeinture": {"description": "Subcategory: Belt"},
+  "subcategoryMontre": "Watch",
+  "@subcategoryMontre": {"description": "Subcategory: Watch"},
+
+  "attributeEtat": "Condition",
+  "@attributeEtat": {"description": "Attribute: Condition"},
+  "attributeMarque": "Brand",
+  "@attributeMarque": {"description": "Attribute: Brand"},
+  "attributeTaille": "Size",
+  "@attributeTaille": {"description": "Attribute: Size"},
+  "attributePointure": "Shoe size",
+  "@attributePointure": {"description": "Attribute: Shoe size"},
+  "attributeCouleur": "Color",
+  "@attributeCouleur": {"description": "Attribute: Color"},
+  "attributeMatiere": "Material",
+  "@attributeMatiere": {"description": "Attribute: Material"},
+  "attributeLongueur": "Length",
+  "@attributeLongueur": {"description": "Attribute: Length"},
+  "attributeTypeSac": "Bag type",
+  "@attributeTypeSac": {"description": "Attribute: Bag type"},
+  "attributeTypeBijou": "Jewelry type",
+  "@attributeTypeBijou": {"description": "Attribute: Jewelry type"},
+  "attributeMouvement": "Movement",
+  "@attributeMouvement": {"description": "Attribute: Movement (watch)"},
+
+  "conditionNewWithTags": "New with tags",
+  "@conditionNewWithTags": {"description": "Condition: New with tags"},
+  "conditionExcellent": "Excellent condition",
+  "@conditionExcellent": {"description": "Condition: Excellent"},
+  "conditionGood": "Good condition",
+  "@conditionGood": {"description": "Condition: Good"},
+  "conditionSatisfactory": "Satisfactory",
+  "@conditionSatisfactory": {"description": "Condition: Satisfactory"},
+  "conditionUsed": "Used",
+  "@conditionUsed": {"description": "Condition: Used"},
+
+  "helpTextCondition": "General condition of the product",
+  "@helpTextCondition": {"description": "Help text for condition attribute"},
+  "helpTextBrand": "Select the product brand",
+  "@helpTextBrand": {"description": "Help text for brand attribute"},
+  "helpTextSizeTop": "Size for tops, shirts, sweaters, jackets",
+  "@helpTextSizeTop": {"description": "Help text for top size"},
+  "helpTextSizeBottom": "Size for pants, shorts, skirts",
+  "@helpTextSizeBottom": {"description": "Help text for bottom size"},
+  "helpTextShoeSize": "Shoe size",
+  "@helpTextShoeSize": {"description": "Help text for shoe size"},
+  "helpTextColor": "Main color of the product",
+  "@helpTextColor": {"description": "Help text for color"},
+  "helpTextMaterial": "Main material of the product",
+  "@helpTextMaterial": {"description": "Help text for material"},
+  "helpTextLength": "Length of dress or skirt",
+  "@helpTextLength": {"description": "Help text for length"},
+  "helpTextBagType": "Bag type (handbag, backpack, etc.)",
+  "@helpTextBagType": {"description": "Help text for bag type"},
+  "helpTextJewelryType": "Jewelry type (necklace, ring, bracelet, etc.)",
+  "@helpTextJewelryType": {"description": "Help text for jewelry type"},
+  "helpTextMovement": "Watch movement type",
+  "@helpTextMovement": {"description": "Help text for watch movement"},
+  "lengthShort": "Short",
+  "@lengthShort": {"description": "Short length option"},
+  "lengthMedium": "Medium",
+  "@lengthMedium": {"description": "Medium length option"},
+  "lengthLong": "Long",
+  "@lengthLong": {"description": "Long length option"},
+  "colorBlack": "Black",
+  "@colorBlack": {"description": "Black color"},
+  "colorWhite": "White",
+  "@colorWhite": {"description": "White color"},
+  "colorGray": "Gray",
+  "@colorGray": {"description": "Gray color"},
+  "colorBeige": "Beige",
+  "@colorBeige": {"description": "Beige color"},
+  "colorBrown": "Brown",
+  "@colorBrown": {"description": "Brown color"},
+  "colorBlue": "Blue",
+  "@colorBlue": {"description": "Blue color"},
+  "colorNavyBlue": "Navy blue",
+  "@colorNavyBlue": {"description": "Navy blue color"},
+  "colorLightBlue": "Light blue",
+  "@colorLightBlue": {"description": "Light blue color"},
+  "colorRed": "Red",
+  "@colorRed": {"description": "Red color"},
+  "colorPink": "Pink",
+  "@colorPink": {"description": "Pink color"},
+  "colorPurple": "Purple",
+  "@colorPurple": {"description": "Purple color"},
+  "colorGreen": "Green",
+  "@colorGreen": {"description": "Green color"},
+  "colorKhakiGreen": "Khaki green",
+  "@colorKhakiGreen": {"description": "Khaki green color"},
+  "colorYellow": "Yellow",
+  "@colorYellow": {"description": "Yellow color"},
+  "colorOrange": "Orange",
+  "@colorOrange": {"description": "Orange color"},
+  "colorMulticolor": "Multicolor",
+  "@colorMulticolor": {"description": "Multicolor"},
+  "colorGold": "Gold",
+  "@colorGold": {"description": "Gold color"},
+  "colorSilver": "Silver",
+  "@colorSilver": {"description": "Silver color"},
+  "materialCotton": "Cotton",
+  "@materialCotton": {"description": "Cotton material"},
+  "materialPolyester": "Polyester",
+  "@materialPolyester": {"description": "Polyester material"},
+  "materialWool": "Wool",
+  "@materialWool": {"description": "Wool material"},
+  "materialSilk": "Silk",
+  "@materialSilk": {"description": "Silk material"},
+  "materialLinen": "Linen",
+  "@materialLinen": {"description": "Linen material"},
+  "materialDenim": "Denim",
+  "@materialDenim": {"description": "Denim material"},
+  "materialLeather": "Leather",
+  "@materialLeather": {"description": "Leather material"},
+  "materialSuede": "Suede",
+  "@materialSuede": {"description": "Suede material"},
+  "materialSynthetic": "Synthetic",
+  "@materialSynthetic": {"description": "Synthetic material"},
+  "materialVelvet": "Velvet",
+  "@materialVelvet": {"description": "Velvet material"},
+  "materialCashmere": "Cashmere",
+  "@materialCashmere": {"description": "Cashmere material"},
+  "materialViscose": "Viscose",
+  "@materialViscose": {"description": "Viscose material"},
+  "materialOther": "Other",
+  "@materialOther": {"description": "Other material"},
+  "bagTypeHandbag": "Handbag",
+  "@bagTypeHandbag": {"description": "Handbag type"},
+  "bagTypeBackpack": "Backpack",
+  "@bagTypeBackpack": {"description": "Backpack type"},
+  "bagTypeClutch": "Clutch",
+  "@bagTypeClutch": {"description": "Clutch type"},
+  "bagTypeTote": "Tote bag",
+  "@bagTypeTote": {"description": "Tote bag type"},
+  "bagTypeCrossbody": "Crossbody bag",
+  "@bagTypeCrossbody": {"description": "Crossbody bag type"},
+  "bagTypeTravel": "Travel bag",
+  "@bagTypeTravel": {"description": "Travel bag type"},
+  "bagTypeSatchel": "Satchel",
+  "@bagTypeSatchel": {"description": "Satchel type"},
+  "jewelryTypeNecklace": "Necklace",
+  "@jewelryTypeNecklace": {"description": "Necklace type"},
+  "jewelryTypeBracelet": "Bracelet",
+  "@jewelryTypeBracelet": {"description": "Bracelet type"},
+  "jewelryTypeEarrings": "Earrings",
+  "@jewelryTypeEarrings": {"description": "Earrings type"},
+  "jewelryTypeRing": "Ring",
+  "@jewelryTypeRing": {"description": "Ring type"},
+  "jewelryTypeBrooch": "Brooch",
+  "@jewelryTypeBrooch": {"description": "Brooch type"},
+  "jewelryTypeWatchBracelet": "Watch bracelet",
+  "@jewelryTypeWatchBracelet": {"description": "Watch bracelet type"},
+  "watchMovementQuartz": "Quartz",
+  "@watchMovementQuartz": {"description": "Quartz watch movement"},
+  "watchMovementAutomatic": "Automatic",
+  "@watchMovementAutomatic": {"description": "Automatic watch movement"},
+  "watchMovementManual": "Manual",
+  "@watchMovementManual": {"description": "Manual watch movement"},
+  "watchMovementDigital": "Digital",
+  "@watchMovementDigital": {"description": "Digital watch movement"},
+  "brandOther": "Other",
+  "@brandOther": {"description": "Other brand"},
+  "navHome": "Home",
+  "@navHome": {"description": "Home navigation label"},
+  "navSearch": "Search",
+  "@navSearch": {"description": "Search navigation label"},
+  "navSell": "Sell",
+  "@navSell": {"description": "Sell navigation label"},
+  "navMessages": "Messages",
+  "@navMessages": {"description": "Messages navigation label"},
+  "navProfile": "Profile",
+  "@navProfile": {"description": "Profile navigation label"},
+  "priceWithProtection": "{price} XOF incl.",
+  "@priceWithProtection": {
+    "description": "Price with buyer protection included",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "searchArticlesTab": "Articles",
+  "@searchArticlesTab": {
+    "description": "Articles tab in search page"
+  },
+  "searchMembersTab": "Members",
+  "@searchMembersTab": {
+    "description": "Members tab in search page"
+  },
+  "searchArticlesPlaceholder": "Search for an article or member...",
+  "@searchArticlesPlaceholder": {
+    "description": "Search bar placeholder"
+  },
+  "closeButton": "Close",
+  "@closeButton": {
+    "description": "Close button text"
+  },
+  "searchNoResults": "No results found",
+  "@searchNoResults": {
+    "description": "No search results found"
+  },
+  "searchTyping": "Start typing to search...",
+  "@searchTyping": {
+    "description": "Message when search field is empty"
+  }
 }

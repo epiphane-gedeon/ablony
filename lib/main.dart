@@ -4,9 +4,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
+import 'core/config/firebase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/theme_provider.dart';
@@ -23,6 +27,37 @@ void main() async {
   // (Android, iOS, Web, etc.)
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // 🔥 CONFIGURATION DES ÉMULATEURS FIREBASE (en mode debug uniquement)
+  // Permet de tester localement sans toucher aux données de production
+  if (FirebaseConfig.useEmulators) {
+    try {
+      final host = FirebaseConfig.emulatorHost;
+
+      // Émulateur Auth
+      await FirebaseAuth.instance.useAuthEmulator(
+        host,
+        FirebaseConfig.authPort,
+      );
+
+      // Émulateur Firestore
+      FirebaseFirestore.instance.useFirestoreEmulator(
+        host,
+        FirebaseConfig.firestorePort,
+      );
+
+      // Émulateur Storage
+      await FirebaseStorage.instance.useStorageEmulator(
+        host,
+        FirebaseConfig.storagePort,
+      );
+
+      // Afficher la configuration
+      FirebaseConfig.printConfig();
+    } catch (e) {
+      debugPrint('⚠️ Erreur configuration émulateurs: $e');
+    }
+  }
+
   // Lance l'application avec Riverpod pour la gestion d'état
   runApp(const ProviderScope(child: MainApp()));
 }
@@ -34,6 +69,12 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Charger la langue sauvegardée au démarrage
+    ref.listen(localeProvider, (previous, next) {});
+    Future.microtask(
+      () => ref.read(localeProvider.notifier).loadSavedLanguage(),
+    );
+
     // Observer la locale actuelle depuis le provider
     final locale = ref.watch(localeProvider);
 

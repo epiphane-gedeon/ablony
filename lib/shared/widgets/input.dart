@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
 
 /// Types de champs de saisie prédéfinis.
@@ -155,6 +154,9 @@ class Input extends StatefulWidget {
   /// sera appliqué selon le type du champ.
   final bool autoValidate;
 
+  /// Autofocus sur le champ lors de l'affichage.
+  final bool autofocus;
+
   const Input({
     super.key,
     this.type = InputType.text,
@@ -187,6 +189,7 @@ class Input extends StatefulWidget {
     this.labelStyle,
     this.placeholderStyle,
     this.autoValidate = true,
+    this.autofocus = false,
   });
 
   @override
@@ -277,7 +280,7 @@ class _InputState extends State<Input> {
   @override
   Widget build(BuildContext context) {
     // Couleurs par défaut depuis le thème
-    final defaultTextColor = widget.textColor ?? Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textPrimary;
+    final defaultTextColor = widget.textColor ?? Theme.of(context).textTheme.bodyLarge?.color ?? Theme.of(context).colorScheme.onSurface;
     final defaultBorderColor = widget.borderColor ?? Theme.of(context).dividerColor;
     final defaultFocusedBorderColor =
         widget.focusedBorderColor ?? Theme.of(context).colorScheme.primary;
@@ -312,6 +315,7 @@ class _InputState extends State<Input> {
           obscureText: _obscureText,
           keyboardType: _getKeyboardType(),
           textInputAction: widget.textInputAction,
+          autofocus: widget.autofocus,
           autocorrect: widget.autocorrect,
           enableSuggestions: widget.enableSuggestions,
           maxLines: _getMaxLines(),

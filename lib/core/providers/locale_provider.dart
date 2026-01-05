@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Provider pour la gestion de la langue de l'application.
 ///
@@ -15,20 +16,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// ref.read(localeProvider.notifier).setLocale(const Locale('en'));
 /// ```
 class LocaleNotifier extends Notifier<Locale> {
+  static const String _languageKey = 'selected_language';
+
   @override
   Locale build() {
+    // Charger la langue enregistrée de manière synchrone n'est pas possible
+    // avec les SharedPreferences. C'est pourquoi on retourne le français par défaut
+    // et on charge la langue enregistrée au démarrage via loadSavedLanguage()
     return const Locale('fr'); // Français par défaut
   }
 
-  /// Change la langue de l'application
-  void setLocale(Locale locale) {
+  /// Charge la langue sauvegardée au démarrage de l'app
+  Future<void> loadSavedLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedLanguageCode = prefs.getString(_languageKey);
+
+    if (savedLanguageCode != null) {
+      state = Locale(savedLanguageCode);
+    }
+  }
+
+  /// Change la langue de l'application et la sauvegarde
+  Future<void> setLocale(Locale locale) async {
     state = locale;
-    // TODO: Sauvegarder la préférence dans SharedPreferences pour la persistance
+
+    // Sauvegarder dans SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_languageKey, locale.languageCode);
   }
 
   /// Change la langue en utilisant un code de langue (String)
-  void setLanguage(String languageCode) {
-    setLocale(Locale(languageCode));
+  Future<void> setLanguage(String languageCode) async {
+    await setLocale(Locale(languageCode));
   }
 }
 

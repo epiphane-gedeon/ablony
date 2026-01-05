@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_colors.dart';
 
 /// Widget réutilisable pour les checkboxes avec texte personnalisable.
 ///

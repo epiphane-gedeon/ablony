@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
 
 /// Bouton principal de l'application (ElevatedButton personnalisé).
 ///
@@ -12,8 +11,8 @@ import '../../../core/theme/app_colors.dart';
 /// - [isLoading] : Affiche un loader si true (optionnel, défaut: false)
 /// - [isFullWidth] : Prend toute la largeur disponible si true (optionnel, défaut: true)
 /// - [icon] : Icône à afficher avant le texte (optionnel)
-/// - [backgroundColor] : Couleur de fond du bouton (optionnel, défaut: AppColors.primary)
-/// - [textColor] : Couleur du texte (optionnel, défaut: AppColors.white)
+/// - [backgroundColor] : Couleur de fond du bouton (optionnel, défaut: Theme.of(context).colorScheme.primary)
+/// - [textColor] : Couleur du texte (optionnel, défaut: Colors.white)
 /// - [fontSize] : Taille du texte (optionnel, utilise le thème par défaut si non spécifié)
 ///
 /// Exemple d'utilisation :
@@ -21,8 +20,8 @@ import '../../../core/theme/app_colors.dart';
 /// PrimaryButton(
 ///   text: 'S\'inscrire',
 ///   onPressed: () => print('Inscription'),
-///   backgroundColor: AppColors.error,
-///   textColor: AppColors.white,
+///   backgroundColor: Theme.of(context).colorScheme.error,
+///   textColor: Colors.white,
 ///   fontSize: 14,
 /// )
 /// ```
@@ -65,8 +64,8 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Couleur du texte (par défaut AppColors.white, sinon celle fournie)
-    final effectiveTextColor = textColor ?? AppColors.white;
+    // Couleur du texte (par défaut blanc, sinon celle fournie)
+    final effectiveTextColor = textColor ?? Colors.white;
 
     // Contenu du bouton (texte ou loader)
     Widget buttonChild;

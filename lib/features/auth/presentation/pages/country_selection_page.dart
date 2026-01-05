@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/entities.dart';
 import '../../application/providers.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -248,14 +247,14 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
               Container(
                 padding: EdgeInsets.all(screenWidth * 0.04),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.05),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
                     SizedBox(width: screenWidth * 0.03),
@@ -339,7 +338,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
                 width: screenWidth * 0.15, // 15% de la largeur
                 height: screenWidth * 0.15,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -386,7 +385,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
               // ============================================================
               Icon(
                 Icons.arrow_forward_ios,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
               ),
             ],

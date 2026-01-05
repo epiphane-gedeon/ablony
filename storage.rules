@@ -50,16 +50,16 @@ service firebase.storage {
     // ============================================================
     // PHOTOS DE PROFIL
     // ============================================================
-    // Structure : users/{userId}/profile.jpg
-    match /users/{userId}/profile.{extension} {
+    // Structure : users/{userId}/profile.jpg (ou .png, .webp, etc.)
+    match /users/{userId}/{fileName} {
       // Lecture : Accessible à tous
       allow read: if true;
       
-      // Écriture : Uniquement le propriétaire
+      // Écriture : Uniquement le propriétaire pour les photos de profil
       allow write: if isOwner(userId)
+        && fileName.matches('profile\\.(jpg|jpeg|png|webp)')
         && isImage()
-        && isValidSize()
-        && extension.matches('(jpg|jpeg|png|webp)');
+        && isValidSize();
       
       // Suppression : Uniquement le propriétaire
       allow delete: if isOwner(userId);

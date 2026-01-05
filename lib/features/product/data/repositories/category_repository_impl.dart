@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../core/exceptions/exceptions.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../models/category_model.dart';
@@ -14,7 +15,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   final FirebaseFirestore _firestore;
 
   CategoryRepositoryImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   // ============================================================
   // CATÉGORIES (Niveau 1)
@@ -56,8 +57,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return snapshot.docs
           .map((doc) => CategoryModel.fromMap(doc.data(), doc.id))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du chargement des catégories : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement des catégories',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -72,12 +79,20 @@ class CategoryRepositoryImpl implements CategoryRepository {
           .get();
 
       if (!doc.exists) {
-        throw Exception('Catégorie non trouvée : $id');
+        throw CategoryNotFoundException(categoryId: id);
       }
 
       return CategoryModel.fromMap(doc.data()!, doc.id);
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du chargement de la catégorie : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement de la catégorie',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -90,9 +105,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
         .where('isActive', isEqualTo: true)
         .orderBy('order')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => CategoryModel.fromMap(doc.data(), doc.id))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => CategoryModel.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
   }
 
   // ============================================================
@@ -113,9 +130,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return snapshot.docs
           .map((doc) => SubcategoryModel.fromMap(doc.data(), doc.id))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors du chargement des sous-catégories : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement des sous-catégories',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -131,13 +152,19 @@ class CategoryRepositoryImpl implements CategoryRepository {
           .get();
 
       if (!doc.exists) {
-        throw Exception('Sous-catégorie non trouvée : $id');
+        throw CategoryNotFoundException(categoryId: id);
       }
 
       return SubcategoryModel.fromMap(doc.data()!, doc.id);
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors du chargement de la sous-catégorie : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement de la sous-catégorie',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -188,9 +215,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return snapshot.docs
           .map((doc) => SubcategoryModel.fromMap(doc.data(), doc.id))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors du chargement des sous-catégories : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement des sous-catégories',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -205,9 +236,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
         .where('isActive', isEqualTo: true)
         .orderBy('order')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => SubcategoryModel.fromMap(doc.data(), doc.id))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => SubcategoryModel.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
   }
 
   // ============================================================
@@ -228,8 +261,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return snapshot.docs
           .map((doc) => ProductAttributeModel.fromMap(doc.data(), doc.id))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du chargement des attributs : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement des attributs',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -244,12 +283,20 @@ class CategoryRepositoryImpl implements CategoryRepository {
           .get();
 
       if (!doc.exists) {
-        throw Exception('Attribut non trouvé : $id');
+        throw CategoryNotFoundException(categoryId: id);
       }
 
       return ProductAttributeModel.fromMap(doc.data()!, doc.id);
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du chargement de l\'attribut : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement de l\'attribut',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -310,13 +357,22 @@ class CategoryRepositoryImpl implements CategoryRepository {
             .where(FieldPath.documentId, whereIn: batch)
             .get();
 
-        attributes.addAll(snapshot.docs
-            .map((doc) => ProductAttributeModel.fromMap(doc.data(), doc.id)));
+        attributes.addAll(
+          snapshot.docs.map(
+            (doc) => ProductAttributeModel.fromMap(doc.data(), doc.id),
+          ),
+        );
       }
 
       return attributes;
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du chargement des attributs : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement des attributs',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -329,8 +385,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
         .where('isActive', isEqualTo: true)
         .orderBy('order')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => ProductAttributeModel.fromMap(doc.data(), doc.id))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ProductAttributeModel.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
   }
 }

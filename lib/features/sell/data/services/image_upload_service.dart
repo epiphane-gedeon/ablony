@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Service pour uploader les images de produits vers Firebase Storage.
 ///
@@ -10,7 +12,7 @@ class ImageUploadService {
   final FirebaseStorage _storage;
 
   ImageUploadService({FirebaseStorage? storage})
-      : _storage = storage ?? FirebaseStorage.instance;
+    : _storage = storage ?? FirebaseStorage.instance;
 
   /// Upload les images d'un produit et retourne les URLs de téléchargement.
   ///
@@ -46,12 +48,19 @@ class ImageUploadService {
     final urls = <String>[];
 
     try {
+      debugPrint(
+        '🔄 ImageUploadService: Début upload de ${images.length} images',
+      );
+      debugPrint('   Bucket: ${_storage.bucket}');
+
       for (int i = 0; i < images.length; i++) {
         final file = images[i];
-        
+
         // Chemin dans Storage : products/{userId}/{productId}/image_{i}.jpg
         final path = 'products/$userId/$productId/image_$i.jpg';
         final ref = _storage.ref().child(path);
+
+        debugPrint('   📤 Upload image $i vers: $path');
 
         // Métadonnées
         final metadata = SettableMetadata(
@@ -64,16 +73,37 @@ class ImageUploadService {
         );
 
         // Upload
-        final uploadTask = ref.putFile(file, metadata);
-        final snapshot = await uploadTask;
+        try {
+          final uploadTask = ref.putFile(file, metadata);
+          final snapshot = await uploadTask;
 
-        // Récupérer l'URL de téléchargement
-        final downloadUrl = await snapshot.ref.getDownloadURL();
-        urls.add(downloadUrl);
+          // Récupérer l'URL de téléchargement
+          final downloadUrl = await snapshot.ref.getDownloadURL();
+          urls.add(downloadUrl);
+
+          debugPrint(
+            '   ✅ Image $i uploadée: ${downloadUrl.substring(0, 50)}...',
+          );
+        } catch (uploadError) {
+          debugPrint('   ❌ Erreur upload image $i: $uploadError');
+
+          // Si c'est une erreur Firebase, donner plus de détails
+          if (uploadError is FirebaseException) {
+            debugPrint('      Code: ${uploadError.code}');
+            debugPrint('      Message: ${uploadError.message}');
+            debugPrint('      Plugin: ${uploadError.plugin}');
+          }
+
+          throw Exception(
+            'Erreur lors de l\'upload de l\'image $i: $uploadError',
+          );
+        }
       }
 
+      debugPrint('✅ Tous les uploads terminés: ${urls.length} URLs');
       return urls;
     } catch (e) {
+      debugPrint('❌ Erreur générale upload: $e');
       // En cas d'erreur, supprimer les images déjà uploadées
       await _cleanupPartialUpload(userId, productId, urls.length);
       rethrow;
@@ -93,10 +123,10 @@ class ImageUploadService {
   Future<void> deleteProductImages(String userId, String productId) async {
     try {
       final folderRef = _storage.ref().child('products/$userId/$productId');
-      
+
       // Lister tous les fichiers dans le dossier
       final listResult = await folderRef.listAll();
-      
+
       // Supprimer chaque fichier
       for (final item in listResult.items) {
         await item.delete();
@@ -126,7 +156,9 @@ class ImageUploadService {
       }
     } catch (e) {
       // Ignorer les erreurs de nettoyage
-      debugPrint('Erreur lors du nettoyage : $e');
+      if (kDebugMode) {
+        print('Erreur lors du nettoyage : $e');
+      }
     }
   }
 
@@ -164,14 +196,12 @@ class ImageUploadService {
 
     final uploadTask = ref.putFile(newImage, metadata);
     final snapshot = await uploadTask;
-    
+
     return await snapshot.ref.getDownloadURL();
   }
 }
 
 /// Provider Riverpod pour ImageUploadService
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 final imageUploadServiceProvider = Provider<ImageUploadService>((ref) {
   return ImageUploadService();
 });

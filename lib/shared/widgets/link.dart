@@ -17,7 +17,7 @@
 ///   text: 'Ignorer',
 ///   onTap: () => Navigator.push(...),
 ///   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-///     color: AppColors.textSecondary,
+///     color: Theme.of(context).colorScheme.onSurfaceVariant,
 ///   ),
 /// )
 /// ```

@@ -34,7 +34,8 @@ abstract class ProductRepository {
   /// Récupère tous les produits
   ///
   /// [limit] : Nombre maximum de produits à récupérer
-  Future<List<Product>> getProducts({int limit = 20});
+  /// [startAfter] : ID du dernier produit pour pagination
+  Future<List<Product>> getProducts({int limit = 20, String? startAfter});
 
   /// Récupère les produits d'un vendeur
   ///
