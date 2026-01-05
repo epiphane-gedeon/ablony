@@ -1,0 +1,1568 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('fr'),
+  ];
+
+  /// Nom de la langue française
+  ///
+  /// In fr, this message translates to:
+  /// **'Français'**
+  String get languageFrench;
+
+  /// Nom de la langue anglaise
+  ///
+  /// In fr, this message translates to:
+  /// **'Anglais'**
+  String get languageEnglish;
+
+  /// Bouton pour ignorer l'onboarding
+  ///
+  /// In fr, this message translates to:
+  /// **'Ignorer'**
+  String get skip;
+
+  /// Première ligne du slogan
+  ///
+  /// In fr, this message translates to:
+  /// **'Achetez et vendez'**
+  String get onboardingCatchPhrase1;
+
+  /// Deuxième ligne du slogan
+  ///
+  /// In fr, this message translates to:
+  /// **'facilement.'**
+  String get onboardingCatchPhrase2;
+
+  /// Bouton d'inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'inscrire sur Ablony'**
+  String get signUpButton;
+
+  /// Bouton de connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai déjà un compte'**
+  String get loginButton;
+
+  /// Texte du lien à propos
+  ///
+  /// In fr, this message translates to:
+  /// **'À propos d\'Ablony : '**
+  String get aboutAblony;
+
+  /// Lien vers la plateforme
+  ///
+  /// In fr, this message translates to:
+  /// **'Notre plateforme'**
+  String get ourPlatform;
+
+  /// Titre du dialogue de sélection de langue
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la langue'**
+  String get changeLanguage;
+
+  /// Bouton de validation
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get validate;
+
+  /// Bouton de fermeture
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get close;
+
+  /// Titre de la page d'erreur 404
+  ///
+  /// In fr, this message translates to:
+  /// **'Page non trouvée'**
+  String get pageNotFound;
+
+  /// Message d'erreur 404 avec la route
+  ///
+  /// In fr, this message translates to:
+  /// **'La route \"{route}\" n\'existe pas.'**
+  String pageNotFoundMessage(String route);
+
+  /// Bouton pour retourner à l'accueil
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à l\'accueil'**
+  String get backToHome;
+
+  /// Titre de la page d'inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'inscrire'**
+  String get registerTitle;
+
+  /// Label du champ username
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom d\'utilisateur'**
+  String get usernameLabel;
+
+  /// Placeholder du champ username
+  ///
+  /// In fr, this message translates to:
+  /// **'john-doe'**
+  String get usernamePlaceholder;
+
+  /// Erreur champ username obligatoire
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom d\'utilisateur est obligatoire'**
+  String get usernameRequired;
+
+  /// Erreur longueur minimale username
+  ///
+  /// In fr, this message translates to:
+  /// **'Minimum 3 caractères'**
+  String get usernameMinLength;
+
+  /// Erreur longueur maximale username
+  ///
+  /// In fr, this message translates to:
+  /// **'Maximum 30 caractères'**
+  String get usernameMaxLength;
+
+  /// Erreur format username
+  ///
+  /// In fr, this message translates to:
+  /// **'Format invalide (lettres, chiffres, - et _ uniquement)'**
+  String get usernameFormatError;
+
+  /// Texte suggestion username
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous te suggérons ce nom d\'utilisateur :'**
+  String get usernameSuggestion;
+
+  /// Message checkbox marketing email
+  ///
+  /// In fr, this message translates to:
+  /// **'Je souhaite recevoir par e-mail des offres personnalisées et les dernières mises à jour d\'Ablony.'**
+  String get marketingEmailMessage;
+
+  /// Préfixe CGU
+  ///
+  /// In fr, this message translates to:
+  /// **'En t\'inscrivant, tu confirmes que tu acceptes les '**
+  String get termsPrefix;
+
+  /// Lien CGU
+  ///
+  /// In fr, this message translates to:
+  /// **'Termes & Conditions de Ablony'**
+  String get termsTitle;
+
+  /// Préfixe politique de confidentialité
+  ///
+  /// In fr, this message translates to:
+  /// **', avoir lu la '**
+  String get privacyPrefix;
+
+  /// Lien politique de confidentialité
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get privacyTitle;
+
+  /// Âge minimum inscription
+  ///
+  /// In fr, this message translates to:
+  /// **' et avoir au moins 18 ans.'**
+  String get termsAge;
+
+  /// Bouton continuer inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get continueButton;
+
+  /// Lien aide inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'Un problème ?'**
+  String get problemLink;
+
+  /// Titre du flow de connexion (inscription)
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'inscrire sur Ablony'**
+  String get loginTitle;
+
+  /// Titre du flow de connexion (login)
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter à Ablony'**
+  String get loginTitleLogin;
+
+  /// Sous-titre Apple
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilise ton identifiant Apple, c\'est plus rapide.'**
+  String get loginSubtitleApple;
+
+  /// Sous-titre Google
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilise ton compte Google, c\'est plus rapide.'**
+  String get loginSubtitleGoogle;
+
+  /// Erreur connexion Apple
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de la connexion avec Apple'**
+  String get loginAppleError;
+
+  /// Erreur connexion Google
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de la connexion avec Google'**
+  String get loginGoogleError;
+
+  /// Erreur connexion Facebook
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de la connexion avec Facebook'**
+  String get loginFacebookError;
+
+  /// Bouton Apple
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer avec Apple'**
+  String get loginApple;
+
+  /// Bouton Google
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer avec Google'**
+  String get loginGoogle;
+
+  /// Bouton Facebook
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer avec Facebook'**
+  String get loginFacebook;
+
+  /// Séparateur ou
+  ///
+  /// In fr, this message translates to:
+  /// **'ou'**
+  String get loginOr;
+
+  /// Lien email
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer avec une adresse e-mail'**
+  String get loginEmail;
+
+  /// Texte entreprise
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu es une entreprise ? '**
+  String get loginBusiness;
+
+  /// Lien entreprise
+  ///
+  /// In fr, this message translates to:
+  /// **'En savoir plus'**
+  String get loginBusinessMore;
+
+  /// Titre de la page d'accueil
+  ///
+  /// In fr, this message translates to:
+  /// **'Ablony'**
+  String get homeTitle;
+
+  /// Message de bienvenue sur la home
+  ///
+  /// In fr, this message translates to:
+  /// **'Hello World! 🎉'**
+  String get homeWelcome;
+
+  /// Sous-titre de la home
+  ///
+  /// In fr, this message translates to:
+  /// **'Bienvenue sur Ablony !'**
+  String get homeSubtitle;
+
+  /// Message de succès inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'inscription est terminée avec succès.'**
+  String get homeSuccess;
+
+  /// Titre de la page de sélection du pays
+  ///
+  /// In fr, this message translates to:
+  /// **'Où habites-tu ?'**
+  String get countryTitle;
+
+  /// Sous-titre de la page de sélection du pays
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionne ton pays pour personnaliser ton expérience.'**
+  String get countrySubtitle;
+
+  /// Texte du loader inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'Finalisation de ton inscription...'**
+  String get countryLoading;
+
+  /// Erreur générique inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get countryErrorGeneric;
+
+  /// Erreur réseau inscription
+  ///
+  /// In fr, this message translates to:
+  /// **'Problème de connexion. Vérifiez votre réseau.'**
+  String get countryErrorNetwork;
+
+  /// Erreur username déjà pris
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom d\'utilisateur est déjà pris.'**
+  String get countryErrorUsername;
+
+  /// Texte info modification pays/ville
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu pourras modifier ton pays et ta ville plus tard dans tes paramètres.'**
+  String get countryInfo;
+
+  /// Titre de la page d'inscription email
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscris-toi'**
+  String get emailSignupTitle;
+
+  /// Label champ username
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom d\'utilisateur'**
+  String get emailSignupUsername;
+
+  /// Placeholder username
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis un nom d\'utilisateur'**
+  String get emailSignupUsernamePlaceholder;
+
+  /// Label champ email
+  ///
+  /// In fr, this message translates to:
+  /// **'Email'**
+  String get emailSignupEmail;
+
+  /// Placeholder email
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton adresse email'**
+  String get emailSignupEmailPlaceholder;
+
+  /// Label champ mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get emailSignupPassword;
+
+  /// Placeholder mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Crée un mot de passe'**
+  String get emailSignupPasswordPlaceholder;
+
+  /// Indication mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Il doit contenir 8 caractères minimum, dont au moins un chiffre une majuscule et un caractère spécial.'**
+  String get emailSignupPasswordHint;
+
+  /// Checkbox marketing
+  ///
+  /// In fr, this message translates to:
+  /// **'Je souhaite recevoir par e-mail des offres personnalisées et les dernières mises à jour d\'Ablony.'**
+  String get emailSignupMarketing;
+
+  /// Erreur CGU non acceptées
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu dois accepter les conditions pour continuer'**
+  String get emailSignupTermsError;
+
+  /// Erreur username requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom d\'utilisateur est requis'**
+  String get emailSignupUsernameRequired;
+
+  /// Erreur longueur min username
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom d\'utilisateur doit contenir au moins 3 caractères'**
+  String get emailSignupUsernameMinLength;
+
+  /// Erreur email requis
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'email est requis'**
+  String get emailSignupEmailRequired;
+
+  /// Erreur email invalide
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez entrer un email valide'**
+  String get emailSignupEmailInvalid;
+
+  /// Erreur mot de passe requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe est requis'**
+  String get emailSignupPasswordRequired;
+
+  /// Erreur longueur min mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe doit contenir au moins 7 caractères'**
+  String get emailSignupPasswordMinLength;
+
+  /// Erreur pas de chiffre dans mot de passe
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe doit contenir au moins un chiffre'**
+  String get emailSignupPasswordNoDigit;
+
+  /// Titre de la page de connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecte-toi'**
+  String get loginScreenTitle;
+
+  /// Label champ identifiant
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant ou adresse email'**
+  String get loginScreenIdentifier;
+
+  /// Placeholder identifiant
+  ///
+  /// In fr, this message translates to:
+  /// **'Entre ton email ou pseudo'**
+  String get loginScreenIdentifierPlaceholder;
+
+  /// Label champ mot de passe connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get loginScreenPassword;
+
+  /// Placeholder mot de passe connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton mot de passe'**
+  String get loginScreenPasswordPlaceholder;
+
+  /// Bouton de connexion
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get loginScreenSubmit;
+
+  /// Lien mot de passe oublié
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as oublié ton mot de passe ?'**
+  String get loginScreenForgotPassword;
+
+  /// Erreur identifiant requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce champ est requis'**
+  String get loginScreenIdentifierRequired;
+
+  /// Erreur mot de passe requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe est requis'**
+  String get loginScreenPasswordRequired;
+
+  /// Titre écran vente
+  ///
+  /// In fr, this message translates to:
+  /// **'Vends un article'**
+  String get sellTitle;
+
+  /// Bouton ajouter photos
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter photos'**
+  String get addPhotos;
+
+  /// Label titre produit
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre'**
+  String get productTitle;
+
+  /// Hint titre produit
+  ///
+  /// In fr, this message translates to:
+  /// **'Dis aux acheteurs ce que tu vends'**
+  String get productTitleHint;
+
+  /// Label description produit
+  ///
+  /// In fr, this message translates to:
+  /// **'Décris ton article'**
+  String get productDescription;
+
+  /// Hint description produit
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoute des informations utiles'**
+  String get productDescriptionHint;
+
+  /// Label catégorie
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get category;
+
+  /// Titre page sélection catégorie
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner une catégorie'**
+  String get selectCategory;
+
+  /// Label état
+  ///
+  /// In fr, this message translates to:
+  /// **'État'**
+  String get condition;
+
+  /// État neuf
+  ///
+  /// In fr, this message translates to:
+  /// **'Neuf avec étiquette'**
+  String get conditionNew;
+
+  /// Condition: Excellent
+  ///
+  /// In fr, this message translates to:
+  /// **'Excellent état'**
+  String get conditionExcellent;
+
+  /// Condition: Good
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon état'**
+  String get conditionGood;
+
+  /// État correct
+  ///
+  /// In fr, this message translates to:
+  /// **'Correct'**
+  String get conditionFair;
+
+  /// Label prix
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix sans les frais de port'**
+  String get price;
+
+  /// Hint prix
+  ///
+  /// In fr, this message translates to:
+  /// **'0'**
+  String get priceHint;
+
+  /// Bouton publier
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier'**
+  String get publish;
+
+  /// Erreur champ requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce champ est obligatoire'**
+  String get requiredField;
+
+  /// Erreur sélection photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionne au moins 1 photo'**
+  String get selectAtLeast1Photo;
+
+  /// Erreur max photos
+  ///
+  /// In fr, this message translates to:
+  /// **'Maximum 6 photos'**
+  String get maxPhotosReached;
+
+  /// Attribut marque
+  ///
+  /// In fr, this message translates to:
+  /// **'Marque'**
+  String get brand;
+
+  /// Attribut taille
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille'**
+  String get size;
+
+  /// Attribut couleur
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get color;
+
+  /// Attribut matière
+  ///
+  /// In fr, this message translates to:
+  /// **'Matière'**
+  String get material;
+
+  /// Attribut longueur
+  ///
+  /// In fr, this message translates to:
+  /// **'Longueur'**
+  String get length;
+
+  /// Attribut type de sac
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de sac'**
+  String get bagType;
+
+  /// Attribut type de bijou
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de bijou'**
+  String get jewelType;
+
+  /// Attribut mouvement
+  ///
+  /// In fr, this message translates to:
+  /// **'Mouvement'**
+  String get movement;
+
+  /// Placeholder sélection état
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner l\'état'**
+  String get selectCondition;
+
+  /// Placeholder recherche catégorie
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher une catégorie'**
+  String get searchCategory;
+
+  /// Placeholder sélection sous-catégorie
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner une sous-catégorie'**
+  String get selectSubcategory;
+
+  /// Message pendant la publication
+  ///
+  /// In fr, this message translates to:
+  /// **'Publication en cours...'**
+  String get publishing;
+
+  /// Label prix sans frais
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix sans les frais de port'**
+  String get priceWithoutShipping;
+
+  /// Message de succès après publication d'un produit
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit publié avec succès ! 🎉'**
+  String get productPublishedSuccess;
+
+  /// Message d'erreur générique lors de la publication
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue lors de la publication'**
+  String get productPublishError;
+
+  /// Erreur quand l'utilisateur n'est pas authentifié
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisateur non connecté'**
+  String get userNotConnected;
+
+  /// Erreur lors de l'upload des images vers Firebase Storage
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'upload des images'**
+  String get imageUploadError;
+
+  /// Bouton de confirmation
+  ///
+  /// In fr, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// Bouton pour réessayer après une erreur
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
+
+  /// Devise monétaire (Franc CFA)
+  ///
+  /// In fr, this message translates to:
+  /// **'FCFA'**
+  String get currency;
+
+  /// Placeholder générique pour sélection d'attributs (utilisé dynamiquement)
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner {attributeName}'**
+  String selectAttributePlaceholder(String attributeName);
+
+  /// Placeholder générique pour entrée de texte d'attributs (utilisé dynamiquement)
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrer {attributeName}'**
+  String enterAttributePlaceholder(String attributeName);
+
+  /// Label for price input field
+  ///
+  /// In fr, this message translates to:
+  /// **'Indique ton prix'**
+  String get indicateYourPrice;
+
+  /// Placeholder for price input showing format (0,00 FCFA)
+  ///
+  /// In fr, this message translates to:
+  /// **'0,00 FCFA'**
+  String get priceFormatPlaceholder;
+
+  /// Button label to confirm price entry
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get validatePrice;
+
+  /// Placeholder for search bar in selection screens
+  ///
+  /// In fr, this message translates to:
+  /// **'Trouver...'**
+  String get searchPlaceholder;
+
+  /// Category name for women's items
+  ///
+  /// In fr, this message translates to:
+  /// **'Femme'**
+  String get categoryFemme;
+
+  /// Category name for men's items
+  ///
+  /// In fr, this message translates to:
+  /// **'Homme'**
+  String get categoryHomme;
+
+  /// Filter option to see all products
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir tout'**
+  String get seeAll;
+
+  /// Subcategory: Top clothing
+  ///
+  /// In fr, this message translates to:
+  /// **'Haut'**
+  String get subcategoryHaut;
+
+  /// Subcategory: Bottom clothing
+  ///
+  /// In fr, this message translates to:
+  /// **'Bas'**
+  String get subcategoryBas;
+
+  /// Subcategory: Shoes
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaussures'**
+  String get subcategoryChaussures;
+
+  /// Subcategory: Accessories
+  ///
+  /// In fr, this message translates to:
+  /// **'Accessoires'**
+  String get subcategoryAccessoires;
+
+  /// Subcategory: Shirt
+  ///
+  /// In fr, this message translates to:
+  /// **'Chemise'**
+  String get subcategoryChemise;
+
+  /// Subcategory: T-shirt
+  ///
+  /// In fr, this message translates to:
+  /// **'T-shirt'**
+  String get subcategoryTshirt;
+
+  /// Subcategory: Tank top
+  ///
+  /// In fr, this message translates to:
+  /// **'Débardeur'**
+  String get subcategoryDebardeur;
+
+  /// Subcategory: Sweater
+  ///
+  /// In fr, this message translates to:
+  /// **'Pull'**
+  String get subcategoryPull;
+
+  /// Subcategory: Jacket
+  ///
+  /// In fr, this message translates to:
+  /// **'Veste'**
+  String get subcategoryVeste;
+
+  /// Subcategory: Pants
+  ///
+  /// In fr, this message translates to:
+  /// **'Pantalon'**
+  String get subcategoryPantalon;
+
+  /// Subcategory: Skirt
+  ///
+  /// In fr, this message translates to:
+  /// **'Jupe'**
+  String get subcategoryJupe;
+
+  /// Subcategory: Shorts
+  ///
+  /// In fr, this message translates to:
+  /// **'Short'**
+  String get subcategoryShort;
+
+  /// Subcategory: Dress
+  ///
+  /// In fr, this message translates to:
+  /// **'Robe'**
+  String get subcategoryRobe;
+
+  /// Subcategory: Sneakers
+  ///
+  /// In fr, this message translates to:
+  /// **'Baskets'**
+  String get subcategoryBaskets;
+
+  /// Subcategory: Sandals
+  ///
+  /// In fr, this message translates to:
+  /// **'Sandales'**
+  String get subcategorySandales;
+
+  /// Subcategory: Heels
+  ///
+  /// In fr, this message translates to:
+  /// **'Talons'**
+  String get subcategoryTalons;
+
+  /// Subcategory: Bag
+  ///
+  /// In fr, this message translates to:
+  /// **'Sac'**
+  String get subcategorySac;
+
+  /// Subcategory: Jewelry
+  ///
+  /// In fr, this message translates to:
+  /// **'Bijoux'**
+  String get subcategoryBijoux;
+
+  /// Subcategory: Cap
+  ///
+  /// In fr, this message translates to:
+  /// **'Casquette'**
+  String get subcategoryCasquette;
+
+  /// Subcategory: Belt
+  ///
+  /// In fr, this message translates to:
+  /// **'Ceinture'**
+  String get subcategoryCeinture;
+
+  /// Subcategory: Watch
+  ///
+  /// In fr, this message translates to:
+  /// **'Montre'**
+  String get subcategoryMontre;
+
+  /// Attribute: Condition
+  ///
+  /// In fr, this message translates to:
+  /// **'État'**
+  String get attributeEtat;
+
+  /// Attribute: Brand
+  ///
+  /// In fr, this message translates to:
+  /// **'Marque'**
+  String get attributeMarque;
+
+  /// Attribute: Size
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille'**
+  String get attributeTaille;
+
+  /// Attribute: Shoe size
+  ///
+  /// In fr, this message translates to:
+  /// **'Pointure'**
+  String get attributePointure;
+
+  /// Attribute: Color
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get attributeCouleur;
+
+  /// Attribute: Material
+  ///
+  /// In fr, this message translates to:
+  /// **'Matière'**
+  String get attributeMatiere;
+
+  /// Attribute: Length
+  ///
+  /// In fr, this message translates to:
+  /// **'Longueur'**
+  String get attributeLongueur;
+
+  /// Attribute: Bag type
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de sac'**
+  String get attributeTypeSac;
+
+  /// Attribute: Jewelry type
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de bijou'**
+  String get attributeTypeBijou;
+
+  /// Attribute: Movement (watch)
+  ///
+  /// In fr, this message translates to:
+  /// **'Mouvement'**
+  String get attributeMouvement;
+
+  /// Condition: New with tags
+  ///
+  /// In fr, this message translates to:
+  /// **'Neuf avec étiquette'**
+  String get conditionNewWithTags;
+
+  /// Condition: Satisfactory
+  ///
+  /// In fr, this message translates to:
+  /// **'Satisfaisant'**
+  String get conditionSatisfactory;
+
+  /// Condition: Used
+  ///
+  /// In fr, this message translates to:
+  /// **'Usé'**
+  String get conditionUsed;
+
+  /// Help text for condition attribute
+  ///
+  /// In fr, this message translates to:
+  /// **'État général du produit'**
+  String get helpTextCondition;
+
+  /// Help text for brand attribute
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionnez la marque du produit'**
+  String get helpTextBrand;
+
+  /// Help text for top size
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille pour hauts, chemises, pulls, vestes'**
+  String get helpTextSizeTop;
+
+  /// Help text for bottom size
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille pour pantalons, shorts, jupes'**
+  String get helpTextSizeBottom;
+
+  /// Help text for shoe size
+  ///
+  /// In fr, this message translates to:
+  /// **'Pointure de chaussures'**
+  String get helpTextShoeSize;
+
+  /// Help text for color
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur principale du produit'**
+  String get helpTextColor;
+
+  /// Help text for material
+  ///
+  /// In fr, this message translates to:
+  /// **'Matière principale du produit'**
+  String get helpTextMaterial;
+
+  /// Help text for length
+  ///
+  /// In fr, this message translates to:
+  /// **'Longueur de la robe ou jupe'**
+  String get helpTextLength;
+
+  /// Help text for bag type
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de sac (sac à main, sac à dos, etc.)'**
+  String get helpTextBagType;
+
+  /// Help text for jewelry type
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de bijou (collier, bague, bracelet, etc.)'**
+  String get helpTextJewelryType;
+
+  /// Help text for watch movement
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de mouvement de la montre'**
+  String get helpTextMovement;
+
+  /// Short length option
+  ///
+  /// In fr, this message translates to:
+  /// **'Court'**
+  String get lengthShort;
+
+  /// Medium length option
+  ///
+  /// In fr, this message translates to:
+  /// **'Mi-long'**
+  String get lengthMedium;
+
+  /// Long length option
+  ///
+  /// In fr, this message translates to:
+  /// **'Long'**
+  String get lengthLong;
+
+  /// Black color
+  ///
+  /// In fr, this message translates to:
+  /// **'Noir'**
+  String get colorBlack;
+
+  /// White color
+  ///
+  /// In fr, this message translates to:
+  /// **'Blanc'**
+  String get colorWhite;
+
+  /// Gray color
+  ///
+  /// In fr, this message translates to:
+  /// **'Gris'**
+  String get colorGray;
+
+  /// Beige color
+  ///
+  /// In fr, this message translates to:
+  /// **'Beige'**
+  String get colorBeige;
+
+  /// Brown color
+  ///
+  /// In fr, this message translates to:
+  /// **'Marron'**
+  String get colorBrown;
+
+  /// Blue color
+  ///
+  /// In fr, this message translates to:
+  /// **'Bleu'**
+  String get colorBlue;
+
+  /// Navy blue color
+  ///
+  /// In fr, this message translates to:
+  /// **'Bleu marine'**
+  String get colorNavyBlue;
+
+  /// Light blue color
+  ///
+  /// In fr, this message translates to:
+  /// **'Bleu clair'**
+  String get colorLightBlue;
+
+  /// Red color
+  ///
+  /// In fr, this message translates to:
+  /// **'Rouge'**
+  String get colorRed;
+
+  /// Pink color
+  ///
+  /// In fr, this message translates to:
+  /// **'Rose'**
+  String get colorPink;
+
+  /// Purple color
+  ///
+  /// In fr, this message translates to:
+  /// **'Violet'**
+  String get colorPurple;
+
+  /// Green color
+  ///
+  /// In fr, this message translates to:
+  /// **'Vert'**
+  String get colorGreen;
+
+  /// Khaki green color
+  ///
+  /// In fr, this message translates to:
+  /// **'Vert kaki'**
+  String get colorKhakiGreen;
+
+  /// Yellow color
+  ///
+  /// In fr, this message translates to:
+  /// **'Jaune'**
+  String get colorYellow;
+
+  /// Orange color
+  ///
+  /// In fr, this message translates to:
+  /// **'Orange'**
+  String get colorOrange;
+
+  /// Multicolor
+  ///
+  /// In fr, this message translates to:
+  /// **'Multicolore'**
+  String get colorMulticolor;
+
+  /// Gold color
+  ///
+  /// In fr, this message translates to:
+  /// **'Doré'**
+  String get colorGold;
+
+  /// Silver color
+  ///
+  /// In fr, this message translates to:
+  /// **'Argenté'**
+  String get colorSilver;
+
+  /// Cotton material
+  ///
+  /// In fr, this message translates to:
+  /// **'Coton'**
+  String get materialCotton;
+
+  /// Polyester material
+  ///
+  /// In fr, this message translates to:
+  /// **'Polyester'**
+  String get materialPolyester;
+
+  /// Wool material
+  ///
+  /// In fr, this message translates to:
+  /// **'Laine'**
+  String get materialWool;
+
+  /// Silk material
+  ///
+  /// In fr, this message translates to:
+  /// **'Soie'**
+  String get materialSilk;
+
+  /// Linen material
+  ///
+  /// In fr, this message translates to:
+  /// **'Lin'**
+  String get materialLinen;
+
+  /// Denim material
+  ///
+  /// In fr, this message translates to:
+  /// **'Jean'**
+  String get materialDenim;
+
+  /// Leather material
+  ///
+  /// In fr, this message translates to:
+  /// **'Cuir'**
+  String get materialLeather;
+
+  /// Suede material
+  ///
+  /// In fr, this message translates to:
+  /// **'Daim'**
+  String get materialSuede;
+
+  /// Synthetic material
+  ///
+  /// In fr, this message translates to:
+  /// **'Synthétique'**
+  String get materialSynthetic;
+
+  /// Velvet material
+  ///
+  /// In fr, this message translates to:
+  /// **'Velours'**
+  String get materialVelvet;
+
+  /// Cashmere material
+  ///
+  /// In fr, this message translates to:
+  /// **'Cachemire'**
+  String get materialCashmere;
+
+  /// Viscose material
+  ///
+  /// In fr, this message translates to:
+  /// **'Viscose'**
+  String get materialViscose;
+
+  /// Other material
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get materialOther;
+
+  /// Handbag type
+  ///
+  /// In fr, this message translates to:
+  /// **'Sac à main'**
+  String get bagTypeHandbag;
+
+  /// Backpack type
+  ///
+  /// In fr, this message translates to:
+  /// **'Sac à dos'**
+  String get bagTypeBackpack;
+
+  /// Clutch type
+  ///
+  /// In fr, this message translates to:
+  /// **'Pochette'**
+  String get bagTypeClutch;
+
+  /// Tote bag type
+  ///
+  /// In fr, this message translates to:
+  /// **'Tote bag'**
+  String get bagTypeTote;
+
+  /// Crossbody bag type
+  ///
+  /// In fr, this message translates to:
+  /// **'Sac bandoulière'**
+  String get bagTypeCrossbody;
+
+  /// Travel bag type
+  ///
+  /// In fr, this message translates to:
+  /// **'Sac de voyage'**
+  String get bagTypeTravel;
+
+  /// Satchel type
+  ///
+  /// In fr, this message translates to:
+  /// **'Sacoche'**
+  String get bagTypeSatchel;
+
+  /// Necklace type
+  ///
+  /// In fr, this message translates to:
+  /// **'Collier'**
+  String get jewelryTypeNecklace;
+
+  /// Bracelet type
+  ///
+  /// In fr, this message translates to:
+  /// **'Bracelet'**
+  String get jewelryTypeBracelet;
+
+  /// Earrings type
+  ///
+  /// In fr, this message translates to:
+  /// **'Boucles d\'oreilles'**
+  String get jewelryTypeEarrings;
+
+  /// Ring type
+  ///
+  /// In fr, this message translates to:
+  /// **'Bague'**
+  String get jewelryTypeRing;
+
+  /// Brooch type
+  ///
+  /// In fr, this message translates to:
+  /// **'Broche'**
+  String get jewelryTypeBrooch;
+
+  /// Watch bracelet type
+  ///
+  /// In fr, this message translates to:
+  /// **'Montre bracelet'**
+  String get jewelryTypeWatchBracelet;
+
+  /// Quartz watch movement
+  ///
+  /// In fr, this message translates to:
+  /// **'Quartz'**
+  String get watchMovementQuartz;
+
+  /// Automatic watch movement
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatique'**
+  String get watchMovementAutomatic;
+
+  /// Manual watch movement
+  ///
+  /// In fr, this message translates to:
+  /// **'Manuel'**
+  String get watchMovementManual;
+
+  /// Digital watch movement
+  ///
+  /// In fr, this message translates to:
+  /// **'Numérique'**
+  String get watchMovementDigital;
+
+  /// Other brand
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get brandOther;
+
+  /// Home navigation label
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get navHome;
+
+  /// Search navigation label
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher'**
+  String get navSearch;
+
+  /// Sell navigation label
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendre'**
+  String get navSell;
+
+  /// Messages navigation label
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages'**
+  String get navMessages;
+
+  /// Profile navigation label
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get navProfile;
+
+  /// Price with buyer protection included
+  ///
+  /// In fr, this message translates to:
+  /// **'{price} FCFA incl.'**
+  String priceWithProtection(String price);
+
+  /// Articles tab in search page
+  ///
+  /// In fr, this message translates to:
+  /// **'Articles'**
+  String get searchArticlesTab;
+
+  /// Members tab in search page
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get searchMembersTab;
+
+  /// Search bar placeholder
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un article ou un membre...'**
+  String get searchArticlesPlaceholder;
+
+  /// Close button text
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get closeButton;
+
+  /// No search results found
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat trouvé'**
+  String get searchNoResults;
+
+  /// Message when search field is empty
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencez à taper pour rechercher...'**
+  String get searchTyping;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'fr'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

@@ -17,7 +17,6 @@
 /// ```
 
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 
@@ -77,7 +76,7 @@ class _LanguageSelectorDialogState extends State<LanguageSelectorDialog> {
     final availableLanguages = _getAvailableLanguages(context);
 
     return Dialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
           16,
@@ -94,9 +93,9 @@ class _LanguageSelectorDialogState extends State<LanguageSelectorDialog> {
             // ============================================================
             Text(
               AppLocalizations.of(context)!.changeLanguage,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge, // titleLarge (22px) au lieu de headlineSmall (24px)
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
 
@@ -163,9 +162,9 @@ class _LanguageSelectorDialogState extends State<LanguageSelectorDialog> {
             Expanded(
               child: Text(
                 language.name,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium, // bodyMedium (14px) au lieu de bodyLarge (16px)
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
 
@@ -173,7 +172,7 @@ class _LanguageSelectorDialogState extends State<LanguageSelectorDialog> {
             Radio<Locale>(
               value: language.locale,
               groupValue: _selectedLocale,
-              activeColor: AppColors.primary,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (Locale? value) {
                 if (value != null) {
                   setState(() {

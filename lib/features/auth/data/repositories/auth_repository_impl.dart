@@ -4,6 +4,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../../../core/exceptions/exceptions.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/user_model.dart';
@@ -147,9 +148,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final firebase_auth.User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
-        throw firebase_auth.FirebaseAuthException(
-          code: 'null-user',
-          message: 'L\'utilisateur Firebase est null après connexion Google',
+        throw UnknownException(
+          message: 'L\'utilisateur Firebase n\'a pas pu être créé',
+          originalException: null,
         );
       }
 
@@ -186,15 +187,16 @@ class AuthRepositoryImpl implements AuthRepository {
           isActive: true,
         );
       }
-    } on firebase_auth.FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
       // Erreur Firebase Auth (compte désactivé, etc.)
-      throw firebase_auth.FirebaseAuthException(
-        code: e.code,
-        message: 'Erreur Firebase lors de la connexion Google : ${e.message}',
-      );
-    } catch (e) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
       // Autres erreurs (réseau, configuration, etc.)
-      throw Exception('Erreur lors de la connexion avec Google : $e');
+      throw UnknownException(
+        message: 'Erreur lors de la connexion avec Google',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -217,14 +219,16 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       if (result.status != LoginStatus.success) {
-        throw Exception('Échec de la connexion Facebook : ${result.status}');
+        throw UnknownException(message: 'Échec de la connexion Facebook');
       }
 
       // ÉTAPE 2 : Obtenir le token d'accès Facebook
       final AccessToken? accessToken = result.accessToken;
 
       if (accessToken == null) {
-        throw Exception('Token d\'accès Facebook null');
+        throw UnknownException(
+          message: 'Le token d\'accès Facebook n\'a pas pu être récupéré',
+        );
       }
 
       // ÉTAPE 3 : Créer les credentials Firebase depuis le token Facebook
@@ -239,9 +243,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final firebase_auth.User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
-        throw firebase_auth.FirebaseAuthException(
-          code: 'null-user',
-          message: 'L\'utilisateur Firebase est null après connexion Facebook',
+        throw UnknownException(
+          message: 'L\'utilisateur Firebase n\'a pas pu être créé',
         );
       }
 
@@ -273,13 +276,14 @@ class AuthRepositoryImpl implements AuthRepository {
           isActive: true,
         );
       }
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      throw firebase_auth.FirebaseAuthException(
-        code: e.code,
-        message: 'Erreur Firebase lors de la connexion Facebook : ${e.message}',
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la connexion avec Facebook',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
-    } catch (e) {
-      throw Exception('Erreur lors de la connexion avec Facebook : $e');
     }
   }
 
@@ -313,9 +317,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final firebase_auth.User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
-        throw firebase_auth.FirebaseAuthException(
-          code: 'null-user',
-          message: 'L\'utilisateur Firebase est null après connexion Apple',
+        throw UnknownException(
+          message: 'L\'utilisateur Firebase n\'a pas pu être créé',
         );
       }
 
@@ -359,19 +362,23 @@ class AuthRepositoryImpl implements AuthRepository {
           isActive: true,
         );
       }
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      throw firebase_auth.FirebaseAuthException(
-        code: e.code,
-        message: 'Erreur Firebase lors de la connexion Apple : ${e.message}',
-      );
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
     } on SignInWithAppleAuthorizationException catch (e) {
       // Erreur spécifique Apple (utilisateur annule, etc.)
       if (e.code == AuthorizationErrorCode.canceled) {
         return null; // L'utilisateur a annulé
       }
-      throw Exception('Erreur Apple Sign In : ${e.message}');
-    } catch (e) {
-      throw Exception('Erreur lors de la connexion avec Apple : $e');
+      throw UnknownException(
+        message: 'Erreur Apple Sign In',
+        originalException: e as Exception?,
+      );
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la connexion avec Apple',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -392,34 +399,21 @@ class AuthRepositoryImpl implements AuthRepository {
       final firebase_auth.User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
-        throw firebase_auth.FirebaseAuthException(
-          code: 'null-user',
-          message: 'L\'utilisateur Firebase est null après connexion email',
+        throw UnknownException(
+          message: 'L\'utilisateur Firebase n\'a pas pu être récupéré',
         );
       }
 
       // Charger les données complètes depuis Firestore
       return await getUserById(firebaseUser.uid);
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      // Propager l'erreur avec un message en français
-      String message;
-      switch (e.code) {
-        case 'user-not-found':
-          message = 'Aucun compte trouvé avec cet email';
-          break;
-        case 'wrong-password':
-          message = 'Mot de passe incorrect';
-          break;
-        case 'invalid-email':
-          message = 'Format d\'email invalide';
-          break;
-        case 'user-disabled':
-          message = 'Ce compte a été désactivé';
-          break;
-        default:
-          message = 'Erreur de connexion : ${e.message}';
-      }
-      throw firebase_auth.FirebaseAuthException(code: e.code, message: message);
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la connexion',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -436,9 +430,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final firebase_auth.User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
-        throw firebase_auth.FirebaseAuthException(
-          code: 'null-user',
-          message: 'L\'utilisateur Firebase est null après inscription',
+        throw UnknownException(
+          message: 'L\'utilisateur Firebase n\'a pas pu être créé',
         );
       }
 
@@ -460,25 +453,14 @@ class AuthRepositoryImpl implements AuthRepository {
         isVerified: false,
         isActive: true,
       );
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'email-already-in-use':
-          message = 'Un compte existe déjà avec cet email';
-          break;
-        case 'invalid-email':
-          message = 'Format d\'email invalide';
-          break;
-        case 'weak-password':
-          message = 'Le mot de passe est trop faible (minimum 6 caractères)';
-          break;
-        case 'operation-not-allowed':
-          message = 'L\'authentification par email est désactivée';
-          break;
-        default:
-          message = 'Erreur d\'inscription : ${e.message}';
-      }
-      throw firebase_auth.FirebaseAuthException(code: e.code, message: message);
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'inscription',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -513,9 +495,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (!isAvailable) {
         print('🔴 [completeUserProfile] Username déjà pris: $username');
-        throw ArgumentError(
-          'Le nom d\'utilisateur "$username" est déjà utilisé',
-        );
+        throw UsernameTakenException(username: username);
       }
 
       // ÉTAPE 2 : Créer l'entité User complète
@@ -572,15 +552,22 @@ class AuthRepositoryImpl implements AuthRepository {
 
       print('✅ [completeUserProfile] Transaction réussie!');
       return user;
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (e, stackTrace) {
       print(
         '🔴 [completeUserProfile] FirebaseException: ${e.code} - ${e.message}',
       );
-      throw Exception('Erreur Firestore : ${e.message}');
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      // Propager les exceptions d'application
+      rethrow;
     } catch (e, stackTrace) {
       print('🔴 [completeUserProfile] Exception inattendue: $e');
       print('🔴 [completeUserProfile] Stack trace: $stackTrace');
-      throw Exception('Erreur lors de la création du profil : $e');
+      throw UnknownException(
+        message: 'Erreur lors de la création du profil',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -602,9 +589,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (username != null && username != currentUser.username) {
         final isAvailable = await isUsernameAvailable(username);
         if (!isAvailable) {
-          throw ArgumentError(
-            'Le nom d\'utilisateur "$username" est déjà utilisé',
-          );
+          throw UsernameTakenException(username: username);
         }
       }
 
@@ -647,8 +632,16 @@ class AuthRepositoryImpl implements AuthRepository {
       });
 
       return updatedUser;
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors de la mise à jour du profil : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la mise à jour du profil',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -658,13 +651,19 @@ class AuthRepositoryImpl implements AuthRepository {
       final docSnapshot = await _firestore.collection('users').doc(uid).get();
 
       if (!docSnapshot.exists) {
-        throw Exception('Utilisateur non trouvé : $uid');
+        throw ProductNotFoundException(productId: uid);
       }
 
       return UserModel.fromFirestore(docSnapshot, null);
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors du chargement de l\'utilisateur : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement de l\'utilisateur',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -687,9 +686,13 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final doc = await _firestore.collection('usernames').doc(username).get();
       return !doc.exists; // Disponible si le document n'existe pas
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors de la vérification du username : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la vérification du pseudo',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -759,7 +762,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (user != null) {
         // Vérifier les providers utilisés pour cette connexion
-        final providers = user.providerData.map((info) => info.providerId).toList();
+        final providers = user.providerData
+            .map((info) => info.providerId)
+            .toList();
 
         // Déconnexion Google si utilisé
         if (providers.contains('google.com')) {
@@ -788,8 +793,12 @@ class AuthRepositoryImpl implements AuthRepository {
       // Le plus important : Firebase Auth (toujours nécessaire)
       await _firebaseAuth.signOut();
       print('✅ Déconnexion Firebase réussie');
-    } catch (e) {
-      throw Exception('Erreur lors de la déconnexion Firebase : $e');
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la déconnexion',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -804,8 +813,14 @@ class AuthRepositoryImpl implements AuthRepository {
       if (user != null && !user.emailVerified) {
         await user.sendEmailVerification();
       }
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      throw Exception('Erreur lors de l\'envoi de l\'email : ${e.message}');
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi de l\'email de vérification',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -813,19 +828,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'user-not-found':
-          message = 'Aucun compte trouvé avec cet email';
-          break;
-        case 'invalid-email':
-          message = 'Format d\'email invalide';
-          break;
-        default:
-          message = 'Erreur : ${e.message}';
-      }
-      throw firebase_auth.FirebaseAuthException(code: e.code, message: message);
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi de l\'email de réinitialisation',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 }

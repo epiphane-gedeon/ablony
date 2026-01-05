@@ -1,5 +1,21 @@
 [
     {
+        "id": "condition",
+        "name": "État",
+        "type": "select",
+        "values": [
+            "Neuf avec étiquette",
+            "Excellent état",
+            "Bon état",
+            "Satisfaisant",
+            "Usé"
+        ],
+        "isRequired": true,
+        "helpText": "État général du produit",
+        "order": 0,
+        "isActive": true
+    },
+    {
         "id": "brand",
         "name": "Marque",
         "type": "select",

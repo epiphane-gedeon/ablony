@@ -11,7 +11,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
 
 /// Classe statique contenant le thème de l'application Ablony.
 /// Fournit une configuration ThemeData complète pour Flutter.
@@ -31,10 +30,10 @@ class AppTheme {
       // ========================================================================
 
       /// Couleur primaire utilisée dans toute l'application
-      primaryColor: AppColors.primary,
+      primaryColor: const Color(0xFF2385AE),
 
       /// Couleur de fond par défaut des Scaffold (écrans)
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: const Color(0xFFFFFFFF),
 
       // ========================================================================
       // SCHÉMA DE COULEURS (Color Scheme)
@@ -42,31 +41,34 @@ class AppTheme {
       // Définit comment les couleurs sont utilisées dans les différents contextes
       colorScheme: const ColorScheme.light(
         /// Couleur primaire de l'application
-        primary: AppColors.primary,
+        primary: Color(0xFF2385AE),
 
         /// Couleur du contenu sur la couleur primaire (texte sur bleu)
-        onPrimary: AppColors.white,
+        onPrimary: Color(0xFFFFFFFF),
 
         /// Couleur secondaire (variation claire du bleu)
-        secondary: AppColors.primaryLight,
+        secondary: Color(0xFF4A9DC4),
 
         /// Couleur du contenu sur la couleur secondaire
-        onSecondary: AppColors.white,
+        onSecondary: Color(0xFFFFFFFF),
 
         /// Couleur pour les erreurs
-        error: AppColors.error,
+        error: Color(0xFFD32F2F),
 
         /// Couleur du contenu sur fond d'erreur
-        onError: AppColors.white,
+        onError: Color(0xFFFFFFFF),
 
         /// Couleur des surfaces (cartes, modales, etc.)
-        surface: AppColors.surface,
+        surface: Color(0xFFFFFFFF),
 
         /// Couleur du contenu sur les surfaces
-        onSurface: AppColors.textPrimary,
+        onSurface: Color(0xFF000000),
 
         /// Couleur des surfaces avec variante (champs de texte, etc.)
-        surfaceContainerHighest: AppColors.surfaceVariant,
+        surfaceContainerHighest: Color(0xFFF5F5F5),
+        
+        /// Couleur pour le texte secondaire
+        onSurfaceVariant: Color(0xFF757575),
       ),
 
       // ========================================================================
@@ -84,7 +86,7 @@ class AppTheme {
         displayLarge: GoogleFonts.beVietnamPro(
           fontSize: 57,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Display Medium - 45px, Bold (w700)
@@ -92,7 +94,7 @@ class AppTheme {
         displayMedium: GoogleFonts.beVietnamPro(
           fontSize: 45,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Display Small - 36px, SemiBold (w600)
@@ -100,7 +102,7 @@ class AppTheme {
         displaySmall: GoogleFonts.beVietnamPro(
           fontSize: 36,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         // ======================================================================
@@ -112,7 +114,7 @@ class AppTheme {
         headlineLarge: GoogleFonts.beVietnamPro(
           fontSize: 32,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Headline Medium - 28px, SemiBold (w600)
@@ -120,7 +122,7 @@ class AppTheme {
         headlineMedium: GoogleFonts.beVietnamPro(
           fontSize: 28,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Headline Small - 24px, SemiBold (w600)
@@ -128,7 +130,7 @@ class AppTheme {
         headlineSmall: GoogleFonts.beVietnamPro(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         // ======================================================================
@@ -140,7 +142,7 @@ class AppTheme {
         titleLarge: GoogleFonts.beVietnamPro(
           fontSize: 22,
           fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Title Medium - 16px, Medium (w500)
@@ -148,7 +150,7 @@ class AppTheme {
         titleMedium: GoogleFonts.beVietnamPro(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Title Small - 14px, Medium (w500)
@@ -156,7 +158,7 @@ class AppTheme {
         titleSmall: GoogleFonts.beVietnamPro(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         // ======================================================================
@@ -168,7 +170,7 @@ class AppTheme {
         bodyLarge: GoogleFonts.beVietnamPro(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Body Medium - 14px, Regular (w400)
@@ -176,7 +178,7 @@ class AppTheme {
         bodyMedium: GoogleFonts.beVietnamPro(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Body Small - 12px, Regular (w400), Couleur secondaire
@@ -184,7 +186,7 @@ class AppTheme {
         bodySmall: GoogleFonts.beVietnamPro(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: AppColors.textSecondary,
+          color: const Color(0xFF757575),
         ),
 
         // ======================================================================
@@ -196,7 +198,7 @@ class AppTheme {
         labelLarge: GoogleFonts.beVietnamPro(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Label Medium - 12px, Medium (w500)
@@ -204,7 +206,7 @@ class AppTheme {
         labelMedium: GoogleFonts.beVietnamPro(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
 
         /// Label Small - 11px, Medium (w500), Couleur secondaire
@@ -212,7 +214,7 @@ class AppTheme {
         labelSmall: GoogleFonts.beVietnamPro(
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: AppColors.textSecondary,
+          color: const Color(0xFF757575),
         ),
       ),
 
@@ -221,10 +223,10 @@ class AppTheme {
       // ========================================================================
       appBarTheme: AppBarTheme(
         /// Couleur de fond de l'AppBar (blanc)
-        backgroundColor: AppColors.white,
+        backgroundColor: const Color(0xFFFFFFFF),
 
         /// Couleur des icônes et texte dans l'AppBar
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: const Color(0xFF000000),
 
         /// Pas d'ombre sous l'AppBar pour un design épuré
         elevation: 0,
@@ -236,7 +238,7 @@ class AppTheme {
         titleTextStyle: GoogleFonts.beVietnamPro(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: const Color(0xFF000000),
         ),
       ),
 
@@ -247,10 +249,10 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           /// Fond bleu
-          backgroundColor: AppColors.primary,
+          backgroundColor: const Color(0xFF2385AE),
 
           /// Texte blanc
-          foregroundColor: AppColors.white,
+          foregroundColor: const Color(0xFFFFFFFF),
 
           /// Pas d'ombre pour un design flat moderne
           elevation: 0,
@@ -278,10 +280,10 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           /// Texte bleu
-          foregroundColor: AppColors.primary,
+          foregroundColor: const Color(0xFF2385AE),
 
           /// Bordure bleue de 1.5px
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          side: const BorderSide(color: const Color(0xFF2385AE), width: 1.5),
 
           /// Espacement interne du bouton
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -306,7 +308,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           /// Texte bleu
-          foregroundColor: AppColors.primary,
+          foregroundColor: const Color(0xFF2385AE),
 
           /// Espacement interne réduit
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -325,7 +327,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         /// Fond rempli avec couleur gris clair
         filled: true,
-        fillColor: AppColors.surfaceVariant,
+        fillColor: const Color(0xFFF5F5F5),
 
         /// Bordure par défaut - pas de bordure visible, fond gris suffit
         border: OutlineInputBorder(
@@ -342,19 +344,19 @@ class AppTheme {
         /// Bordure bleue de 2px quand le champ est focus (en cours de saisie)
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: const Color(0xFF2385AE), width: 2),
         ),
 
         /// Bordure rouge quand il y a une erreur de validation
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 1),
+          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 1),
         ),
 
         /// Bordure rouge épaisse quand le champ en erreur est focus
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 2),
         ),
 
         /// Espacement interne du champ (padding)
@@ -366,13 +368,13 @@ class AppTheme {
         /// Style du texte placeholder (hint)
         hintStyle: GoogleFonts.beVietnamPro(
           fontSize: 14,
-          color: AppColors.textSecondary,
+          color: const Color(0xFF757575),
         ),
 
         /// Style du label flottant
         labelStyle: GoogleFonts.beVietnamPro(
           fontSize: 14,
-          color: AppColors.textSecondary,
+          color: const Color(0xFF757575),
         ),
       ),
 
@@ -382,7 +384,7 @@ class AppTheme {
       // Utilisées pour grouper du contenu (produits, profils, etc.)
       cardTheme: CardThemeData(
         /// Fond blanc
-        color: AppColors.surface,
+        color: const Color(0xFFFFFFFF),
 
         /// Légère élévation pour effet de profondeur
         elevation: 2,
@@ -399,7 +401,7 @@ class AppTheme {
       // ========================================================================
       dividerTheme: const DividerThemeData(
         /// Couleur gris clair
-        color: AppColors.divider,
+        color: const Color(0xFFE0E0E0),
 
         /// Épaisseur de 1px
         thickness: 1,
@@ -413,7 +415,7 @@ class AppTheme {
       // ========================================================================
       iconTheme: const IconThemeData(
         /// Couleur par défaut des icônes (noir)
-        color: AppColors.textPrimary,
+        color: const Color(0xFF000000),
 
         /// Taille par défaut des icônes
         size: 24,
@@ -425,10 +427,10 @@ class AppTheme {
       // Bouton rond en bas à droite pour l'action principale
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         /// Fond bleu
-        backgroundColor: AppColors.primary,
+        backgroundColor: const Color(0xFF2385AE),
 
         /// Icône blanche
-        foregroundColor: AppColors.white,
+        foregroundColor: const Color(0xFFFFFFFF),
 
         /// Élévation moyenne pour qu'il se démarque
         elevation: 4,
@@ -452,23 +454,24 @@ class AppTheme {
       // COULEURS PRINCIPALES
       // ========================================================================
 
-      primaryColor: AppColors.darkPrimary,
-      scaffoldBackgroundColor: AppColors.darkBackground,
+      primaryColor: const Color(0xFF2385AE),
+      scaffoldBackgroundColor: const Color(0xFF121212),
 
       // ========================================================================
       // SCHÉMA DE COULEURS (Color Scheme)
       // ========================================================================
 
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.darkPrimary,
-        onPrimary: AppColors.darkTextOnPrimary,
-        secondary: AppColors.darkPrimaryLight,
-        onSecondary: AppColors.darkTextOnPrimary,
-        error: AppColors.error,
-        onError: AppColors.white,
-        surface: AppColors.darkSurface,
-        onSurface: AppColors.darkTextPrimary,
-        surfaceContainerHighest: AppColors.darkSurfaceVariant,
+        primary: Color(0xFF2385AE),
+        onPrimary: Color(0xFF000000),
+        secondary: Color(0xFF90CAF9),
+        onSecondary: Color(0xFF000000),
+        error: Color(0xFFD32F2F),
+        onError: Color(0xFFFFFFFF),
+        surface: Color(0xFF1E1E1E),
+        onSurface: Color(0xFFE0E0E0),
+        surfaceContainerHighest: Color(0xFF2C2C2C),
+        onSurfaceVariant: Color(0xFFB0B0B0),
       ),
 
       // ========================================================================
@@ -479,77 +482,77 @@ class AppTheme {
         displayLarge: GoogleFonts.beVietnamPro(
           fontSize: 57,
           fontWeight: FontWeight.w700,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         displayMedium: GoogleFonts.beVietnamPro(
           fontSize: 45,
           fontWeight: FontWeight.w700,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         displaySmall: GoogleFonts.beVietnamPro(
           fontSize: 36,
           fontWeight: FontWeight.w600,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         headlineLarge: GoogleFonts.beVietnamPro(
           fontSize: 32,
           fontWeight: FontWeight.w600,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         headlineMedium: GoogleFonts.beVietnamPro(
           fontSize: 28,
           fontWeight: FontWeight.w600,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         headlineSmall: GoogleFonts.beVietnamPro(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         titleLarge: GoogleFonts.beVietnamPro(
           fontSize: 22,
           fontWeight: FontWeight.w500,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         titleMedium: GoogleFonts.beVietnamPro(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         titleSmall: GoogleFonts.beVietnamPro(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         bodyLarge: GoogleFonts.beVietnamPro(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         bodyMedium: GoogleFonts.beVietnamPro(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         bodySmall: GoogleFonts.beVietnamPro(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: AppColors.darkTextSecondary,
+          color: const Color(0xFFB0B0B0),
         ),
         labelLarge: GoogleFonts.beVietnamPro(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         labelMedium: GoogleFonts.beVietnamPro(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
         labelSmall: GoogleFonts.beVietnamPro(
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: AppColors.darkTextSecondary,
+          color: const Color(0xFFB0B0B0),
         ),
       ),
 
@@ -558,14 +561,14 @@ class AppTheme {
       // ========================================================================
 
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.darkSurface,
-        foregroundColor: AppColors.darkTextPrimary,
+        backgroundColor: const Color(0xFF1E1E1E),
+        foregroundColor: const Color(0xFFE0E0E0),
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.beVietnamPro(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: AppColors.darkTextPrimary,
+          color: const Color(0xFFE0E0E0),
         ),
       ),
 
@@ -575,8 +578,8 @@ class AppTheme {
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.darkPrimary,
-          foregroundColor: AppColors.darkTextOnPrimary,
+          backgroundColor: const Color(0xFF2385AE),
+          foregroundColor: const Color(0xFF000000),
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
@@ -595,8 +598,8 @@ class AppTheme {
 
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.darkPrimary,
-          side: const BorderSide(color: AppColors.darkPrimary, width: 1.5),
+          foregroundColor: const Color(0xFF2385AE),
+          side: const BorderSide(color: const Color(0xFF2385AE), width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -614,7 +617,7 @@ class AppTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.darkPrimary,
+          foregroundColor: const Color(0xFF2385AE),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           textStyle: GoogleFonts.beVietnamPro(
             fontSize: 14,
@@ -629,7 +632,7 @@ class AppTheme {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.darkSurfaceVariant,
+        fillColor: const Color(0xFF2C2C2C),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -640,15 +643,15 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.darkPrimary, width: 2),
+          borderSide: const BorderSide(color: const Color(0xFF2385AE), width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 1),
+          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -656,11 +659,11 @@ class AppTheme {
         ),
         hintStyle: GoogleFonts.beVietnamPro(
           fontSize: 14,
-          color: AppColors.darkTextSecondary,
+          color: const Color(0xFFB0B0B0),
         ),
         labelStyle: GoogleFonts.beVietnamPro(
           fontSize: 14,
-          color: AppColors.darkTextSecondary,
+          color: const Color(0xFFB0B0B0),
         ),
       ),
 
@@ -669,7 +672,7 @@ class AppTheme {
       // ========================================================================
 
       cardTheme: CardThemeData(
-        color: AppColors.darkSurface,
+        color: const Color(0xFF1E1E1E),
         elevation: 4,
         shadowColor: Colors.black.withValues(alpha: 0.3),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -680,7 +683,7 @@ class AppTheme {
       // ========================================================================
 
       dividerTheme: const DividerThemeData(
-        color: AppColors.darkDivider,
+        color: const Color(0xFF2A2A2A),
         thickness: 1,
         space: 1,
       ),
@@ -690,7 +693,7 @@ class AppTheme {
       // ========================================================================
 
       iconTheme: const IconThemeData(
-        color: AppColors.darkTextPrimary,
+        color: const Color(0xFFE0E0E0),
         size: 24,
       ),
 
@@ -699,8 +702,8 @@ class AppTheme {
       // ========================================================================
 
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.darkPrimary,
-        foregroundColor: AppColors.darkTextOnPrimary,
+        backgroundColor: const Color(0xFF2385AE),
+        foregroundColor: const Color(0xFF000000),
         elevation: 4,
       ),
     );

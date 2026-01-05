@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../features/sell/presentation/widgets/sell_bottom_sheet.dart';
 
 /// Layout principal de l'application avec BottomNavigationBar
@@ -18,10 +19,7 @@ class MainLayout extends StatelessWidget {
   /// Shell de navigation fourni par go_router
   final StatefulNavigationShell navigationShell;
 
-  const MainLayout({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainLayout({super.key, required this.navigationShell});
 
   /// Gère la navigation entre les onglets
   void _onItemTapped(BuildContext context, int index) {
@@ -41,18 +39,22 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: navigationShell.currentIndex,
         onTap: (index) => _onItemTapped(context, index),
         type: BottomNavigationBarType.fixed,
-        
+
         // Couleurs adaptées au thème
-        backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+        backgroundColor: Theme.of(
+          context,
+        ).bottomNavigationBarTheme.backgroundColor,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color,
-        
+
         // Style du texte
         selectedLabelStyle: const TextStyle(
           fontSize: 12,
@@ -62,39 +64,39 @@ class MainLayout extends StatelessWidget {
           fontSize: 12,
           fontWeight: FontWeight.normal,
         ),
-        
+
         // Toujours afficher les labels
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        
+
         // Élévation pour l'ombre
         elevation: 8,
-        
-        items: const [
+
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Accueil',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: l10n.navHome,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            activeIcon: Icon(Icons.search),
-            label: 'Rechercher',
+            icon: const Icon(Icons.search),
+            activeIcon: const Icon(Icons.search),
+            label: l10n.navSearch,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            activeIcon: Icon(Icons.add_circle),
-            label: 'Vendre',
+            icon: const Icon(Icons.add_circle_outline),
+            activeIcon: const Icon(Icons.add_circle),
+            label: l10n.navSell,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.mail_outline),
-            activeIcon: Icon(Icons.mail),
-            label: 'Messages',
+            icon: const Icon(Icons.mail_outline),
+            activeIcon: const Icon(Icons.mail),
+            label: l10n.navMessages,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profil',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: l10n.navProfile,
           ),
         ],
       ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/link.dart';
 import '../../../../shared/widgets/input.dart';
@@ -312,17 +311,17 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
                                     vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.1),
+                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: AppColors.primary.withOpacity(0.3),
+                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                                     ),
                                   ),
                                   child: Text(
                                     suggestion,
                                     style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
-                                          color: AppColors.primary,
+                                          color: Theme.of(context).colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                   ),
@@ -343,7 +342,7 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
                     setState(() => _marketingEmails = value ?? false);
                   },
                   message: l10n.marketingEmailMessage,
-                  activeColor: AppColors.primary,
+                  activeColor: Theme.of(context).colorScheme.primary,
                 ),
                 SizedBox(height: screenHeight * 0.02),
                 CustomCheckbox(
@@ -364,7 +363,7 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
                         },
                         underline: true,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -379,7 +378,7 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
                         },
                         underline: true,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -389,7 +388,7 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
                       ),
                     ],
                   ),
-                  activeColor: AppColors.primary,
+                  activeColor: Theme.of(context).colorScheme.primary,
                 ),
                 SizedBox(height: screenHeight * 0.04),
                 PrimaryButton(
@@ -408,7 +407,7 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
                     },
                     underline: false,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

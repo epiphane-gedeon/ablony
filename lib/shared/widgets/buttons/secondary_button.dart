@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
 
 /// Bouton secondaire de l'application (OutlinedButton personnalisé).
 ///
@@ -13,8 +12,8 @@ import '../../../core/theme/app_colors.dart';
 /// - [isFullWidth] : Prend toute la largeur disponible si true (optionnel, défaut: true)
 /// - [icon] : Icône à afficher avant le texte (optionnel)
 /// - [customIcon] : Widget personnalisé à afficher avant le texte (optionnel, prioritaire sur icon)
-/// - [borderColor] : Couleur de la bordure (optionnel, défaut: AppColors.primary)
-/// - [textColor] : Couleur du texte (optionnel, défaut: AppColors.primary)
+/// - [borderColor] : Couleur de la bordure (optionnel, défaut: Theme.of(context).colorScheme.primary)
+/// - [textColor] : Couleur du texte (optionnel, défaut: Theme.of(context).colorScheme.primary)
 /// - [fontSize] : Taille du texte (optionnel, utilise le thème par défaut si non spécifié)
 /// - [showBorder] : Affiche la bordure si true (optionnel, défaut: true)
 ///
@@ -23,8 +22,8 @@ import '../../../core/theme/app_colors.dart';
 /// SecondaryButton(
 ///   text: 'J\'ai déjà un compte',
 ///   onPressed: () => print('Connexion'),
-///   borderColor: AppColors.error,
-///   textColor: AppColors.error,
+///   borderColor: Theme.of(context).colorScheme.error,
+///   textColor: Theme.of(context).colorScheme.error,
 ///   fontSize: 14,
 ///   showBorder: false, // Pour un style TextButton
 /// )
@@ -76,10 +75,10 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Couleur du texte (par défaut AppColors.primary, sinon celle fournie)
-    final effectiveTextColor = textColor ?? AppColors.primary;
-    // Couleur de la bordure (par défaut AppColors.primary, sinon celle fournie)
-    final effectiveBorderColor = borderColor ?? AppColors.primary;
+    // Couleur du texte (par défaut primary du thème, sinon celle fournie)
+    final effectiveTextColor = textColor ?? Theme.of(context).colorScheme.primary;
+    // Couleur de la bordure (par défaut primary du thème, sinon celle fournie)
+    final effectiveBorderColor = borderColor ?? Theme.of(context).colorScheme.primary;
 
     // Contenu du bouton (texte ou loader)
     Widget buttonChild;

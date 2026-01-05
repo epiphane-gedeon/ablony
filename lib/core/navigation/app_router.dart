@@ -9,6 +9,8 @@ import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
+import '../../features/search/presentation/pages/search_results_page.dart';
+import '../../features/search/presentation/pages/searching_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../core/layout/main_layout.dart';
@@ -405,6 +407,41 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+      ),
+
+      // ============================================================
+      // ROUTE : RECHERCHE DÉTAILLÉE
+      // ============================================================
+      /// Page de recherche détaillée avec suggestions en temps réel
+      /// Accessible depuis n'importe où dans l'app
+      GoRoute(
+        path: '/searching',
+        name: 'searching',
+        pageBuilder: (context, state) {
+          final initialQuery = state.uri.queryParameters['q'];
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: SearchingPage(initialQuery: initialQuery),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  // Transition fade pour un effet fondu
+                  return FadeTransition(opacity: animation, child: child);
+                },
+          );
+        },
+      ),
+
+      // ============================================================
+      // ROUTE : RÉSULTATS DE RECHERCHE
+      // ============================================================
+      /// Page affichant les résultats de recherche
+      GoRoute(
+        path: '/search-results',
+        name: 'search-results',
+        builder: (context, state) {
+          final query = state.extra as String;
+          return SearchResultsPage(query: query);
+        },
       ),
 
       // ============================================================

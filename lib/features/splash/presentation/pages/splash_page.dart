@@ -7,7 +7,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../auth/application/providers.dart';
 
@@ -99,7 +98,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Fond bleu uni
-      backgroundColor: AppColors.primary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       // Logo et loader centrés
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +121,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   strokeWidth: 2.5,
                 ),
               ),

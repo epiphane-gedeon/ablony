@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/recaptcha_widget.dart';
 import '../../application/providers.dart';
@@ -141,10 +140,10 @@ class _CaptchaPageState extends ConsumerState<CaptchaPage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: SafeArea(
@@ -159,7 +158,7 @@ class _CaptchaPageState extends ConsumerState<CaptchaPage> {
                   'assets/icons/logo_full.svg',
                   width: screenWidth * 0.5,
                   colorFilter: ColorFilter.mode(
-                    AppColors.primary,
+                    Theme.of(context).colorScheme.primary,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -179,7 +178,7 @@ class _CaptchaPageState extends ConsumerState<CaptchaPage> {
                   border: Border.all(
                     color: _captchaVerified
                         ? Colors.green
-                        : AppColors.textSecondary.withOpacity(0.3),
+                        : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
                     width: 2,
                   ),
                   boxShadow: [

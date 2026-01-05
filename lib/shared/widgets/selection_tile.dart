@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 ///   value: 'Chemise',
 ///   onTap: () => Navigator.push(...),
 ///   isRequired: true,
+///   trailingIcon: Icons.arrow_forward_ios, // Icône personnalisée
 /// )
 /// ```
 class SelectionTile extends StatelessWidget {
@@ -30,6 +31,9 @@ class SelectionTile extends StatelessWidget {
   /// Placeholder affiché quand aucune valeur n'est sélectionnée
   final String? placeholder;
 
+  /// Icône personnalisée à afficher à droite (par défaut: chevron_right)
+  final IconData? trailingIcon;
+
   const SelectionTile({
     super.key,
     required this.label,
@@ -37,6 +41,7 @@ class SelectionTile extends StatelessWidget {
     required this.onTap,
     this.isRequired = false,
     this.placeholder,
+    this.trailingIcon,
   });
 
   @override
@@ -99,9 +104,9 @@ class SelectionTile extends StatelessWidget {
                 ],
               ),
             ),
-            // Flèche
+            // Flèche personnalisable
             Icon(
-              Icons.chevron_right,
+              trailingIcon ?? Icons.chevron_right,
               color: theme.colorScheme.onSurface.withOpacity(0.4),
               size: 24,
             ),

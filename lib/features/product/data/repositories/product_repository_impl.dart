@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../core/exceptions/exceptions.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../models/product_model.dart';
@@ -11,7 +12,7 @@ class ProductRepositoryImpl implements ProductRepository {
   final FirebaseFirestore _firestore;
 
   ProductRepositoryImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   // ============================================================
   // CRÉATION ET MODIFICATION
@@ -57,13 +58,19 @@ class ProductRepositoryImpl implements ProductRepository {
       // Générer un ID unique
       final docRef = _firestore.collection('products').doc();
       final productWithId = product.copyWith(id: docRef.id);
-      
+
       // Sauvegarder dans Firestore
       await docRef.set(ProductModel.toFirestore(productWithId));
-      
+
       return productWithId;
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors de la création du produit : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la création du produit',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -71,15 +78,21 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Product> updateProduct(Product product) async {
     try {
       final updatedProduct = product.copyWith(updatedAt: DateTime.now());
-      
+
       await _firestore
           .collection('products')
           .doc(product.id)
           .update(ProductModel.toFirestore(updatedProduct));
-      
+
       return updatedProduct;
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors de la mise à jour du produit : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la mise à jour du produit',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -87,8 +100,14 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> deleteProduct(String productId) async {
     try {
       await _firestore.collection('products').doc(productId).delete();
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors de la suppression du produit : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la suppression du produit',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -102,30 +121,60 @@ class ProductRepositoryImpl implements ProductRepository {
       final doc = await _firestore.collection('products').doc(productId).get();
 
       if (!doc.exists) {
-        throw Exception('Produit non trouvé : $productId');
+        throw ProductNotFoundException(productId: productId);
       }
 
       return ProductModel.fromMap(doc.data()!, doc.id);
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du chargement du produit : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement du produit',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
   @override
-  Future<List<Product>> getProducts({int limit = 20}) async {
+  Future<List<Product>> getProducts({
+    int limit = 20,
+    String? startAfter,
+  }) async {
     try {
-      final snapshot = await _firestore
+      var query = _firestore
           .collection('products')
           .where('isSold', isEqualTo: false)
           .orderBy('createdAt', descending: true)
-          .limit(limit)
-          .get();
+          .limit(limit);
+
+      // Si startAfter est fourni, on récupère le document et on commence après
+      if (startAfter != null) {
+        final lastDoc = await _firestore
+            .collection('products')
+            .doc(startAfter)
+            .get();
+
+        if (lastDoc.exists) {
+          query = query.startAfterDocument(lastDoc);
+        }
+      }
+
+      final snapshot = await query.get();
 
       return snapshot.docs
           .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du chargement des produits : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement des produits',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -141,9 +190,13 @@ class ProductRepositoryImpl implements ProductRepository {
       return snapshot.docs
           .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors du chargement des produits du vendeur : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement des produits du vendeur',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -186,6 +239,10 @@ class ProductRepositoryImpl implements ProductRepository {
     String? subcategoryId,
   }) async {
     try {
+      print(
+        '🔍 [Repository] getProductsByCategory - categoryId: $categoryId, subcategoryId: $subcategoryId',
+      );
+
       Query query = _firestore
           .collection('products')
           .where('categoryId', isEqualTo: categoryId)
@@ -196,15 +253,30 @@ class ProductRepositoryImpl implements ProductRepository {
         query = query.where('subcategoryId', isEqualTo: subcategoryId);
       }
 
-      final snapshot =
-          await query.orderBy('createdAt', descending: true).get();
+      final snapshot = await query.orderBy('createdAt', descending: true).get();
+
+      print('📦 [Repository] Produits trouvés: ${snapshot.docs.length}');
+      if (snapshot.docs.isNotEmpty) {
+        print('   Premier produit: ${snapshot.docs.first.data()}');
+      }
 
       return snapshot.docs
-          .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .map(
+            (doc) => ProductModel.fromMap(
+              doc.data() as Map<String, dynamic>,
+              doc.id,
+            ),
+          )
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors du chargement des produits par catégorie : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      print('❌ [Repository] Firebase error: $e');
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      print('❌ [Repository] Error: $e');
+      throw UnknownException(
+        message: 'Erreur lors du chargement des produits par catégorie',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -212,21 +284,50 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<List<Product>> searchProducts(String query) async {
     try {
-      // Note: Pour une recherche full-text, il faudrait utiliser Algolia ou similar
-      // Pour l'instant, on fait une recherche simple sur le titre
+      final queryLower = query.toLowerCase();
+
+      // Récupérer tous les produits non vendus
       final snapshot = await _firestore
           .collection('products')
           .where('isSold', isEqualTo: false)
-          .orderBy('title')
-          .startAt([query])
-          .endAt(['$query\uf8ff'])
           .get();
 
-      return snapshot.docs
+      // Filtrer côté client pour chercher dans titre, description et marque
+      final results = snapshot.docs
           .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
+          .where((product) {
+            // Recherche dans le titre
+            if (product.title.toLowerCase().contains(queryLower)) {
+              return true;
+            }
+
+            // Recherche dans la description
+            if (product.description?.toLowerCase().contains(queryLower) ??
+                false) {
+              return true;
+            }
+
+            // Recherche dans la marque
+            final brand =
+                product.attributes['brand'] ?? product.attributes['marque'];
+            if (brand != null &&
+                brand.toString().toLowerCase().contains(queryLower)) {
+              return true;
+            }
+
+            return false;
+          })
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors de la recherche de produits : ${e.message}');
+
+      return results;
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la recherche de produits',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -250,9 +351,11 @@ class ProductRepositoryImpl implements ProductRepository {
         .where('sellerId', isEqualTo: sellerId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
   }
 
   // ============================================================
@@ -265,9 +368,13 @@ class ProductRepositoryImpl implements ProductRepository {
       await _firestore.collection('products').doc(productId).update({
         'viewsCount': FieldValue.increment(1),
       });
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors de l\'incrémentation des vues : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'incrémentation des vues',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -278,9 +385,13 @@ class ProductRepositoryImpl implements ProductRepository {
       await _firestore.collection('products').doc(productId).update({
         'favoritesCount': FieldValue.increment(1),
       });
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors de l\'incrémentation des favoris : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'incrémentation des favoris',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -291,9 +402,13 @@ class ProductRepositoryImpl implements ProductRepository {
       await _firestore.collection('products').doc(productId).update({
         'favoritesCount': FieldValue.increment(-1),
       });
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors de la décrémentation des favoris : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la décrémentation des favoris',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -306,9 +421,13 @@ class ProductRepositoryImpl implements ProductRepository {
         'soldAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-    } on FirebaseException catch (e) {
-      throw Exception(
-        'Erreur lors du marquage du produit comme vendu : ${e.message}',
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du marquage du produit comme vendu',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -321,14 +440,20 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> boostProduct(String productId, Duration duration) async {
     try {
       final expiresAt = DateTime.now().add(duration);
-      
+
       await _firestore.collection('products').doc(productId).update({
         'isBoosted': true,
         'boostExpiresAt': Timestamp.fromDate(expiresAt),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-    } on FirebaseException catch (e) {
-      throw Exception('Erreur lors du boost du produit : ${e.message}');
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du boost du produit',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
   }
 }

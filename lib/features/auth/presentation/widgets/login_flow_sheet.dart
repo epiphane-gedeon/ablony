@@ -9,7 +9,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/link.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -329,7 +328,7 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
-        Expanded(child: Divider(color: AppColors.textSecondary, thickness: 1)),
+        Expanded(child: Divider(color: Theme.of(context).colorScheme.onSurfaceVariant, thickness: 1)),
       ],
     );
   }
