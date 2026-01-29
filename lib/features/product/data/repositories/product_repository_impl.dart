@@ -286,13 +286,56 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final queryLower = query.toLowerCase();
 
+      // Récupérer toutes les catégories et sous-catégories pour la recherche
+      // IMPORTANT : Les catégories sont dans config/categories/items et config/subcategories/items
+      final categoriesSnapshot = await _firestore
+          .collection('config')
+          .doc('categories')
+          .collection('items')
+          .get();
+      final subcategoriesSnapshot = await _firestore
+          .collection('config')
+          .doc('subcategories')
+          .collection('items')
+          .get();
+
+      // Créer des maps pour rechercher par nom
+      final Map<String, String> categoryIdsByName = {};
+      final Map<String, String> subcategoryIdsByName = {};
+
+      for (var doc in categoriesSnapshot.docs) {
+        final name = (doc.data()['name'] ?? '').toString().toLowerCase();
+        categoryIdsByName[name] = doc.id;
+      }
+
+      for (var doc in subcategoriesSnapshot.docs) {
+        final name = (doc.data()['name'] ?? '').toString().toLowerCase();
+        subcategoryIdsByName[name] = doc.id;
+      }
+
+      // Trouver les IDs de catégories/sous-catégories qui correspondent à la recherche
+      final Set<String> matchingCategoryIds = {};
+      final Set<String> matchingSubcategoryIds = {};
+
+      categoryIdsByName.forEach((name, id) {
+        if (name.contains(queryLower)) {
+          matchingCategoryIds.add(id);
+        }
+      });
+
+      subcategoryIdsByName.forEach((name, id) {
+        if (name.contains(queryLower)) {
+          matchingSubcategoryIds.add(id);
+        }
+      });
+
       // Récupérer tous les produits non vendus
       final snapshot = await _firestore
           .collection('products')
           .where('isSold', isEqualTo: false)
           .get();
 
-      // Filtrer côté client pour chercher dans titre, description et marque
+      // Filtrer côté client pour chercher dans titre, description, marque, catégorie et sous-catégorie
       final results = snapshot.docs
           .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
           .where((product) {
@@ -315,6 +358,16 @@ class ProductRepositoryImpl implements ProductRepository {
               return true;
             }
 
+            // Recherche par catégorie
+            if (matchingCategoryIds.contains(product.categoryId)) {
+              return true;
+            }
+
+            // Recherche par sous-catégorie
+            if (matchingSubcategoryIds.contains(product.subcategoryId)) {
+              return true;
+            }
+
             return false;
           })
           .toList();
@@ -325,6 +378,76 @@ class ProductRepositoryImpl implements ProductRepository {
     } catch (e, stackTrace) {
       throw UnknownException(
         message: 'Erreur lors de la recherche de produits',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<List<Category>> getAllCategories() async {
+    try {
+      final snapshot = await _firestore
+          .collection('config')
+          .doc('categories')
+          .collection('items')
+          .get();
+
+      return snapshot.docs
+          .map(
+            (doc) => Category(
+              id: doc.id,
+              name: doc.data()['name'] as String,
+              children: List<String>.from(doc.data()['children'] ?? []),
+              order: doc.data()['order'] as int?,
+              iconUrl: doc.data()['iconUrl'] as String?,
+              isActive: doc.data()['isActive'] as bool? ?? true,
+              createdAt: (doc.data()['createdAt'] as Timestamp).toDate(),
+              updatedAt: (doc.data()['updatedAt'] as Timestamp).toDate(),
+            ),
+          )
+          .toList();
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la récupération des catégories',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<List<Subcategory>> getAllSubcategories() async {
+    try {
+      final snapshot = await _firestore
+          .collection('config')
+          .doc('subcategories')
+          .collection('items')
+          .get();
+
+      return snapshot.docs
+          .map(
+            (doc) => Subcategory(
+              id: doc.id,
+              name: doc.data()['name'] as String,
+              parentId: doc.data()['parentId'] as String,
+              children: List<String>.from(doc.data()['children'] ?? []),
+              attributes: List<String>.from(doc.data()['attributes'] ?? []),
+              order: doc.data()['order'] as int?,
+              iconUrl: doc.data()['iconUrl'] as String?,
+              isActive: doc.data()['isActive'] as bool? ?? true,
+              createdAt: (doc.data()['createdAt'] as Timestamp).toDate(),
+              updatedAt: (doc.data()['updatedAt'] as Timestamp).toDate(),
+            ),
+          )
+          .toList();
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la récupération des sous-catégories',
         originalException: e as Exception?,
         stackTrace: stackTrace,
       );

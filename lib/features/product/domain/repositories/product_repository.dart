@@ -56,6 +56,12 @@ abstract class ProductRepository {
   /// [query] : Terme de recherche
   Future<List<Product>> searchProducts(String query);
 
+  /// Récupère toutes les catégories
+  Future<List<Category>> getAllCategories();
+
+  /// Récupère toutes les sous-catégories
+  Future<List<Subcategory>> getAllSubcategories();
+
   // ============================================================
   // STREAMS (Temps réel)
   // ============================================================

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../../domain/entities/entities.dart';
+import './category_provider.dart';
 
 /// Provider pour le repository des produits.
 ///
@@ -63,4 +64,58 @@ final productByIdProvider = FutureProvider.family<Product, String>((
   productId,
 ) async {
   return ref.watch(productRepositoryProvider).getProductById(productId);
+});
+
+/// Provider pour récupérer toutes les valeurs d'un attribut par son nom
+/// (ex: 'brand', 'color', 'size', 'material')
+/// Récupère TOUTES les valeurs possibles depuis la base, pas seulement celles utilisées dans les produits
+final attributeValuesByNameProvider =
+    FutureProvider.family<List<String>, String>((ref, attributeName) async {
+      final categoryRepo = ref.watch(categoryRepositoryProvider);
+      try {
+        final attributes = await categoryRepo.getAttributes();
+
+        // Chercher tous les attributs qui correspondent au nom
+        final matchingAttributes = attributes
+            .where(
+              (attr) =>
+                  attr.name.toLowerCase() == attributeName.toLowerCase() ||
+                  attr.id.toLowerCase().contains(attributeName.toLowerCase()),
+            )
+            .toList();
+
+        if (matchingAttributes.isEmpty) {
+          return [];
+        }
+
+        // Combiner toutes les valeurs si plusieurs attributs correspondent
+        final allValues = <String>{};
+        for (var attr in matchingAttributes) {
+          allValues.addAll(attr.values);
+        }
+
+        return allValues.toList()..sort();
+      } catch (e) {
+        return [];
+      }
+    });
+
+/// Provider pour toutes les marques depuis la base
+final allBrandsProvider = FutureProvider<List<String>>((ref) async {
+  return ref.watch(attributeValuesByNameProvider('brand').future);
+});
+
+/// Provider pour toutes les couleurs depuis la base
+final allColorsProvider = FutureProvider<List<String>>((ref) async {
+  return ref.watch(attributeValuesByNameProvider('color').future);
+});
+
+/// Provider pour toutes les tailles depuis la base
+final allSizesProvider = FutureProvider<List<String>>((ref) async {
+  return ref.watch(attributeValuesByNameProvider('size').future);
+});
+
+/// Provider pour toutes les matières depuis la base
+final allMaterialsProvider = FutureProvider<List<String>>((ref) async {
+  return ref.watch(attributeValuesByNameProvider('material').future);
 });

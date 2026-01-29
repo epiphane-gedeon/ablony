@@ -417,10 +417,7 @@ abstract class AuthRepository {
   /// );
   /// print(suggestion); // "marie-kouassi" ou "marie-kouassi1" si déjà pris
   /// ```
-  Future<String> generateUsername({
-    String? displayName,
-    String? email,
-  });
+  Future<String> generateUsername({String? displayName, String? email});
 
   // ============================================================
   // ÉTAT D'AUTHENTIFICATION
@@ -536,4 +533,48 @@ abstract class AuthRepository {
   /// showMessage('Email de réinitialisation envoyé');
   /// ```
   Future<void> sendPasswordResetEmail({required String email});
+
+  // ============================================================
+  // RECHERCHE D'UTILISATEURS
+  // ============================================================
+
+  /// Recherche des utilisateurs par nom d'utilisateur.
+  ///
+  /// Cette méthode effectue une recherche partielle et insensible à la casse
+  /// dans la collection des utilisateurs pour trouver ceux dont le username
+  /// correspond à la requête.
+  ///
+  /// **Paramètres :**
+  /// - [query] : Le terme de recherche (minimum 1 caractère recommandé)
+  ///
+  /// **Retour :**
+  /// - [List<User>] : Liste des utilisateurs trouvés (maximum 10 résultats)
+  ///   La liste est vide si aucun utilisateur ne correspond
+  ///
+  /// **Comportement :**
+  /// - Recherche insensible à la casse
+  /// - Recherche par préfixe (commence par la requête)
+  /// - Limite les résultats à 10 utilisateurs
+  /// - Exclut l'utilisateur actuel des résultats (optionnel)
+  ///
+  /// **Exceptions possibles :**
+  /// - [FirebaseException] : Erreur Firestore
+  /// - [Exception] : Autres erreurs (réseau, permissions, etc.)
+  ///
+  /// **Exemple :**
+  /// ```dart
+  /// // Dans la page de recherche
+  /// final users = await authRepository.searchUsersByUsername('john');
+  /// // Retourne : [User(username: 'john_doe'), User(username: 'johnny')]
+  ///
+  /// // Afficher les résultats
+  /// for (final user in users) {
+  ///   print(user.username);
+  /// }
+  /// ```
+  ///
+  /// **Note :** Cette méthode est utilisée principalement dans la page de
+  /// recherche (SearchingPage) pour permettre aux utilisateurs de trouver
+  /// d'autres membres de la communauté.
+  Future<List<User>> searchUsersByUsername(String query);
 }
