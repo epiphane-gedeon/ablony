@@ -743,4 +743,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchTyping => 'Start typing to search...';
+
+  @override
+  String get filterTitle => 'Filter';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get sortRelevance => 'Relevance';
+
+  @override
+  String get sortRecent => 'Most recent';
+
+  @override
+  String get sortPriceAsc => 'Price: Low to High';
+
+  @override
+  String get sortPriceDesc => 'Price: High to Low';
+
+  @override
+  String get sortPopular => 'Most popular';
+
+  @override
+  String get filterCategory => 'Category';
+
+  @override
+  String get filterSize => 'Size';
+
+  @override
+  String get filterBrand => 'Brand';
+
+  @override
+  String get filterCondition => 'Condition';
+
+  @override
+  String get filterColor => 'Color';
+
+  @override
+  String get filterPrice => 'Price';
+
+  @override
+  String get filterMaterial => 'Material';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterAllCategories => 'All';
+
+  @override
+  String get filterCustomPrice => 'Custom';
+
+  @override
+  String get filterClear => 'Clear';
+
+  @override
+  String get filterShowResults => 'Show results';
+
+  @override
+  String get filterValidate => 'Validate';
+
+  @override
+  String resultsCount(int count) {
+    return '$count results';
+  }
 }

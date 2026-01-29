@@ -7,6 +7,8 @@ import '../../../../shared/widgets/input.dart';
 import '../../../../shared/widgets/link.dart';
 import '../../../../shared/widgets/selection_tile.dart';
 import '../../../product/presentation/providers/product_provider.dart';
+import '../../../auth/application/auth_providers.dart';
+import '../../../auth/domain/entities/entities.dart';
 
 /// Page de recherche avec onglets Articles/Membres
 ///
@@ -27,7 +29,12 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
+  // Suggestions pour l'onglet Articles
   List<String> _suggestions = [];
+
+  // Suggestions pour l'onglet Membres
+  List<User> _memberSuggestions = [];
+
   bool _isSearching = false;
 
   @override
@@ -64,6 +71,7 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
     if (query.isEmpty) {
       setState(() {
         _suggestions = [];
+        _memberSuggestions = [];
         _isSearching = false;
       });
       return;
@@ -76,7 +84,14 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
     // Simuler une recherche avec délai (debounce)
     Future.delayed(const Duration(milliseconds: 300), () {
       if (query == _searchController.text.trim()) {
-        _performSearch(query);
+        // Lancer la recherche en fonction de l'onglet actif
+        if (_tabController.index == 0) {
+          // Onglet Articles
+          _performSearch(query);
+        } else {
+          // Onglet Membres
+          _performMemberSearch(query);
+        }
       }
     });
   }
@@ -86,20 +101,29 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
     if (query.isEmpty) return;
 
     try {
-      final repository = ref.read(productRepositoryProvider);
-      final products = await repository.searchProducts(query);
+      final queryLower = query.toLowerCase();
 
-      // Extraire les suggestions uniques (titres et marques)
+      // Récupérer les catégories et sous-catégories depuis Firestore
+      final categoriesSnapshot = await ref
+          .read(productRepositoryProvider)
+          .getAllCategories();
+      final subcategoriesSnapshot = await ref
+          .read(productRepositoryProvider)
+          .getAllSubcategories();
+
       final Set<String> uniqueSuggestions = {};
 
-      for (final product in products.take(10)) {
-        uniqueSuggestions.add(product.title);
+      // Ajouter les catégories qui matchent
+      for (final category in categoriesSnapshot) {
+        if (category.name.toLowerCase().contains(queryLower)) {
+          uniqueSuggestions.add(category.name);
+        }
+      }
 
-        // Ajouter la marque si présente dans les attributs
-        final brand =
-            product.attributes['brand'] ?? product.attributes['marque'];
-        if (brand != null && brand.toString().isNotEmpty) {
-          uniqueSuggestions.add(brand.toString());
+      // Ajouter les sous-catégories qui matchent
+      for (final subcategory in subcategoriesSnapshot) {
+        if (subcategory.name.toLowerCase().contains(queryLower)) {
+          uniqueSuggestions.add(subcategory.name);
         }
       }
 
@@ -110,6 +134,33 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
     } catch (e) {
       setState(() {
         _suggestions = [];
+        _isSearching = false;
+      });
+    }
+  }
+
+  /// Effectue la recherche de membres par username
+  ///
+  /// Cette méthode recherche les utilisateurs dont le username
+  /// correspond à la requête et met à jour [_memberSuggestions].
+  Future<void> _performMemberSearch(String query) async {
+    if (query.isEmpty) return;
+
+    try {
+      // Récupérer le repository d'authentification
+      final authRepository = ref.read(authRepositoryProvider);
+
+      // Rechercher les utilisateurs par username
+      final users = await authRepository.searchUsersByUsername(query);
+
+      setState(() {
+        _memberSuggestions = users;
+        _isSearching = false;
+      });
+    } catch (e) {
+      // En cas d'erreur, afficher une liste vide
+      setState(() {
+        _memberSuggestions = [];
         _isSearching = false;
       });
     }
@@ -179,13 +230,8 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
                   // Onglet Articles
                   _buildArticlesTab(context, l10n),
 
-                  // Onglet Membres (TODO)
-                  Center(
-                    child: Text(
-                      'Fonctionnalité à venir',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ),
+                  // Onglet Membres
+                  _buildMembersTab(context, l10n),
                 ],
               ),
             ),
@@ -264,6 +310,108 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
           },
           // Utiliser une flèche de suggestion (nord-ouest)
           trailingIcon: Icons.north_west,
+        );
+      },
+    );
+  }
+
+  /// Construit l'onglet de recherche de membres
+  ///
+  /// Affiche les résultats de recherche d'utilisateurs avec :
+  /// - Photo de profil (ou avatar générique avec initiale)
+  /// - Username
+  /// - Flèche de navigation
+  Widget _buildMembersTab(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+
+    // Afficher le message initial (avant toute saisie)
+    if (_searchController.text.trim().isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_search,
+              size: 64,
+              color: theme.colorScheme.primary.withOpacity(0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Recherchez des membres par leur nom d\'utilisateur',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.textTheme.bodySmall?.color,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Afficher un loader pendant la recherche
+    if (_isSearching) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Afficher un message si aucun résultat
+    if (_memberSuggestions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_off,
+              size: 64,
+              color: theme.colorScheme.primary.withOpacity(0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Aucun membre trouvé',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.textTheme.bodySmall?.color,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Afficher les résultats de recherche
+    return ListView.builder(
+      itemCount: _memberSuggestions.length,
+      itemBuilder: (context, index) {
+        final user = _memberSuggestions[index];
+
+        return ListTile(
+          // Avatar avec photo de profil ou initiale
+          leading: CircleAvatar(
+            radius: 20,
+            backgroundImage: user.photoUrl != null && user.photoUrl!.isNotEmpty
+                ? NetworkImage(user.photoUrl!)
+                : null,
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+            child: user.photoUrl == null || user.photoUrl!.isEmpty
+                ? Text(
+                    user.username.isNotEmpty
+                        ? user.username[0].toUpperCase()
+                        : '?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : null,
+          ),
+          title: Text(user.username, style: theme.textTheme.bodyLarge),
+          trailing: Icon(
+            Icons.chevron_right,
+            color: theme.colorScheme.onSurface.withOpacity(0.4),
+          ),
+          onTap: () {
+            // TODO: Naviguer vers la page de profil de l'utilisateur
+            // Pour le moment, on peut juste afficher le username
+            context.push('/profile/${user.uid}');
+          },
         );
       },
     );

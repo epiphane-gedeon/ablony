@@ -613,5 +613,95 @@
   "searchTyping": "Start typing to search...",
   "@searchTyping": {
     "description": "Message when search field is empty"
+  },
+  "filterTitle": "Filter",
+  "@filterTitle": {
+    "description": "Filter modal title"
+  },
+  "sortBy": "Sort by",
+  "@sortBy": {
+    "description": "Sort by label"
+  },
+  "sortRelevance": "Relevance",
+  "@sortRelevance": {
+    "description": "Sort by relevance"
+  },
+  "sortRecent": "Most recent",
+  "@sortRecent": {
+    "description": "Sort by most recent"
+  },
+  "sortPriceAsc": "Price: Low to High",
+  "@sortPriceAsc": {
+    "description": "Sort by price ascending"
+  },
+  "sortPriceDesc": "Price: High to Low",
+  "@sortPriceDesc": {
+    "description": "Sort by price descending"
+  },
+  "sortPopular": "Most popular",
+  "@sortPopular": {
+    "description": "Sort by most popular"
+  },
+  "filterCategory": "Category",
+  "@filterCategory": {
+    "description": "Category filter label"
+  },
+  "filterSize": "Size",
+  "@filterSize": {
+    "description": "Size filter label"
+  },
+  "filterBrand": "Brand",
+  "@filterBrand": {
+    "description": "Brand filter label"
+  },
+  "filterCondition": "Condition",
+  "@filterCondition": {
+    "description": "Condition filter label"
+  },
+  "filterColor": "Color",
+  "@filterColor": {
+    "description": "Color filter label"
+  },
+  "filterPrice": "Price",
+  "@filterPrice": {
+    "description": "Price filter label"
+  },
+  "filterMaterial": "Material",
+  "@filterMaterial": {
+    "description": "Material filter label"
+  },
+  "filterAll": "All",
+  "@filterAll": {
+    "description": "All/Everything filter option"
+  },
+  "filterAllCategories": "All",
+  "@filterAllCategories": {
+    "description": "All categories option"
+  },
+  "filterCustomPrice": "Custom",
+  "@filterCustomPrice": {
+    "description": "Custom price filter"
+  },
+  "filterClear": "Clear",
+  "@filterClear": {
+    "description": "Clear filters button"
+  },
+  "filterShowResults": "Show results",
+  "@filterShowResults": {
+    "description": "Show results button"
+  },
+  "filterValidate": "Validate",
+  "@filterValidate": {
+    "description": "Validate selection button"
+  },
+  "resultsCount": "{count} results",
+  "@resultsCount": {
+    "description": "Number of results found",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "42"
+      }
+    }
   }
 }

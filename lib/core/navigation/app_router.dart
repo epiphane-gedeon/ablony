@@ -13,6 +13,7 @@ import '../../features/search/presentation/pages/search_results_page.dart';
 import '../../features/search/presentation/pages/searching_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/product/presentation/pages/product_detail_page.dart';
 import '../../core/layout/main_layout.dart';
 import 'router_notifier.dart';
 
@@ -445,12 +446,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ============================================================
+      // ROUTE : DÉTAIL PRODUIT
+      // ============================================================
+      /// Page affichant le détail d'un produit
+      GoRoute(
+        path: '/product/:id',
+        name: 'product-detail',
+        builder: (context, state) {
+          final productId = state.pathParameters['id']!;
+          return ProductDetailPage(productId: productId);
+        },
+      ),
+
+      // ============================================================
       // TODO: AUTRES ROUTES
       // ============================================================
       // - /search : Page de recherche
       // - /messages : Page des conversations
       // - /profile/:userId : Page de profil utilisateur
-      // - /product/:productId : Page détail produit
       // - /product/add : Page d'ajout de produit
       // - /settings : Page des paramètres
       // - /notifications : Page des notifications

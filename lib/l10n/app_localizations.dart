@@ -1531,6 +1531,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Commencez à taper pour rechercher...'**
   String get searchTyping;
+
+  /// Filter modal title
+  ///
+  /// In fr, this message translates to:
+  /// **'Filtrer'**
+  String get filterTitle;
+
+  /// Sort by label
+  ///
+  /// In fr, this message translates to:
+  /// **'Classer par'**
+  String get sortBy;
+
+  /// Sort by relevance
+  ///
+  /// In fr, this message translates to:
+  /// **'Pertinence'**
+  String get sortRelevance;
+
+  /// Sort by most recent
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus récents'**
+  String get sortRecent;
+
+  /// Sort by price ascending
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix croissant'**
+  String get sortPriceAsc;
+
+  /// Sort by price descending
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix décroissant'**
+  String get sortPriceDesc;
+
+  /// Sort by most popular
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus populaires'**
+  String get sortPopular;
+
+  /// Category filter label
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get filterCategory;
+
+  /// Size filter label
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille'**
+  String get filterSize;
+
+  /// Brand filter label
+  ///
+  /// In fr, this message translates to:
+  /// **'Marque'**
+  String get filterBrand;
+
+  /// Condition filter label
+  ///
+  /// In fr, this message translates to:
+  /// **'État'**
+  String get filterCondition;
+
+  /// Color filter label
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get filterColor;
+
+  /// Price filter label
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix'**
+  String get filterPrice;
+
+  /// Material filter label
+  ///
+  /// In fr, this message translates to:
+  /// **'Matière'**
+  String get filterMaterial;
+
+  /// All/Everything filter option
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get filterAll;
+
+  /// All categories option
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get filterAllCategories;
+
+  /// Custom price filter
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnalisé'**
+  String get filterCustomPrice;
+
+  /// Clear filters button
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get filterClear;
+
+  /// Show results button
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les résultats'**
+  String get filterShowResults;
+
+  /// Validate selection button
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get filterValidate;
+
+  /// Number of results found
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} résultats'**
+  String resultsCount(int count);
 }
 
 class _AppLocalizationsDelegate

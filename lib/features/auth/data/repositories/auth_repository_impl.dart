@@ -838,4 +838,53 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
   }
+
+  // ============================================================
+  // RECHERCHE D'UTILISATEURS
+  // ============================================================
+
+  @override
+  Future<List<User>> searchUsersByUsername(String query) async {
+    try {
+      // Convertir la requête en minuscules pour une recherche insensible à la casse
+      final queryLower = query.toLowerCase();
+
+      // Effectuer une requête Firestore avec recherche par préfixe
+      // Note : Firestore ne supporte pas la recherche en texte intégral (full-text search)
+      // On utilise donc une recherche par préfixe (commence par)
+      final snapshot = await _firestore
+          .collection('users')
+          .where('username', isGreaterThanOrEqualTo: queryLower)
+          .where('username', isLessThan: '${queryLower}z')
+          .limit(10) // Limiter à 10 résultats pour les performances
+          .get();
+
+      // Convertir les documents Firestore en objets User
+      final users = snapshot.docs
+          .map((doc) => UserModel.fromFirestore(doc, null))
+          .toList();
+
+      // Optionnel : Exclure l'utilisateur actuel des résultats
+      final currentUserId = _firebaseAuth.currentUser?.uid;
+      if (currentUserId != null) {
+        users.removeWhere((user) => user.uid == currentUserId);
+      }
+
+      return users;
+    } on FirebaseException catch (e, stackTrace) {
+      // Erreur Firestore (permissions, réseau, etc.)
+      throw UnknownException(
+        message: 'Erreur lors de la recherche d\'utilisateurs: ${e.message}',
+        originalException: Exception(e),
+        stackTrace: stackTrace,
+      );
+    } catch (e, stackTrace) {
+      // Autres erreurs inattendues
+      throw UnknownException(
+        message: 'Erreur inattendue lors de la recherche d\'utilisateurs',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
 }

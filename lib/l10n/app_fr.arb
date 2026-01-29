@@ -613,5 +613,95 @@
   "searchTyping": "Commencez à taper pour rechercher...",
   "@searchTyping": {
     "description": "Message when search field is empty"
+  },
+  "filterTitle": "Filtrer",
+  "@filterTitle": {
+    "description": "Filter modal title"
+  },
+  "sortBy": "Classer par",
+  "@sortBy": {
+    "description": "Sort by label"
+  },
+  "sortRelevance": "Pertinence",
+  "@sortRelevance": {
+    "description": "Sort by relevance"
+  },
+  "sortRecent": "Plus récents",
+  "@sortRecent": {
+    "description": "Sort by most recent"
+  },
+  "sortPriceAsc": "Prix croissant",
+  "@sortPriceAsc": {
+    "description": "Sort by price ascending"
+  },
+  "sortPriceDesc": "Prix décroissant",
+  "@sortPriceDesc": {
+    "description": "Sort by price descending"
+  },
+  "sortPopular": "Plus populaires",
+  "@sortPopular": {
+    "description": "Sort by most popular"
+  },
+  "filterCategory": "Catégorie",
+  "@filterCategory": {
+    "description": "Category filter label"
+  },
+  "filterSize": "Taille",
+  "@filterSize": {
+    "description": "Size filter label"
+  },
+  "filterBrand": "Marque",
+  "@filterBrand": {
+    "description": "Brand filter label"
+  },
+  "filterCondition": "État",
+  "@filterCondition": {
+    "description": "Condition filter label"
+  },
+  "filterColor": "Couleur",
+  "@filterColor": {
+    "description": "Color filter label"
+  },
+  "filterPrice": "Prix",
+  "@filterPrice": {
+    "description": "Price filter label"
+  },
+  "filterMaterial": "Matière",
+  "@filterMaterial": {
+    "description": "Material filter label"
+  },
+  "filterAll": "Tout",
+  "@filterAll": {
+    "description": "All/Everything filter option"
+  },
+  "filterAllCategories": "Tous",
+  "@filterAllCategories": {
+    "description": "All categories option"
+  },
+  "filterCustomPrice": "Personnalisé",
+  "@filterCustomPrice": {
+    "description": "Custom price filter"
+  },
+  "filterClear": "Effacer",
+  "@filterClear": {
+    "description": "Clear filters button"
+  },
+  "filterShowResults": "Afficher les résultats",
+  "@filterShowResults": {
+    "description": "Show results button"
+  },
+  "filterValidate": "Valider",
+  "@filterValidate": {
+    "description": "Validate selection button"
+  },
+  "resultsCount": "{count} résultats",
+  "@resultsCount": {
+    "description": "Number of results found",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "42"
+      }
+    }
   }
 }
