@@ -1,7 +1,7 @@
 /// État/condition du produit
 enum ProductCondition {
   newWithTags('Neuf avec étiquette'),
-  excellent('Excellent'),
+  excellent('Excellent état'),
   good('Bon état'),
   satisfactory('Satisfaisant'),
   worn('Usé');
@@ -145,6 +145,96 @@ class Product {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  /// Récupère l'ID de l'attribut de taille principal détecté
+  String? get primarySizeAttributeId {
+    // Ordre de priorité pour les clés exactes
+    const priorityKeys = ['size', 'taille', 'size_haut', 'size_bas', 'pointure'];
+    for (final key in priorityKeys) {
+      if (attributes.containsKey(key)) return key;
+    }
+
+    // Recherche par mot-clé si aucune clé prioritaire n'est trouvée
+    for (final key in attributes.keys) {
+      final k = key.toLowerCase();
+      if (k.contains('size') || k.contains('taille') || k.contains('pointure')) {
+        return key;
+      }
+    }
+    return null;
+  }
+
+  /// Récupère la valeur de l'attribut de taille principal
+  dynamic get primarySizeValue {
+    final id = primarySizeAttributeId;
+    return id != null ? attributes[id] : null;
+  }
+
+  /// Récupère l'ID de l'attribut de marque principal détecté
+  String? get primaryBrandAttributeId {
+    const priorityKeys = ['brand', 'marque'];
+    for (final key in priorityKeys) {
+      if (attributes.containsKey(key)) return key;
+    }
+
+    for (final key in attributes.keys) {
+      final k = key.toLowerCase();
+      if (k.contains('brand') || k.contains('marque')) {
+        return key;
+      }
+    }
+    return null;
+  }
+
+  /// Récupère la valeur de l'attribut de marque principal
+  dynamic get primaryBrandValue {
+    final id = primaryBrandAttributeId;
+    return id != null ? attributes[id] : null;
+  }
+
+  /// Récupère l'ID de l'attribut de couleur principal détecté
+  String? get primaryColorAttributeId {
+    const priorityKeys = ['color', 'couleur'];
+    for (final key in priorityKeys) {
+      if (attributes.containsKey(key)) return key;
+    }
+
+    for (final key in attributes.keys) {
+      final k = key.toLowerCase();
+      if (k.contains('color') || k.contains('couleur')) {
+        return key;
+      }
+    }
+    return null;
+  }
+
+  /// Récupère la valeur de l'attribut de couleur principal
+  dynamic get primaryColorValue {
+    final id = primaryColorAttributeId;
+    return id != null ? attributes[id] : null;
+  }
+
+  /// Récupère l'ID de l'attribut de matière principal détecté
+  String? get primaryMaterialAttributeId {
+    const priorityKeys = ['material', 'matiere', 'matière'];
+    for (final key in priorityKeys) {
+      if (attributes.containsKey(key)) return key;
+    }
+
+    for (final key in attributes.keys) {
+      final k = key.toLowerCase();
+      if (k.contains('material') || k.contains('matiere') || k.contains('matière')) {
+        return key;
+      }
+    }
+    return null;
+  }
+
+  /// Récupère la valeur de l'attribut de matière principal
+  dynamic get primaryMaterialValue {
+    final id = primaryMaterialAttributeId;
+    return id != null ? attributes[id] : null;
   }
 
   @override

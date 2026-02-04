@@ -18,7 +18,11 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepositoryImpl();
 });
 
-/// Provider pour récupérer tous les produits.
+/// Provider pour récupérer un attribut complet par son ID.
+final attributeByIdProvider = FutureProvider.family<ProductAttribute, String>((ref, id) async {
+  final categoryRepo = ref.watch(categoryRepositoryProvider);
+  return categoryRepo.getAttributeById(id);
+});
 ///
 /// Charge automatiquement la liste des produits depuis Firestore.
 /// Le résultat est mis en cache par Riverpod.
@@ -119,3 +123,33 @@ final allSizesProvider = FutureProvider<List<String>>((ref) async {
 final allMaterialsProvider = FutureProvider<List<String>>((ref) async {
   return ref.watch(attributeValuesByNameProvider('material').future);
 });
+
+/// Provider pour tous les états (conditions) depuis la base
+final allConditionsProvider = FutureProvider<List<String>>((ref) async {
+  return ref.watch(attributeValuesByNameProvider('condition').future);
+});
+
+/// Provider pour récupérer le label d'un attribut par son ID et sa valeur (index ou string)
+final attributeLabelProvider =
+    FutureProvider.family<String, ({String attributeId, dynamic value})>((
+  ref,
+  params,
+) async {
+  final value = params.value;
+  if (value == null) return 'Non spécifié';
+  if (value is! int) return value.toString();
+
+  final categoryRepo = ref.watch(categoryRepositoryProvider);
+  try {
+    // On essaie de trouver l'attribut par son ID
+    final attribute = await categoryRepo.getAttributeById(params.attributeId);
+    if (params.value >= 0 && params.value < attribute.values.length) {
+      return attribute.values[params.value];
+    }
+  } catch (e) {
+    // Si l'attribut par ID échoue, on peut essayer de chercher par nom ou rester sur la valeur brute
+  }
+  
+  return value.toString();
+});
+

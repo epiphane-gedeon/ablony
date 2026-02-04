@@ -34,7 +34,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   List<String> _selectedBrands = [];
   List<String> _selectedColors = [];
   List<String> _selectedSizes = [];
-  List<ProductCondition> _selectedConditions = [];
+  List<String> _selectedConditions = [];
   List<String> _selectedMaterials = [];
   double? _minPrice;
   double? _maxPrice;
@@ -162,34 +162,69 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
     // Filtre par marque
     if (_selectedBrands.isNotEmpty) {
       filtered = filtered.where((product) {
-        final brand =
-            product.attributes['brand']?.toString() ??
-            product.attributes['marque']?.toString();
-        return brand != null && _selectedBrands.contains(brand);
+        for (var selection in _selectedBrands) {
+          final parts = selection.split(':');
+          if (parts.length == 2) {
+            final attrId = parts[0];
+            final valueIndexStr = parts[1];
+            final productValue = product.attributes[attrId];
+            if (productValue != null && productValue.toString() == valueIndexStr) {
+              return true;
+            }
+          } else {
+            final brand = product.attributes['brand']?.toString() ??
+                          product.attributes['marque']?.toString();
+            if (brand != null && selection == brand) return true;
+          }
+        }
+        return false;
       }).toList();
     }
 
     // Filtre par couleur
     if (_selectedColors.isNotEmpty) {
       filtered = filtered.where((product) {
-        final color =
-            product.attributes['color']?.toString() ??
-            product.attributes['couleur']?.toString();
-        return color != null && _selectedColors.contains(color);
+        for (var selection in _selectedColors) {
+          final parts = selection.split(':');
+          if (parts.length == 2) {
+            final attrId = parts[0];
+            final valueIndexStr = parts[1];
+            final productValue = product.attributes[attrId];
+            if (productValue != null && productValue.toString() == valueIndexStr) {
+              return true;
+            }
+          } else {
+            final color = product.attributes['color']?.toString() ??
+                          product.attributes['couleur']?.toString();
+            if (color != null && selection == color) return true;
+          }
+        }
+        return false;
       }).toList();
     }
 
     // Filtre par taille
     if (_selectedSizes.isNotEmpty) {
       filtered = filtered.where((product) {
-        // Chercher dans tous les attributs de taille possibles
-        for (var key in product.attributes.keys) {
-          if (key.toLowerCase().contains('size') ||
-              key.toLowerCase().contains('taille') ||
-              key.toLowerCase().contains('pointure')) {
-            final size = product.attributes[key]?.toString();
-            if (size != null && _selectedSizes.contains(size)) {
+        // Le format de _selectedSizes est "attributeId:valueIndex"
+        for (var selection in _selectedSizes) {
+          final parts = selection.split(':');
+          if (parts.length == 2) {
+            final attrId = parts[0];
+            final valueIndexStr = parts[1];
+            
+            final productValue = product.attributes[attrId];
+            if (productValue != null && productValue.toString() == valueIndexStr) {
               return true;
+            }
+          } else {
+            // Fallback pour compatibilité avec d'anciennes sélections
+            for (var key in product.attributes.keys) {
+              if (key.toLowerCase().contains('size') ||
+                  key.toLowerCase().contains('taille') ||
+                  key.toLowerCase().contains('pointure')) {
+                if (product.attributes[key]?.toString() == selection) return true;
+              }
             }
           }
         }
@@ -200,18 +235,30 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
     // Filtre par état/condition
     if (_selectedConditions.isNotEmpty) {
       filtered = filtered.where((product) {
-        return _selectedConditions.contains(product.condition);
+        return _selectedConditions.contains(product.condition.index.toString());
       }).toList();
     }
 
     // Filtre par matière
     if (_selectedMaterials.isNotEmpty) {
       filtered = filtered.where((product) {
-        final material =
-            product.attributes['material']?.toString() ??
-            product.attributes['matiere']?.toString() ??
-            product.attributes['matière']?.toString();
-        return material != null && _selectedMaterials.contains(material);
+        for (var selection in _selectedMaterials) {
+          final parts = selection.split(':');
+          if (parts.length == 2) {
+            final attrId = parts[0];
+            final valueIndexStr = parts[1];
+            final productValue = product.attributes[attrId];
+            if (productValue != null && productValue.toString() == valueIndexStr) {
+              return true;
+            }
+          } else {
+            final materialValue = product.attributes['material'] ??
+                                product.attributes['matiere'] ??
+                                product.attributes['matière'];
+            if (materialValue != null && selection == materialValue.toString()) return true;
+          }
+        }
+        return false;
       }).toList();
     }
 
@@ -359,8 +406,17 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                   _selectedSizes.isEmpty
                       ? l10n.filterAll
                       : _selectedSizes.length <= 3
-                      ? _selectedSizes.join(', ')
-                      : '${_selectedSizes.take(3).join(', ')}...',
+                      ? _selectedSizes.map((selection) {
+                          final parts = selection.split(':');
+                          if (parts.length == 2) {
+                            return ref.watch(attributeLabelProvider((
+                              attributeId: parts[0],
+                              value: int.tryParse(parts[1]) ?? parts[1]
+                            ))).value ?? selection;
+                          }
+                          return selection;
+                        }).join(', ')
+                      : '${_selectedSizes.length} sélectionné(s)',
                   _showSizeFilter,
                 ),
                 Divider(
@@ -374,8 +430,17 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                   _selectedBrands.isEmpty
                       ? l10n.filterAll
                       : _selectedBrands.length <= 3
-                      ? _selectedBrands.join(', ')
-                      : '${_selectedBrands.take(3).join(', ')}...',
+                      ? _selectedBrands.map((selection) {
+                          final parts = selection.split(':');
+                          if (parts.length == 2) {
+                            return ref.watch(attributeLabelProvider((
+                              attributeId: parts[0],
+                              value: int.tryParse(parts[1]) ?? parts[1]
+                            ))).value ?? selection;
+                          }
+                          return selection;
+                        }).join(', ')
+                      : '${_selectedBrands.length} sélectionné(s)',
                   _showBrandFilter,
                 ),
                 Divider(
@@ -389,8 +454,12 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                   _selectedConditions.isEmpty
                       ? l10n.filterAll
                       : _selectedConditions.length <= 2
-                      ? _selectedConditions.map((c) => c.label).join(', ')
-                      : '${_selectedConditions.take(2).map((c) => c.label).join(', ')}...',
+                      ? _selectedConditions.map((id) {
+                          return ref.watch(attributeLabelProvider((attributeId: 'condition', value: int.tryParse(id) ?? id))).value ?? id;
+                        }).join(', ')
+                      : '${_selectedConditions.take(2).map((id) {
+                          return ref.watch(attributeLabelProvider((attributeId: 'condition', value: int.tryParse(id) ?? id))).value ?? id;
+                        }).join(', ')}...',
                   _showConditionFilter,
                 ),
                 Divider(
@@ -404,8 +473,17 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                   _selectedColors.isEmpty
                       ? l10n.filterAll
                       : _selectedColors.length <= 3
-                      ? _selectedColors.join(', ')
-                      : '${_selectedColors.take(3).join(', ')}...',
+                      ? _selectedColors.map((selection) {
+                          final parts = selection.split(':');
+                          if (parts.length == 2) {
+                            return ref.watch(attributeLabelProvider((
+                              attributeId: parts[0],
+                              value: int.tryParse(parts[1]) ?? parts[1]
+                            ))).value ?? selection;
+                          }
+                          return selection;
+                        }).join(', ')
+                      : '${_selectedColors.length} sélectionné(s)',
                   _showColorFilter,
                 ),
                 Divider(
@@ -432,8 +510,17 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                   _selectedMaterials.isEmpty
                       ? l10n.filterAll
                       : _selectedMaterials.length <= 2
-                      ? _selectedMaterials.join(', ')
-                      : '${_selectedMaterials.take(2).join(', ')}...',
+                      ? _selectedMaterials.map((selection) {
+                          final parts = selection.split(':');
+                          if (parts.length == 2) {
+                            return ref.watch(attributeLabelProvider((
+                              attributeId: parts[0],
+                              value: int.tryParse(parts[1]) ?? parts[1]
+                            ))).value ?? selection;
+                          }
+                          return selection;
+                        }).join(', ')
+                      : '${_selectedMaterials.length} sélectionné(s)',
                   _showMaterialFilter,
                 ),
               ],
@@ -833,22 +920,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                             itemBuilder: (context, index) {
                               final product = _filteredResults[index];
                               return ProductCard(
-                                imageUrl: product.imageUrls.isNotEmpty
-                                    ? product.imageUrls.first
-                                    : null,
-                                brand:
-                                    product.attributes['brand']?.toString() ??
-                                    product.title,
-                                size:
-                                    product.attributes['size_haut']
-                                        ?.toString() ??
-                                    product.attributes['size_bas']
-                                        ?.toString() ??
-                                    product.attributes['pointure']?.toString(),
-                                condition: product.condition.label,
-                                price: product.price,
-                                priceWithProtection: product.price * 1.05,
-                                favoritesCount: product.favoritesCount,
+                                product: product,
                                 onTap: () {
                                   context.push('/product/${product.id}');
                                 },
@@ -865,268 +937,42 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
     );
   }
 
-  /// Affiche le filtre Marque
+  /// Affiche le filtre Marque de manière contextuelle
   void _showBrandFilter() async {
     final l10n = AppLocalizations.of(context)!;
-    final brandsAsync = ref.read(allBrandsProvider);
-    final contentKey = GlobalKey<DynamicSelectionViewState>();
-
-    brandsAsync.whenOrNull(
-      data: (brands) {
-        if (!mounted || brands.isEmpty) return;
-
-        SelectionSheet.show(
-          context: context,
-          title: l10n.filterBrand,
-          onClear: () {
-            contentKey.currentState?.clearSelections();
-          },
-          content: DynamicSelectionView(
-            key: contentKey,
-            config: {
-              'type': 'list',
-              'dataSource': 'brands',
-              'itemKey': 'id',
-              'itemLabel': 'name',
-              'multiSelect': true,
-            },
-            initialData: {'selectedIds': _selectedBrands},
-            dataSources: {
-              'brands': (_) async =>
-                  brands.map((brand) => {'id': brand, 'name': brand}).toList(),
-            },
-            onResult: (result) {
-              if (result != null && result['selectedIds'] != null) {
-                setState(() {
-                  _selectedBrands = List<String>.from(result['selectedIds']);
-                });
-                Navigator.pop(context);
-              }
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  /// Affiche le filtre Couleur
-  void _showColorFilter() async {
-    final l10n = AppLocalizations.of(context)!;
-    final colorsAsync = ref.read(allColorsProvider);
-    final contentKey = GlobalKey<DynamicSelectionViewState>();
-
-    colorsAsync.whenOrNull(
-      data: (colors) {
-        if (!mounted || colors.isEmpty) return;
-
-        SelectionSheet.show(
-          context: context,
-          title: l10n.filterColor,
-          onClear: () {
-            contentKey.currentState?.clearSelections();
-          },
-          content: DynamicSelectionView(
-            key: contentKey,
-            config: {
-              'type': 'list',
-              'dataSource': 'colors',
-              'itemKey': 'id',
-              'itemLabel': 'name',
-              'multiSelect': true,
-            },
-            initialData: {'selectedIds': _selectedColors},
-            dataSources: {
-              'colors': (_) async =>
-                  colors.map((color) => {'id': color, 'name': color}).toList(),
-            },
-            onResult: (result) {
-              if (result != null && result['selectedIds'] != null) {
-                setState(() {
-                  _selectedColors = List<String>.from(result['selectedIds']);
-                });
-                Navigator.pop(context);
-              }
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  /// Affiche le filtre Taille
-  void _showSizeFilter() async {
-    final l10n = AppLocalizations.of(context)!;
-    final sizesAsync = ref.read(allSizesProvider);
-
-    sizesAsync.whenOrNull(
-      data: (allSizes) {
-        if (!mounted || allSizes.isEmpty) return;
-
-        // Détecter le type de tailles dans les résultats actuels
-        bool hasNumericSizes = false;
-        bool hasLetterSizes = false;
-
-        for (var product in _results) {
-          for (var key in product.attributes.keys) {
-            if (key.toLowerCase().contains('size') ||
-                key.toLowerCase().contains('taille')) {
-              final size = product.attributes[key];
-              if (size != null && size.toString().isNotEmpty) {
-                if (int.tryParse(size.toString().split('.')[0]) != null) {
-                  hasNumericSizes = true;
-                } else {
-                  hasLetterSizes = true;
-                }
-              }
-            }
-          }
-        }
-
-        // Séparer les tailles numériques et lettres
-        final numericSizes = allSizes
-            .where((s) => int.tryParse(s.split('.')[0]) != null)
-            .toList();
-        final letterSizes = allSizes
-            .where((s) => int.tryParse(s) == null)
-            .toList();
-
-        // Trier intelligemment
-        numericSizes.sort((a, b) {
-          final aNum = double.tryParse(a) ?? 0;
-          final bNum = double.tryParse(b) ?? 0;
-          return aNum.compareTo(bNum);
-        });
-        letterSizes.sort();
-
-        // Sélectionner selon le type détecté
-        List<String> filteredSizes = [];
-        if (hasNumericSizes && !hasLetterSizes) {
-          filteredSizes = numericSizes;
-        } else if (hasLetterSizes && !hasNumericSizes) {
-          filteredSizes = letterSizes;
-        } else {
-          filteredSizes = [...numericSizes, ...letterSizes];
-        }
-
-        if (filteredSizes.isEmpty) return;
-
-        final contentKey = GlobalKey<DynamicSelectionViewState>();
-
-        SelectionSheet.show(
-          context: context,
-          title: l10n.filterSize,
-          onClear: () {
-            contentKey.currentState?.clearSelections();
-          },
-          content: DynamicSelectionView(
-            key: contentKey,
-            config: {
-              'type': 'list',
-              'dataSource': 'sizes',
-              'itemKey': 'id',
-              'itemLabel': 'name',
-              'multiSelect': true,
-            },
-            initialData: {'selectedIds': _selectedSizes},
-            dataSources: {
-              'sizes': (_) async => filteredSizes
-                  .map((size) => {'id': size, 'name': size})
-                  .toList(),
-            },
-            onResult: (result) {
-              if (result != null && result['selectedIds'] != null) {
-                setState(() {
-                  _selectedSizes = List<String>.from(result['selectedIds']);
-                });
-                Navigator.pop(context);
-              }
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  /// Affiche le filtre Matière
-  void _showMaterialFilter() async {
-    final l10n = AppLocalizations.of(context)!;
-    final materialsAsync = ref.read(allMaterialsProvider);
-    final contentKey = GlobalKey<DynamicSelectionViewState>();
-
-    materialsAsync.whenOrNull(
-      data: (materials) {
-        if (!mounted || materials.isEmpty) return;
-
-        SelectionSheet.show(
-          context: context,
-          title: l10n.filterMaterial,
-          onClear: () {
-            contentKey.currentState?.clearSelections();
-          },
-          content: DynamicSelectionView(
-            key: contentKey,
-            config: {
-              'type': 'list',
-              'dataSource': 'materials',
-              'itemKey': 'id',
-              'itemLabel': 'name',
-              'multiSelect': true,
-            },
-            initialData: {'selectedIds': _selectedMaterials},
-            dataSources: {
-              'materials': (_) async => materials
-                  .map((material) => {'id': material, 'name': material})
-                  .toList(),
-            },
-            onResult: (result) {
-              if (result != null && result['selectedIds'] != null) {
-                setState(() {
-                  _selectedMaterials = List<String>.from(result['selectedIds']);
-                });
-                Navigator.pop(context);
-              }
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  /// Récupère le label traduit d'une condition
-  String _getConditionLabel(AppLocalizations l10n, ProductCondition condition) {
-    switch (condition) {
-      case ProductCondition.newWithTags:
-        return l10n.conditionNew;
-      case ProductCondition.excellent:
-        return l10n.conditionExcellent;
-      case ProductCondition.good:
-        return l10n.conditionGood;
-      case ProductCondition.satisfactory:
-        return l10n
-            .conditionFair; // Using 'fair' as translation for 'satisfactory'
-      case ProductCondition.worn:
-        return l10n
-            .conditionFair; // Using 'fair' as translation for 'worn' (can be adjusted)
+    
+    final attributeIds = <String>{};
+    for (var product in _results) {
+      final id = product.primaryBrandAttributeId;
+      if (id != null) attributeIds.add(id);
     }
-  }
 
-  /// Affiche le filtre État/Condition
-  void _showConditionFilter() {
-    final l10n = AppLocalizations.of(context)!;
+    if (attributeIds.isEmpty) return;
+
+    final List<ProductAttribute> attributes = [];
+    for (var id in attributeIds) {
+      final attr = await ref.read(attributeByIdProvider(id).future);
+      attributes.add(attr);
+    }
+
+    final Map<String, String> options = {};
+    for (var attr in attributes) {
+      for (var i = 0; i < attr.values.length; i++) {
+        options['${attr.id}:$i'] = attr.values[i];
+      }
+    }
+
+    if (options.isEmpty) return;
+
+    final entries = options.entries.toList();
+    entries.sort((a, b) => a.value.compareTo(b.value));
+
+    if (!mounted) return;
     final contentKey = GlobalKey<DynamicSelectionViewState>();
-    final conditions = ProductCondition.values
-        .map(
-          (condition) => {
-            'id': condition.name,
-            'name': _getConditionLabel(l10n, condition),
-            'condition': condition,
-          },
-        )
-        .toList();
 
     SelectionSheet.show(
       context: context,
-      title: l10n.filterCondition,
+      title: l10n.filterBrand,
       onClear: () {
         contentKey.currentState?.clearSelections();
       },
@@ -1134,27 +980,294 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         key: contentKey,
         config: {
           'type': 'list',
-          'dataSource': 'conditions',
+          'dataSource': 'brands',
           'itemKey': 'id',
           'itemLabel': 'name',
           'multiSelect': true,
         },
-        initialData: {
-          'selectedIds': _selectedConditions.map((c) => c.name).toList(),
+        initialData: {'selectedIds': _selectedBrands},
+        dataSources: {
+          'brands': (_) async => entries.map((e) => {
+            'id': e.key,
+            'name': e.value,
+          }).toList(),
         },
-        dataSources: {'conditions': (_) async => conditions},
         onResult: (result) {
           if (result != null && result['selectedIds'] != null) {
             setState(() {
-              final selectedNames = List<String>.from(result['selectedIds']);
-              _selectedConditions = ProductCondition.values
-                  .where((c) => selectedNames.contains(c.name))
-                  .toList();
+              _selectedBrands = List<String>.from(result['selectedIds']);
             });
             Navigator.pop(context);
           }
         },
       ),
+    );
+  }
+
+  /// Affiche le filtre Couleur de manière contextuelle
+  void _showColorFilter() async {
+    final l10n = AppLocalizations.of(context)!;
+    
+    final attributeIds = <String>{};
+    for (var product in _results) {
+      final id = product.primaryColorAttributeId;
+      if (id != null) attributeIds.add(id);
+    }
+
+    if (attributeIds.isEmpty) return;
+
+    final List<ProductAttribute> attributes = [];
+    for (var id in attributeIds) {
+      final attr = await ref.read(attributeByIdProvider(id).future);
+      attributes.add(attr);
+    }
+
+    final Map<String, String> options = {};
+    for (var attr in attributes) {
+      for (var i = 0; i < attr.values.length; i++) {
+        options['${attr.id}:$i'] = attr.values[i];
+      }
+    }
+
+    if (options.isEmpty) return;
+
+    final entries = options.entries.toList();
+    entries.sort((a, b) => a.value.compareTo(b.value));
+
+    if (!mounted) return;
+    final contentKey = GlobalKey<DynamicSelectionViewState>();
+
+    SelectionSheet.show(
+      context: context,
+      title: l10n.filterColor,
+      onClear: () {
+        contentKey.currentState?.clearSelections();
+      },
+      content: DynamicSelectionView(
+        key: contentKey,
+        config: {
+          'type': 'list',
+          'dataSource': 'colors',
+          'itemKey': 'id',
+          'itemLabel': 'name',
+          'multiSelect': true,
+        },
+        initialData: {'selectedIds': _selectedColors},
+        dataSources: {
+          'colors': (_) async => entries.map((e) => {
+            'id': e.key,
+            'name': e.value,
+          }).toList(),
+        },
+        onResult: (result) {
+          if (result != null && result['selectedIds'] != null) {
+            setState(() {
+              _selectedColors = List<String>.from(result['selectedIds']);
+            });
+            Navigator.pop(context);
+          }
+        },
+      ),
+    );
+  }
+
+  /// Affiche le filtre Taille de manière contextuelle
+  void _showSizeFilter() async {
+    final l10n = AppLocalizations.of(context)!;
+    
+    // 1. Identifier les IDs d'attributs de taille présents dans les résultats
+    final sizeAttributeIds = <String>{};
+    for (var product in _results) {
+      final id = product.primarySizeAttributeId;
+      if (id != null) sizeAttributeIds.add(id);
+    }
+
+    if (sizeAttributeIds.isEmpty) return;
+
+    // 2. Récupérer les définitions complètes de ces attributs
+    final List<ProductAttribute> sizeAttributes = [];
+    for (var id in sizeAttributeIds) {
+      final attr = await ref.read(attributeByIdProvider(id).future);
+      sizeAttributes.add(attr);
+    }
+
+    // 3. Collecter toutes les valeurs possibles et leurs libellés
+    // Map de id_global -> label
+    final Map<String, String> sizeOptions = {};
+    
+    for (var attr in sizeAttributes) {
+      for (var i = 0; i < attr.values.length; i++) {
+        final label = attr.values[i];
+        // On utilise "attrId:index" comme ID unique pour le filtre
+        sizeOptions['${attr.id}:$i'] = label;
+      }
+    }
+
+    if (sizeOptions.isEmpty) return;
+
+    // 4. Trier les options (Numérique vs Lettres)
+    final entries = sizeOptions.entries.toList();
+    entries.sort((a, b) {
+      final aLabel = a.value;
+      final bLabel = b.value;
+      
+      final aNum = double.tryParse(aLabel.split(RegExp(r'[^0-9.]')).first);
+      final bNum = double.tryParse(bLabel.split(RegExp(r'[^0-9.]')).first);
+      
+      if (aNum != null && bNum != null) return aNum.compareTo(bNum);
+      if (aNum != null) return -1;
+      if (bNum != null) return 1;
+      return aLabel.compareTo(bLabel);
+    });
+
+    if (!mounted) return;
+
+    final contentKey = GlobalKey<DynamicSelectionViewState>();
+
+    SelectionSheet.show(
+      context: context,
+      title: l10n.filterSize,
+      onClear: () {
+        contentKey.currentState?.clearSelections();
+      },
+      content: DynamicSelectionView(
+        key: contentKey,
+        config: {
+          'type': 'list',
+          'dataSource': 'sizes',
+          'itemKey': 'id',
+          'itemLabel': 'name',
+          'multiSelect': true,
+        },
+        initialData: {'selectedIds': _selectedSizes},
+        dataSources: {
+          'sizes': (_) async => entries.map((e) => {
+            'id': e.key,
+            'name': e.value,
+          }).toList(),
+        },
+        onResult: (result) {
+          if (result != null && result['selectedIds'] != null) {
+            setState(() {
+              _selectedSizes = List<String>.from(result['selectedIds']);
+            });
+            Navigator.pop(context);
+          }
+        },
+      ),
+    );
+  }
+
+  /// Affiche le filtre Matière de manière contextuelle
+  void _showMaterialFilter() async {
+    final l10n = AppLocalizations.of(context)!;
+    
+    final attributeIds = <String>{};
+    for (var product in _results) {
+      final id = product.primaryMaterialAttributeId;
+      if (id != null) attributeIds.add(id);
+    }
+
+    if (attributeIds.isEmpty) return;
+
+    final List<ProductAttribute> attributes = [];
+    for (var id in attributeIds) {
+      final attr = await ref.read(attributeByIdProvider(id).future);
+      attributes.add(attr);
+    }
+
+    final Map<String, String> options = {};
+    for (var attr in attributes) {
+      for (var i = 0; i < attr.values.length; i++) {
+        options['${attr.id}:$i'] = attr.values[i];
+      }
+    }
+
+    if (options.isEmpty) return;
+
+    final entries = options.entries.toList();
+    entries.sort((a, b) => a.value.compareTo(b.value));
+
+    if (!mounted) return;
+    final contentKey = GlobalKey<DynamicSelectionViewState>();
+
+    SelectionSheet.show(
+      context: context,
+      title: l10n.filterMaterial,
+      onClear: () {
+        contentKey.currentState?.clearSelections();
+      },
+      content: DynamicSelectionView(
+        key: contentKey,
+        config: {
+          'type': 'list',
+          'dataSource': 'materials',
+          'itemKey': 'id',
+          'itemLabel': 'name',
+          'multiSelect': true,
+        },
+        initialData: {'selectedIds': _selectedMaterials},
+        dataSources: {
+          'materials': (_) async => entries.map((e) => {
+            'id': e.key,
+            'name': e.value,
+          }).toList(),
+        },
+        onResult: (result) {
+          if (result != null && result['selectedIds'] != null) {
+            setState(() {
+              _selectedMaterials = List<String>.from(result['selectedIds']);
+            });
+            Navigator.pop(context);
+          }
+        },
+      ),
+    );
+  }
+
+
+  /// Affiche le filtre État/Condition
+  void _showConditionFilter() async {
+    final l10n = AppLocalizations.of(context)!;
+    final conditionsAsync = ref.read(allConditionsProvider);
+    final contentKey = GlobalKey<DynamicSelectionViewState>();
+
+    conditionsAsync.whenOrNull(
+      data: (conditions) {
+        if (!mounted || conditions.isEmpty) return;
+
+        SelectionSheet.show(
+          context: context,
+          title: l10n.filterCondition,
+          onClear: () {
+            contentKey.currentState?.clearSelections();
+          },
+          content: DynamicSelectionView(
+            key: contentKey,
+            config: {
+              'type': 'list',
+              'dataSource': 'conditions',
+              'itemKey': 'id',
+              'itemLabel': 'name',
+              'multiSelect': true,
+            },
+            initialData: {'selectedIds': _selectedConditions},
+            dataSources: {
+              'conditions': (_) async => conditions.asMap().entries.map((entry) {
+                return {'id': entry.key.toString(), 'name': entry.value};
+              }).toList(),
+            },
+            onResult: (result) {
+              if (result != null && result['selectedIds'] != null) {
+                setState(() {
+                  _selectedConditions = List<String>.from(result['selectedIds']);
+                });
+                Navigator.pop(context);
+              }
+            },
+          ),
+        );
+      },
     );
   }
 

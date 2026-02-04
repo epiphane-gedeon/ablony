@@ -1082,6 +1082,12 @@ abstract class AppLocalizations {
   /// **'Usé'**
   String get conditionUsed;
 
+  /// Dynamic condition value translation
+  ///
+  /// In fr, this message translates to:
+  /// **'{value, select, newWithTags{Neuf avec étiquette} excellent{Excellent} good{Bon état} satisfactory{Satisfaisant} worn{Usé} other{Bon état}}'**
+  String conditionValue(String value);
+
   /// Help text for condition attribute
   ///
   /// In fr, this message translates to:
@@ -1657,6 +1663,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count} résultats'**
   String resultsCount(int count);
+
+  /// Tab label for messages
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages'**
+  String get messagesTab;
+
+  /// Tab label for notifications
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTab;
+
+  /// Empty state message for messages
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de messages'**
+  String get noMessages;
+
+  /// Empty state message for notifications
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de notifications'**
+  String get noNotifications;
+
+  /// Title of the make offer bottom sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Faire une offre'**
+  String get makeOfferTitle;
+
+  /// Item price label in make offer sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'prix de l\'article : {price}'**
+  String itemPrice(String price);
+
+  /// Reduction percentage label
+  ///
+  /// In fr, this message translates to:
+  /// **'{percent}% de réduction'**
+  String reductionLabel(int percent);
+
+  /// Other offer option
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get otherOffer;
+
+  /// Hint for custom price offer
+  ///
+  /// In fr, this message translates to:
+  /// **'Propose un prix'**
+  String get otherOfferHint;
+
+  /// Propose button text
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer {amount}'**
+  String proposeButton(String amount);
+
+  /// Simple propose button text
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer'**
+  String get proposeButtonSimple;
+
+  /// Error message when offer is too low
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton offre doit être de {minAmount} minimum (-{limit}%)'**
+  String offerLimitError(String minAmount, int limit);
+
+  /// Remaining offers for today
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} propositions restante(s) pour aujourd\'hui'**
+  String suggestionsRemaining(int count);
+
+  /// Why link in make offer sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi ?'**
+  String get whyLink;
 }
 
 class _AppLocalizationsDelegate

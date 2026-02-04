@@ -10,6 +10,7 @@ import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/category_provider.dart';
 import '../providers/product_provider.dart';
+import 'package:ablony/features/make_offer_feature/presentation/widgets/make_offer_bottom_sheet.dart';
 
 /// Page de détail d'un produit
 class ProductDetailPage extends ConsumerStatefulWidget {
@@ -309,14 +310,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                       Row(
                         children: [
                           // Taille
-                          if (product.attributes['size_haut'] != null ||
-                              product.attributes['size_bas'] != null ||
-                              product.attributes['pointure'] != null) ...[
+                          if (product.primarySizeValue != null) ...[
                             Text(
-                              product.attributes['size_haut']?.toString() ??
-                                  product.attributes['size_bas']?.toString() ??
-                                  product.attributes['pointure']?.toString() ??
-                                  '',
+                              ref.watch(attributeLabelProvider((
+                                attributeId: product.primarySizeAttributeId!,
+                                value: product.primarySizeValue
+                              ))).value ?? '',
                               style: theme.textTheme.bodyMedium,
                             ),
                             Text(' · ', style: theme.textTheme.bodyMedium),
@@ -324,15 +323,18 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
                           // État
                           Text(
-                            product.condition.label,
+                            ref.watch(attributeLabelProvider((attributeId: 'condition', value: product.condition.index))).value ?? product.condition.label,
                             style: theme.textTheme.bodyMedium,
                           ),
 
                           // Marque (si elle existe)
-                          if (product.attributes['brand'] != null) ...[
+                          if (product.primaryBrandValue != null) ...[
                             Text(' · ', style: theme.textTheme.bodyMedium),
                             Link(
-                              text: product.attributes['brand'].toString(),
+                              text: ref.watch(attributeLabelProvider((
+                                attributeId: product.primaryBrandAttributeId!,
+                                value: product.primaryBrandValue
+                              ))).value ?? product.primaryBrandValue.toString(),
                               onTap: () {
                                 // TODO: Rediriger vers la page de la marque
                               },
@@ -427,10 +429,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         _buildDetailRow(
                           theme,
                           'Taille',
-                          product.attributes['size_haut']?.toString() ??
-                              product.attributes['size_bas']?.toString() ??
-                              product.attributes['pointure']?.toString() ??
-                              'Non spécifiée',
+                          product.primarySizeValue != null
+                              ? ref.watch(attributeLabelProvider((
+                                  attributeId: product.primarySizeAttributeId!,
+                                  value: product.primarySizeValue
+                                ))).value ?? 'Non spécifiée'
+                              : 'Non spécifiée',
                           showArrow: true,
                         ),
                         const Divider(height: 1),
@@ -439,7 +443,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         _buildDetailRow(
                           theme,
                           'État',
-                          product.condition.label,
+                          ref.watch(attributeLabelProvider((attributeId: 'condition', value: product.condition.index))).value ?? product.condition.label,
                           showArrow: true,
                         ),
                         const Divider(height: 1),
@@ -449,7 +453,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           _buildDetailRow(
                             theme,
                             'Couleur',
-                            product.attributes['color'].toString(),
+                            ref.watch(attributeLabelProvider((attributeId: 'color', value: product.attributes['color']))).value ?? product.attributes['color'].toString(),
                             showArrow: false,
                           ),
                         if (product.attributes['color'] != null)
@@ -700,7 +704,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                     child: SecondaryButton(
                       text: 'Faire une offre',
                       onPressed: () {
-                        // TODO: Ouvrir le dialogue pour faire une offre
+                        if (_product != null) {
+                          MakeOfferBottomSheet.show(context, _product!);
+                        }
                       },
                     ),
                   ),
@@ -822,27 +828,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
               itemBuilder: (context, index) {
                 final product = products[index];
                 return ProductCard(
-                  // Image du produit (première image de la liste)
-                  imageUrl: product.imageUrls.isNotEmpty
-                      ? product.imageUrls.first
-                      : null,
-                  // Marque (depuis les attributs ou titre si non spécifiée)
-                  brand:
-                      product.attributes['brand']?.toString() ?? product.title,
-                  // Taille (récupère size_haut, size_bas ou pointure)
-                  size:
-                      product.attributes['size_haut']?.toString() ??
-                      product.attributes['size_bas']?.toString() ??
-                      product.attributes['pointure']?.toString(),
-                  // État du produit (Neuf, Excellent, Bon état, etc.)
-                  condition: product.condition.label,
-                  // Prix du produit
-                  price: product.price,
-                  // Prix avec protection acheteurs (+5%)
-                  priceWithProtection: product.price * 1.05,
-                  // Nombre de favoris
-                  favoritesCount: product.favoritesCount,
-                  // Navigation vers la page de détail au clic
+                  product: product,
                   onTap: () {
                     context.push('/product/${product.id}');
                   },

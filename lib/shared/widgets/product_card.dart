@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/product/domain/entities/product.dart';
+import '../../features/product/presentation/providers/product_provider.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Carte de produit réutilisable
@@ -11,11 +14,14 @@ import '../../l10n/app_localizations.dart';
 /// - Prix classique
 /// - Prix avec protection client (en bleu)
 /// - Bouton favoris
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerWidget {
+  final Product? product; // Passer le produit complet pour une résolution automatique
   final String? imageUrl;
-  final String brand;
-  final String? size;
-  final String condition;
+  final dynamic brand;
+  final dynamic size;
+  final String? sizeAttributeId;
+  final String? brandAttributeId;
+  final dynamic condition;
   final double price;
   final double priceWithProtection;
   final int? favoritesCount;
@@ -24,20 +30,56 @@ class ProductCard extends StatelessWidget {
 
   const ProductCard({
     super.key,
+    this.product,
     this.imageUrl,
-    required this.brand,
+    this.brand,
     this.size,
-    required this.condition,
-    required this.price,
-    required this.priceWithProtection,
+    this.sizeAttributeId,
+    this.brandAttributeId,
+    this.condition,
+    this.price = 0,
+    this.priceWithProtection = 0,
     this.favoritesCount,
     this.onTap,
     this.onFavorite,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+
+    // Utiliser les données du produit s'il est fourni, sinon utiliser les paramètres individuels
+    final effectiveImageUrl = imageUrl ?? product?.imageUrls.firstOrNull;
+    final effectiveBrand = brand ?? product?.primaryBrandValue ?? product?.title;
+    final effectiveBrandId = brandAttributeId ?? product?.primaryBrandAttributeId ?? 'brand';
+    final effectiveSize = size ?? product?.primarySizeValue;
+    final effectiveSizeId = sizeAttributeId ?? product?.primarySizeAttributeId ?? 'size';
+    final effectiveCondition = condition ?? product?.condition.index;
+    final effectivePrice = product?.price ?? price;
+    final effectivePriceWithProtection = product != null ? product!.price * 1.05 : priceWithProtection;
+    final effectiveFavoritesCount = favoritesCount ?? product?.favoritesCount;
+
+    // Résolution dynamique des libellés (index -> label ou string -> string)
+    final resolvedBrand = ref.watch(
+          attributeLabelProvider((attributeId: effectiveBrandId, value: effectiveBrand)),
+        ).value ??
+        effectiveBrand?.toString() ??
+        '';
+
+    final resolvedCondition = ref.watch(
+          attributeLabelProvider((attributeId: 'condition', value: effectiveCondition)),
+        ).value ??
+        effectiveCondition?.toString() ??
+        '';
+
+    String? resolvedSize;
+    if (effectiveSize != null) {
+      resolvedSize = ref.watch(
+            attributeLabelProvider(
+                (attributeId: effectiveSizeId, value: effectiveSize)),
+          ).value ??
+          effectiveSize.toString();
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -54,11 +96,11 @@ class ProductCard extends StatelessWidget {
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: imageUrl != null
+                  child: effectiveImageUrl != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.network(
-                            imageUrl!,
+                            effectiveImageUrl,
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.cover,
@@ -83,7 +125,7 @@ class ProductCard extends StatelessWidget {
                 ),
 
                 // Badge favoris (coin inférieur droit)
-                if (favoritesCount != null && favoritesCount! > 0)
+                if (effectiveFavoritesCount != null && effectiveFavoritesCount > 0)
                   Positioned(
                     bottom: 8,
                     right: 8,
@@ -106,7 +148,7 @@ class ProductCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            favoritesCount.toString(),
+                            effectiveFavoritesCount.toString(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -130,7 +172,7 @@ class ProductCard extends StatelessWidget {
               children: [
                 // Marque
                 Text(
-                  brand,
+                  resolvedBrand,
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -142,7 +184,9 @@ class ProductCard extends StatelessWidget {
 
                 // Taille et état
                 Text(
-                  size != null ? '$size • $condition' : condition,
+                  resolvedSize != null
+                      ? '$resolvedSize • $resolvedCondition'
+                      : resolvedCondition,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -155,7 +199,7 @@ class ProductCard extends StatelessWidget {
 
                 // Prix classique
                 Text(
-                  '${price.toStringAsFixed(0)} FCFA',
+                  '${effectivePrice.toStringAsFixed(0)} FCFA',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -169,7 +213,7 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       l10n.priceWithProtection(
-                        priceWithProtection.toStringAsFixed(0),
+                        effectivePriceWithProtection.toStringAsFixed(0),
                       ),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,

@@ -8,6 +8,7 @@ import '../../../../shared/widgets/product_card.dart';
 import '../../../../core/utils/category_translator.dart';
 import '../../../product/presentation/providers/category_provider.dart';
 import '../../../product/presentation/providers/paginated_products_provider.dart';
+import '../../../product/presentation/providers/product_provider.dart';
 import '../../../product/domain/entities/category.dart';
 import '../../../product/domain/entities/product.dart';
 
@@ -119,19 +120,10 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                             final product = products[index];
                             return ProductCard(
-                              imageUrl: product.imageUrls.isNotEmpty
-                                  ? product.imageUrls.first
-                                  : null,
-                              brand:
-                                  _getBrandFromAttributes(product.attributes) ??
-                                  product.title,
-                              size: _getSizeFromAttributes(product.attributes),
-                              condition: _getConditionLabel(product.condition),
-                              price: product.price,
-                              priceWithProtection: product.price * 1.13,
-                              favoritesCount: product.favoritesCount,
-                              onTap: () =>
-                                  context.push('/product/${product.id}'),
+                              product: product,
+                              onTap: () {
+                                context.push('/product/${product.id}');
+                              },
                             );
                           },
                         ),
@@ -216,51 +208,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     // Utiliser CategoryTranslator qui a déjà toutes les traductions
     return CategoryTranslator.translateAttributeValue(l10n, conditionValue);
-  }
-
-  /// Extraire la taille depuis les attributs
-  /// Cherche les attributs contenant "size", "taille" ou "pointure"
-  String? _getSizeFromAttributes(Map<String, dynamic> attributes) {
-    // Chercher d'abord les clés exactes communes
-    if (attributes.containsKey('size')) {
-      return attributes['size'] as String?;
-    }
-    if (attributes.containsKey('taille')) {
-      return attributes['taille'] as String?;
-    }
-
-    // Chercher les variantes (size_haut, size_bas, pointure, etc.)
-    for (var entry in attributes.entries) {
-      final key = entry.key.toLowerCase();
-      if (key.contains('size') ||
-          key.contains('taille') ||
-          key.contains('pointure')) {
-        return entry.value as String?;
-      }
-    }
-
-    return null;
-  }
-
-  /// Extraire la marque depuis les attributs
-  String? _getBrandFromAttributes(Map<String, dynamic> attributes) {
-    // Chercher d'abord les clés exactes communes
-    if (attributes.containsKey('brand')) {
-      return attributes['brand'] as String?;
-    }
-    if (attributes.containsKey('marque')) {
-      return attributes['marque'] as String?;
-    }
-
-    // Chercher les variantes
-    for (var entry in attributes.entries) {
-      final key = entry.key.toLowerCase();
-      if (key.contains('brand') || key.contains('marque')) {
-        return entry.value as String?;
-      }
-    }
-
-    return null;
   }
 
   /// Barre de recherche simple qui redirige vers la page de recherche

@@ -523,6 +523,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get conditionUsed => 'Usé';
 
   @override
+  String conditionValue(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'newWithTags': 'Neuf avec étiquette',
+      'excellent': 'Excellent',
+      'good': 'Bon état',
+      'satisfactory': 'Satisfaisant',
+      'worn': 'Usé',
+      'other': 'Bon état',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get helpTextCondition => 'État général du produit';
 
   @override
@@ -815,4 +828,56 @@ class AppLocalizationsFr extends AppLocalizations {
   String resultsCount(int count) {
     return '$count résultats';
   }
+
+  @override
+  String get messagesTab => 'Messages';
+
+  @override
+  String get notificationsTab => 'Notifications';
+
+  @override
+  String get noMessages => 'Pas encore de messages';
+
+  @override
+  String get noNotifications => 'Pas encore de notifications';
+
+  @override
+  String get makeOfferTitle => 'Faire une offre';
+
+  @override
+  String itemPrice(String price) {
+    return 'prix de l\'article : $price';
+  }
+
+  @override
+  String reductionLabel(int percent) {
+    return '$percent% de réduction';
+  }
+
+  @override
+  String get otherOffer => 'Autre';
+
+  @override
+  String get otherOfferHint => 'Propose un prix';
+
+  @override
+  String proposeButton(String amount) {
+    return 'Proposer $amount';
+  }
+
+  @override
+  String get proposeButtonSimple => 'Proposer';
+
+  @override
+  String offerLimitError(String minAmount, int limit) {
+    return 'Ton offre doit être de $minAmount minimum (-$limit%)';
+  }
+
+  @override
+  String suggestionsRemaining(int count) {
+    return '$count propositions restante(s) pour aujourd\'hui';
+  }
+
+  @override
+  String get whyLink => 'Pourquoi ?';
 }
