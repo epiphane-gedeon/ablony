@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/utils/category_translator.dart';
@@ -385,7 +386,17 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
     switch (attr.type) {
       case AttributeType.select:
         // Récupérer et traduire la valeur sélectionnée si elle existe
-        final selectedValue = _attributeValues[attr.id] as String?;
+        final rawValue = _attributeValues[attr.id];
+        String? selectedValue;
+
+        if (rawValue is int) {
+          if (rawValue >= 0 && rawValue < attr.values.length) {
+            selectedValue = attr.values[rawValue];
+          }
+        } else if (rawValue is String) {
+          selectedValue = rawValue;
+        }
+
         final displayValue = selectedValue != null
             ? CategoryTranslator.translateAttributeValue(l10n, selectedValue)
             : null;
@@ -429,14 +440,14 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
     AppLocalizations l10n,
     String translatedName,
   ) {
-    // Traduire les valeurs des attributs
-    final items = attr.values.map((v) {
+    // Transformer les valeurs en objets utilisables par le sélecteur, en utilisant l'index comme ID
+    final items = attr.values.asMap().entries.map((entry) {
       final translatedValue = CategoryTranslator.translateAttributeValue(
         l10n,
-        v,
+        entry.value,
       );
       return {
-        'id': v, // Garder la valeur originale comme ID
+        'id': entry.key.toString(), // Utiliser l'index comme ID
         'name': translatedValue, // Afficher la valeur traduite
       };
     }).toList();
@@ -456,8 +467,9 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
             onResult: (item) {
               if (item != null) {
                 setState(() {
-                  // Stocker la valeur originale (non traduite) dans la BDD
-                  _attributeValues[attr.id] = item['id'] as String;
+                  // Stocker l'index (sous forme d'entier) dans la BDD
+                  final index = int.tryParse(item['id'] as String);
+                  _attributeValues[attr.id] = index ?? item['id'];
                 });
                 Navigator.of(context).pop();
               }
@@ -529,24 +541,53 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
                     .toList();
               },
             },
-            onResult: (item) {
+            onResult: (item) async {
               if (item != null) {
                 final categoryId = item['id'] as String;
                 final categoryName = item['name'] as String;
 
+                // Récupérer le parentId depuis Firestore
+                String? parentId;
+                try {
+                  // Remontée récursive pour trouver la catégorie racine (niveau 1)
+                  // Les filtres de l'accueil ("femme", "homme") s'appuient sur le categoryId de niveau 1
+                  String currentSubId = categoryId;
+                  bool foundRoot = false;
+                  String? rootId;
+
+                  while (!foundRoot) {
+                    try {
+                      final sub = await ref
+                          .read(categoryRepositoryProvider)
+                          .getSubcategoryById(currentSubId);
+
+                      if (sub.parentId == 'femme' || sub.parentId == 'homme') {
+                        rootId = sub.parentId;
+                        foundRoot = true;
+                      } else {
+                        // On remonte d'un niveau
+                        currentSubId = sub.parentId;
+                      }
+                    } catch (e) {
+                      // Si getSubcategoryById échoue, on est probablement sur une racine
+                      rootId = currentSubId;
+                      foundRoot = true;
+                    }
+                  }
+
+                  parentId = rootId;
+                  debugPrint('✅ Root ParentId extracted from Firestore: $parentId');
+                } catch (e) {
+                  parentId = categoryId;
+                  debugPrint(
+                    'ℹ️ Fallback: Using categoryId as parentId: $parentId',
+                  );
+                }
+
                 setState(() {
                   _selectedCategory = categoryName;
                   _selectedCategoryId = categoryId;
-
-                  // Extraire la catégorie parente depuis l'ID
-                  // Ex: "talon_femme" -> parentId = "femme"
-                  // Ex: "chemise_homme" -> parentId = "homme"
-                  if (categoryId.contains('_')) {
-                    _selectedParentCategoryId = categoryId.split('_').last;
-                  } else {
-                    // Si pas de underscore, c'est une catégorie de niveau 1
-                    _selectedParentCategoryId = categoryId;
-                  }
+                  _selectedParentCategoryId = parentId;
 
                   _attributeValues.clear(); // Reset attributes
                   _categoryAttributes = []; // Clear previous attributes list
@@ -735,11 +776,16 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       // Parser le prix (convertir String → double)
       final price = double.tryParse(_priceController.text) ?? 0.0;
 
-      // Déterminer l'état/condition du produit
-      // TODO: Quand "État" sera ajouté comme attribut dynamique,
-      // récupérer la valeur depuis _attributeValues['condition']
-      // Pour le moment, on utilise une valeur par défaut
-      final condition = ProductCondition.good; // Par défaut : "Bon état"
+      // Récupérer l'état depuis les attributs dynamiques
+      final conditionValue = _attributeValues['condition'];
+      ProductCondition condition = ProductCondition.good;
+
+      if (conditionValue is int) {
+        if (conditionValue >= 0 &&
+            conditionValue < ProductCondition.values.length) {
+          condition = ProductCondition.values[conditionValue];
+        }
+      }
 
       // Créer l'objet Product avec toutes les informations
       final product = Product(
@@ -782,7 +828,7 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
 
       // Créer le produit dans Firestore
       // Cette méthode génère automatiquement l'ID et sauvegarde le document
-      await productRepository.createProduct(product);
+      final createdProduct = await productRepository.createProduct(product);
 
       // ============================================================
       // ÉTAPE 5 : RAFRAÎCHIR LA LISTE DES PRODUITS
@@ -808,8 +854,8 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
           ),
         );
 
-        // TODO: Naviguer vers la page de détail du produit créé
-        // context.go('/product/${createdProduct.id}');
+        // Naviguer vers la page de détail du produit créé
+        context.go('/product/${createdProduct.id}');
       }
     } catch (e, stackTrace) {
       // ============================================================

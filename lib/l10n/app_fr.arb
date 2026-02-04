@@ -445,6 +445,17 @@
   "conditionUsed": "Usé",
   "@conditionUsed": {"description": "Condition: Used"},
 
+  "conditionValue": "{value, select, newWithTags{Neuf avec étiquette} excellent{Excellent} good{Bon état} satisfactory{Satisfaisant} worn{Usé} other{Bon état}}",
+  "@conditionValue": {
+    "description": "Dynamic condition value translation",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "excellent"
+      }
+    }
+  },
+
   "helpTextCondition": "État général du produit",
   "@helpTextCondition": {"description": "Help text for condition attribute"},
   "helpTextBrand": "Sélectionnez la marque du produit",
@@ -703,5 +714,95 @@
         "example": "42"
       }
     }
+  },
+  "messagesTab": "Messages",
+  "@messagesTab": {
+    "description": "Tab label for messages"
+  },
+  "notificationsTab": "Notifications",
+  "@notificationsTab": {
+    "description": "Tab label for notifications"
+  },
+  "noMessages": "Pas encore de messages",
+  "@noMessages": {
+    "description": "Empty state message for messages"
+  },
+  "noNotifications": "Pas encore de notifications",
+  "@noNotifications": {
+    "description": "Empty state message for notifications"
+  },
+  "makeOfferTitle": "Faire une offre",
+  "@makeOfferTitle": {
+    "description": "Title of the make offer bottom sheet"
+  },
+  "itemPrice": "prix de l'article : {price}",
+  "@itemPrice": {
+    "description": "Item price label in make offer sheet",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "2000 FCFA"
+      }
+    }
+  },
+  "reductionLabel": "{percent}% de réduction",
+  "@reductionLabel": {
+    "description": "Reduction percentage label",
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "example": "15"
+      }
+    }
+  },
+  "otherOffer": "Autre",
+  "@otherOffer": {
+    "description": "Other offer option"
+  },
+  "otherOfferHint": "Propose un prix",
+  "@otherOfferHint": {
+    "description": "Hint for custom price offer"
+  },
+  "proposeButton": "Proposer {amount}",
+  "@proposeButton": {
+    "description": "Propose button text",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "1500 FCFA"
+      }
+    }
+  },
+  "proposeButtonSimple": "Proposer",
+  "@proposeButtonSimple": {
+    "description": "Simple propose button text"
+  },
+  "offerLimitError": "Ton offre doit être de {minAmount} minimum (-{limit}%)",
+  "@offerLimitError": {
+    "description": "Error message when offer is too low",
+    "placeholders": {
+      "minAmount": {
+        "type": "String",
+        "example": "1200 FCFA"
+      },
+      "limit": {
+        "type": "int",
+        "example": "40"
+      }
+    }
+  },
+  "suggestionsRemaining": "{count} propositions restante(s) pour aujourd'hui",
+  "@suggestionsRemaining": {
+    "description": "Remaining offers for today",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "25"
+      }
+    }
+  },
+  "whyLink": "Pourquoi ?",
+  "@whyLink": {
+    "description": "Why link in make offer sheet"
   }
 }

@@ -1,2 +1,0 @@
-Tu dois gérer les états... Pour qu'ils soient tirés de la base de données
-Et que les ça soit les même dans sell et search

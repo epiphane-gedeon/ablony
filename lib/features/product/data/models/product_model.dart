@@ -17,7 +17,7 @@ class ProductModel {
       description: data['description'] as String,
       price: (data['price'] as num).toDouble(),
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
-      condition: _parseCondition(data['condition'] as String),
+      condition: _parseCondition(data['condition']),
       sellerId: data['sellerId'] as String,
       categoryId: data['categoryId'] as String,
       subcategoryId: data['subcategoryId'] as String,
@@ -44,7 +44,7 @@ class ProductModel {
       'description': product.description,
       'price': product.price,
       'imageUrls': product.imageUrls,
-      'condition': _conditionToString(product.condition),
+      'condition': product.condition.index, // Sauvegarder l'index numérique
       'sellerId': product.sellerId,
       'categoryId': product.categoryId,
       'subcategoryId': product.subcategoryId,
@@ -71,7 +71,7 @@ class ProductModel {
       description: data['description'] as String,
       price: (data['price'] as num).toDouble(),
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
-      condition: _parseCondition(data['condition'] as String),
+      condition: _parseCondition(data['condition']),
       sellerId: data['sellerId'] as String,
       categoryId: data['categoryId'] as String,
       subcategoryId: data['subcategoryId'] as String,
@@ -91,37 +91,41 @@ class ProductModel {
     );
   }
 
-  /// Parse la condition depuis une string
-  static ProductCondition _parseCondition(String condition) {
-    switch (condition) {
-      case 'newWithTags':
-        return ProductCondition.newWithTags;
-      case 'excellent':
-        return ProductCondition.excellent;
-      case 'good':
-        return ProductCondition.good;
-      case 'satisfactory':
-        return ProductCondition.satisfactory;
-      case 'worn':
-        return ProductCondition.worn;
-      default:
-        return ProductCondition.good;
+  /// Parse la condition depuis Firestore (supporte int, numeric string ou legacy string)
+  static ProductCondition _parseCondition(dynamic condition) {
+    if (condition is int) {
+      if (condition >= 0 && condition < ProductCondition.values.length) {
+        return ProductCondition.values[condition];
+      }
+      return ProductCondition.good;
     }
+
+    if (condition is String) {
+      // Support des strings numériques
+      final intValue = int.tryParse(condition);
+      if (intValue != null) {
+        if (intValue >= 0 && intValue < ProductCondition.values.length) {
+          return ProductCondition.values[intValue];
+        }
+      }
+
+      // Support des anciens IDs textuels
+      switch (condition) {
+        case 'newWithTags':
+          return ProductCondition.newWithTags;
+        case 'excellent':
+          return ProductCondition.excellent;
+        case 'good':
+          return ProductCondition.good;
+        case 'satisfactory':
+          return ProductCondition.satisfactory;
+        case 'worn':
+          return ProductCondition.worn;
+      }
+    }
+
+    return ProductCondition.good;
   }
 
-  /// Convertit la condition en string
-  static String _conditionToString(ProductCondition condition) {
-    switch (condition) {
-      case ProductCondition.newWithTags:
-        return 'newWithTags';
-      case ProductCondition.excellent:
-        return 'excellent';
-      case ProductCondition.good:
-        return 'good';
-      case ProductCondition.satisfactory:
-        return 'satisfactory';
-      case ProductCondition.worn:
-        return 'worn';
-    }
-  }
+
 }

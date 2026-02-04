@@ -57,7 +57,14 @@ class SecondaryButton extends StatelessWidget {
   final double? fontSize;
 
   /// Affiche la bordure si true (optionnel, défaut: true)
+  /// Affiche la bordure si true (optionnel, défaut: true)
   final bool showBorder;
+
+  /// Rayon de la bordure (optionnel)
+  final double? borderRadius;
+
+  /// Padding interne (optionnel)
+  final EdgeInsetsGeometry? padding;
 
   const SecondaryButton({
     super.key,
@@ -71,6 +78,8 @@ class SecondaryButton extends StatelessWidget {
     this.textColor,
     this.fontSize,
     this.showBorder = true,
+    this.borderRadius,
+    this.padding,
   });
 
   @override
@@ -136,8 +145,21 @@ class SecondaryButton extends StatelessWidget {
               side: showBorder
                   ? BorderSide(color: effectiveBorderColor)
                   : BorderSide.none, // Pas de bordure si showBorder = false
+              padding: padding,
+              shape: borderRadius != null
+                  ? RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(borderRadius!),
+                    )
+                  : null,
             )
-          : null,
+          : OutlinedButton.styleFrom(
+              padding: padding,
+              shape: borderRadius != null
+                  ? RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(borderRadius!),
+                    )
+                  : null,
+            ),
       child: buttonChild,
     );
 

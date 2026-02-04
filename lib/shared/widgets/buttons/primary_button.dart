@@ -48,7 +48,14 @@ class PrimaryButton extends StatelessWidget {
   final Color? textColor;
 
   /// Taille du texte (optionnel, utilise le thème par défaut si non spécifié)
+  /// Taille du texte (optionnel, utilise le thème par défaut si non spécifié)
   final double? fontSize;
+
+  /// Rayon de la bordure (optionnel)
+  final double? borderRadius;
+
+  /// Padding interne (optionnel)
+  final EdgeInsetsGeometry? padding;
 
   const PrimaryButton({
     super.key,
@@ -60,6 +67,8 @@ class PrimaryButton extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.fontSize,
+    this.borderRadius,
+    this.padding,
   });
 
   @override
@@ -108,8 +117,21 @@ class PrimaryButton extends StatelessWidget {
           ? ElevatedButton.styleFrom(
               backgroundColor: backgroundColor,
               foregroundColor: effectiveTextColor,
+              padding: padding,
+              shape: borderRadius != null
+                  ? RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(borderRadius!),
+                    )
+                  : null,
             )
-          : null,
+          : ElevatedButton.styleFrom(
+              padding: padding,
+              shape: borderRadius != null
+                  ? RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(borderRadius!),
+                    )
+                  : null,
+            ),
       child: buttonChild,
     );
 

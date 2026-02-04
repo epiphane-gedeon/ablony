@@ -157,6 +157,9 @@ class Input extends StatefulWidget {
   /// Autofocus sur le champ lors de l'affichage.
   final bool autofocus;
 
+  /// FocusNode optionnel pour gérer le focus depuis l'extérieur.
+  final FocusNode? focusNode;
+
   const Input({
     super.key,
     this.type = InputType.text,
@@ -190,6 +193,7 @@ class Input extends StatefulWidget {
     this.placeholderStyle,
     this.autoValidate = true,
     this.autofocus = false,
+    this.focusNode,
   });
 
   @override
@@ -325,6 +329,8 @@ class _InputState extends State<Input> {
             color: defaultTextColor,
             fontSize: widget.fontSize,
           ),
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          focusNode: widget.focusNode,
           decoration: InputDecoration(
             // Placeholder
             hintText: widget.placeholder,
