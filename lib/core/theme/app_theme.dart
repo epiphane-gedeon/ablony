@@ -66,9 +66,24 @@ class AppTheme {
 
         /// Couleur des surfaces avec variante (champs de texte, etc.)
         surfaceContainerHighest: Color(0xFFF5F5F5),
-        
+
         /// Couleur pour le texte secondaire
         onSurfaceVariant: Color(0xFF757575),
+
+        // ========================================================================
+        // COULEURS DES BULLES DE MESSAGE (Message Bubbles)
+        // ========================================================================
+        /// Background des messages envoyés (isMe) - Noir
+        tertiary: Color(0xFF000000),
+
+        /// Texte des messages envoyés (isMe) - Blanc
+        onTertiary: Color(0xFFFFFFFF),
+
+        /// Background des messages reçus (notIsMe) - Transparent
+        tertiaryContainer: Colors.transparent,
+
+        /// Texte des messages reçus (notIsMe) en mode clair - Noir
+        onTertiaryContainer: Color(0xFF000000),
       ),
 
       // ========================================================================
@@ -344,19 +359,28 @@ class AppTheme {
         /// Bordure bleue de 2px quand le champ est focus (en cours de saisie)
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: const Color(0xFF2385AE), width: 2),
+          borderSide: const BorderSide(
+            color: const Color(0xFF2385AE),
+            width: 2,
+          ),
         ),
 
         /// Bordure rouge quand il y a une erreur de validation
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 1),
+          borderSide: const BorderSide(
+            color: const Color(0xFFD32F2F),
+            width: 1,
+          ),
         ),
 
         /// Bordure rouge épaisse quand le champ en erreur est focus
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 2),
+          borderSide: const BorderSide(
+            color: const Color(0xFFD32F2F),
+            width: 2,
+          ),
         ),
 
         /// Espacement interne du champ (padding)
@@ -453,14 +477,12 @@ class AppTheme {
       // ========================================================================
       // COULEURS PRINCIPALES
       // ========================================================================
-
       primaryColor: const Color(0xFF2385AE),
       scaffoldBackgroundColor: const Color(0xFF121212),
 
       // ========================================================================
       // SCHÉMA DE COULEURS (Color Scheme)
       // ========================================================================
-
       colorScheme: const ColorScheme.dark(
         primary: Color(0xFF2385AE),
         onPrimary: Color(0xFF000000),
@@ -472,94 +494,108 @@ class AppTheme {
         onSurface: Color(0xFFE0E0E0),
         surfaceContainerHighest: Color(0xFF2C2C2C),
         onSurfaceVariant: Color(0xFFB0B0B0),
+
+        // ========================================================================
+        // COULEURS DES BULLES DE MESSAGE (Message Bubbles)
+        // ========================================================================
+        /// Background des messages envoyés (isMe) - Noir
+        tertiary: Color(0xFF000000),
+
+        /// Texte des messages envoyés (isMe) - Blanc
+        onTertiary: Color(0xFFFFFFFF),
+
+        /// Background des messages reçus (notIsMe) - Transparent
+        tertiaryContainer: Colors.transparent,
+
+        /// Texte des messages reçus (notIsMe) en mode sombre - Blanc
+        onTertiaryContainer: Color(0xFFFFFFFF),
       ),
 
       // ========================================================================
       // TYPOGRAPHIE - Police Be Vietnam Pro
       // ========================================================================
-
-      textTheme: GoogleFonts.beVietnamProTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.beVietnamPro(
-          fontSize: 57,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFFE0E0E0),
-        ),
-        displayMedium: GoogleFonts.beVietnamPro(
-          fontSize: 45,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFFE0E0E0),
-        ),
-        displaySmall: GoogleFonts.beVietnamPro(
-          fontSize: 36,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFFE0E0E0),
-        ),
-        headlineLarge: GoogleFonts.beVietnamPro(
-          fontSize: 32,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFFE0E0E0),
-        ),
-        headlineMedium: GoogleFonts.beVietnamPro(
-          fontSize: 28,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFFE0E0E0),
-        ),
-        headlineSmall: GoogleFonts.beVietnamPro(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFFE0E0E0),
-        ),
-        titleLarge: GoogleFonts.beVietnamPro(
-          fontSize: 22,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFFE0E0E0),
-        ),
-        titleMedium: GoogleFonts.beVietnamPro(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFFE0E0E0),
-        ),
-        titleSmall: GoogleFonts.beVietnamPro(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFFE0E0E0),
-        ),
-        bodyLarge: GoogleFonts.beVietnamPro(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: const Color(0xFFE0E0E0),
-        ),
-        bodyMedium: GoogleFonts.beVietnamPro(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: const Color(0xFFE0E0E0),
-        ),
-        bodySmall: GoogleFonts.beVietnamPro(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: const Color(0xFFB0B0B0),
-        ),
-        labelLarge: GoogleFonts.beVietnamPro(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFFE0E0E0),
-        ),
-        labelMedium: GoogleFonts.beVietnamPro(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFFE0E0E0),
-        ),
-        labelSmall: GoogleFonts.beVietnamPro(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFFB0B0B0),
-        ),
-      ),
+      textTheme: GoogleFonts.beVietnamProTextTheme(ThemeData.dark().textTheme)
+          .copyWith(
+            displayLarge: GoogleFonts.beVietnamPro(
+              fontSize: 57,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFFE0E0E0),
+            ),
+            displayMedium: GoogleFonts.beVietnamPro(
+              fontSize: 45,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFFE0E0E0),
+            ),
+            displaySmall: GoogleFonts.beVietnamPro(
+              fontSize: 36,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFFE0E0E0),
+            ),
+            headlineLarge: GoogleFonts.beVietnamPro(
+              fontSize: 32,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFFE0E0E0),
+            ),
+            headlineMedium: GoogleFonts.beVietnamPro(
+              fontSize: 28,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFFE0E0E0),
+            ),
+            headlineSmall: GoogleFonts.beVietnamPro(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFFE0E0E0),
+            ),
+            titleLarge: GoogleFonts.beVietnamPro(
+              fontSize: 22,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFFE0E0E0),
+            ),
+            titleMedium: GoogleFonts.beVietnamPro(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFFE0E0E0),
+            ),
+            titleSmall: GoogleFonts.beVietnamPro(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFFE0E0E0),
+            ),
+            bodyLarge: GoogleFonts.beVietnamPro(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFFE0E0E0),
+            ),
+            bodyMedium: GoogleFonts.beVietnamPro(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFFE0E0E0),
+            ),
+            bodySmall: GoogleFonts.beVietnamPro(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFFB0B0B0),
+            ),
+            labelLarge: GoogleFonts.beVietnamPro(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFFE0E0E0),
+            ),
+            labelMedium: GoogleFonts.beVietnamPro(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFFE0E0E0),
+            ),
+            labelSmall: GoogleFonts.beVietnamPro(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFFB0B0B0),
+            ),
+          ),
 
       // ========================================================================
       // THÈME DE L'APPBAR
       // ========================================================================
-
       appBarTheme: AppBarTheme(
         backgroundColor: const Color(0xFF1E1E1E),
         foregroundColor: const Color(0xFFE0E0E0),
@@ -575,7 +611,6 @@ class AppTheme {
       // ========================================================================
       // THÈME DES BOUTONS ELEVÉS
       // ========================================================================
-
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2385AE),
@@ -595,7 +630,6 @@ class AppTheme {
       // ========================================================================
       // THÈME DES BOUTONS OUTLINED
       // ========================================================================
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF2385AE),
@@ -614,7 +648,6 @@ class AppTheme {
       // ========================================================================
       // THÈME DES BOUTONS TEXTE
       // ========================================================================
-
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: const Color(0xFF2385AE),
@@ -629,7 +662,6 @@ class AppTheme {
       // ========================================================================
       // THÈME DES CHAMPS DE SAISIE
       // ========================================================================
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: const Color(0xFF2C2C2C),
@@ -643,15 +675,24 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: const Color(0xFF2385AE), width: 2),
+          borderSide: const BorderSide(
+            color: const Color(0xFF2385AE),
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 1),
+          borderSide: const BorderSide(
+            color: const Color(0xFFD32F2F),
+            width: 1,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: const Color(0xFFD32F2F), width: 2),
+          borderSide: const BorderSide(
+            color: const Color(0xFFD32F2F),
+            width: 2,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -670,7 +711,6 @@ class AppTheme {
       // ========================================================================
       // THÈME DES CARTES
       // ========================================================================
-
       cardTheme: CardThemeData(
         color: const Color(0xFF1E1E1E),
         elevation: 4,
@@ -681,7 +721,6 @@ class AppTheme {
       // ========================================================================
       // THÈME DES SÉPARATEURS
       // ========================================================================
-
       dividerTheme: const DividerThemeData(
         color: const Color(0xFF2A2A2A),
         thickness: 1,
@@ -691,16 +730,11 @@ class AppTheme {
       // ========================================================================
       // THÈME DES ICÔNES
       // ========================================================================
-
-      iconTheme: const IconThemeData(
-        color: const Color(0xFFE0E0E0),
-        size: 24,
-      ),
+      iconTheme: const IconThemeData(color: const Color(0xFFE0E0E0), size: 24),
 
       // ========================================================================
       // THÈME DU BOUTON D'ACTION FLOTTANT (FAB)
       // ========================================================================
-
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: const Color(0xFF2385AE),
         foregroundColor: const Color(0xFF000000),
@@ -708,4 +742,22 @@ class AppTheme {
       ),
     );
   }
+}
+
+// ==============================================================================
+// EXTENSION POUR LES COULEURS DES BULLES DE MESSAGE
+// ==============================================================================
+/// Extension pour faciliter l'accès aux couleurs des bulles de message
+extension MessageBubbleColors on ColorScheme {
+  /// Background des messages envoyés (isMe) - Noir (clair et sombre)
+  Color get bubbleSentBackground => tertiary;
+
+  /// Texte des messages envoyés (isMe) - Blanc (clair et sombre)
+  Color get bubbleSentText => onTertiary;
+
+  /// Background des messages reçus (notIsMe) - Transparent (clair et sombre)
+  Color get bubbleReceivedBackground => tertiaryContainer;
+
+  /// Texte des messages reçus (notIsMe) - Noir (clair) / Blanc (sombre)
+  Color get bubbleReceivedText => onTertiaryContainer;
 }

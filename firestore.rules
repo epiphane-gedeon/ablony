@@ -126,12 +126,46 @@ service cloud.firestore {
     }
     
     // ============================================================
-    // COLLECTION : messages (à implémenter plus tard)
+    // COLLECTION : conversations
     // ============================================================
-    // match /conversations/{conversationId} {
-    //   allow read, write: if isAuthenticated() 
-    //     && request.auth.uid in resource.data.participants;
-    // }
+    // Gère les conversations entre acheteurs et vendeurs
+    match /conversations/{conversationId} {
+      // Lecture : Uniquement les participants de la conversation
+      allow read: if isAuthenticated() 
+        && request.auth.uid in resource.data.participants;
+      
+      // Création : Utilisateur authentifié qui est l'un des participants
+      allow create: if isAuthenticated() 
+        && request.auth.uid in request.resource.data.participants
+        && request.resource.data.participants.size() == 2
+        && request.resource.data.keys().hasAll(['participants', 'participantDetails', 'productId', 'productDetails', 'unreadCount', 'createdAt', 'updatedAt']);
+      
+      // Mise à jour : Les participants peuvent mettre à jour (lastMessage, unreadCount, etc.)
+      allow update: if isAuthenticated() 
+        && request.auth.uid in resource.data.participants
+        && request.resource.data.participants == resource.data.participants
+        && request.resource.data.productId == resource.data.productId;
+      
+      // Sous-collection : messages
+      match /messages/{messageId} {
+        // Lecture : Uniquement les participants de la conversation
+        allow read: if isAuthenticated() 
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        
+        // Création : Uniquement les participants peuvent envoyer des messages
+        allow create: if isAuthenticated() 
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.keys().hasAll(['senderId', 'type', 'timestamp', 'read']);
+        
+        // Mise à jour : Pour marquer comme lu ou modifier le statut d'une offre
+        allow update: if isAuthenticated() 
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        
+        // Suppression : Aucune suppression de messages
+        allow delete: if false;
+      }
+    }
     
     // ============================================================
     // RÈGLE PAR DÉFAUT : TOUT REFUSER

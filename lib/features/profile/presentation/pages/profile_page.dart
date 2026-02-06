@@ -2,245 +2,270 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/providers/locale_provider.dart';
-import '../../../auth/application/providers.dart';
+import '../../../auth/application/auth_providers.dart';
 
 /// Page de profil utilisateur
-///
-/// Cette page affiche le profil de l'utilisateur avec ses paramètres.
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final currentLocale = ref.watch(localeProvider);
+    final theme = Theme.of(context);
+    final userAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profil'), centerTitle: true),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Avatar et infos utilisateur
-          Center(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: const Icon(
-                    Icons.person,
-                    size: 50,
-                    color: Colors.white,
+      body: userAsync.when(
+        data: (user) {
+          if (user == null) {
+            return const Center(child: Text('Utilisateur non connecté'));
+          }
+
+          return ListView(
+            children: [
+              // Section profil avec avatar et nom
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withOpacity(0.2),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Nom d\'utilisateur',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'email@example.com',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 32),
-
-          // Section Paramètres
-          Text(
-            'Paramètres',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-
-          // Changement de thème
-          _buildSettingTile(
-            context: context,
-            icon: isDarkMode ? Icons.light_mode : Icons.dark_mode,
-            title: 'Thème',
-            subtitle: isDarkMode ? 'Mode sombre' : 'Mode clair',
-            trailing: Switch(
-              value: isDarkMode,
-              onChanged: (value) {
-                ref.read(themeProvider.notifier).toggleTheme();
-              },
-            ),
-          ),
-
-          const Divider(height: 32),
-
-          // Sélection de la langue
-          _buildSettingTile(
-            context: context,
-            icon: Icons.language,
-            title: 'Langue',
-            subtitle: currentLocale.languageCode == 'fr'
-                ? 'Français'
-                : 'English',
-            trailing: DropdownButton<String>(
-              value: currentLocale.languageCode,
-              underline: const SizedBox(),
-              items: const [
-                DropdownMenuItem(value: 'fr', child: Text('Français')),
-                DropdownMenuItem(value: 'en', child: Text('English')),
-              ],
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  ref.read(localeProvider.notifier).setLanguage(newValue);
-                }
-              },
-            ),
-          ),
-
-          const Divider(height: 32),
-          _buildSettingTile(
-            context: context,
-            icon: Icons.shopping_bag_outlined,
-            title: 'Mes annonces',
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Navigation vers mes annonces
-            },
-          ),
-
-          // Favoris
-          _buildSettingTile(
-            context: context,
-            icon: Icons.favorite_border,
-            title: 'Favoris',
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Navigation vers favoris
-            },
-          ),
-
-          // Paramètres du compte
-          _buildSettingTile(
-            context: context,
-            icon: Icons.settings_outlined,
-            title: 'Paramètres du compte',
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Navigation vers paramètres
-            },
-          ),
-
-          const Divider(height: 32),
-
-          // Section Aide
-          Text(
-            'Aide',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-
-          // Centre d'aide
-          _buildSettingTile(
-            context: context,
-            icon: Icons.help_outline,
-            title: 'Centre d\'aide',
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Ouvrir centre d'aide
-            },
-          ),
-
-          // À propos
-          _buildSettingTile(
-            context: context,
-            icon: Icons.info_outline,
-            title: 'À propos',
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Afficher à propos
-            },
-          ),
-
-          const SizedBox(height: 32),
-
-          // Bouton de déconnexion
-          ElevatedButton.icon(
-            onPressed: () async {
-              // Afficher dialogue de confirmation
-              final shouldLogout = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Déconnexion'),
-                  content: const Text(
-                    'Êtes-vous sûr de vouloir vous déconnecter ?',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Annuler'),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: user.photoUrl != null
+                          ? NetworkImage(user.photoUrl!)
+                          : null,
+                      child: user.photoUrl == null
+                          ? Text(
+                              user.username.substring(0, 1).toUpperCase(),
+                              style: theme.textTheme.headlineSmall,
+                            )
+                          : null,
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text(
-                        'Déconnexion',
-                        style: TextStyle(color: Colors.red),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user.username,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Voir mes annonces',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.6,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              );
-
-              if (shouldLogout == true && context.mounted) {
-                // Déconnexion
-                await ref.read(authRepositoryProvider).signOut();
-                // Redirection vers onboarding
-                if (context.mounted) {
-                  context.go('/onboarding');
-                }
-              }
-            },
-            icon: const Icon(Icons.logout),
-            label: const Text('Se déconnecter'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[400],
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
               ),
-            ),
-          ),
 
-          const SizedBox(height: 16),
-        ],
+              const SizedBox(height: 16),
+
+              // Liste des options
+              _buildMenuTile(
+                context: context,
+                icon: Icons.favorite_border,
+                title: 'Favoris',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.email_outlined,
+                title: 'Inviter des amis',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.wallet_outlined,
+                title: 'Mon porte-monnaie',
+                trailing: '0,00 €',
+                onTap: () => context.push('/profile/wallet'),
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.receipt_long_outlined,
+                title: 'Mes ventes et achats',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.rocket_launch_outlined,
+                title: 'Outils de promotion',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.tune_outlined,
+                title: 'Personnalisation',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.discount_outlined,
+                title: 'Réduction sur les lots',
+                trailing: 'Désactivé',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.beach_access_outlined,
+                title: 'Mode vacances',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.favorite_outline,
+                title: 'Dons',
+                trailing: 'Désactivé',
+                onTap: () {},
+              ),
+
+              const Divider(height: 32),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.help_outline,
+                title: 'Ton guide Vinted',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.support_agent_outlined,
+                title: 'Centre d\'aide',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.settings_outlined,
+                title: 'Paramètres',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.cookie_outlined,
+                title: 'Paramètres des cookies',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.info_outline,
+                title: 'À propos de nous',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.description_outlined,
+                title: 'Informations légales',
+                onTap: () {},
+              ),
+
+              _buildMenuTile(
+                context: context,
+                icon: Icons.verified_outlined,
+                title: 'Notre plateforme',
+                onTap: () {},
+              ),
+
+              const SizedBox(height: 32),
+
+              // Footer
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Centre de protection de la vie privée  •  Conditions générales',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 80), // Espace pour la nav bar
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Erreur: $error')),
       ),
     );
   }
 
-  /// Widget réutilisable pour les éléments de paramètres
-  Widget _buildSettingTile({
+  Widget _buildMenuTile({
     required BuildContext context,
     required IconData icon,
     required String title,
-    String? subtitle,
-    Widget? trailing,
-    VoidCallback? onTap,
+    String? trailing,
+    required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle) : null,
-      trailing: trailing,
+    final theme = Theme.of(context);
+
+    return InkWell(
       onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: theme.dividerColor.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              size: 24,
+            ),
+            const SizedBox(width: 16),
+            Expanded(child: Text(title, style: theme.textTheme.bodyLarge)),
+            if (trailing != null) ...[
+              Text(
+                trailing,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Icon(
+              Icons.chevron_right,
+              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              size: 20,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
