@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ablony/shared/widgets/buttons/buttons.dart';
 import 'package:ablony/shared/widgets/input.dart';
 import 'package:ablony/shared/widgets/choice_card_widget.dart';
 import 'package:ablony/l10n/app_localizations.dart';
 import 'package:ablony/features/product/domain/entities/product.dart';
+import 'package:ablony/features/auth/application/auth_providers.dart';
+import 'package:ablony/features/messages/application/services/messaging_service.dart';
+import 'package:ablony/features/messages/domain/models/participant_details.dart';
+import 'package:ablony/features/messages/domain/models/product_details.dart'
+    as msg;
+import 'package:ablony/features/messages/domain/models/user_info.dart';
 
 /// Bottom sheet plein écran pour faire une offre.
-/// Version prototype UI-only avec logique locale pour une réactivité maximale.
-class MakeOfferBottomSheet extends StatefulWidget {
+/// Envoie l'offre au vendeur via le système de messagerie.
+class MakeOfferBottomSheet extends ConsumerStatefulWidget {
   final Product product;
 
-  const MakeOfferBottomSheet({
-    super.key,
-    required this.product,
-  });
+  const MakeOfferBottomSheet({super.key, required this.product});
 
   /// Affiche le bottom sheet en plein écran
   static Future<void> show(BuildContext context, Product product) {
@@ -27,24 +32,28 @@ class MakeOfferBottomSheet extends StatefulWidget {
   }
 
   @override
-  State<MakeOfferBottomSheet> createState() => _MakeOfferBottomSheetState();
+  ConsumerState<MakeOfferBottomSheet> createState() =>
+      _MakeOfferBottomSheetState();
 }
 
-class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
+class _MakeOfferBottomSheetState extends ConsumerState<MakeOfferBottomSheet> {
   late TextEditingController _priceController;
   late double _currentAmount;
   final FocusNode _priceFocusNode = FocusNode();
-  
+
   // -1: aucune, 0: -15%, 1: -30%, 2: Autre
   int _selectedSuggestionIndex = -1;
   String? _errorLabel;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
     _currentAmount = widget.product.price;
-    _priceController = TextEditingController(text: _formatAmount(_currentAmount));
-    
+    _priceController = TextEditingController(
+      text: _formatAmount(_currentAmount),
+    );
+
     // Écouter le focus pour sélectionner "Autre" automatiquement
     _priceFocusNode.addListener(() {
       if (_priceFocusNode.hasFocus) {
@@ -63,7 +72,9 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
   }
 
   String _formatAmount(double amount) {
-    return amount.toStringAsFixed(0); // FCFA généralement sans décimales ou .00 inutile
+    return amount.toStringAsFixed(
+      0,
+    ); // FCFA généralement sans décimales ou .00 inutile
   }
 
   void _selectSuggestion(int index) {
@@ -74,16 +85,16 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
       } else if (index == 1) {
         _currentAmount = widget.product.price * 0.70;
       }
-      
+
       // Si on sélectionne une suggestion prédéfinie, on met à jour le champ et on enlève le focus
       if (index != 2) {
-         _priceController.text = _formatAmount(_currentAmount);
-         _priceFocusNode.unfocus();
+        _priceController.text = _formatAmount(_currentAmount);
+        _priceFocusNode.unfocus();
       } else {
-         // Si on clique sur "Autre", on donne le focus au champ pour inciter à la saisie
-         _priceFocusNode.requestFocus();
+        // Si on clique sur "Autre", on donne le focus au champ pour inciter à la saisie
+        _priceFocusNode.requestFocus();
       }
-      
+
       _validateAmount(_currentAmount);
     });
   }
@@ -93,7 +104,7 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
       _currentAmount = amount;
       // Force la sélection "Autre" si on tape
       if (_selectedSuggestionIndex != 2) {
-         _selectedSuggestionIndex = 2;
+        _selectedSuggestionIndex = 2;
       }
       _validateAmount(amount);
     });
@@ -101,11 +112,96 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
 
   void _validateAmount(double amount) {
     final minAllowed = widget.product.price * 0.60;
-    
+
     if (amount < minAllowed) {
-      _errorLabel = "limit_reached"; 
+      _errorLabel = "limit_reached";
     } else {
       _errorLabel = null;
+    }
+  }
+
+  Future<void> _submitOffer() async {
+    setState(() => _isSubmitting = true);
+
+    try {
+      final currentUser = ref.read(authStateProvider).value;
+      if (currentUser == null) {
+        throw Exception('Utilisateur non connecté');
+      }
+
+      // Récupérer les données complètes de l'utilisateur actuel (buyer)
+      final authRepository = ref.read(authRepositoryProvider);
+      final buyer = await authRepository.getUserById(currentUser.uid);
+      final seller = await authRepository.getUserById(widget.product.sellerId);
+
+      // Préparer les détails des participants
+      final buyerDetails = ParticipantDetails(
+        name: buyer.username,
+        avatar: buyer.photoUrl,
+      );
+
+      final sellerDetails = ParticipantDetails(
+        name: seller.username,
+        avatar: seller.photoUrl,
+      );
+
+      // Préparer les infos utilisateur pour les messages système
+      final buyerInfo = UserInfo(
+        name: buyer.username,
+        avatar: buyer.photoUrl,
+        country: buyer.country.name,
+        memberSince: buyer.createdAt,
+      );
+
+      final sellerInfo = UserInfo(
+        name: seller.username,
+        avatar: seller.photoUrl,
+        country: seller.country.name,
+        memberSince: seller.createdAt,
+      );
+
+      // Préparer les détails du produit
+      final productDetails = msg.ProductDetails(
+        title: widget.product.title,
+        price: widget.product.price,
+        image: widget.product.imageUrls.isNotEmpty
+            ? widget.product.imageUrls.first
+            : null,
+        sellerId: seller.uid,
+      );
+
+      // Envoyer l'offre via le service de messagerie
+      final messagingService = ref.read(messagingServiceProvider);
+      final conversationId = await messagingService.sendInitialOffer(
+        buyerId: buyer.uid,
+        sellerId: seller.uid,
+        buyerDetails: buyerDetails,
+        sellerDetails: sellerDetails,
+        buyerInfo: buyerInfo,
+        sellerInfo: sellerInfo,
+        productId: widget.product.id,
+        productDetails: productDetails,
+        offerAmount: _currentAmount,
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+
+        // Naviguer vers la conversation
+        context.push('/chat/$conversationId');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Offre envoyée avec succès !')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString()}')));
+      }
     }
   }
 
@@ -125,15 +221,19 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
     // Résolution du message d'erreur
     String? displayError;
     if (_errorLabel == "limit_reached") {
-       final minAllowed = widget.product.price * 0.60;
-       displayError = l10n.offerLimitError(_formatAmount(minAllowed) + ' FCFA', 40);
+      final minAllowed = widget.product.price * 0.60;
+      displayError = l10n.offerLimitError(
+        _formatAmount(minAllowed) + ' FCFA',
+        40,
+      );
     } else if (_errorLabel == "too_high") {
-       displayError = "Ton offre ne peut pas être supérieure au prix original";
+      displayError = "Ton offre ne peut pas être supérieure au prix original";
     }
 
     return Container(
       height: screenHeight,
-      color: theme.scaffoldBackgroundColor, // Background direct, pas de round corner en haut pour full screen immersif type "Sell"
+      color: theme
+          .scaffoldBackgroundColor, // Background direct, pas de round corner en haut pour full screen immersif type "Sell"
       child: Column(
         children: [
           // AppBar Custom (Match SellBottomSheet style)
@@ -164,11 +264,13 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(width: 48), // Équilibre visuel pour le titre centré
+                const SizedBox(
+                  width: 48,
+                ), // Équilibre visuel pour le titre centré
               ],
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
@@ -179,7 +281,7 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Info Produit
                   Row(
@@ -201,14 +303,20 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                           children: [
                             Text(
                               widget.product.title,
-                              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              l10n.itemPrice(_formatAmount(widget.product.price) + ' FCFA'),
-                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                              l10n.itemPrice(
+                                _formatAmount(widget.product.price) + ' FCFA',
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -222,7 +330,8 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                     children: [
                       Expanded(
                         child: ChoiceCardWidget(
-                          title: '${_formatAmount(widget.product.price * 0.85)} FCFA',
+                          title:
+                              '${_formatAmount(widget.product.price * 0.85)} FCFA',
                           subTitle: l10n.reductionLabel(15),
                           isSelected: _selectedSuggestionIndex == 0,
                           onTap: () => _selectSuggestion(0),
@@ -232,7 +341,8 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: ChoiceCardWidget(
-                          title: '${_formatAmount(widget.product.price * 0.70)} FCFA',
+                          title:
+                              '${_formatAmount(widget.product.price * 0.70)} FCFA',
                           subTitle: l10n.reductionLabel(30),
                           isSelected: _selectedSuggestionIndex == 1,
                           onTap: () => _selectSuggestion(1),
@@ -261,10 +371,17 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                     placeholder: "0",
                     suffixIcon: const Padding(
                       padding: EdgeInsets.all(14.0),
-                      child: Text('FCFA', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      child: Text(
+                        'FCFA',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly, // FCFA souvent entiers
+                      FilteringTextInputFormatter
+                          .digitsOnly, // FCFA souvent entiers
                     ],
                     onChanged: (value) {
                       final amount = double.tryParse(value) ?? 0;
@@ -272,13 +389,17 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                     },
                     errorLabel: displayError,
                   ),
-                  
+
                   if (displayError == null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Row(
                         children: [
-                          Icon(Icons.shield_outlined, size: 14, color: theme.colorScheme.primary),
+                          Icon(
+                            Icons.shield_outlined,
+                            size: 14,
+                            color: theme.colorScheme.primary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${_formatAmount(totalAmount)} FCFA (incl. Protection acheteurs)',
@@ -289,31 +410,34 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                         ],
                       ),
                     ),
-                  
+
                   const SizedBox(height: 48),
 
                   // Bouton Valider
                   PrimaryButton(
-                    text: _currentAmount > 0 
-                        ? l10n.proposeButton(_formatAmount(_currentAmount) + ' FCFA')
+                    text: _currentAmount > 0
+                        ? l10n.proposeButton(
+                            _formatAmount(_currentAmount) + ' FCFA',
+                          )
                         : l10n.proposeButtonSimple,
-                    onPressed: (displayError != null || _currentAmount <= 0)
-                        ? null 
-                        : () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Offre envoyée (Simulation)')),
-                            );
-                          },
+                    isLoading: _isSubmitting,
+                    onPressed:
+                        (displayError != null ||
+                            _currentAmount <= 0 ||
+                            _isSubmitting)
+                        ? null
+                        : _submitOffer,
                   ),
-                  
+
                   const SizedBox(height: 24),
 
                   // Offres restantes
                   Center(
                     child: Text(
                       l10n.suggestionsRemaining(25),
-                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ],

@@ -47,6 +47,8 @@ dependencies:
   google_fonts: ^6.3.2
   flutter_svg: ^2.0.10+1
   image_picker: ^1.0.7
+  # Affichage de timestamps relatifs (il y a 3 jours, etc.)
+  timeago: ^3.7.0
 
   # ============================================================
   # SÉCURITÉ

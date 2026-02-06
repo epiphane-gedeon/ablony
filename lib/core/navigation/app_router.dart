@@ -12,7 +12,9 @@ import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/search/presentation/pages/search_results_page.dart';
 import '../../features/search/presentation/pages/searching_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
+import '../../features/messages/presentation/pages/chat_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/product/presentation/pages/product_detail_page.dart';
 import '../../core/layout/main_layout.dart';
 import 'router_notifier.dart';
@@ -404,6 +406,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/profile',
                 name: 'profile',
                 builder: (context, state) => const ProfilePage(),
+                routes: [
+                  // Sous-route : Porte-monnaie
+                  GoRoute(
+                    path: 'wallet',
+                    name: 'wallet',
+                    builder: (context, state) => const WalletPage(),
+                  ),
+                ],
               ),
             ],
           ),
@@ -455,6 +465,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final productId = state.pathParameters['id']!;
           return ProductDetailPage(productId: productId);
+        },
+      ),
+
+      // ============================================================
+      // ROUTE : CHAT
+      // ============================================================
+      /// Page de conversation avec un utilisateur
+      GoRoute(
+        path: '/chat/:conversationId',
+        name: 'chat',
+        builder: (context, state) {
+          final conversationId = state.pathParameters['conversationId']!;
+          return ChatPage(conversationId: conversationId);
         },
       ),
 

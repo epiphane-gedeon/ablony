@@ -8,6 +8,9 @@ import '../../../../shared/widgets/product_card.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/entities.dart';
+import '../../../messages/application/providers/message_providers.dart';
+import '../../../messages/domain/models/participant_details.dart';
+import '../../../messages/domain/models/product_details.dart';
 import '../providers/category_provider.dart';
 import '../providers/product_provider.dart';
 import 'package:ablony/features/make_offer_feature/presentation/widgets/make_offer_bottom_sheet.dart';
@@ -312,10 +315,16 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           // Taille
                           if (product.primarySizeValue != null) ...[
                             Text(
-                              ref.watch(attributeLabelProvider((
-                                attributeId: product.primarySizeAttributeId!,
-                                value: product.primarySizeValue
-                              ))).value ?? '',
+                              ref
+                                      .watch(
+                                        attributeLabelProvider((
+                                          attributeId:
+                                              product.primarySizeAttributeId!,
+                                          value: product.primarySizeValue,
+                                        )),
+                                      )
+                                      .value ??
+                                  '',
                               style: theme.textTheme.bodyMedium,
                             ),
                             Text(' · ', style: theme.textTheme.bodyMedium),
@@ -323,7 +332,15 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
                           // État
                           Text(
-                            ref.watch(attributeLabelProvider((attributeId: 'condition', value: product.condition.index))).value ?? product.condition.label,
+                            ref
+                                    .watch(
+                                      attributeLabelProvider((
+                                        attributeId: 'condition',
+                                        value: product.condition.index,
+                                      )),
+                                    )
+                                    .value ??
+                                product.condition.label,
                             style: theme.textTheme.bodyMedium,
                           ),
 
@@ -331,10 +348,17 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           if (product.primaryBrandValue != null) ...[
                             Text(' · ', style: theme.textTheme.bodyMedium),
                             Link(
-                              text: ref.watch(attributeLabelProvider((
-                                attributeId: product.primaryBrandAttributeId!,
-                                value: product.primaryBrandValue
-                              ))).value ?? product.primaryBrandValue.toString(),
+                              text:
+                                  ref
+                                      .watch(
+                                        attributeLabelProvider((
+                                          attributeId:
+                                              product.primaryBrandAttributeId!,
+                                          value: product.primaryBrandValue,
+                                        )),
+                                      )
+                                      .value ??
+                                  product.primaryBrandValue.toString(),
                               onTap: () {
                                 // TODO: Rediriger vers la page de la marque
                               },
@@ -430,10 +454,16 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           theme,
                           'Taille',
                           product.primarySizeValue != null
-                              ? ref.watch(attributeLabelProvider((
-                                  attributeId: product.primarySizeAttributeId!,
-                                  value: product.primarySizeValue
-                                ))).value ?? 'Non spécifiée'
+                              ? ref
+                                        .watch(
+                                          attributeLabelProvider((
+                                            attributeId:
+                                                product.primarySizeAttributeId!,
+                                            value: product.primarySizeValue,
+                                          )),
+                                        )
+                                        .value ??
+                                    'Non spécifiée'
                               : 'Non spécifiée',
                           showArrow: true,
                         ),
@@ -443,7 +473,15 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         _buildDetailRow(
                           theme,
                           'État',
-                          ref.watch(attributeLabelProvider((attributeId: 'condition', value: product.condition.index))).value ?? product.condition.label,
+                          ref
+                                  .watch(
+                                    attributeLabelProvider((
+                                      attributeId: 'condition',
+                                      value: product.condition.index,
+                                    )),
+                                  )
+                                  .value ??
+                              product.condition.label,
                           showArrow: true,
                         ),
                         const Divider(height: 1),
@@ -453,7 +491,15 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           _buildDetailRow(
                             theme,
                             'Couleur',
-                            ref.watch(attributeLabelProvider((attributeId: 'color', value: product.attributes['color']))).value ?? product.attributes['color'].toString(),
+                            ref
+                                    .watch(
+                                      attributeLabelProvider((
+                                        attributeId: 'color',
+                                        value: product.attributes['color'],
+                                      )),
+                                    )
+                                    .value ??
+                                product.attributes['color'].toString(),
                             showArrow: false,
                           ),
                         if (product.attributes['color'] != null)
@@ -549,8 +595,64 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                 // Bouton Message pour contacter le vendeur
                                 SecondaryButton(
                                   text: 'Message',
-                                  onPressed: () {
-                                    // TODO: Ouvrir la page de conversation avec le vendeur
+                                  onPressed: () async {
+                                    final currentUser = ref
+                                        .read(authStateProvider)
+                                        .value;
+                                    if (currentUser == null) return;
+
+                                    // Vérifier si une conversation existe déjà
+                                    final messageRepo = ref.read(
+                                      messageRepositoryProvider,
+                                    );
+                                    String? conversationId = await messageRepo
+                                        .findConversation(
+                                          userId1: currentUser.uid,
+                                          userId2: _product!.sellerId,
+                                          productId: _product!.id,
+                                        );
+
+                                    // Si pas de conversation, la créer
+                                    if (conversationId == null) {
+                                      final authRepo = ref.read(
+                                        authRepositoryProvider,
+                                      );
+                                      final buyer = await authRepo.getUserById(
+                                        currentUser.uid,
+                                      );
+                                      final seller = await authRepo.getUserById(
+                                        _product!.sellerId,
+                                      );
+
+                                      conversationId = await messageRepo
+                                          .createConversation(
+                                            buyerId: buyer.uid,
+                                            sellerId: seller.uid,
+                                            buyerDetails: ParticipantDetails(
+                                              name: buyer.username,
+                                              avatar: buyer.photoUrl,
+                                            ),
+                                            sellerDetails: ParticipantDetails(
+                                              name: seller.username,
+                                              avatar: seller.photoUrl,
+                                            ),
+                                            productId: _product!.id,
+                                            productDetails: ProductDetails(
+                                              title: _product!.title,
+                                              price: _product!.price,
+                                              image:
+                                                  _product!.imageUrls.isNotEmpty
+                                                  ? _product!.imageUrls.first
+                                                  : null,
+                                              sellerId: seller.uid,
+                                            ),
+                                          );
+                                    }
+
+                                    // Rediriger vers la conversation
+                                    if (context.mounted) {
+                                      context.push('/chat/$conversationId');
+                                    }
                                   },
                                   isFullWidth: false,
                                 ),
