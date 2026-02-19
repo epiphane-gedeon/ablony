@@ -5,19 +5,19 @@ Ablony est une application mobile de marketplace moderne et élégante, conçue 
 ## 🚀 Stack Technique
 
 L'application est bâtie sur les technologies les plus robustes de l'écosystème mobile actuel :
-
-- **Framework** : [Flutter](https!//flutter.dev) (multi-plateforme iOS/Android/Web)
-- **Gestionnaire d'État** : [Riverpod](https!//riverpod.dev) (Architecture réactive et testable)
-- **Backend & Temps Réel** : [Firebase](https!//firebase.google.com)
-  - **Cloud Firestore** : Base de données NoSQL en temps réel.
-  - **Firebase Authentication** : Connexion sécurisée (Email, Google, Facebook, Apple).
-  - **Cloud Storage** : Hébergement des photos de produits.
-  - **App Check** : Sécurité renforcée contre les abus.
-- **Navigation** : [Go Router](https!//pub.dev/packages/go_router)
-- **Interface Utilisateur** :
-  - Design "Glassmorphism" et minimaliste.
-  - Polices personnalisées via [Google Fonts](https!//pub.dev/packages/google_fonts).
-  - Icônes vectorielles via [Flutter SVG](https!//pub.dev/packages/flutter_svg).
+ 
+ - **Framework** : [Flutter](https://flutter.dev) (multi-plateforme : iOS / Android / Web)
+ - **Gestionnaire d'État** : [Riverpod](https://riverpod.dev) (architecture réactive et testable)
+ - **Backend & Temps Réel** : [Firebase](https://firebase.google.com)
+   - **Cloud Firestore** : Base de données NoSQL.
+   - **Firebase Authentication** : Connexions via Email, Google, Facebook et Apple (configuration plateforme requise).
+   - **Cloud Storage** : Hébergement des photos de produits.
+   - **App Check** : Sécurité contre les abus.
+ - **Navigation** : [Go Router](https://pub.dev/packages/go_router)
+ - **Interface Utilisateur** :
+   - Design minimaliste.
+   - Polices personnalisées via [Google Fonts](https://pub.dev/packages/google_fonts).
+   - Icônes vectorielles via [Flutter SVG](https://pub.dev/packages/flutter_svg).
 
 ## ✨ Fonctionnalités Clés
 
