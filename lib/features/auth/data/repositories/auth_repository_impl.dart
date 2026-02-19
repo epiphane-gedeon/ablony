@@ -7,6 +7,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../../core/exceptions/exceptions.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../wallet/domain/models/wallet.dart';
 import '../models/user_model.dart';
 
 /// Implémentation concrète du [AuthRepository] utilisant Firebase.
@@ -580,6 +581,7 @@ class AuthRepositoryImpl implements AuthRepository {
     String? phoneNumber,
     String? city,
     bool? marketingEmailsEnabled,
+    Wallet? wallet,
   }) async {
     try {
       // Charger l'utilisateur actuel
@@ -601,6 +603,7 @@ class AuthRepositoryImpl implements AuthRepository {
         phoneNumber: phoneNumber,
         city: city,
         marketingEmailsEnabled: marketingEmailsEnabled,
+        wallet: wallet,
         updatedAt: DateTime.now(),
       );
 

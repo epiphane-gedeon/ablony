@@ -50,7 +50,22 @@ service cloud.firestore {
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email
         && request.resource.data.authProvider == resource.data.authProvider
-        && request.resource.data.createdAt == resource.data.createdAt;
+        && request.resource.data.createdAt == resource.data.createdAt
+        // Validation du wallet si présent
+        && (!request.resource.data.keys().hasAny(['wallet']) 
+          || (request.resource.data.wallet is map
+            && request.resource.data.wallet.keys().hasAll(['firstName', 'lastName', 'nationality', 'birthDate', 'availableAmount', 'pendingAmount', 'isActivated'])
+            && request.resource.data.wallet.firstName is string
+            && request.resource.data.wallet.lastName is string
+            && request.resource.data.wallet.nationality is string
+            && request.resource.data.wallet.availableAmount is int
+            && request.resource.data.wallet.pendingAmount is int
+            && request.resource.data.wallet.isActivated is bool
+            // Une fois activé, le wallet ne peut pas être désactivé
+            && (!resource.data.keys().hasAny(['wallet']) 
+              || !resource.data.wallet.isActivated 
+              || request.resource.data.wallet.isActivated == true)
+          ));
       
       // Suppression : Uniquement le propriétaire (et dans le futur, les admins)
       allow delete: if isOwner(userId);

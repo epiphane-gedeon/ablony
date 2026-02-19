@@ -17,12 +17,21 @@ class ChoiceCardWidget extends StatelessWidget {
   /// Action au clic
   final VoidCallback onTap;
 
-  /// Si true, le style peut suggérer une sélection multiple (pas de changement majeur visuel 
+  /// Si true, le style peut suggérer une sélection multiple (pas de changement majeur visuel
   /// pour l'instant, mais prêt pour évolution future si besoin de checkbox explicites)
   final bool isMultiple;
-  
+
   /// Hauteur fixe optionnelle pour uniformiser les cartes dans une Row
   final double? height;
+
+  /// Largeur optionnelle pour contrôler la largeur de la carte
+  final double? width;
+
+  /// Icône optionnelle à afficher avant le titre
+  final IconData? icon;
+
+  /// Afficher ou non le rond de sélection à droite
+  final bool showSelectionCircle;
 
   const ChoiceCardWidget({
     super.key,
@@ -32,6 +41,9 @@ class ChoiceCardWidget extends StatelessWidget {
     required this.onTap,
     this.isMultiple = false,
     this.height,
+    this.width,
+    this.icon,
+    this.showSelectionCircle = false,
   });
 
   @override
@@ -43,10 +55,13 @@ class ChoiceCardWidget extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: height,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        width: width,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           // Fond : légèrement teinté si sélectionné, sinon couleur de la carte/surface
-          color: isSelected ? colorScheme.primary.withOpacity(0.1) : theme.cardColor,
+          color: isSelected
+              ? colorScheme.primary.withOpacity(0.1)
+              : theme.cardColor,
           // Bordure : primaire si sélectionné, sinon diviseur standard
           border: Border.all(
             color: isSelected ? colorScheme.primary : theme.dividerColor,
@@ -54,29 +69,67 @@ class ChoiceCardWidget extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                // Couleur : primaire si sélectionné
-                color: isSelected ? colorScheme.primary : theme.textTheme.bodyMedium?.color,
+            // Icône optionnelle à gauche
+            if (icon != null) ...[
+              Icon(
+                icon,
+                color: isSelected ? colorScheme.primary : Colors.grey,
+                size: 24,
               ),
-              textAlign: TextAlign.center,
+              const SizedBox(width: 12),
+            ],
+
+            // Contenu principal (titre et sous-titre)
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      // Couleur : primaire si sélectionné
+                      color: isSelected
+                          ? colorScheme.primary
+                          : theme.textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                  if (subTitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subTitle!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
             ),
-            if (subTitle != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                subTitle!,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontSize: 10,
-                  color: Colors.grey,
+
+            // Rond de sélection à droite
+            if (showSelectionCircle) ...[
+              const SizedBox(width: 12),
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? colorScheme.primary : Colors.grey,
+                    width: 2,
+                  ),
+                  color: isSelected ? colorScheme.primary : Colors.transparent,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                child: isSelected
+                    ? Icon(Icons.check, size: 16, color: colorScheme.onPrimary)
+                    : null,
               ),
             ],
           ],
