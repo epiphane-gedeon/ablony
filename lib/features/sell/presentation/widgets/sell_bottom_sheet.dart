@@ -576,7 +576,9 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
                   }
 
                   parentId = rootId;
-                  debugPrint('✅ Root ParentId extracted from Firestore: $parentId');
+                  debugPrint(
+                    '✅ Root ParentId extracted from Firestore: $parentId',
+                  );
                 } catch (e) {
                   parentId = categoryId;
                   debugPrint(
@@ -854,8 +856,8 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
           ),
         );
 
-        // Naviguer vers la page de détail du produit créé
-        context.go('/product/${createdProduct.id}');
+        // Naviguer vers la page d'accueil
+        context.go('/home');
       }
     } catch (e, stackTrace) {
       // ============================================================

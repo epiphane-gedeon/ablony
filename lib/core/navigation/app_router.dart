@@ -15,6 +15,7 @@ import '../../features/messages/presentation/pages/messages_page.dart';
 import '../../features/messages/presentation/pages/chat_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
+import '../../features/payment/presentation/pages/payment_page.dart';
 import '../../features/product/presentation/pages/product_detail_page.dart';
 import '../../core/layout/main_layout.dart';
 import 'router_notifier.dart';
@@ -466,6 +467,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           final productId = state.pathParameters['id']!;
           return ProductDetailPage(productId: productId);
         },
+      ),
+
+      // ============================================================
+      // ROUTE : PAIEMENT
+      // ============================================================
+      /// Page de paiement pour finaliser un achat
+      GoRoute(
+        path: '/payment',
+        name: 'payment',
+        builder: (context, state) => const PaymentPage(),
       ),
 
       // ============================================================

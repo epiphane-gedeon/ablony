@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/presentation/dynamic_ui/dynamic_selection_view.dart';
 import '../../../../core/presentation/pages/selection_screen.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
+import '../../../../shared/widgets/info_bubble.dart';
 import '../../../../shared/widgets/input.dart';
 import '../../../../shared/widgets/selection_tile.dart';
-import '../../../auth/domain/entities/country.dart';
+import '../../../auth/application/auth_providers.dart';
+import '../../data/nationalities.dart';
+import '../../domain/models/wallet.dart';
 
 /// Page du porte-monnaie utilisateur
 class WalletPage extends ConsumerStatefulWidget {
@@ -20,6 +23,8 @@ class _WalletPageState extends ConsumerState<WalletPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userAsync = ref.watch(currentUserProvider);
+    final wallet = userAsync.value?.wallet;
 
     return Scaffold(
       appBar: AppBar(
@@ -44,16 +49,42 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                 Row(
                   children: [
                     Text(
-                      '0,00 €',
+                      wallet != null
+                          ? '${wallet.pendingAmountInXOF.toStringAsFixed(0)} FCFA'
+                          : '0 FCFA',
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(
-                      Icons.info_outline,
-                      size: 20,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    InfoBubble(
+                      message:
+                          'Lorsqu\'un acheteur valide un achat, le montant est mis en attente jusqu\'à la réception et la confirmation du produit.',
+                      link: TextButton(
+                        onPressed: () {
+                          // TODO: Naviguer vers la page d'aide
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Page d\'aide à venir'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'En savoir plus',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      displayDuration: 5,
+                      iconColor: theme.colorScheme.onSurface.withOpacity(0.5),
                     ),
                   ],
                 ),
@@ -67,7 +98,9 @@ class _WalletPageState extends ConsumerState<WalletPage> {
           Column(
             children: [
               Text(
-                '0,00 €',
+                wallet != null
+                    ? '${wallet.availableAmountInXOF.toStringAsFixed(0)} FCFA'
+                    : '0 FCFA',
                 style: theme.textTheme.displayLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 48,
@@ -85,14 +118,53 @@ class _WalletPageState extends ConsumerState<WalletPage> {
 
           const SizedBox(height: 32),
 
-          // Bouton "Activer le porte-monnaie"
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: PrimaryButton(
-              text: 'Activer le porte-monnaie',
-              onPressed: () => _openWalletSetup(context),
+          // Bouton "Activer le porte-monnaie" (affiché seulement si non activé)
+          if (wallet == null || !wallet.isActivated)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: PrimaryButton(
+                text: 'Activer le porte-monnaie',
+                onPressed: () => _openWalletSetup(context),
+              ),
             ),
-          ),
+
+          // Boutons Recharger et Retirer (affichés seulement si le wallet est activé)
+          if (wallet != null && wallet.isActivated) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: PrimaryButton(
+                      text: 'Recharger',
+                      onPressed: () {
+                        // TODO: Implémenter la recharge
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Fonctionnalité de recharge à venir'),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SecondaryButton(
+                      text: 'Retirer',
+                      onPressed: () {
+                        // TODO: Implémenter le retrait
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Fonctionnalité de retrait à venir'),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           const SizedBox(height: 80), // Espace pour la nav bar
         ],
@@ -107,14 +179,14 @@ class _WalletPageState extends ConsumerState<WalletPage> {
   }
 }
 
-class _WalletSetupForm extends StatefulWidget {
+class _WalletSetupForm extends ConsumerStatefulWidget {
   const _WalletSetupForm();
 
   @override
-  State<_WalletSetupForm> createState() => _WalletSetupFormState();
+  ConsumerState<_WalletSetupForm> createState() => _WalletSetupFormState();
 }
 
-class _WalletSetupFormState extends State<_WalletSetupForm> {
+class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   String? _selectedNationality;
@@ -128,6 +200,9 @@ class _WalletSetupFormState extends State<_WalletSetupForm> {
   }
 
   void _showNationalityPicker(BuildContext context) {
+    final userAsync = ref.read(currentUserProvider);
+    final userCountryCode = userAsync.value?.country.code;
+
     final nationalityConfig = {
       'type': 'list',
       'dataSource': 'nationalities',
@@ -144,11 +219,24 @@ class _WalletSetupFormState extends State<_WalletSetupForm> {
             config: nationalityConfig,
             dataSources: {
               'nationalities': (_) async {
-                return Country.all
-                    .map(
-                      (c) => {'code': c.code, 'name': c.name, 'emoji': c.flag},
-                    )
-                    .toList();
+                final allNationalities = Nationalities.all.toList();
+
+                // Si l'utilisateur a un pays, on le met en premier
+                if (userCountryCode != null) {
+                  // Trouver la nationalité correspondant au pays de l'utilisateur
+                  final userNationalityIndex = allNationalities.indexWhere(
+                    (n) => n['code'] == userCountryCode,
+                  );
+
+                  if (userNationalityIndex != -1) {
+                    final userNationality = allNationalities.removeAt(
+                      userNationalityIndex,
+                    );
+                    allNationalities.insert(0, userNationality);
+                  }
+                }
+
+                return allNationalities;
               },
             },
             onResult: (item) {
@@ -246,13 +334,7 @@ class _WalletSetupFormState extends State<_WalletSetupForm> {
             // Bouton
             PrimaryButton(
               text: 'Activer le porte-monnaie',
-              onPressed: () {
-                // TODO: Gérer l'activation du porte-monnaie
-                print(
-                  'Données: ${_firstNameController.text} ${_lastNameController.text}, $_selectedNationality, $_selectedBirthDate',
-                );
-                Navigator.of(context).pop();
-              },
+              onPressed: () => _activateWallet(context),
             ),
 
             const SizedBox(height: 20),
@@ -260,5 +342,88 @@ class _WalletSetupFormState extends State<_WalletSetupForm> {
         ),
       ),
     );
+  }
+
+  Future<void> _activateWallet(BuildContext context) async {
+    // Validation des champs
+    if (_firstNameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez saisir votre prénom')),
+      );
+      return;
+    }
+
+    if (_lastNameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez saisir votre nom')),
+      );
+      return;
+    }
+
+    if (_selectedNationality == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner une nationalité')),
+      );
+      return;
+    }
+
+    if (_selectedBirthDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez sélectionner votre date de naissance'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Récupérer l'utilisateur actuel
+      final user = ref.read(currentUserProvider).value;
+      if (user == null) {
+        throw Exception('Utilisateur non connecté');
+      }
+
+      // Créer l'objet Wallet
+      final wallet = Wallet(
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        nationality: _selectedNationality!,
+        birthDate: _selectedBirthDate!,
+        availableAmount: 0, // Initialiser à 0
+        pendingAmount: 0, // Initialiser à 0
+        isActivated: true,
+        activatedAt: DateTime.now(),
+      );
+
+      // Sauvegarder dans Firestore via le repository
+      await ref
+          .read(authRepositoryProvider)
+          .updateUserProfile(uid: user.uid, wallet: wallet);
+
+      // Invalider le provider pour recharger les données
+      ref.invalidate(currentUserProvider);
+
+      if (context.mounted) {
+        // Afficher un message de succès
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Porte-monnaie activé avec succès !'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Retour à la page du wallet
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur : ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

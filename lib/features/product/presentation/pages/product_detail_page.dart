@@ -819,7 +819,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                     child: PrimaryButton(
                       text: 'Acheter',
                       onPressed: () {
-                        // TODO: Rediriger vers la page de paiement
+                        context.push('/payment');
                       },
                     ),
                   ),

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'auth_provider.dart';
 import 'country.dart';
+import '../../../wallet/domain/models/wallet.dart';
 
 /// Entité représentant un utilisateur dans l'application Ablony.
 ///
@@ -243,6 +244,17 @@ class User extends Equatable {
   final int reviewsCount;
 
   // ============================================================
+  // PORTEFEUILLE
+  // ============================================================
+
+  /// Informations du portefeuille de l'utilisateur
+  ///
+  /// Contient les informations bancaires et les montants disponibles.
+  /// - null : Le portefeuille n'est pas activé
+  /// - Wallet : Le portefeuille est activé avec les informations
+  final Wallet? wallet;
+
+  // ============================================================
   // CONSTRUCTEUR
   // ============================================================
 
@@ -272,6 +284,7 @@ class User extends Equatable {
     this.salesCount = 0,
     this.rating = 0.0,
     this.reviewsCount = 0,
+    this.wallet,
   });
 
   // ============================================================
@@ -312,6 +325,7 @@ class User extends Equatable {
     int? salesCount,
     double? rating,
     int? reviewsCount,
+    Wallet? wallet,
   }) {
     return User(
       uid: uid ?? this.uid,
@@ -336,6 +350,7 @@ class User extends Equatable {
       salesCount: salesCount ?? this.salesCount,
       rating: rating ?? this.rating,
       reviewsCount: reviewsCount ?? this.reviewsCount,
+      wallet: wallet ?? this.wallet,
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/entities.dart';
+import '../../../wallet/domain/models/wallet.dart';
 
 /// Modèle de données pour l'utilisateur avec sérialisation Firestore.
 ///
@@ -60,6 +61,7 @@ class UserModel extends User {
     super.salesCount,
     super.rating,
     super.reviewsCount,
+    super.wallet,
   });
 
   // ============================================================
@@ -103,6 +105,7 @@ class UserModel extends User {
       salesCount: user.salesCount,
       rating: user.rating,
       reviewsCount: user.reviewsCount,
+      wallet: user.wallet,
     );
   }
 
@@ -228,6 +231,11 @@ class UserModel extends User {
         salesCount: data['salesCount'] as int? ?? 0,
         rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
         reviewsCount: data['reviewsCount'] as int? ?? 0,
+
+        // PORTEFEUILLE (optionnel)
+        wallet: data['wallet'] != null
+            ? Wallet.fromFirestore(data['wallet'] as Map<String, dynamic>)
+            : null,
       );
     } catch (e) {
       // Capturer et enrichir l'erreur avec le contexte
@@ -281,6 +289,9 @@ class UserModel extends User {
       salesCount: json['salesCount'] as int? ?? 0,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       reviewsCount: json['reviewsCount'] as int? ?? 0,
+      wallet: json['wallet'] != null
+          ? Wallet.fromFirestore(json['wallet'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -354,6 +365,9 @@ class UserModel extends User {
     }
     if (city != null) {
       data['city'] = city;
+    }
+    if (wallet != null) {
+      data['wallet'] = wallet!.toFirestore();
     }
 
     return data;

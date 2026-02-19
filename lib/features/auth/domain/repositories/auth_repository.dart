@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../entities/entities.dart';
+import '../../../wallet/domain/models/wallet.dart';
 
 /// Interface définissant le contrat pour les opérations d'authentification.
 ///
@@ -313,6 +314,7 @@ abstract class AuthRepository {
     String? phoneNumber,
     String? city,
     bool? marketingEmailsEnabled,
+    Wallet? wallet,
   });
 
   /// Récupère les données d'un utilisateur depuis Firestore.

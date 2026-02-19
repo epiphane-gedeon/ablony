@@ -96,7 +96,9 @@ class ProfilePage extends ConsumerWidget {
                 context: context,
                 icon: Icons.wallet_outlined,
                 title: 'Mon porte-monnaie',
-                trailing: '0,00 €',
+                trailing: user.wallet != null
+                    ? '${user.wallet!.availableAmount} FCFA'
+                    : '0 FCFA',
                 onTap: () => context.push('/profile/wallet'),
               ),
 
