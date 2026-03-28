@@ -24,16 +24,20 @@ class ProfilePage extends ConsumerWidget {
           return ListView(
             children: [
               // Section profil avec avatar et nom
-              Container(
-                margin: const EdgeInsets.all(16),
+              Padding(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                child: InkWell(
+                  onTap: () => context.push('/profile/my-listings'),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: theme.colorScheme.outline.withOpacity(0.2),
-                  ),
-                ),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withOpacity(0.2),
+                      ),
+                    ),
                 child: Row(
                   children: [
                     CircleAvatar(
@@ -74,6 +78,8 @@ class ProfilePage extends ConsumerWidget {
                   ],
                 ),
               ),
+            ),
+          ),
 
               const SizedBox(height: 16),
 
@@ -82,7 +88,7 @@ class ProfilePage extends ConsumerWidget {
                 context: context,
                 icon: Icons.favorite_border,
                 title: 'Favoris',
-                onTap: () {},
+                onTap: () => context.push('/profile/favorites'),
               ),
 
               _buildMenuTile(

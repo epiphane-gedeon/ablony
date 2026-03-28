@@ -69,6 +69,29 @@ service cloud.firestore {
       
       // Suppression : Uniquement le propriétaire (et dans le futur, les admins)
       allow delete: if isOwner(userId);
+
+    }
+
+    // ============================================================
+    // COLLECTION : fav
+    // ============================================================
+    // Relation favoris : un document par paire (userId, productId)
+    match /fav/{favId} {
+      // Lecture : autorisée pour utilisateur connecté
+      // (nécessaire pour les lectures transactionnelles sur doc potentiellement absent)
+      allow read: if isAuthenticated();
+
+      // Création : uniquement pour soi-même
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['productId', 'userId', 'createdAt'])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.productId is string;
+
+      // Mise à jour : non autorisée (toggle = create/delete)
+      allow update: if false;
+
+      // Suppression : uniquement le propriétaire du favori
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
     // ============================================================
@@ -130,11 +153,24 @@ service cloud.firestore {
         && request.resource.data.imageUrls.size() >= 1
         && request.resource.data.imageUrls.size() <= 6;
       
-      // Mise à jour : Uniquement le vendeur peut modifier son produit
-      // Empêche la modification du vendeur et de la date de création
-      allow update: if isOwner(resource.data.sellerId)
-        && request.resource.data.sellerId == resource.data.sellerId
-        && request.resource.data.createdAt == resource.data.createdAt;
+      // Mise à jour :
+      // 1) le vendeur peut modifier son produit
+      // 2) tout utilisateur authentifié peut uniquement incrémenter/décrémenter favoritesCount de 1
+      allow update: if (
+          isOwner(resource.data.sellerId)
+          && request.resource.data.sellerId == resource.data.sellerId
+          && request.resource.data.createdAt == resource.data.createdAt
+        ) || (
+          isAuthenticated()
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['favoritesCount'])
+          && resource.data.favoritesCount is int
+          && request.resource.data.favoritesCount is int
+          && request.resource.data.favoritesCount >= 0
+          && (
+            request.resource.data.favoritesCount == resource.data.favoritesCount + 1
+            || request.resource.data.favoritesCount == resource.data.favoritesCount - 1
+          )
+        );
       
       // Suppression : Uniquement le vendeur
       allow delete: if isOwner(resource.data.sellerId);

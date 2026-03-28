@@ -7,6 +7,8 @@ import '../../../../shared/widgets/link.dart';
 import '../../../../shared/widgets/product_card.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/user.dart';
+import '../../../product_fav/presentation/providers/product_fav_provider.dart';
+import '../../../product_fav/presentation/widgets/fav_toggle.dart';
 import '../../domain/entities/entities.dart';
 import '../../../messages/application/providers/message_providers.dart';
 import '../../../messages/domain/models/participant_details.dart';
@@ -205,6 +207,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     }
 
     final product = _product!;
+    final favoriteCountAsync = ref.watch(
+      productFavoriteCountProvider(product.id),
+    );
+    final favoriteCount = favoriteCountAsync.value ?? product.favoritesCount;
     final images = product.imageUrls.isNotEmpty
         ? product.imageUrls
         : ['https://picsum.photos/400/600'];
@@ -257,7 +263,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           ),
                         ),
                       ),
-                      // Icône favoris avec nombre
+                      // Toggle favoris + nombre réel (collection fav)
                       Positioned(
                         bottom: 16,
                         right: 16,
@@ -272,14 +278,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           ),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.favorite_border,
-                                color: Colors.white,
-                                size: 20,
-                              ),
+                              FavToggle(productId: product.id, size: 20),
                               const SizedBox(width: 4),
                               Text(
-                                '${product.favoritesCount}',
+                                '$favoriteCount',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: Colors.white,
                                 ),
@@ -819,7 +821,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                     child: PrimaryButton(
                       text: 'Acheter',
                       onPressed: () {
-                        context.push('/payment');
+                        if (_product != null) {
+                          context.push('/payment', extra: _product);
+                        }
                       },
                     ),
                   ),

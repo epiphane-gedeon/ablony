@@ -19,10 +19,14 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 });
 
 /// Provider pour récupérer un attribut complet par son ID.
-final attributeByIdProvider = FutureProvider.family<ProductAttribute, String>((ref, id) async {
+final attributeByIdProvider = FutureProvider.family<ProductAttribute, String>((
+  ref,
+  id,
+) async {
   final categoryRepo = ref.watch(categoryRepositoryProvider);
   return categoryRepo.getAttributeById(id);
 });
+
 ///
 /// Charge automatiquement la liste des produits depuis Firestore.
 /// Le résultat est mis en cache par Riverpod.
@@ -67,6 +71,8 @@ final productByIdProvider = FutureProvider.family<Product, String>((
   ref,
   productId,
 ) async {
+  // Garder en cache pour réutiliser entre les pages (produit → chat → paiement)
+  ref.keepAlive();
   return ref.watch(productRepositoryProvider).getProductById(productId);
 });
 
@@ -132,24 +138,25 @@ final allConditionsProvider = FutureProvider<List<String>>((ref) async {
 /// Provider pour récupérer le label d'un attribut par son ID et sa valeur (index ou string)
 final attributeLabelProvider =
     FutureProvider.family<String, ({String attributeId, dynamic value})>((
-  ref,
-  params,
-) async {
-  final value = params.value;
-  if (value == null) return 'Non spécifié';
-  if (value is! int) return value.toString();
+      ref,
+      params,
+    ) async {
+      final value = params.value;
+      if (value == null) return 'Non spécifié';
+      if (value is! int) return value.toString();
 
-  final categoryRepo = ref.watch(categoryRepositoryProvider);
-  try {
-    // On essaie de trouver l'attribut par son ID
-    final attribute = await categoryRepo.getAttributeById(params.attributeId);
-    if (params.value >= 0 && params.value < attribute.values.length) {
-      return attribute.values[params.value];
-    }
-  } catch (e) {
-    // Si l'attribut par ID échoue, on peut essayer de chercher par nom ou rester sur la valeur brute
-  }
-  
-  return value.toString();
-});
+      final categoryRepo = ref.watch(categoryRepositoryProvider);
+      try {
+        // On essaie de trouver l'attribut par son ID
+        final attribute = await categoryRepo.getAttributeById(
+          params.attributeId,
+        );
+        if (params.value >= 0 && params.value < attribute.values.length) {
+          return attribute.values[params.value];
+        }
+      } catch (e) {
+        // Si l'attribut par ID échoue, on peut essayer de chercher par nom ou rester sur la valeur brute
+      }
 
+      return value.toString();
+    });
