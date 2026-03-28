@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/choice_card_widget.dart';
-import '../../../../shared/widgets/selection_option.dart';
+import '../../../../shared/widgets/selection_tile.dart';
+import '../../../product/domain/entities/product.dart';
 
 /// Page de paiement pour finaliser un achat
 class PaymentPage extends ConsumerStatefulWidget {
-  const PaymentPage({super.key});
+  final Product product;
+
+  const PaymentPage({super.key, required this.product});
 
   @override
   ConsumerState<PaymentPage> createState() => _PaymentPageState();
@@ -17,11 +21,37 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   // Options de livraison
   String _selectedDeliveryOption = 'relay'; // 'relay' ou 'home'
 
+  // Sélections
+  String? _selectedAddress;
+  String? _selectedRelayPoint;
+  String? _selectedPaymentMethod;
+
+  // Calcul des frais
+  double get _protectionFees => widget.product.price * 0.05; // 5% de protection
+  double get _shippingCost =>
+      _selectedDeliveryOption == 'relay' ? 1000.0 : 1500.0; // FCFA
+  double get _totalAmount =>
+      widget.product.price + _protectionFees + _shippingCost;
+
+  // Helper pour formater le nom de la méthode de paiement
+  String _getPaymentMethodLabel(String method) {
+    switch (method) {
+      case 'tmoney':
+        return 'T-Money';
+      case 'flooz':
+        return 'Flooz';
+      case 'card':
+        return 'Carte bancaire';
+      default:
+        return method;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final imageSize = screenWidth * 0.25; // 25% de la largeur de l'écran
+    final imageSize = screenWidth * 0.35; // 35% de la largeur de l'écran
 
     return Scaffold(
       appBar: AppBar(title: const Text('Paiement'), centerTitle: true),
@@ -42,12 +72,30 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                     // Image du produit
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        width: imageSize,
-                        height: imageSize,
-                        color: Colors.grey[300],
-                        child: Icon(Icons.image, size: imageSize * 0.4),
-                      ),
+                      child: widget.product.imageUrls.isNotEmpty
+                          ? Image.network(
+                              widget.product.imageUrls.first,
+                              width: imageSize,
+                              height: imageSize,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: imageSize,
+                                  height: imageSize,
+                                  color: Colors.grey[300],
+                                  child: Icon(
+                                    Icons.image,
+                                    size: imageSize * 0.4,
+                                  ),
+                                );
+                              },
+                            )
+                          : Container(
+                              width: imageSize,
+                              height: imageSize,
+                              color: Colors.grey[300],
+                              child: Icon(Icons.image, size: imageSize * 0.4),
+                            ),
                     ),
                     SizedBox(width: screenWidth * 0.03),
 
@@ -56,39 +104,31 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Tricot noir',
-                            style: TextStyle(
+                          Text(
+                            widget.product.title,
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'S',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          Text(
+                            widget.product.condition.label,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
                           ),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Text(
-                                '2,00 €',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                '1,00 €',
-                                style: TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            '${widget.product.price.toStringAsFixed(0)} FCFA',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: theme.colorScheme.primary,
+                            ),
                           ),
                         ],
                       ),
@@ -100,19 +140,19 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
               const SizedBox(height: 8),
 
               // Section Adresse
-              _buildSection(
-                context,
-                title: 'Adresse',
-                child: SelectionOption(
-                  label: 'Ajouter l\'adresse de livraison',
-                  trailingIcon: SelectionOptionIcon.plus,
-                  onTap: () {
-                    // TODO: Naviguer vers la page d'ajout d'adresse
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Ajout d\'adresse à venir')),
-                    );
-                  },
-                ),
+              SelectionTile(
+                label: 'Adresse',
+                value: _selectedAddress,
+                placeholder: 'Ajouter l\'adresse de livraison',
+                isRequired: true,
+                onTap: () async {
+                  final result = await context.push('/address/add');
+                  if (result != null) {
+                    setState(() {
+                      _selectedAddress = result.toString();
+                    });
+                  }
+                },
               ),
 
               SizedBox(height: screenWidth * 0.06),
@@ -125,7 +165,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   children: [
                     ChoiceCardWidget(
                       title: 'Envoi en point relais',
-                      subTitle: 'à partir de 3,28 €',
+                      subTitle: 'à partir de ${1000.toStringAsFixed(0)} FCFA',
                       icon: Icons.location_on_outlined,
                       isSelected: _selectedDeliveryOption == 'relay',
                       showSelectionCircle: true,
@@ -138,13 +178,15 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                     SizedBox(height: screenWidth * 0.03),
                     ChoiceCardWidget(
                       title: 'Envoi à domicile',
-                      subTitle: '4,59 €',
+                      subTitle: '${1500.toStringAsFixed(0)} FCFA',
                       icon: Icons.home_outlined,
                       isSelected: _selectedDeliveryOption == 'home',
                       showSelectionCircle: true,
                       onTap: () {
                         setState(() {
                           _selectedDeliveryOption = 'home';
+                          // Réinitialiser le point relais car non applicable
+                          _selectedRelayPoint = null;
                         });
                       },
                     ),
@@ -156,42 +198,42 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
 
               // Section Détails de la livraison
               if (_selectedDeliveryOption == 'relay')
-                _buildSection(
-                  context,
-                  title: 'Détails de la livraison',
-                  child: SelectionOption(
-                    label: 'Choisir un point relais',
-                    trailingIcon: SelectionOptionIcon.plus,
-                    onTap: () {
-                      // TODO: Naviguer vers la sélection de point relais
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sélection du point relais à venir'),
-                        ),
-                      );
-                    },
-                  ),
+                SelectionTile(
+                  label: 'Détails de la livraison',
+                  value: _selectedRelayPoint,
+                  placeholder: 'Choisir un point relais',
+                  isRequired: true,
+                  onTap: () async {
+                    final result = await context.push('/relay-point/select');
+                    if (result != null && result is Map) {
+                      setState(() {
+                        _selectedRelayPoint = result['name'] as String?;
+                      });
+                    }
+                  },
                 ),
 
               if (_selectedDeliveryOption == 'relay')
                 SizedBox(height: screenWidth * 0.06),
 
               // Section Paiement
-              _buildSection(
-                context,
-                title: 'Paiement',
-                child: SelectionOption(
-                  label: 'Sélectionne un mode de paiement',
-                  trailingIcon: SelectionOptionIcon.plus,
-                  onTap: () {
-                    // TODO: Naviguer vers la sélection du mode de paiement
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Sélection du mode de paiement à venir'),
-                      ),
-                    );
-                  },
-                ),
+              SelectionTile(
+                label: 'Paiement',
+                value: _selectedPaymentMethod != null
+                    ? _getPaymentMethodLabel(_selectedPaymentMethod!)
+                    : null,
+                placeholder: 'Sélectionne un mode de paiement',
+                isRequired: true,
+                onTap: () async {
+                  final selectedMethod = await context.push(
+                    '/payment-method/select',
+                  );
+                  if (selectedMethod != null && selectedMethod is String) {
+                    setState(() {
+                      _selectedPaymentMethod = selectedMethod;
+                    });
+                  }
+                },
               ),
 
               SizedBox(height: screenWidth * 0.06),
@@ -202,15 +244,21 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                 title: 'Prix',
                 child: Column(
                   children: [
-                    _buildPriceRow('Commande', '2,00 €'),
+                    _buildPriceRow(
+                      'Commande',
+                      '${widget.product.price.toStringAsFixed(0)} FCFA',
+                    ),
                     SizedBox(height: screenWidth * 0.03),
                     _buildPriceRow(
                       'Frais de Protection acheteurs',
-                      '0,80 €',
+                      '${_protectionFees.toStringAsFixed(0)} FCFA',
                       hasInfo: true,
                     ),
                     SizedBox(height: screenWidth * 0.03),
-                    _buildPriceRow('Frais de port', '3,28 €'),
+                    _buildPriceRow(
+                      'Frais de port',
+                      '${_shippingCost.toStringAsFixed(0)} FCFA',
+                    ),
                   ],
                 ),
               ),
@@ -250,7 +298,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                         ),
                       ),
                       Text(
-                        '6,08 €',
+                        '${_totalAmount.toStringAsFixed(0)} FCFA',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

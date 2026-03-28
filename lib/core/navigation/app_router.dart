@@ -14,9 +14,15 @@ import '../../features/search/presentation/pages/searching_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
 import '../../features/messages/presentation/pages/chat_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/user_listings_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
+import '../../features/product_fav/presentation/pages/favorites_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
+import '../../features/address/presentation/pages/add_address_page.dart';
+import '../../features/payment_method/presentation/pages/payment_method_page.dart';
+import '../../features/relay_point/presentation/pages/select_relay_point_page.dart';
 import '../../features/product/presentation/pages/product_detail_page.dart';
+import '../../features/product/domain/entities/product.dart';
 import '../../core/layout/main_layout.dart';
 import 'router_notifier.dart';
 
@@ -414,6 +420,18 @@ final routerProvider = Provider<GoRouter>((ref) {
                     name: 'wallet',
                     builder: (context, state) => const WalletPage(),
                   ),
+                  // Sous-route : Favoris
+                  GoRoute(
+                    path: 'favorites',
+                    name: 'favorites',
+                    builder: (context, state) => const FavoritesPage(),
+                  ),
+                  // Sous-route : Mes annonces
+                  GoRoute(
+                    path: 'my-listings',
+                    name: 'my-listings',
+                    builder: (context, state) => const UserListingsPage(),
+                  ),
                 ],
               ),
             ],
@@ -476,7 +494,46 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/payment',
         name: 'payment',
-        builder: (context, state) => const PaymentPage(),
+        builder: (context, state) {
+          final product = state.extra as Product;
+          return PaymentPage(product: product);
+        },
+      ),
+
+      // ============================================================
+      // ROUTE : ADRESSE
+      // ============================================================
+      /// Page d'ajout/modification d'adresse de livraison
+      GoRoute(
+        path: '/address/add',
+        name: 'add_address',
+        builder: (context, state) {
+          return const AddAddressPage();
+        },
+      ),
+
+      // ============================================================
+      // ROUTE : POINT RELAIS
+      // ============================================================
+      /// Page de sélection d'un point relais
+      GoRoute(
+        path: '/relay-point/select',
+        name: 'select_relay_point',
+        builder: (context, state) {
+          return const SelectRelayPointPage();
+        },
+      ),
+
+      // ============================================================
+      // ROUTE : MOYEN DE PAIEMENT
+      // ============================================================
+      /// Page de sélection du moyen de paiement
+      GoRoute(
+        path: '/payment-method/select',
+        name: 'select_payment_method',
+        builder: (context, state) {
+          return const PaymentMethodPage();
+        },
       ),
 
       // ============================================================

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/product/domain/entities/product.dart';
 import '../../features/product/presentation/providers/product_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../features/product_fav/presentation/widgets/fav_toggle.dart';
 
 /// Carte de produit réutilisable
 ///
@@ -15,7 +16,8 @@ import '../../l10n/app_localizations.dart';
 /// - Prix avec protection client (en bleu)
 /// - Bouton favoris
 class ProductCard extends ConsumerWidget {
-  final Product? product; // Passer le produit complet pour une résolution automatique
+  final Product?
+  product; // Passer le produit complet pour une résolution automatique
   final String? imageUrl;
   final dynamic brand;
   final dynamic size;
@@ -50,34 +52,55 @@ class ProductCard extends ConsumerWidget {
 
     // Utiliser les données du produit s'il est fourni, sinon utiliser les paramètres individuels
     final effectiveImageUrl = imageUrl ?? product?.imageUrls.firstOrNull;
-    final effectiveBrand = brand ?? product?.primaryBrandValue ?? product?.title;
-    final effectiveBrandId = brandAttributeId ?? product?.primaryBrandAttributeId ?? 'brand';
+    final effectiveBrand =
+        brand ?? product?.primaryBrandValue ?? product?.title;
+    final effectiveBrandId =
+        brandAttributeId ?? product?.primaryBrandAttributeId ?? 'brand';
     final effectiveSize = size ?? product?.primarySizeValue;
-    final effectiveSizeId = sizeAttributeId ?? product?.primarySizeAttributeId ?? 'size';
+    final effectiveSizeId =
+        sizeAttributeId ?? product?.primarySizeAttributeId ?? 'size';
     final effectiveCondition = condition ?? product?.condition.index;
     final effectivePrice = product?.price ?? price;
-    final effectivePriceWithProtection = product != null ? product!.price * 1.05 : priceWithProtection;
-    final effectiveFavoritesCount = favoritesCount ?? product?.favoritesCount;
+    final effectivePriceWithProtection = product != null
+        ? product!.price * 1.05
+        : priceWithProtection;
 
     // Résolution dynamique des libellés (index -> label ou string -> string)
-    final resolvedBrand = ref.watch(
-          attributeLabelProvider((attributeId: effectiveBrandId, value: effectiveBrand)),
-        ).value ??
+    final resolvedBrand =
+        ref
+            .watch(
+              attributeLabelProvider((
+                attributeId: effectiveBrandId,
+                value: effectiveBrand,
+              )),
+            )
+            .value ??
         effectiveBrand?.toString() ??
         '';
 
-    final resolvedCondition = ref.watch(
-          attributeLabelProvider((attributeId: 'condition', value: effectiveCondition)),
-        ).value ??
+    final resolvedCondition =
+        ref
+            .watch(
+              attributeLabelProvider((
+                attributeId: 'condition',
+                value: effectiveCondition,
+              )),
+            )
+            .value ??
         effectiveCondition?.toString() ??
         '';
 
     String? resolvedSize;
     if (effectiveSize != null) {
-      resolvedSize = ref.watch(
-            attributeLabelProvider(
-                (attributeId: effectiveSizeId, value: effectiveSize)),
-          ).value ??
+      resolvedSize =
+          ref
+              .watch(
+                attributeLabelProvider((
+                  attributeId: effectiveSizeId,
+                  value: effectiveSize,
+                )),
+              )
+              .value ??
           effectiveSize.toString();
     }
 
@@ -124,41 +147,8 @@ class ProductCard extends ConsumerWidget {
                         ),
                 ),
 
-                // Badge favoris (coin inférieur droit)
-                if (effectiveFavoritesCount != null && effectiveFavoritesCount > 0)
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.favorite,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            effectiveFavoritesCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                // Bouton favoris (coin supérieur droit)
+                Positioned(top: 8, right: 8, child: _buildFavButton()),
               ],
             ),
           ),
@@ -235,5 +225,39 @@ class ProductCard extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildFavButton() {
+    // Utilise FavToggle si disponible, sinon icône statique
+    try {
+      // Import dynamique évite cycle d'import lors de l'analyse statique
+      return Builder(
+        builder: (context) {
+          final productId = product?.id ?? '';
+          if (productId.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          // Utilisation du widget FavToggle
+          return SizedBox(
+            width: 40,
+            height: 40,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                color: Colors.black.withOpacity(0.35),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: FavToggle(productId: productId, size: 20),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    } catch (_) {
+      return const SizedBox.shrink();
+    }
   }
 }

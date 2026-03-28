@@ -51,6 +51,16 @@ dependencies:
   timeago: ^3.7.0
 
   # ============================================================
+  # LOCALISATION ET CARTES
+  # ============================================================
+  # Google Maps pour afficher des cartes interactives
+  google_maps_flutter: ^2.5.0
+  # Obtention de la position GPS actuelle
+  geolocator: ^10.1.0
+  # Conversion coordonnées GPS ↔ adresses (reverse geocoding)
+  geocoding: ^2.1.1
+
+  # ============================================================
   # SÉCURITÉ
   # ============================================================
   # Google reCAPTCHA v2 pour la vérification anti-bot

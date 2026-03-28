@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/message_bubble.dart';
 import '../../../../shared/widgets/input.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
@@ -141,11 +142,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
-  Future<void> _buyProduct() async {
-    // TODO: Implémenter la logique d'achat (navigation vers la page de paiement, etc.)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Redirection vers le paiement...')),
-    );
+  Future<void> _buyProduct(Conversation conversation) async {
+    try {
+      // Utiliser directement productId de la conversation (pas de requête supplémentaire)
+      // Le produit est probablement déjà en cache si on vient de la page produit
+      final product = await ref.read(
+        productByIdProvider(conversation.productId).future,
+      );
+
+      if (mounted) {
+        // Naviguer vers la page de paiement avec le produit
+        context.push('/payment', extra: product);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString()}')));
+      }
+    }
   }
 
   Future<void> _showMakeOfferBottomSheet(Conversation conversation) async {
@@ -275,7 +290,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                             fontSize: 14,
                             borderRadius: 8,
                             padding: EdgeInsets.zero,
-                            onPressed: _buyProduct,
+                            onPressed: () => _buyProduct(conversation),
                           ),
                         ),
                       ),
@@ -542,7 +557,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           // 1. L'offre est acceptée
           // 2. L'utilisateur actuel est l'acheteur (pas le vendeur)
           onBuy: message.offer?.status.name == 'accepted' && isBuyer
-              ? () => _buyProduct()
+              ? () => _buyProduct(conversation)
               : null,
           // Le bouton "Faire une offre" dans la bulle appelle la même fonction que celle du haut
           onCounterOffer: () => _showMakeOfferBottomSheet(conversation),
