@@ -10,6 +10,7 @@ import '../../../../shared/widgets/selection_tile.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../data/nationalities.dart';
 import '../../domain/models/wallet.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Page du porte-monnaie utilisateur
 class WalletPage extends ConsumerStatefulWidget {
@@ -28,7 +29,7 @@ class _WalletPageState extends ConsumerState<WalletPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mon porte-monnaie'),
+        title: Text(AppLocalizations.of(context)!.myWallet),
         centerTitle: false,
       ),
       body: ListView(
@@ -41,7 +42,7 @@ class _WalletPageState extends ConsumerState<WalletPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Montant en attente',
+                  AppLocalizations.of(context)!.pendingAmount,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
@@ -58,14 +59,13 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                     ),
                     const SizedBox(width: 8),
                     InfoBubble(
-                      message:
-                          'Lorsqu\'un acheteur valide un achat, le montant est mis en attente jusqu\'à la réception et la confirmation du produit.',
+                      message: AppLocalizations.of(context)!.pendingAmountInfo,
                       link: TextButton(
                         onPressed: () {
                           // TODO: Naviguer vers la page d'aide
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Page d\'aide à venir'),
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.helpPageComingSoon),
                               duration: Duration(seconds: 2),
                             ),
                           );
@@ -76,7 +76,7 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(
-                          'En savoir plus',
+                          AppLocalizations.of(context)!.learnMore,
                           style: TextStyle(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,
@@ -108,7 +108,7 @@ class _WalletPageState extends ConsumerState<WalletPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Montant disponible',
+                AppLocalizations.of(context)!.availableAmount,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
@@ -123,7 +123,7 @@ class _WalletPageState extends ConsumerState<WalletPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: PrimaryButton(
-                text: 'Activer le porte-monnaie',
+                text: AppLocalizations.of(context)!.activateWallet,
                 onPressed: () => _openWalletSetup(context),
               ),
             ),
@@ -136,12 +136,12 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                 children: [
                   Expanded(
                     child: PrimaryButton(
-                      text: 'Recharger',
+                      text: AppLocalizations.of(context)!.topUpWallet,
                       onPressed: () {
                         // TODO: Implémenter la recharge
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fonctionnalité de recharge à venir'),
+                          SnackBar(
+                            content: Text(AppLocalizations.of(context)!.topUpComingSoon),
                           ),
                         );
                       },
@@ -150,12 +150,12 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: SecondaryButton(
-                      text: 'Retirer',
+                      text: AppLocalizations.of(context)!.withdrawWallet,
                       onPressed: () {
                         // TODO: Implémenter le retrait
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fonctionnalité de retrait à venir'),
+                          SnackBar(
+                            content: Text(AppLocalizations.of(context)!.withdrawalComingSoon),
                           ),
                         );
                       },
@@ -214,7 +214,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SelectionScreen(
-          title: 'Nationalité',
+          title: AppLocalizations.of(context)!.nationality,
           content: DynamicSelectionView(
             config: nationalityConfig,
             dataSources: {
@@ -277,7 +277,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configuration du porte-monnaie'),
+        title: Text(AppLocalizations.of(context)!.walletConfig),
         centerTitle: false,
       ),
       body: Padding(
@@ -288,7 +288,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
             // Prénom
             Input(
               controller: _firstNameController,
-              label: 'Prénom(s) du titulaire du compte',
+              label: AppLocalizations.of(context)!.accountHolderFirstName,
               placeholder: 'John',
               type: InputType.text,
             ),
@@ -298,7 +298,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
             // Nom de famille
             Input(
               controller: _lastNameController,
-              label: 'Nom de famille du titulaire du compte',
+              label: AppLocalizations.of(context)!.accountHolderLastName,
               placeholder: 'Doe',
               type: InputType.text,
             ),
@@ -307,9 +307,9 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
 
             // Nationalité
             SelectionTile(
-              label: 'Nationalité',
+              label: AppLocalizations.of(context)!.nationality,
               value: _selectedNationality,
-              placeholder: 'Sélectionne une nationalité',
+              placeholder: AppLocalizations.of(context)!.selectNationalityPlaceholder,
               onTap: () => _showNationalityPicker(context),
               isRequired: true,
             ),
@@ -318,7 +318,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
 
             // Date de naissance
             SelectionTile(
-              label: 'Date de naissance',
+              label: AppLocalizations.of(context)!.birthDate,
               value: _selectedBirthDate != null
                   ? '${_selectedBirthDate!.day.toString().padLeft(2, '0')}/${_selectedBirthDate!.month.toString().padLeft(2, '0')}/${_selectedBirthDate!.year}'
                   : null,
@@ -333,7 +333,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
 
             // Bouton
             PrimaryButton(
-              text: 'Activer le porte-monnaie',
+              text: AppLocalizations.of(context)!.activateWallet,
               onPressed: () => _activateWallet(context),
             ),
 
@@ -348,29 +348,29 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
     // Validation des champs
     if (_firstNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez saisir votre prénom')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.enterFirstName)),
       );
       return;
     }
 
     if (_lastNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez saisir votre nom')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.enterLastName)),
       );
       return;
     }
 
     if (_selectedNationality == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner une nationalité')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.selectNationality)),
       );
       return;
     }
 
     if (_selectedBirthDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner votre date de naissance'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.selectBirthDate),
         ),
       );
       return;
@@ -406,8 +406,8 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
       if (context.mounted) {
         // Afficher un message de succès
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Porte-monnaie activé avec succès !'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.walletActivatedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -419,7 +419,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur : ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString())),
             backgroundColor: Colors.red,
           ),
         );

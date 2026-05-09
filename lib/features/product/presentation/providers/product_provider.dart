@@ -52,11 +52,12 @@ final allProductsProvider = FutureProvider<List<Product>>((ref) async {
 /// ```dart
 /// final userProductsAsync = ref.watch(sellerProductsProvider('user_123'));
 /// ```
-final sellerProductsProvider = FutureProvider.family<List<Product>, String>((
+/// Provider pour récupérer les produits d'un vendeur en temps réel.
+final sellerProductsProvider = StreamProvider.family<List<Product>, String>((
   ref,
   sellerId,
-) async {
-  return ref.watch(productRepositoryProvider).getProductsBySeller(sellerId);
+) {
+  return ref.watch(productRepositoryProvider).getProductsBySellerStream(sellerId);
 });
 
 /// Provider pour récupérer un produit par son ID.

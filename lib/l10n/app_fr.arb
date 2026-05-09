@@ -1,71 +1,57 @@
 {
   "@@locale": "fr",
-  
   "languageFrench": "Français",
   "@languageFrench": {
     "description": "Nom de la langue française"
   },
-
   "languageEnglish": "Anglais",
   "@languageEnglish": {
     "description": "Nom de la langue anglaise"
   },
-
   "skip": "Ignorer",
   "@skip": {
     "description": "Bouton pour ignorer l'onboarding"
   },
-
   "onboardingCatchPhrase1": "Achetez et vendez",
   "@onboardingCatchPhrase1": {
     "description": "Première ligne du slogan"
   },
-
   "onboardingCatchPhrase2": "facilement.",
   "@onboardingCatchPhrase2": {
     "description": "Deuxième ligne du slogan"
   },
-
   "signUpButton": "S'inscrire sur Ablony",
   "@signUpButton": {
     "description": "Bouton d'inscription"
   },
-
   "loginButton": "J'ai déjà un compte",
   "@loginButton": {
     "description": "Bouton de connexion"
   },
-
   "aboutAblony": "À propos d'Ablony : ",
   "@aboutAblony": {
     "description": "Texte du lien à propos"
   },
-
   "ourPlatform": "Notre plateforme",
   "@ourPlatform": {
     "description": "Lien vers la plateforme"
   },
-
   "changeLanguage": "Changer la langue",
   "@changeLanguage": {
     "description": "Titre du dialogue de sélection de langue"
   },
-
   "validate": "Valider",
   "@validate": {
     "description": "Bouton de validation"
   },
-
   "close": "Fermer",
   "@close": {
     "description": "Bouton de fermeture"
   },
-
   "pageNotFound": "Page non trouvée",
   "@pageNotFound": {
     "description": "Titre de la page d'erreur 404"
   },
-
   "pageNotFoundMessage": "La route \"{route}\" n'existe pas.",
   "@pageNotFoundMessage": {
     "description": "Message d'erreur 404 avec la route",
@@ -76,217 +62,406 @@
       }
     }
   },
-
   "backToHome": "Retour à l'accueil",
   "@backToHome": {
     "description": "Bouton pour retourner à l'accueil"
-  }
-  ,
+  },
   "registerTitle": "S'inscrire",
-  "@registerTitle": {"description": "Titre de la page d'inscription"},
+  "@registerTitle": {
+    "description": "Titre de la page d'inscription"
+  },
   "usernameLabel": "Nom d'utilisateur",
-  "@usernameLabel": {"description": "Label du champ username"},
+  "@usernameLabel": {
+    "description": "Label du champ username"
+  },
   "usernamePlaceholder": "john-doe",
-  "@usernamePlaceholder": {"description": "Placeholder du champ username"},
+  "@usernamePlaceholder": {
+    "description": "Placeholder du champ username"
+  },
   "usernameRequired": "Le nom d'utilisateur est obligatoire",
-  "@usernameRequired": {"description": "Erreur champ username obligatoire"},
+  "@usernameRequired": {
+    "description": "Erreur champ username obligatoire"
+  },
   "usernameMinLength": "Minimum 3 caractères",
-  "@usernameMinLength": {"description": "Erreur longueur minimale username"},
+  "@usernameMinLength": {
+    "description": "Erreur longueur minimale username"
+  },
   "usernameMaxLength": "Maximum 30 caractères",
-  "@usernameMaxLength": {"description": "Erreur longueur maximale username"},
+  "@usernameMaxLength": {
+    "description": "Erreur longueur maximale username"
+  },
   "usernameFormatError": "Format invalide (lettres, chiffres, - et _ uniquement)",
-  "@usernameFormatError": {"description": "Erreur format username"},
+  "@usernameFormatError": {
+    "description": "Erreur format username"
+  },
   "usernameSuggestion": "Nous te suggérons ce nom d'utilisateur :",
-  "@usernameSuggestion": {"description": "Texte suggestion username"},
+  "@usernameSuggestion": {
+    "description": "Texte suggestion username"
+  },
   "marketingEmailMessage": "Je souhaite recevoir par e-mail des offres personnalisées et les dernières mises à jour d'Ablony.",
-  "@marketingEmailMessage": {"description": "Message checkbox marketing email"},
+  "@marketingEmailMessage": {
+    "description": "Message checkbox marketing email"
+  },
   "termsPrefix": "En t'inscrivant, tu confirmes que tu acceptes les ",
-  "@termsPrefix": {"description": "Préfixe CGU"},
+  "@termsPrefix": {
+    "description": "Préfixe CGU"
+  },
   "termsTitle": "Termes & Conditions de Ablony",
-  "@termsTitle": {"description": "Lien CGU"},
+  "@termsTitle": {
+    "description": "Lien CGU"
+  },
   "privacyPrefix": ", avoir lu la ",
-  "@privacyPrefix": {"description": "Préfixe politique de confidentialité"},
+  "@privacyPrefix": {
+    "description": "Préfixe politique de confidentialité"
+  },
   "privacyTitle": "Politique de confidentialité",
-  "@privacyTitle": {"description": "Lien politique de confidentialité"},
+  "@privacyTitle": {
+    "description": "Lien politique de confidentialité"
+  },
   "termsAge": " et avoir au moins 18 ans.",
-  "@termsAge": {"description": "Âge minimum inscription"},
+  "@termsAge": {
+    "description": "Âge minimum inscription"
+  },
   "continueButton": "Continuer",
-  "@continueButton": {"description": "Bouton continuer inscription"},
+  "@continueButton": {
+    "description": "Bouton continuer inscription"
+  },
   "problemLink": "Un problème ?",
-  "@problemLink": {"description": "Lien aide inscription"},
-
+  "@problemLink": {
+    "description": "Lien aide inscription"
+  },
   "loginTitle": "S'inscrire sur Ablony",
-  "@loginTitle": {"description": "Titre du flow de connexion (inscription)"},
+  "@loginTitle": {
+    "description": "Titre du flow de connexion (inscription)"
+  },
   "loginTitleLogin": "Se connecter à Ablony",
-  "@loginTitleLogin": {"description": "Titre du flow de connexion (login)"},
+  "@loginTitleLogin": {
+    "description": "Titre du flow de connexion (login)"
+  },
   "loginSubtitleApple": "Utilise ton identifiant Apple, c'est plus rapide.",
-  "@loginSubtitleApple": {"description": "Sous-titre Apple"},
+  "@loginSubtitleApple": {
+    "description": "Sous-titre Apple"
+  },
   "loginSubtitleGoogle": "Utilise ton compte Google, c'est plus rapide.",
-  "@loginSubtitleGoogle": {"description": "Sous-titre Google"},
+  "@loginSubtitleGoogle": {
+    "description": "Sous-titre Google"
+  },
   "loginAppleError": "Échec de la connexion avec Apple",
-  "@loginAppleError": {"description": "Erreur connexion Apple"},
+  "@loginAppleError": {
+    "description": "Erreur connexion Apple"
+  },
   "loginGoogleError": "Échec de la connexion avec Google",
-  "@loginGoogleError": {"description": "Erreur connexion Google"},
+  "@loginGoogleError": {
+    "description": "Erreur connexion Google"
+  },
   "loginFacebookError": "Échec de la connexion avec Facebook",
-  "@loginFacebookError": {"description": "Erreur connexion Facebook"},
+  "@loginFacebookError": {
+    "description": "Erreur connexion Facebook"
+  },
   "loginApple": "Continuer avec Apple",
-  "@loginApple": {"description": "Bouton Apple"},
+  "@loginApple": {
+    "description": "Bouton Apple"
+  },
   "loginGoogle": "Continuer avec Google",
-  "@loginGoogle": {"description": "Bouton Google"},
+  "@loginGoogle": {
+    "description": "Bouton Google"
+  },
   "loginFacebook": "Continuer avec Facebook",
-  "@loginFacebook": {"description": "Bouton Facebook"},
+  "@loginFacebook": {
+    "description": "Bouton Facebook"
+  },
   "loginOr": "ou",
-  "@loginOr": {"description": "Séparateur ou"},
+  "@loginOr": {
+    "description": "Séparateur ou"
+  },
   "loginEmail": "Continuer avec une adresse e-mail",
-  "@loginEmail": {"description": "Lien email"},
+  "@loginEmail": {
+    "description": "Lien email"
+  },
   "loginBusiness": "Tu es une entreprise ? ",
-  "@loginBusiness": {"description": "Texte entreprise"},
+  "@loginBusiness": {
+    "description": "Texte entreprise"
+  },
   "loginBusinessMore": "En savoir plus",
-  "@loginBusinessMore": {"description": "Lien entreprise"},
-
+  "@loginBusinessMore": {
+    "description": "Lien entreprise"
+  },
   "homeTitle": "Ablony",
-  "@homeTitle": {"description": "Titre de la page d'accueil"},
+  "@homeTitle": {
+    "description": "Titre de la page d'accueil"
+  },
   "homeWelcome": "Hello World! 🎉",
-  "@homeWelcome": {"description": "Message de bienvenue sur la home"},
+  "@homeWelcome": {
+    "description": "Message de bienvenue sur la home"
+  },
   "homeSubtitle": "Bienvenue sur Ablony !",
-  "@homeSubtitle": {"description": "Sous-titre de la home"},
+  "@homeSubtitle": {
+    "description": "Sous-titre de la home"
+  },
   "homeSuccess": "L'inscription est terminée avec succès.",
-  "@homeSuccess": {"description": "Message de succès inscription"},
-
+  "@homeSuccess": {
+    "description": "Message de succès inscription"
+  },
   "countryTitle": "Où habites-tu ?",
-  "@countryTitle": {"description": "Titre de la page de sélection du pays"},
+  "@countryTitle": {
+    "description": "Titre de la page de sélection du pays"
+  },
   "countrySubtitle": "Sélectionne ton pays pour personnaliser ton expérience.",
-  "@countrySubtitle": {"description": "Sous-titre de la page de sélection du pays"},
+  "@countrySubtitle": {
+    "description": "Sous-titre de la page de sélection du pays"
+  },
   "countryLoading": "Finalisation de ton inscription...",
-  "@countryLoading": {"description": "Texte du loader inscription"},
+  "@countryLoading": {
+    "description": "Texte du loader inscription"
+  },
   "countryErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
-  "@countryErrorGeneric": {"description": "Erreur générique inscription"},
+  "@countryErrorGeneric": {
+    "description": "Erreur générique inscription"
+  },
   "countryErrorNetwork": "Problème de connexion. Vérifiez votre réseau.",
-  "@countryErrorNetwork": {"description": "Erreur réseau inscription"},
+  "@countryErrorNetwork": {
+    "description": "Erreur réseau inscription"
+  },
   "countryErrorUsername": "Le nom d'utilisateur est déjà pris.",
-  "@countryErrorUsername": {"description": "Erreur username déjà pris"},
+  "@countryErrorUsername": {
+    "description": "Erreur username déjà pris"
+  },
   "countryInfo": "Tu pourras modifier ton pays et ta ville plus tard dans tes paramètres.",
-  "@countryInfo": {"description": "Texte info modification pays/ville"},
-
+  "@countryInfo": {
+    "description": "Texte info modification pays/ville"
+  },
   "emailSignupTitle": "Inscris-toi",
-  "@emailSignupTitle": {"description": "Titre de la page d'inscription email"},
+  "@emailSignupTitle": {
+    "description": "Titre de la page d'inscription email"
+  },
   "emailSignupUsername": "Nom d'utilisateur",
-  "@emailSignupUsername": {"description": "Label champ username"},
+  "@emailSignupUsername": {
+    "description": "Label champ username"
+  },
   "emailSignupUsernamePlaceholder": "Choisis un nom d'utilisateur",
-  "@emailSignupUsernamePlaceholder": {"description": "Placeholder username"},
+  "@emailSignupUsernamePlaceholder": {
+    "description": "Placeholder username"
+  },
   "emailSignupEmail": "Email",
-  "@emailSignupEmail": {"description": "Label champ email"},
+  "@emailSignupEmail": {
+    "description": "Label champ email"
+  },
   "emailSignupEmailPlaceholder": "Ton adresse email",
-  "@emailSignupEmailPlaceholder": {"description": "Placeholder email"},
+  "@emailSignupEmailPlaceholder": {
+    "description": "Placeholder email"
+  },
   "emailSignupPassword": "Mot de passe",
-  "@emailSignupPassword": {"description": "Label champ mot de passe"},
+  "@emailSignupPassword": {
+    "description": "Label champ mot de passe"
+  },
   "emailSignupPasswordPlaceholder": "Crée un mot de passe",
-  "@emailSignupPasswordPlaceholder": {"description": "Placeholder mot de passe"},
+  "@emailSignupPasswordPlaceholder": {
+    "description": "Placeholder mot de passe"
+  },
   "emailSignupPasswordHint": "Il doit contenir 8 caractères minimum, dont au moins un chiffre une majuscule et un caractère spécial.",
-  "@emailSignupPasswordHint": {"description": "Indication mot de passe"},
+  "@emailSignupPasswordHint": {
+    "description": "Indication mot de passe"
+  },
   "emailSignupMarketing": "Je souhaite recevoir par e-mail des offres personnalisées et les dernières mises à jour d'Ablony.",
-  "@emailSignupMarketing": {"description": "Checkbox marketing"},
+  "@emailSignupMarketing": {
+    "description": "Checkbox marketing"
+  },
   "emailSignupTermsError": "Tu dois accepter les conditions pour continuer",
-  "@emailSignupTermsError": {"description": "Erreur CGU non acceptées"},
+  "@emailSignupTermsError": {
+    "description": "Erreur CGU non acceptées"
+  },
   "emailSignupUsernameRequired": "Le nom d'utilisateur est requis",
-  "@emailSignupUsernameRequired": {"description": "Erreur username requis"},
+  "@emailSignupUsernameRequired": {
+    "description": "Erreur username requis"
+  },
   "emailSignupUsernameMinLength": "Le nom d'utilisateur doit contenir au moins 3 caractères",
-  "@emailSignupUsernameMinLength": {"description": "Erreur longueur min username"},
+  "@emailSignupUsernameMinLength": {
+    "description": "Erreur longueur min username"
+  },
   "emailSignupEmailRequired": "L'email est requis",
-  "@emailSignupEmailRequired": {"description": "Erreur email requis"},
+  "@emailSignupEmailRequired": {
+    "description": "Erreur email requis"
+  },
   "emailSignupEmailInvalid": "Veuillez entrer un email valide",
-  "@emailSignupEmailInvalid": {"description": "Erreur email invalide"},
+  "@emailSignupEmailInvalid": {
+    "description": "Erreur email invalide"
+  },
   "emailSignupPasswordRequired": "Le mot de passe est requis",
-  "@emailSignupPasswordRequired": {"description": "Erreur mot de passe requis"},
+  "@emailSignupPasswordRequired": {
+    "description": "Erreur mot de passe requis"
+  },
   "emailSignupPasswordMinLength": "Le mot de passe doit contenir au moins 7 caractères",
-  "@emailSignupPasswordMinLength": {"description": "Erreur longueur min mot de passe"},
+  "@emailSignupPasswordMinLength": {
+    "description": "Erreur longueur min mot de passe"
+  },
   "emailSignupPasswordNoDigit": "Le mot de passe doit contenir au moins un chiffre",
-  "@emailSignupPasswordNoDigit": {"description": "Erreur pas de chiffre dans mot de passe"},
-
+  "@emailSignupPasswordNoDigit": {
+    "description": "Erreur pas de chiffre dans mot de passe"
+  },
   "loginScreenTitle": "Connecte-toi",
-  "@loginScreenTitle": {"description": "Titre de la page de connexion"},
+  "@loginScreenTitle": {
+    "description": "Titre de la page de connexion"
+  },
   "loginScreenIdentifier": "Identifiant ou adresse email",
-  "@loginScreenIdentifier": {"description": "Label champ identifiant"},
+  "@loginScreenIdentifier": {
+    "description": "Label champ identifiant"
+  },
   "loginScreenIdentifierPlaceholder": "Entre ton email ou pseudo",
-  "@loginScreenIdentifierPlaceholder": {"description": "Placeholder identifiant"},
+  "@loginScreenIdentifierPlaceholder": {
+    "description": "Placeholder identifiant"
+  },
   "loginScreenPassword": "Mot de passe",
-  "@loginScreenPassword": {"description": "Label champ mot de passe connexion"},
+  "@loginScreenPassword": {
+    "description": "Label champ mot de passe connexion"
+  },
   "loginScreenPasswordPlaceholder": "Ton mot de passe",
-  "@loginScreenPasswordPlaceholder": {"description": "Placeholder mot de passe connexion"},
+  "@loginScreenPasswordPlaceholder": {
+    "description": "Placeholder mot de passe connexion"
+  },
   "loginScreenSubmit": "Se connecter",
-  "@loginScreenSubmit": {"description": "Bouton de connexion"},
+  "@loginScreenSubmit": {
+    "description": "Bouton de connexion"
+  },
   "loginScreenForgotPassword": "Tu as oublié ton mot de passe ?",
-  "@loginScreenForgotPassword": {"description": "Lien mot de passe oublié"},
+  "@loginScreenForgotPassword": {
+    "description": "Lien mot de passe oublié"
+  },
   "loginScreenIdentifierRequired": "Ce champ est requis",
-  "@loginScreenIdentifierRequired": {"description": "Erreur identifiant requis"},
+  "@loginScreenIdentifierRequired": {
+    "description": "Erreur identifiant requis"
+  },
   "loginScreenPasswordRequired": "Le mot de passe est requis",
-  "@loginScreenPasswordRequired": {"description": "Erreur mot de passe requis"},
-
+  "@loginScreenPasswordRequired": {
+    "description": "Erreur mot de passe requis"
+  },
   "sellTitle": "Vends un article",
-  "@sellTitle": {"description": "Titre écran vente"},
+  "@sellTitle": {
+    "description": "Titre écran vente"
+  },
   "addPhotos": "Ajouter photos",
-  "@addPhotos": {"description": "Bouton ajouter photos"},
+  "@addPhotos": {
+    "description": "Bouton ajouter photos"
+  },
   "productTitle": "Titre",
-  "@productTitle": {"description": "Label titre produit"},
+  "@productTitle": {
+    "description": "Label titre produit"
+  },
   "productTitleHint": "Dis aux acheteurs ce que tu vends",
-  "@productTitleHint": {"description": "Hint titre produit"},
+  "@productTitleHint": {
+    "description": "Hint titre produit"
+  },
   "productDescription": "Décris ton article",
-  "@productDescription": {"description": "Label description produit"},
+  "@productDescription": {
+    "description": "Label description produit"
+  },
   "productDescriptionHint": "Ajoute des informations utiles",
-  "@productDescriptionHint": {"description": "Hint description produit"},
+  "@productDescriptionHint": {
+    "description": "Hint description produit"
+  },
   "category": "Catégorie",
-  "@category": {"description": "Label catégorie"},
+  "@category": {
+    "description": "Label catégorie"
+  },
   "selectCategory": "Sélectionner une catégorie",
-  "@selectCategory": {"description": "Titre page sélection catégorie"},
+  "@selectCategory": {
+    "description": "Titre page sélection catégorie"
+  },
   "condition": "État",
-  "@condition": {"description": "Label état"},
+  "@condition": {
+    "description": "Label état"
+  },
   "conditionNew": "Neuf avec étiquette",
-  "@conditionNew": {"description": "État neuf"},
-  "conditionExcellent": "Excellent",
-  "@conditionExcellent": {"description": "État excellent"},
-  "conditionGood": "Bon",
-  "@conditionGood": {"description": "État bon"},
+  "@conditionNew": {
+    "description": "État neuf"
+  },
+  "conditionExcellent": "Excellent état",
+  "@conditionExcellent": {
+    "description": "Condition: Excellent"
+  },
+  "conditionGood": "Bon état",
+  "@conditionGood": {
+    "description": "Condition: Good"
+  },
   "conditionFair": "Correct",
-  "@conditionFair": {"description": "État correct"},
+  "@conditionFair": {
+    "description": "État correct"
+  },
   "price": "Prix sans les frais de port",
-  "@price": {"description": "Label prix"},
+  "@price": {
+    "description": "Label prix"
+  },
   "priceHint": "0",
-  "@priceHint": {"description": "Hint prix"},
+  "@priceHint": {
+    "description": "Hint prix"
+  },
   "publish": "Publier",
-  "@publish": {"description": "Bouton publier"},
+  "@publish": {
+    "description": "Bouton publier"
+  },
   "requiredField": "Ce champ est obligatoire",
-  "@requiredField": {"description": "Erreur champ requis"},
+  "@requiredField": {
+    "description": "Erreur champ requis"
+  },
   "selectAtLeast1Photo": "Sélectionne au moins 1 photo",
-  "@selectAtLeast1Photo": {"description": "Erreur sélection photo"},
+  "@selectAtLeast1Photo": {
+    "description": "Erreur sélection photo"
+  },
   "maxPhotosReached": "Maximum 6 photos",
-  "@maxPhotosReached": {"description": "Erreur max photos"},
+  "@maxPhotosReached": {
+    "description": "Erreur max photos"
+  },
   "brand": "Marque",
-  "@brand": {"description": "Attribut marque"},
+  "@brand": {
+    "description": "Attribut marque"
+  },
   "size": "Taille",
-  "@size": {"description": "Attribut taille"},
+  "@size": {
+    "description": "Attribut taille"
+  },
   "color": "Couleur",
-  "@color": {"description": "Attribut couleur"},
+  "@color": {
+    "description": "Attribut couleur"
+  },
   "material": "Matière",
-  "@material": {"description": "Attribut matière"},
+  "@material": {
+    "description": "Attribut matière"
+  },
   "length": "Longueur",
-  "@length": {"description": "Attribut longueur"},
+  "@length": {
+    "description": "Attribut longueur"
+  },
   "bagType": "Type de sac",
-  "@bagType": {"description": "Attribut type de sac"},
+  "@bagType": {
+    "description": "Attribut type de sac"
+  },
   "jewelType": "Type de bijou",
-  "@jewelType": {"description": "Attribut type de bijou"},
+  "@jewelType": {
+    "description": "Attribut type de bijou"
+  },
   "movement": "Mouvement",
-  "@movement": {"description": "Attribut mouvement"},
+  "@movement": {
+    "description": "Attribut mouvement"
+  },
   "selectCondition": "Sélectionner l'état",
-  "@selectCondition": {"description": "Placeholder sélection état"},
+  "@selectCondition": {
+    "description": "Placeholder sélection état"
+  },
   "searchCategory": "Chercher une catégorie",
-  "@searchCategory": {"description": "Placeholder recherche catégorie"},
+  "@searchCategory": {
+    "description": "Placeholder recherche catégorie"
+  },
   "selectSubcategory": "Sélectionner une sous-catégorie",
-  "@selectSubcategory": {"description": "Placeholder sélection sous-catégorie"},
+  "@selectSubcategory": {
+    "description": "Placeholder sélection sous-catégorie"
+  },
   "publishing": "Publication en cours...",
-  "@publishing": {"description": "Message pendant la publication"},
+  "@publishing": {
+    "description": "Message pendant la publication"
+  },
   "priceWithoutShipping": "Prix sans les frais de port",
-  "@priceWithoutShipping": {"description": "Label prix sans frais"},
-
+  "@priceWithoutShipping": {
+    "description": "Label prix sans frais"
+  },
   "productPublishedSuccess": "Produit publié avec succès ! 🎉",
   "@productPublishedSuccess": {
     "description": "Message de succès après publication d'un produit"
@@ -303,7 +478,6 @@
   "@imageUploadError": {
     "description": "Erreur lors de l'upload des images vers Firebase Storage"
   },
-
   "ok": "OK",
   "@ok": {
     "description": "Bouton de confirmation"
@@ -312,12 +486,10 @@
   "@retry": {
     "description": "Bouton pour réessayer après une erreur"
   },
-
   "currency": "FCFA",
   "@currency": {
     "description": "Devise monétaire (Franc CFA)"
   },
-
   "selectAttributePlaceholder": "Sélectionner {attributeName}",
   "@selectAttributePlaceholder": {
     "description": "Placeholder générique pour sélection d'attributs (utilisé dynamiquement)",
@@ -338,7 +510,6 @@
       }
     }
   },
-
   "indicateYourPrice": "Indique ton prix",
   "@indicateYourPrice": {
     "description": "Label for price input field"
@@ -351,12 +522,10 @@
   "@validatePrice": {
     "description": "Button label to confirm price entry"
   },
-
   "searchPlaceholder": "Trouver...",
   "@searchPlaceholder": {
     "description": "Placeholder for search bar in selection screens"
   },
-
   "categoryFemme": "Femme",
   "@categoryFemme": {
     "description": "Category name for women's items"
@@ -369,82 +538,142 @@
   "@seeAll": {
     "description": "Filter option to see all products"
   },
-
   "subcategoryHaut": "Haut",
-  "@subcategoryHaut": {"description": "Subcategory: Top clothing"},
+  "@subcategoryHaut": {
+    "description": "Subcategory: Top clothing"
+  },
   "subcategoryBas": "Bas",
-  "@subcategoryBas": {"description": "Subcategory: Bottom clothing"},
+  "@subcategoryBas": {
+    "description": "Subcategory: Bottom clothing"
+  },
   "subcategoryChaussures": "Chaussures",
-  "@subcategoryChaussures": {"description": "Subcategory: Shoes"},
+  "@subcategoryChaussures": {
+    "description": "Subcategory: Shoes"
+  },
   "subcategoryAccessoires": "Accessoires",
-  "@subcategoryAccessoires": {"description": "Subcategory: Accessories"},
+  "@subcategoryAccessoires": {
+    "description": "Subcategory: Accessories"
+  },
   "subcategoryChemise": "Chemise",
-  "@subcategoryChemise": {"description": "Subcategory: Shirt"},
+  "@subcategoryChemise": {
+    "description": "Subcategory: Shirt"
+  },
   "subcategoryTshirt": "T-shirt",
-  "@subcategoryTshirt": {"description": "Subcategory: T-shirt"},
+  "@subcategoryTshirt": {
+    "description": "Subcategory: T-shirt"
+  },
   "subcategoryDebardeur": "Débardeur",
-  "@subcategoryDebardeur": {"description": "Subcategory: Tank top"},
+  "@subcategoryDebardeur": {
+    "description": "Subcategory: Tank top"
+  },
   "subcategoryPull": "Pull",
-  "@subcategoryPull": {"description": "Subcategory: Sweater"},
+  "@subcategoryPull": {
+    "description": "Subcategory: Sweater"
+  },
   "subcategoryVeste": "Veste",
-  "@subcategoryVeste": {"description": "Subcategory: Jacket"},
+  "@subcategoryVeste": {
+    "description": "Subcategory: Jacket"
+  },
   "subcategoryPantalon": "Pantalon",
-  "@subcategoryPantalon": {"description": "Subcategory: Pants"},
+  "@subcategoryPantalon": {
+    "description": "Subcategory: Pants"
+  },
   "subcategoryJupe": "Jupe",
-  "@subcategoryJupe": {"description": "Subcategory: Skirt"},
+  "@subcategoryJupe": {
+    "description": "Subcategory: Skirt"
+  },
   "subcategoryShort": "Short",
-  "@subcategoryShort": {"description": "Subcategory: Shorts"},
+  "@subcategoryShort": {
+    "description": "Subcategory: Shorts"
+  },
   "subcategoryRobe": "Robe",
-  "@subcategoryRobe": {"description": "Subcategory: Dress"},
+  "@subcategoryRobe": {
+    "description": "Subcategory: Dress"
+  },
   "subcategoryBaskets": "Baskets",
-  "@subcategoryBaskets": {"description": "Subcategory: Sneakers"},
+  "@subcategoryBaskets": {
+    "description": "Subcategory: Sneakers"
+  },
   "subcategorySandales": "Sandales",
-  "@subcategorySandales": {"description": "Subcategory: Sandals"},
+  "@subcategorySandales": {
+    "description": "Subcategory: Sandals"
+  },
   "subcategoryTalons": "Talons",
-  "@subcategoryTalons": {"description": "Subcategory: Heels"},
+  "@subcategoryTalons": {
+    "description": "Subcategory: Heels"
+  },
   "subcategorySac": "Sac",
-  "@subcategorySac": {"description": "Subcategory: Bag"},
+  "@subcategorySac": {
+    "description": "Subcategory: Bag"
+  },
   "subcategoryBijoux": "Bijoux",
-  "@subcategoryBijoux": {"description": "Subcategory: Jewelry"},
+  "@subcategoryBijoux": {
+    "description": "Subcategory: Jewelry"
+  },
   "subcategoryCasquette": "Casquette",
-  "@subcategoryCasquette": {"description": "Subcategory: Cap"},
+  "@subcategoryCasquette": {
+    "description": "Subcategory: Cap"
+  },
   "subcategoryCeinture": "Ceinture",
-  "@subcategoryCeinture": {"description": "Subcategory: Belt"},
+  "@subcategoryCeinture": {
+    "description": "Subcategory: Belt"
+  },
   "subcategoryMontre": "Montre",
-  "@subcategoryMontre": {"description": "Subcategory: Watch"},
-
+  "@subcategoryMontre": {
+    "description": "Subcategory: Watch"
+  },
   "attributeEtat": "État",
-  "@attributeEtat": {"description": "Attribute: Condition"},
+  "@attributeEtat": {
+    "description": "Attribute: Condition"
+  },
   "attributeMarque": "Marque",
-  "@attributeMarque": {"description": "Attribute: Brand"},
+  "@attributeMarque": {
+    "description": "Attribute: Brand"
+  },
   "attributeTaille": "Taille",
-  "@attributeTaille": {"description": "Attribute: Size"},
+  "@attributeTaille": {
+    "description": "Attribute: Size"
+  },
   "attributePointure": "Pointure",
-  "@attributePointure": {"description": "Attribute: Shoe size"},
+  "@attributePointure": {
+    "description": "Attribute: Shoe size"
+  },
   "attributeCouleur": "Couleur",
-  "@attributeCouleur": {"description": "Attribute: Color"},
+  "@attributeCouleur": {
+    "description": "Attribute: Color"
+  },
   "attributeMatiere": "Matière",
-  "@attributeMatiere": {"description": "Attribute: Material"},
+  "@attributeMatiere": {
+    "description": "Attribute: Material"
+  },
   "attributeLongueur": "Longueur",
-  "@attributeLongueur": {"description": "Attribute: Length"},
+  "@attributeLongueur": {
+    "description": "Attribute: Length"
+  },
   "attributeTypeSac": "Type de sac",
-  "@attributeTypeSac": {"description": "Attribute: Bag type"},
+  "@attributeTypeSac": {
+    "description": "Attribute: Bag type"
+  },
   "attributeTypeBijou": "Type de bijou",
-  "@attributeTypeBijou": {"description": "Attribute: Jewelry type"},
+  "@attributeTypeBijou": {
+    "description": "Attribute: Jewelry type"
+  },
   "attributeMouvement": "Mouvement",
-  "@attributeMouvement": {"description": "Attribute: Movement (watch)"},
-
+  "@attributeMouvement": {
+    "description": "Attribute: Movement (watch)"
+  },
   "conditionNewWithTags": "Neuf avec étiquette",
-  "@conditionNewWithTags": {"description": "Condition: New with tags"},
-  "conditionExcellent": "Excellent état",
-  "@conditionExcellent": {"description": "Condition: Excellent"},
-  "conditionGood": "Bon état",
-  "@conditionGood": {"description": "Condition: Good"},
+  "@conditionNewWithTags": {
+    "description": "Condition: New with tags"
+  },
   "conditionSatisfactory": "Satisfaisant",
-  "@conditionSatisfactory": {"description": "Condition: Satisfactory"},
+  "@conditionSatisfactory": {
+    "description": "Condition: Satisfactory"
+  },
   "conditionUsed": "Usé",
-  "@conditionUsed": {"description": "Condition: Used"},
-
+  "@conditionUsed": {
+    "description": "Condition: Used"
+  },
   "conditionValue": "{value, select, newWithTags{Neuf avec étiquette} excellent{Excellent} good{Bon état} satisfactory{Satisfaisant} worn{Usé} other{Bon état}}",
   "@conditionValue": {
     "description": "Dynamic condition value translation",
@@ -455,143 +684,278 @@
       }
     }
   },
-
   "helpTextCondition": "État général du produit",
-  "@helpTextCondition": {"description": "Help text for condition attribute"},
+  "@helpTextCondition": {
+    "description": "Help text for condition attribute"
+  },
   "helpTextBrand": "Sélectionnez la marque du produit",
-  "@helpTextBrand": {"description": "Help text for brand attribute"},
+  "@helpTextBrand": {
+    "description": "Help text for brand attribute"
+  },
   "helpTextSizeTop": "Taille pour hauts, chemises, pulls, vestes",
-  "@helpTextSizeTop": {"description": "Help text for top size"},
+  "@helpTextSizeTop": {
+    "description": "Help text for top size"
+  },
   "helpTextSizeBottom": "Taille pour pantalons, shorts, jupes",
-  "@helpTextSizeBottom": {"description": "Help text for bottom size"},
+  "@helpTextSizeBottom": {
+    "description": "Help text for bottom size"
+  },
   "helpTextShoeSize": "Pointure de chaussures",
-  "@helpTextShoeSize": {"description": "Help text for shoe size"},
+  "@helpTextShoeSize": {
+    "description": "Help text for shoe size"
+  },
   "helpTextColor": "Couleur principale du produit",
-  "@helpTextColor": {"description": "Help text for color"},
+  "@helpTextColor": {
+    "description": "Help text for color"
+  },
   "helpTextMaterial": "Matière principale du produit",
-  "@helpTextMaterial": {"description": "Help text for material"},
+  "@helpTextMaterial": {
+    "description": "Help text for material"
+  },
   "helpTextLength": "Longueur de la robe ou jupe",
-  "@helpTextLength": {"description": "Help text for length"},
+  "@helpTextLength": {
+    "description": "Help text for length"
+  },
   "helpTextBagType": "Type de sac (sac à main, sac à dos, etc.)",
-  "@helpTextBagType": {"description": "Help text for bag type"},
+  "@helpTextBagType": {
+    "description": "Help text for bag type"
+  },
   "helpTextJewelryType": "Type de bijou (collier, bague, bracelet, etc.)",
-  "@helpTextJewelryType": {"description": "Help text for jewelry type"},
+  "@helpTextJewelryType": {
+    "description": "Help text for jewelry type"
+  },
   "helpTextMovement": "Type de mouvement de la montre",
-  "@helpTextMovement": {"description": "Help text for watch movement"},
+  "@helpTextMovement": {
+    "description": "Help text for watch movement"
+  },
   "lengthShort": "Court",
-  "@lengthShort": {"description": "Short length option"},
+  "@lengthShort": {
+    "description": "Short length option"
+  },
   "lengthMedium": "Mi-long",
-  "@lengthMedium": {"description": "Medium length option"},
+  "@lengthMedium": {
+    "description": "Medium length option"
+  },
   "lengthLong": "Long",
-  "@lengthLong": {"description": "Long length option"},
+  "@lengthLong": {
+    "description": "Long length option"
+  },
   "colorBlack": "Noir",
-  "@colorBlack": {"description": "Black color"},
+  "@colorBlack": {
+    "description": "Black color"
+  },
   "colorWhite": "Blanc",
-  "@colorWhite": {"description": "White color"},
+  "@colorWhite": {
+    "description": "White color"
+  },
   "colorGray": "Gris",
-  "@colorGray": {"description": "Gray color"},
+  "@colorGray": {
+    "description": "Gray color"
+  },
   "colorBeige": "Beige",
-  "@colorBeige": {"description": "Beige color"},
+  "@colorBeige": {
+    "description": "Beige color"
+  },
   "colorBrown": "Marron",
-  "@colorBrown": {"description": "Brown color"},
+  "@colorBrown": {
+    "description": "Brown color"
+  },
   "colorBlue": "Bleu",
-  "@colorBlue": {"description": "Blue color"},
+  "@colorBlue": {
+    "description": "Blue color"
+  },
   "colorNavyBlue": "Bleu marine",
-  "@colorNavyBlue": {"description": "Navy blue color"},
+  "@colorNavyBlue": {
+    "description": "Navy blue color"
+  },
   "colorLightBlue": "Bleu clair",
-  "@colorLightBlue": {"description": "Light blue color"},
+  "@colorLightBlue": {
+    "description": "Light blue color"
+  },
   "colorRed": "Rouge",
-  "@colorRed": {"description": "Red color"},
+  "@colorRed": {
+    "description": "Red color"
+  },
   "colorPink": "Rose",
-  "@colorPink": {"description": "Pink color"},
+  "@colorPink": {
+    "description": "Pink color"
+  },
   "colorPurple": "Violet",
-  "@colorPurple": {"description": "Purple color"},
+  "@colorPurple": {
+    "description": "Purple color"
+  },
   "colorGreen": "Vert",
-  "@colorGreen": {"description": "Green color"},
+  "@colorGreen": {
+    "description": "Green color"
+  },
   "colorKhakiGreen": "Vert kaki",
-  "@colorKhakiGreen": {"description": "Khaki green color"},
+  "@colorKhakiGreen": {
+    "description": "Khaki green color"
+  },
   "colorYellow": "Jaune",
-  "@colorYellow": {"description": "Yellow color"},
+  "@colorYellow": {
+    "description": "Yellow color"
+  },
   "colorOrange": "Orange",
-  "@colorOrange": {"description": "Orange color"},
+  "@colorOrange": {
+    "description": "Orange color"
+  },
   "colorMulticolor": "Multicolore",
-  "@colorMulticolor": {"description": "Multicolor"},
+  "@colorMulticolor": {
+    "description": "Multicolor"
+  },
   "colorGold": "Doré",
-  "@colorGold": {"description": "Gold color"},
+  "@colorGold": {
+    "description": "Gold color"
+  },
   "colorSilver": "Argenté",
-  "@colorSilver": {"description": "Silver color"},
+  "@colorSilver": {
+    "description": "Silver color"
+  },
   "materialCotton": "Coton",
-  "@materialCotton": {"description": "Cotton material"},
+  "@materialCotton": {
+    "description": "Cotton material"
+  },
   "materialPolyester": "Polyester",
-  "@materialPolyester": {"description": "Polyester material"},
+  "@materialPolyester": {
+    "description": "Polyester material"
+  },
   "materialWool": "Laine",
-  "@materialWool": {"description": "Wool material"},
+  "@materialWool": {
+    "description": "Wool material"
+  },
   "materialSilk": "Soie",
-  "@materialSilk": {"description": "Silk material"},
+  "@materialSilk": {
+    "description": "Silk material"
+  },
   "materialLinen": "Lin",
-  "@materialLinen": {"description": "Linen material"},
+  "@materialLinen": {
+    "description": "Linen material"
+  },
   "materialDenim": "Jean",
-  "@materialDenim": {"description": "Denim material"},
+  "@materialDenim": {
+    "description": "Denim material"
+  },
   "materialLeather": "Cuir",
-  "@materialLeather": {"description": "Leather material"},
+  "@materialLeather": {
+    "description": "Leather material"
+  },
   "materialSuede": "Daim",
-  "@materialSuede": {"description": "Suede material"},
+  "@materialSuede": {
+    "description": "Suede material"
+  },
   "materialSynthetic": "Synthétique",
-  "@materialSynthetic": {"description": "Synthetic material"},
+  "@materialSynthetic": {
+    "description": "Synthetic material"
+  },
   "materialVelvet": "Velours",
-  "@materialVelvet": {"description": "Velvet material"},
+  "@materialVelvet": {
+    "description": "Velvet material"
+  },
   "materialCashmere": "Cachemire",
-  "@materialCashmere": {"description": "Cashmere material"},
+  "@materialCashmere": {
+    "description": "Cashmere material"
+  },
   "materialViscose": "Viscose",
-  "@materialViscose": {"description": "Viscose material"},
+  "@materialViscose": {
+    "description": "Viscose material"
+  },
   "materialOther": "Autre",
-  "@materialOther": {"description": "Other material"},
+  "@materialOther": {
+    "description": "Other material"
+  },
   "bagTypeHandbag": "Sac à main",
-  "@bagTypeHandbag": {"description": "Handbag type"},
+  "@bagTypeHandbag": {
+    "description": "Handbag type"
+  },
   "bagTypeBackpack": "Sac à dos",
-  "@bagTypeBackpack": {"description": "Backpack type"},
+  "@bagTypeBackpack": {
+    "description": "Backpack type"
+  },
   "bagTypeClutch": "Pochette",
-  "@bagTypeClutch": {"description": "Clutch type"},
+  "@bagTypeClutch": {
+    "description": "Clutch type"
+  },
   "bagTypeTote": "Tote bag",
-  "@bagTypeTote": {"description": "Tote bag type"},
+  "@bagTypeTote": {
+    "description": "Tote bag type"
+  },
   "bagTypeCrossbody": "Sac bandoulière",
-  "@bagTypeCrossbody": {"description": "Crossbody bag type"},
+  "@bagTypeCrossbody": {
+    "description": "Crossbody bag type"
+  },
   "bagTypeTravel": "Sac de voyage",
-  "@bagTypeTravel": {"description": "Travel bag type"},
+  "@bagTypeTravel": {
+    "description": "Travel bag type"
+  },
   "bagTypeSatchel": "Sacoche",
-  "@bagTypeSatchel": {"description": "Satchel type"},
+  "@bagTypeSatchel": {
+    "description": "Satchel type"
+  },
   "jewelryTypeNecklace": "Collier",
-  "@jewelryTypeNecklace": {"description": "Necklace type"},
+  "@jewelryTypeNecklace": {
+    "description": "Necklace type"
+  },
   "jewelryTypeBracelet": "Bracelet",
-  "@jewelryTypeBracelet": {"description": "Bracelet type"},
+  "@jewelryTypeBracelet": {
+    "description": "Bracelet type"
+  },
   "jewelryTypeEarrings": "Boucles d'oreilles",
-  "@jewelryTypeEarrings": {"description": "Earrings type"},
+  "@jewelryTypeEarrings": {
+    "description": "Earrings type"
+  },
   "jewelryTypeRing": "Bague",
-  "@jewelryTypeRing": {"description": "Ring type"},
+  "@jewelryTypeRing": {
+    "description": "Ring type"
+  },
   "jewelryTypeBrooch": "Broche",
-  "@jewelryTypeBrooch": {"description": "Brooch type"},
+  "@jewelryTypeBrooch": {
+    "description": "Brooch type"
+  },
   "jewelryTypeWatchBracelet": "Montre bracelet",
-  "@jewelryTypeWatchBracelet": {"description": "Watch bracelet type"},
+  "@jewelryTypeWatchBracelet": {
+    "description": "Watch bracelet type"
+  },
   "watchMovementQuartz": "Quartz",
-  "@watchMovementQuartz": {"description": "Quartz watch movement"},
+  "@watchMovementQuartz": {
+    "description": "Quartz watch movement"
+  },
   "watchMovementAutomatic": "Automatique",
-  "@watchMovementAutomatic": {"description": "Automatic watch movement"},
+  "@watchMovementAutomatic": {
+    "description": "Automatic watch movement"
+  },
   "watchMovementManual": "Manuel",
-  "@watchMovementManual": {"description": "Manual watch movement"},
+  "@watchMovementManual": {
+    "description": "Manual watch movement"
+  },
   "watchMovementDigital": "Numérique",
-  "@watchMovementDigital": {"description": "Digital watch movement"},
+  "@watchMovementDigital": {
+    "description": "Digital watch movement"
+  },
   "brandOther": "Autre",
-  "@brandOther": {"description": "Other brand"},
+  "@brandOther": {
+    "description": "Other brand"
+  },
   "navHome": "Accueil",
-  "@navHome": {"description": "Home navigation label"},
+  "@navHome": {
+    "description": "Home navigation label"
+  },
   "navSearch": "Rechercher",
-  "@navSearch": {"description": "Search navigation label"},
+  "@navSearch": {
+    "description": "Search navigation label"
+  },
   "navSell": "Vendre",
-  "@navSell": {"description": "Sell navigation label"},
+  "@navSell": {
+    "description": "Sell navigation label"
+  },
   "navMessages": "Messages",
-  "@navMessages": {"description": "Messages navigation label"},
+  "@navMessages": {
+    "description": "Messages navigation label"
+  },
   "navProfile": "Profil",
-  "@navProfile": {"description": "Profile navigation label"},
+  "@navProfile": {
+    "description": "Profile navigation label"
+  },
   "priceWithProtection": "{price} FCFA incl.",
   "@priceWithProtection": {
     "description": "Price with buyer protection included",
@@ -804,5 +1168,570 @@
   "whyLink": "Pourquoi ?",
   "@whyLink": {
     "description": "Why link in make offer sheet"
+  },
+  "settingsTitle": "Paramètres",
+  "@settingsTitle": {
+    "description": "settingsTitle"
+  },
+  "profileInfo": "Informations du profil",
+  "@profileInfo": {
+    "description": "profileInfo"
+  },
+  "accountSettings": "Paramètres du compte",
+  "@accountSettings": {
+    "description": "accountSettings"
+  },
+  "payments": "Paiements",
+  "@payments": {
+    "description": "payments"
+  },
+  "shipping": "Envoi",
+  "@shipping": {
+    "description": "shipping"
+  },
+  "security": "Sécurité",
+  "@security": {
+    "description": "security"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "notifications"
+  },
+  "mobile": "Mobile",
+  "@mobile": {
+    "description": "mobile"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "email"
+  },
+  "appLanguage": "Langue de l'appli",
+  "@appLanguage": {
+    "description": "appLanguage"
+  },
+  "language": "Langue",
+  "@language": {
+    "description": "language"
+  },
+  "darkMode": "Mode sombre",
+  "@darkMode": {
+    "description": "darkMode"
+  },
+  "privacySettings": "Paramètres de confidentialité",
+  "@privacySettings": {
+    "description": "privacySettings"
+  },
+  "logout": "Déconnexion",
+  "@logout": {
+    "description": "logout"
+  },
+  "appVersion": "Version de l'application : {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    },
+    "description": "appVersion"
+  },
+  "chooseLanguage": "Choisir la langue",
+  "@chooseLanguage": {
+    "description": "chooseLanguage"
+  },
+  "cancel": "ANNULER",
+  "@cancel": {
+    "description": "cancel"
+  },
+  "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+  "@logoutConfirm": {
+    "description": "logoutConfirm"
+  },
+  "profileTitle": "Profil",
+  "@profileTitle": {
+    "description": "profileTitle"
+  },
+  "favorites": "Favoris",
+  "@favorites": {
+    "description": "favorites"
+  },
+  "inviteFriends": "Inviter des amis",
+  "@inviteFriends": {
+    "description": "inviteFriends"
+  },
+  "myWallet": "Mon porte-monnaie",
+  "@myWallet": {
+    "description": "myWallet"
+  },
+  "salesAndPurchases": "Mes ventes et achats",
+  "@salesAndPurchases": {
+    "description": "salesAndPurchases"
+  },
+  "promotionTools": "Outils de promotion",
+  "@promotionTools": {
+    "description": "promotionTools"
+  },
+  "personalization": "Personnalisation",
+  "@personalization": {
+    "description": "personalization"
+  },
+  "bundleDiscount": "Réduction sur les lots",
+  "@bundleDiscount": {
+    "description": "bundleDiscount"
+  },
+  "vacationMode": "Mode vacances",
+  "@vacationMode": {
+    "description": "vacationMode"
+  },
+  "donations": "Dons",
+  "@donations": {
+    "description": "donations"
+  },
+  "ablonyGuide": "Ton guide Ablony",
+  "@ablonyGuide": {
+    "description": "ablonyGuide"
+  },
+  "helpCenter": "Centre d'aide",
+  "@helpCenter": {
+    "description": "helpCenter"
+  },
+  "cookieSettings": "Paramètres des cookies",
+  "@cookieSettings": {
+    "description": "cookieSettings"
+  },
+  "aboutUs": "À propos de nous",
+  "@aboutUs": {
+    "description": "aboutUs"
+  },
+  "legalInfo": "Informations légales",
+  "@legalInfo": {
+    "description": "legalInfo"
+  },
+  "viewMyListings": "Voir mes annonces",
+  "@viewMyListings": {
+    "description": "viewMyListings"
+  },
+  "productNotFound": "Produit introuvable",
+  "@productNotFound": {
+    "description": "productNotFound"
+  },
+  "clickToTranslate": "Clique ici pour traduire",
+  "@clickToTranslate": {
+    "description": "clickToTranslate"
+  },
+  "activelyPublishes": "Publie activement",
+  "@activelyPublishes": {
+    "description": "activelyPublishes"
+  },
+  "sendsQuickly": "Envoie rapidement",
+  "@sendsQuickly": {
+    "description": "sendsQuickly"
+  },
+  "markAsSold": "Indiquer comme vendu",
+  "@markAsSold": {
+    "description": "markAsSold"
+  },
+  "markAsReserved": "Marquer comme réservé",
+  "@markAsReserved": {
+    "description": "markAsReserved"
+  },
+  "edit": "Modifier",
+  "@edit": {
+    "description": "edit"
+  },
+  "hide": "Masquer",
+  "@hide": {
+    "description": "hide"
+  },
+  "productMarkedAsSold": "Produit marqué comme vendu",
+  "@productMarkedAsSold": {
+    "description": "productMarkedAsSold"
+  },
+  "deleteProductConfirm": "Supprimer le produit ?",
+  "@deleteProductConfirm": {
+    "description": "deleteProductConfirm"
+  },
+  "deleteProductBtn": "SUPPRIMER",
+  "@deleteProductBtn": {
+    "description": "deleteProductBtn"
+  },
+  "productDeletedSuccess": "Produit supprimé avec succès",
+  "@productDeletedSuccess": {
+    "description": "productDeletedSuccess"
+  },
+  "errorGenericMsg": "Erreur : {error}",
+  "@errorGenericMsg": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    },
+    "description": "errorGenericMsg"
+  },
+  "walletConfig": "Configuration du porte-monnaie",
+  "@walletConfig": {
+    "description": "walletConfig"
+  },
+  "enterFirstName": "Veuillez saisir votre prénom",
+  "@enterFirstName": {
+    "description": "enterFirstName"
+  },
+  "enterLastName": "Veuillez saisir votre nom",
+  "@enterLastName": {
+    "description": "enterLastName"
+  },
+  "selectNationality": "Veuillez sélectionner une nationalité",
+  "@selectNationality": {
+    "description": "selectNationality"
+  },
+  "selectBirthDate": "Veuillez sélectionner votre date de naissance",
+  "@selectBirthDate": {
+    "description": "selectBirthDate"
+  },
+  "walletActivatedSuccess": "Porte-monnaie activé avec succès !",
+  "@walletActivatedSuccess": {
+    "description": "walletActivatedSuccess"
+  },
+  "helpPageComingSoon": "Page d'aide à venir",
+  "@helpPageComingSoon": {
+    "description": "helpPageComingSoon"
+  },
+  "topUpComingSoon": "Fonctionnalité de recharge à venir",
+  "@topUpComingSoon": {
+    "description": "topUpComingSoon"
+  },
+  "withdrawalComingSoon": "Fonctionnalité de retrait à venir",
+  "@withdrawalComingSoon": {
+    "description": "withdrawalComingSoon"
+  },
+  "activatedStr": "Activé",
+  "@activatedStr": {
+    "description": "activatedStr"
+  },
+  "deactivatedStr": "Désactivé",
+  "@deactivatedStr": {
+    "description": "deactivatedStr"
+  },
+  "listings": "Annonces",
+  "@listings": {
+    "description": "listings"
+  },
+  "reviews": "Évaluations",
+  "@reviews": {
+    "description": "reviews"
+  },
+  "aboutTab": "À propos",
+  "@aboutTab": {
+    "description": "aboutTab"
+  },
+  "addItems": "Ajoute des articles...",
+  "@addItems": {
+    "description": "addItems"
+  },
+  "verifiedInfo": "Informations vérifiées :",
+  "@verifiedInfo": {
+    "description": "verifiedInfo"
+  },
+  "pendingAmount": "Montant en attente",
+  "@pendingAmount": {
+    "description": "pendingAmount"
+  },
+  "pendingAmountInfo": "Lorsqu'un acheteur valide un achat, le montant est mis en attente jusqu'à la réception et la confirmation du produit.",
+  "@pendingAmountInfo": {
+    "description": "pendingAmountInfo"
+  },
+  "learnMore": "En savoir plus",
+  "@learnMore": {
+    "description": "learnMore"
+  },
+  "availableAmount": "Montant disponible",
+  "@availableAmount": {
+    "description": "availableAmount"
+  },
+  "activateWallet": "Activer le porte-monnaie",
+  "@activateWallet": {
+    "description": "activateWallet"
+  },
+  "topUpWallet": "Recharger",
+  "@topUpWallet": {
+    "description": "topUpWallet"
+  },
+  "withdrawWallet": "Retirer",
+  "@withdrawWallet": {
+    "description": "withdrawWallet"
+  },
+  "accountHolderFirstName": "Prénom(s) du titulaire du compte",
+  "@accountHolderFirstName": {
+    "description": "accountHolderFirstName"
+  },
+  "accountHolderLastName": "Nom de famille du titulaire du compte",
+  "@accountHolderLastName": {
+    "description": "accountHolderLastName"
+  },
+  "nationality": "Nationalité",
+  "@nationality": {
+    "description": "nationality"
+  },
+  "selectNationalityPlaceholder": "Sélectionne une nationalité",
+  "@selectNationalityPlaceholder": {
+    "description": "selectNationalityPlaceholder"
+  },
+  "birthDate": "Date de naissance",
+  "@birthDate": {
+    "description": "birthDate"
+  },
+  "productDescriptionTitle": "Description",
+  "@productDescriptionTitle": {
+    "description": "productDescriptionTitle"
+  },
+  "readMore": "plus",
+  "@readMore": {
+    "description": "readMore"
+  },
+  "readLess": "moins",
+  "@readLess": {
+    "description": "readLess"
+  },
+  "productCategory": "Catégorie",
+  "@productCategory": {
+    "description": "productCategory"
+  },
+  "productSize": "Taille",
+  "@productSize": {
+    "description": "productSize"
+  },
+  "productCondition": "État",
+  "@productCondition": {
+    "description": "productCondition"
+  },
+  "productColor": "Couleur",
+  "@productColor": {
+    "description": "productColor"
+  },
+  "productAddedDate": "Ajouté",
+  "@productAddedDate": {
+    "description": "productAddedDate"
+  },
+  "notSpecified": "Non spécifiée",
+  "@notSpecified": {
+    "description": "notSpecified"
+  },
+  "membersWardrobe": "Dressing du membre",
+  "@membersWardrobe": {
+    "description": "membersWardrobe"
+  },
+  "similarItems": "Articles similaires",
+  "@similarItems": {
+    "description": "similarItems"
+  },
+  "boostProduct": "Booster",
+  "@boostProduct": {
+    "description": "boostProduct"
+  },
+  "shareProduct": "Partager",
+  "@shareProduct": {
+    "description": "shareProduct"
+  },
+  "priceIncl": "incl.",
+  "@priceIncl": {
+    "description": "priceIncl"
+  },
+  "subtotalForBuyer": "(sous-total pour l'acheteur)",
+  "@subtotalForBuyer": {
+    "description": "subtotalForBuyer"
+  },
+  "deleteProductConfirmationMessage": "Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.",
+  "@deleteProductConfirmationMessage": {
+    "description": "deleteProductConfirmationMessage"
+  },
+  "noReviewsYet": "Pas encore d'évaluations",
+  "@noReviewsYet": {
+    "description": "noReviewsYet"
+  },
+  "priceFilterDevelopment": "Filtre de prix en cours de développement",
+  "@priceFilterDevelopment": {
+    "description": "priceFilterDevelopment"
+  },
+  "noReviewsSubtitle": "Demande à la personne avec qui tu as effectué une transaction réussie de te laisser une évaluation.",
+  "@noReviewsSubtitle": {
+    "description": "Subtitle when there are no reviews"
+  },
+  "messageButton": "Message",
+  "@messageButton": {
+    "description": "Message button label"
+  },
+  "buyerProtectionTitle": "Frais de Protection acheteurs",
+  "@buyerProtectionTitle": {
+    "description": "Buyer protection fees section title"
+  },
+  "buyerProtectionDescription": "Pour tout achat effectué par le biais du bouton Acheter, nous appliquons des frais couvrant notre Protection acheteurs.",
+  "@buyerProtectionDescription": {
+    "description": "Buyer protection fees description"
+  },
+  "deleteProduct": "Supprimer",
+  "@deleteProduct": {
+    "description": "Delete product menu item"
+  },
+  "makeOffer": "Faire une offre",
+  "@makeOffer": {
+    "description": "Make an offer button"
+  },
+  "buyNow": "Acheter",
+  "@buyNow": {
+    "description": "Buy now button"
+  },
+  "noProductsAvailable": "Aucun produit disponible",
+  "@noProductsAvailable": {
+    "description": "Empty state for product grids"
+  },
+  "timeAgoYear": "Il y a 1 an",
+  "@timeAgoYear": {
+    "description": "Time ago: 1 year"
+  },
+  "timeAgoYears": "Il y a {count} ans",
+  "@timeAgoYears": {
+    "description": "Time ago: multiple years",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "timeAgoMonths": "Il y a {count} mois",
+  "@timeAgoMonths": {
+    "description": "Time ago: months",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "timeAgoDay": "Il y a 1 jour",
+  "@timeAgoDay": {
+    "description": "Time ago: 1 day"
+  },
+  "timeAgoDays": "Il y a {count} jours",
+  "@timeAgoDays": {
+    "description": "Time ago: multiple days",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "timeAgoHour": "Il y a 1 heure",
+  "@timeAgoHour": {
+    "description": "Time ago: 1 hour"
+  },
+  "timeAgoHours": "Il y a {count} heures",
+  "@timeAgoHours": {
+    "description": "Time ago: multiple hours",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "timeAgoMinute": "Il y a 1 minute",
+  "@timeAgoMinute": {
+    "description": "Time ago: 1 minute"
+  },
+  "timeAgoMinutes": "Il y a {count} minutes",
+  "@timeAgoMinutes": {
+    "description": "Time ago: multiple minutes",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "timeAgoJustNow": "À l'instant",
+  "@timeAgoJustNow": {
+    "description": "Time ago: just now"
+  },
+  "followButton": "Suivre",
+  "@followButton": {
+    "description": "Follow user button"
+  },
+  "followComingSoon": "Suivre {username} bientôt disponible !",
+  "@followComingSoon": {
+    "description": "Snackbar message when follow is tapped",
+    "placeholders": {
+      "username": { "type": "String" }
+    }
+  },
+  "sendMessagePlaceholder": "Envoyer un message",
+  "@sendMessagePlaceholder": {
+    "description": "Placeholder for chat input field"
+  },
+  "offerAcceptedSuccess": "Offre acceptée !",
+  "@offerAcceptedSuccess": {
+    "description": "Success message when offer is accepted"
+  },
+  "offerRejectedSuccess": "Offre refusée",
+  "@offerRejectedSuccess": {
+    "description": "Success message when offer is rejected"
+  },
+  "chatTitle": "Chat",
+  "@chatTitle": {
+    "description": "Title of the chat page"
+  },
+  "conversationNotFound": "Conversation introuvable",
+  "@conversationNotFound": {
+    "description": "Message shown when conversation is not found"
+  },
+  "chatWelcomeMessage": "Bonjour ! Moi c'est {username}",
+  "@chatWelcomeMessage": {
+    "description": "Welcome message showing user's name in chat",
+    "placeholders": {
+      "username": { "type": "String" }
+    }
+  },
+  "memberSinceYear": "Membre depuis {year}",
+  "@memberSinceYear": {
+    "description": "Shows the year the user joined",
+    "placeholders": {
+      "year": { "type": "int" }
+    }
+  },
+  "systemMessage": "Message système",
+  "@systemMessage": {
+    "description": "Fallback text for system messages"
+  },
+  "heyUserMadeOffer": "Hey, {name} t'a fait une offre",
+  "@heyUserMadeOffer": {
+    "description": "Notification that a user made an offer",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "defaultUser": "un utilisateur",
+  "@defaultUser": {
+    "description": "Default name when user name is missing"
+  },
+  "offerStatusAccepted": "Acceptée",
+  "@offerStatusAccepted": {
+    "description": "Offer status: accepted"
+  },
+  "offerStatusRejected": "Refusée",
+  "@offerStatusRejected": {
+    "description": "Offer status: rejected"
+  },
+  "offerStatusPending": "En attente",
+  "@offerStatusPending": {
+    "description": "Offer status: pending"
+  },
+  "acceptButton": "Accepter",
+  "@acceptButton": {
+    "description": "Accept button label"
+  },
+  "rejectButton": "Refuser",
+  "@rejectButton": {
+    "description": "Reject button label"
+  },
+  "noMessages": "Aucun message",
+  "@noMessages": {
+    "description": "Empty messages state"
+  },
+  "counterOffer": "Contre-offre",
+  "@counterOffer": {
+    "description": "Counter offer label"
+  },
+  "errorLoading": "Erreur de chargement",
+  "@errorLoading": {
+    "description": "Error loading state"
+  },
+  "pleaseLogin": "Veuillez vous connecter",
+  "@pleaseLogin": {
+    "description": "Please login message"
   }
 }

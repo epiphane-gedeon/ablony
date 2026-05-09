@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ablony/shared/widgets/buttons/buttons.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class MessageBubble extends StatelessWidget {
   final bool isMe;
@@ -100,7 +101,7 @@ class MessageBubble extends StatelessWidget {
           // Afficher l'en-tête seulement pour celui qui reçoit l'offre (!isMe)
           if (!isMe) ...[
             Text(
-              "Hey, ${senderName ?? 'un utilisateur'} t'a fait une offre",
+              AppLocalizations.of(context)!.heyUserMadeOffer(senderName ?? AppLocalizations.of(context)!.defaultUser),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: textColor.withOpacity(0.7),
                 fontSize: 12,
@@ -124,7 +125,7 @@ class MessageBubble extends StatelessWidget {
               const SizedBox(width: 8),
               if (offerStatus != null)
                 Text(
-                  _getStatusText(),
+                  _getStatusText(context),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: _getStatusColor(),
                     fontWeight: FontWeight.w500,
@@ -141,7 +142,7 @@ class MessageBubble extends StatelessWidget {
               width: double.infinity,
               height: 38,
               child: PrimaryButton(
-                text: "Accepter",
+                text: AppLocalizations.of(context)!.acceptButton,
                 fontSize: 12,
                 borderRadius: 8,
                 padding: EdgeInsets.zero,
@@ -155,7 +156,7 @@ class MessageBubble extends StatelessWidget {
                   child: SizedBox(
                     height: 38,
                     child: SecondaryButton(
-                      text: "Refuser",
+                      text: AppLocalizations.of(context)!.rejectButton,
                       fontSize: 12,
                       borderRadius: 8,
                       padding: EdgeInsets.zero,
@@ -168,7 +169,7 @@ class MessageBubble extends StatelessWidget {
                   child: SizedBox(
                     height: 38,
                     child: SecondaryButton(
-                      text: "Faire une offre",
+                      text: AppLocalizations.of(context)!.makeOffer,
                       fontSize: 12,
                       borderRadius: 8,
                       padding: EdgeInsets.zero,
@@ -189,7 +190,7 @@ class MessageBubble extends StatelessWidget {
               width: double.infinity,
               height: 38,
               child: PrimaryButton(
-                text: "Acheter",
+                text: AppLocalizations.of(context)!.buyNow,
                 fontSize: 12,
                 borderRadius: 8,
                 padding: EdgeInsets.zero,
@@ -228,14 +229,14 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  String _getStatusText() {
+  String _getStatusText(BuildContext context) {
     switch (offerStatus) {
       case 'accepted':
-        return 'Acceptée';
+        return AppLocalizations.of(context)!.offerStatusAccepted;
       case 'rejected':
-        return 'Refusée';
+        return AppLocalizations.of(context)!.offerStatusRejected;
       default:
-        return 'En attente';
+        return AppLocalizations.of(context)!.offerStatusPending;
     }
   }
 

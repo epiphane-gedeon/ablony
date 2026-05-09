@@ -8,6 +8,8 @@ import '../../../sell/presentation/widgets/sell_bottom_sheet.dart';
 import '../../../../shared/widgets/product_card.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 class UserListingsPage extends ConsumerWidget {
   const UserListingsPage({super.key});
 
@@ -18,8 +20,8 @@ class UserListingsPage extends ConsumerWidget {
     return userAsync.when(
       data: (user) {
         if (user == null) {
-          return const Scaffold(
-            body: Center(child: Text('Utilisateur non connecté')),
+          return Scaffold(
+            body: Center(child: Text(AppLocalizations.of(context)!.userNotConnected)),
           );
         }
 
@@ -29,11 +31,11 @@ class UserListingsPage extends ConsumerWidget {
             appBar: AppBar(
               title: Text(user.username),
               centerTitle: true,
-              bottom: const TabBar(
+              bottom: TabBar(
                 tabs: [
-                  Tab(text: 'Annonces'),
-                  Tab(text: 'Évaluations'),
-                  Tab(text: 'À propos'),
+                  Tab(text: AppLocalizations.of(context)!.listings),
+                  Tab(text: AppLocalizations.of(context)!.reviews),
+                  Tab(text: AppLocalizations.of(context)!.aboutTab),
                 ],
               ),
             ),
@@ -51,7 +53,7 @@ class UserListingsPage extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stack) => Scaffold(
-        body: Center(child: Text('Erreur: $error')),
+        body: Center(child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString()))),
       ),
     );
   }
@@ -82,7 +84,7 @@ class UserListingsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 PrimaryButton(
-                  text: 'Ajouter un article',
+                  text: AppLocalizations.of(context)!.addItems,
                   isFullWidth: false,
                   onPressed: () {
                      SellBottomSheet.show(context);
@@ -112,7 +114,7 @@ class UserListingsPage extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('Erreur: $error')),
+      error: (error, stack) => Center(child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString()))),
     );
   }
 
@@ -123,7 +125,7 @@ class UserListingsPage extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Pas encore d\'évaluations',
+            AppLocalizations.of(context)!.noReviewsYet,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -132,7 +134,7 @@ class UserListingsPage extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Text(
-              'Demande à la personne avec qui tu as effectué une transaction réussie de te laisser une évaluation.',
+              AppLocalizations.of(context)!.noReviewsSubtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -181,8 +183,8 @@ class UserListingsPage extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Informations vérifiées :',
-                style: theme.textTheme.bodyMedium?.copyWith(
+                AppLocalizations.of(context)!.verifiedInfo,
+                style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),

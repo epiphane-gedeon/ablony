@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../auth/application/auth_providers.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Page de profil utilisateur
 class ProfilePage extends ConsumerWidget {
@@ -14,11 +15,11 @@ class ProfilePage extends ConsumerWidget {
     final userAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil'), centerTitle: true),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.profileTitle), centerTitle: true),
       body: userAsync.when(
         data: (user) {
           if (user == null) {
-            return const Center(child: Text('Utilisateur non connecté'));
+            return Center(child: Text(AppLocalizations.of(context)!.userNotConnected));
           }
 
           return ListView(
@@ -65,7 +66,7 @@ class ProfilePage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Voir mes annonces',
+                            AppLocalizations.of(context)!.viewMyListings,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(
                                 0.6,
@@ -87,21 +88,21 @@ class ProfilePage extends ConsumerWidget {
               _buildMenuTile(
                 context: context,
                 icon: Icons.favorite_border,
-                title: 'Favoris',
+                title: AppLocalizations.of(context)!.favorites,
                 onTap: () => context.push('/profile/favorites'),
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.email_outlined,
-                title: 'Inviter des amis',
+                title: AppLocalizations.of(context)!.inviteFriends,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.wallet_outlined,
-                title: 'Mon porte-monnaie',
+                title: AppLocalizations.of(context)!.myWallet,
                 trailing: user.wallet != null
                     ? '${user.wallet!.availableAmount} FCFA'
                     : '0 FCFA',
@@ -111,44 +112,44 @@ class ProfilePage extends ConsumerWidget {
               _buildMenuTile(
                 context: context,
                 icon: Icons.receipt_long_outlined,
-                title: 'Mes ventes et achats',
+                title: AppLocalizations.of(context)!.salesAndPurchases,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.rocket_launch_outlined,
-                title: 'Outils de promotion',
+                title: AppLocalizations.of(context)!.promotionTools,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.tune_outlined,
-                title: 'Personnalisation',
+                title: AppLocalizations.of(context)!.personalization,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.discount_outlined,
-                title: 'Réduction sur les lots',
-                trailing: 'Désactivé',
+                title: AppLocalizations.of(context)!.bundleDiscount,
+                trailing: AppLocalizations.of(context)!.deactivatedStr,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.beach_access_outlined,
-                title: 'Mode vacances',
+                title: AppLocalizations.of(context)!.vacationMode,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.favorite_outline,
-                title: 'Dons',
-                trailing: 'Désactivé',
+                title: AppLocalizations.of(context)!.donations,
+                trailing: AppLocalizations.of(context)!.deactivatedStr,
                 onTap: () {},
               ),
 
@@ -157,49 +158,49 @@ class ProfilePage extends ConsumerWidget {
               _buildMenuTile(
                 context: context,
                 icon: Icons.help_outline,
-                title: 'Ton guide Vinted',
+                title: AppLocalizations.of(context)!.ablonyGuide,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.support_agent_outlined,
-                title: 'Centre d\'aide',
+                title: AppLocalizations.of(context)!.helpCenter,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.settings_outlined,
-                title: 'Paramètres',
-                onTap: () {},
+                title: AppLocalizations.of(context)!.settingsTitle,
+                onTap: () => context.push('/profile/settings'),
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.cookie_outlined,
-                title: 'Paramètres des cookies',
+                title: AppLocalizations.of(context)!.cookieSettings,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.info_outline,
-                title: 'À propos de nous',
+                title: AppLocalizations.of(context)!.aboutUs,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.description_outlined,
-                title: 'Informations légales',
+                title: AppLocalizations.of(context)!.legalInfo,
                 onTap: () {},
               ),
 
               _buildMenuTile(
                 context: context,
                 icon: Icons.verified_outlined,
-                title: 'Notre plateforme',
+                title: AppLocalizations.of(context)!.ourPlatform,
                 onTap: () {},
               ),
 
@@ -222,7 +223,7 @@ class ProfilePage extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Erreur: $error')),
+        error: (error, stack) => Center(child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString()))),
       ),
     );
   }

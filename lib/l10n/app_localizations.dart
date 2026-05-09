@@ -1676,10 +1676,10 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get notificationsTab;
 
-  /// Empty state message for messages
+  /// Empty messages state
   ///
   /// In fr, this message translates to:
-  /// **'Pas encore de messages'**
+  /// **'Aucun message'**
   String get noMessages;
 
   /// Empty state message for notifications
@@ -1747,6 +1747,792 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pourquoi ?'**
   String get whyLink;
+
+  /// settingsTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres'**
+  String get settingsTitle;
+
+  /// profileInfo
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations du profil'**
+  String get profileInfo;
+
+  /// accountSettings
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres du compte'**
+  String get accountSettings;
+
+  /// payments
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiements'**
+  String get payments;
+
+  /// shipping
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi'**
+  String get shipping;
+
+  /// security
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurité'**
+  String get security;
+
+  /// notifications
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// mobile
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile'**
+  String get mobile;
+
+  /// email
+  ///
+  /// In fr, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// appLanguage
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue de l\'appli'**
+  String get appLanguage;
+
+  /// language
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get language;
+
+  /// darkMode
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode sombre'**
+  String get darkMode;
+
+  /// privacySettings
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres de confidentialité'**
+  String get privacySettings;
+
+  /// logout
+  ///
+  /// In fr, this message translates to:
+  /// **'Déconnexion'**
+  String get logout;
+
+  /// appVersion
+  ///
+  /// In fr, this message translates to:
+  /// **'Version de l\'application : {version}'**
+  String appVersion(String version);
+
+  /// chooseLanguage
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la langue'**
+  String get chooseLanguage;
+
+  /// cancel
+  ///
+  /// In fr, this message translates to:
+  /// **'ANNULER'**
+  String get cancel;
+
+  /// logoutConfirm
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir vous déconnecter ?'**
+  String get logoutConfirm;
+
+  /// profileTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get profileTitle;
+
+  /// favorites
+  ///
+  /// In fr, this message translates to:
+  /// **'Favoris'**
+  String get favorites;
+
+  /// inviteFriends
+  ///
+  /// In fr, this message translates to:
+  /// **'Inviter des amis'**
+  String get inviteFriends;
+
+  /// myWallet
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon porte-monnaie'**
+  String get myWallet;
+
+  /// salesAndPurchases
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes ventes et achats'**
+  String get salesAndPurchases;
+
+  /// promotionTools
+  ///
+  /// In fr, this message translates to:
+  /// **'Outils de promotion'**
+  String get promotionTools;
+
+  /// personalization
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnalisation'**
+  String get personalization;
+
+  /// bundleDiscount
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduction sur les lots'**
+  String get bundleDiscount;
+
+  /// vacationMode
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode vacances'**
+  String get vacationMode;
+
+  /// donations
+  ///
+  /// In fr, this message translates to:
+  /// **'Dons'**
+  String get donations;
+
+  /// ablonyGuide
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton guide Ablony'**
+  String get ablonyGuide;
+
+  /// helpCenter
+  ///
+  /// In fr, this message translates to:
+  /// **'Centre d\'aide'**
+  String get helpCenter;
+
+  /// cookieSettings
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres des cookies'**
+  String get cookieSettings;
+
+  /// aboutUs
+  ///
+  /// In fr, this message translates to:
+  /// **'À propos de nous'**
+  String get aboutUs;
+
+  /// legalInfo
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations légales'**
+  String get legalInfo;
+
+  /// viewMyListings
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mes annonces'**
+  String get viewMyListings;
+
+  /// productNotFound
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit introuvable'**
+  String get productNotFound;
+
+  /// clickToTranslate
+  ///
+  /// In fr, this message translates to:
+  /// **'Clique ici pour traduire'**
+  String get clickToTranslate;
+
+  /// activelyPublishes
+  ///
+  /// In fr, this message translates to:
+  /// **'Publie activement'**
+  String get activelyPublishes;
+
+  /// sendsQuickly
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoie rapidement'**
+  String get sendsQuickly;
+
+  /// markAsSold
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquer comme vendu'**
+  String get markAsSold;
+
+  /// markAsReserved
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme réservé'**
+  String get markAsReserved;
+
+  /// edit
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get edit;
+
+  /// hide
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer'**
+  String get hide;
+
+  /// productMarkedAsSold
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit marqué comme vendu'**
+  String get productMarkedAsSold;
+
+  /// deleteProductConfirm
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le produit ?'**
+  String get deleteProductConfirm;
+
+  /// deleteProductBtn
+  ///
+  /// In fr, this message translates to:
+  /// **'SUPPRIMER'**
+  String get deleteProductBtn;
+
+  /// productDeletedSuccess
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit supprimé avec succès'**
+  String get productDeletedSuccess;
+
+  /// errorGenericMsg
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur : {error}'**
+  String errorGenericMsg(String error);
+
+  /// walletConfig
+  ///
+  /// In fr, this message translates to:
+  /// **'Configuration du porte-monnaie'**
+  String get walletConfig;
+
+  /// enterFirstName
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez saisir votre prénom'**
+  String get enterFirstName;
+
+  /// enterLastName
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez saisir votre nom'**
+  String get enterLastName;
+
+  /// selectNationality
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez sélectionner une nationalité'**
+  String get selectNationality;
+
+  /// selectBirthDate
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez sélectionner votre date de naissance'**
+  String get selectBirthDate;
+
+  /// walletActivatedSuccess
+  ///
+  /// In fr, this message translates to:
+  /// **'Porte-monnaie activé avec succès !'**
+  String get walletActivatedSuccess;
+
+  /// helpPageComingSoon
+  ///
+  /// In fr, this message translates to:
+  /// **'Page d\'aide à venir'**
+  String get helpPageComingSoon;
+
+  /// topUpComingSoon
+  ///
+  /// In fr, this message translates to:
+  /// **'Fonctionnalité de recharge à venir'**
+  String get topUpComingSoon;
+
+  /// withdrawalComingSoon
+  ///
+  /// In fr, this message translates to:
+  /// **'Fonctionnalité de retrait à venir'**
+  String get withdrawalComingSoon;
+
+  /// activatedStr
+  ///
+  /// In fr, this message translates to:
+  /// **'Activé'**
+  String get activatedStr;
+
+  /// deactivatedStr
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivé'**
+  String get deactivatedStr;
+
+  /// listings
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonces'**
+  String get listings;
+
+  /// reviews
+  ///
+  /// In fr, this message translates to:
+  /// **'Évaluations'**
+  String get reviews;
+
+  /// aboutTab
+  ///
+  /// In fr, this message translates to:
+  /// **'À propos'**
+  String get aboutTab;
+
+  /// addItems
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoute des articles...'**
+  String get addItems;
+
+  /// verifiedInfo
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations vérifiées :'**
+  String get verifiedInfo;
+
+  /// pendingAmount
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant en attente'**
+  String get pendingAmount;
+
+  /// pendingAmountInfo
+  ///
+  /// In fr, this message translates to:
+  /// **'Lorsqu\'un acheteur valide un achat, le montant est mis en attente jusqu\'à la réception et la confirmation du produit.'**
+  String get pendingAmountInfo;
+
+  /// learnMore
+  ///
+  /// In fr, this message translates to:
+  /// **'En savoir plus'**
+  String get learnMore;
+
+  /// availableAmount
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant disponible'**
+  String get availableAmount;
+
+  /// activateWallet
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer le porte-monnaie'**
+  String get activateWallet;
+
+  /// topUpWallet
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger'**
+  String get topUpWallet;
+
+  /// withdrawWallet
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get withdrawWallet;
+
+  /// accountHolderFirstName
+  ///
+  /// In fr, this message translates to:
+  /// **'Prénom(s) du titulaire du compte'**
+  String get accountHolderFirstName;
+
+  /// accountHolderLastName
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de famille du titulaire du compte'**
+  String get accountHolderLastName;
+
+  /// nationality
+  ///
+  /// In fr, this message translates to:
+  /// **'Nationalité'**
+  String get nationality;
+
+  /// selectNationalityPlaceholder
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionne une nationalité'**
+  String get selectNationalityPlaceholder;
+
+  /// birthDate
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de naissance'**
+  String get birthDate;
+
+  /// productDescriptionTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Description'**
+  String get productDescriptionTitle;
+
+  /// readMore
+  ///
+  /// In fr, this message translates to:
+  /// **'plus'**
+  String get readMore;
+
+  /// readLess
+  ///
+  /// In fr, this message translates to:
+  /// **'moins'**
+  String get readLess;
+
+  /// productCategory
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get productCategory;
+
+  /// productSize
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille'**
+  String get productSize;
+
+  /// productCondition
+  ///
+  /// In fr, this message translates to:
+  /// **'État'**
+  String get productCondition;
+
+  /// productColor
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get productColor;
+
+  /// productAddedDate
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouté'**
+  String get productAddedDate;
+
+  /// notSpecified
+  ///
+  /// In fr, this message translates to:
+  /// **'Non spécifiée'**
+  String get notSpecified;
+
+  /// membersWardrobe
+  ///
+  /// In fr, this message translates to:
+  /// **'Dressing du membre'**
+  String get membersWardrobe;
+
+  /// similarItems
+  ///
+  /// In fr, this message translates to:
+  /// **'Articles similaires'**
+  String get similarItems;
+
+  /// boostProduct
+  ///
+  /// In fr, this message translates to:
+  /// **'Booster'**
+  String get boostProduct;
+
+  /// shareProduct
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager'**
+  String get shareProduct;
+
+  /// priceIncl
+  ///
+  /// In fr, this message translates to:
+  /// **'incl.'**
+  String get priceIncl;
+
+  /// subtotalForBuyer
+  ///
+  /// In fr, this message translates to:
+  /// **'(sous-total pour l\'acheteur)'**
+  String get subtotalForBuyer;
+
+  /// deleteProductConfirmationMessage
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.'**
+  String get deleteProductConfirmationMessage;
+
+  /// noReviewsYet
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore d\'évaluations'**
+  String get noReviewsYet;
+
+  /// priceFilterDevelopment
+  ///
+  /// In fr, this message translates to:
+  /// **'Filtre de prix en cours de développement'**
+  String get priceFilterDevelopment;
+
+  /// Subtitle when there are no reviews
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande à la personne avec qui tu as effectué une transaction réussie de te laisser une évaluation.'**
+  String get noReviewsSubtitle;
+
+  /// Message button label
+  ///
+  /// In fr, this message translates to:
+  /// **'Message'**
+  String get messageButton;
+
+  /// Buyer protection fees section title
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de Protection acheteurs'**
+  String get buyerProtectionTitle;
+
+  /// Buyer protection fees description
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour tout achat effectué par le biais du bouton Acheter, nous appliquons des frais couvrant notre Protection acheteurs.'**
+  String get buyerProtectionDescription;
+
+  /// Delete product menu item
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get deleteProduct;
+
+  /// Make an offer button
+  ///
+  /// In fr, this message translates to:
+  /// **'Faire une offre'**
+  String get makeOffer;
+
+  /// Buy now button
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheter'**
+  String get buyNow;
+
+  /// Empty state for product grids
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit disponible'**
+  String get noProductsAvailable;
+
+  /// Time ago: 1 year
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a 1 an'**
+  String get timeAgoYear;
+
+  /// Time ago: multiple years
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a {count} ans'**
+  String timeAgoYears(int count);
+
+  /// Time ago: months
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a {count} mois'**
+  String timeAgoMonths(int count);
+
+  /// Time ago: 1 day
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a 1 jour'**
+  String get timeAgoDay;
+
+  /// Time ago: multiple days
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a {count} jours'**
+  String timeAgoDays(int count);
+
+  /// Time ago: 1 hour
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a 1 heure'**
+  String get timeAgoHour;
+
+  /// Time ago: multiple hours
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a {count} heures'**
+  String timeAgoHours(int count);
+
+  /// Time ago: 1 minute
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a 1 minute'**
+  String get timeAgoMinute;
+
+  /// Time ago: multiple minutes
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a {count} minutes'**
+  String timeAgoMinutes(int count);
+
+  /// Time ago: just now
+  ///
+  /// In fr, this message translates to:
+  /// **'À l\'instant'**
+  String get timeAgoJustNow;
+
+  /// Follow user button
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre'**
+  String get followButton;
+
+  /// Snackbar message when follow is tapped
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre {username} bientôt disponible !'**
+  String followComingSoon(String username);
+
+  /// Placeholder for chat input field
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer un message'**
+  String get sendMessagePlaceholder;
+
+  /// Success message when offer is accepted
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre acceptée !'**
+  String get offerAcceptedSuccess;
+
+  /// Success message when offer is rejected
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre refusée'**
+  String get offerRejectedSuccess;
+
+  /// Title of the chat page
+  ///
+  /// In fr, this message translates to:
+  /// **'Chat'**
+  String get chatTitle;
+
+  /// Message shown when conversation is not found
+  ///
+  /// In fr, this message translates to:
+  /// **'Conversation introuvable'**
+  String get conversationNotFound;
+
+  /// Welcome message showing user's name in chat
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour ! Moi c\'est {username}'**
+  String chatWelcomeMessage(String username);
+
+  /// Shows the year the user joined
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre depuis {year}'**
+  String memberSinceYear(int year);
+
+  /// Fallback text for system messages
+  ///
+  /// In fr, this message translates to:
+  /// **'Message système'**
+  String get systemMessage;
+
+  /// Notification that a user made an offer
+  ///
+  /// In fr, this message translates to:
+  /// **'Hey, {name} t\'a fait une offre'**
+  String heyUserMadeOffer(String name);
+
+  /// Default name when user name is missing
+  ///
+  /// In fr, this message translates to:
+  /// **'un utilisateur'**
+  String get defaultUser;
+
+  /// Offer status: accepted
+  ///
+  /// In fr, this message translates to:
+  /// **'Acceptée'**
+  String get offerStatusAccepted;
+
+  /// Offer status: rejected
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get offerStatusRejected;
+
+  /// Offer status: pending
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get offerStatusPending;
+
+  /// Accept button label
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get acceptButton;
+
+  /// Reject button label
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get rejectButton;
+
+  /// Counter offer label
+  ///
+  /// In fr, this message translates to:
+  /// **'Contre-offre'**
+  String get counterOffer;
+
+  /// Error loading state
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de chargement'**
+  String get errorLoading;
+
+  /// Please login message
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez vous connecter'**
+  String get pleaseLogin;
 }
 
 class _AppLocalizationsDelegate
