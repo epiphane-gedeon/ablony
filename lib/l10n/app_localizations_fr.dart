@@ -836,7 +836,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notificationsTab => 'Notifications';
 
   @override
-  String get noMessages => 'Pas encore de messages';
+  String get noMessages => 'Aucun message';
 
   @override
   String get noNotifications => 'Pas encore de notifications';
@@ -880,4 +880,424 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get whyLink => 'Pourquoi ?';
+
+  @override
+  String get settingsTitle => 'Paramètres';
+
+  @override
+  String get profileInfo => 'Informations du profil';
+
+  @override
+  String get accountSettings => 'Paramètres du compte';
+
+  @override
+  String get payments => 'Paiements';
+
+  @override
+  String get shipping => 'Envoi';
+
+  @override
+  String get security => 'Sécurité';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get mobile => 'Mobile';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get appLanguage => 'Langue de l\'appli';
+
+  @override
+  String get language => 'Langue';
+
+  @override
+  String get darkMode => 'Mode sombre';
+
+  @override
+  String get privacySettings => 'Paramètres de confidentialité';
+
+  @override
+  String get logout => 'Déconnexion';
+
+  @override
+  String appVersion(String version) {
+    return 'Version de l\'application : $version';
+  }
+
+  @override
+  String get chooseLanguage => 'Choisir la langue';
+
+  @override
+  String get cancel => 'ANNULER';
+
+  @override
+  String get logoutConfirm => 'Êtes-vous sûr de vouloir vous déconnecter ?';
+
+  @override
+  String get profileTitle => 'Profil';
+
+  @override
+  String get favorites => 'Favoris';
+
+  @override
+  String get inviteFriends => 'Inviter des amis';
+
+  @override
+  String get myWallet => 'Mon porte-monnaie';
+
+  @override
+  String get salesAndPurchases => 'Mes ventes et achats';
+
+  @override
+  String get promotionTools => 'Outils de promotion';
+
+  @override
+  String get personalization => 'Personnalisation';
+
+  @override
+  String get bundleDiscount => 'Réduction sur les lots';
+
+  @override
+  String get vacationMode => 'Mode vacances';
+
+  @override
+  String get donations => 'Dons';
+
+  @override
+  String get ablonyGuide => 'Ton guide Ablony';
+
+  @override
+  String get helpCenter => 'Centre d\'aide';
+
+  @override
+  String get cookieSettings => 'Paramètres des cookies';
+
+  @override
+  String get aboutUs => 'À propos de nous';
+
+  @override
+  String get legalInfo => 'Informations légales';
+
+  @override
+  String get viewMyListings => 'Voir mes annonces';
+
+  @override
+  String get productNotFound => 'Produit introuvable';
+
+  @override
+  String get clickToTranslate => 'Clique ici pour traduire';
+
+  @override
+  String get activelyPublishes => 'Publie activement';
+
+  @override
+  String get sendsQuickly => 'Envoie rapidement';
+
+  @override
+  String get markAsSold => 'Indiquer comme vendu';
+
+  @override
+  String get markAsReserved => 'Marquer comme réservé';
+
+  @override
+  String get edit => 'Modifier';
+
+  @override
+  String get hide => 'Masquer';
+
+  @override
+  String get productMarkedAsSold => 'Produit marqué comme vendu';
+
+  @override
+  String get deleteProductConfirm => 'Supprimer le produit ?';
+
+  @override
+  String get deleteProductBtn => 'SUPPRIMER';
+
+  @override
+  String get productDeletedSuccess => 'Produit supprimé avec succès';
+
+  @override
+  String errorGenericMsg(String error) {
+    return 'Erreur : $error';
+  }
+
+  @override
+  String get walletConfig => 'Configuration du porte-monnaie';
+
+  @override
+  String get enterFirstName => 'Veuillez saisir votre prénom';
+
+  @override
+  String get enterLastName => 'Veuillez saisir votre nom';
+
+  @override
+  String get selectNationality => 'Veuillez sélectionner une nationalité';
+
+  @override
+  String get selectBirthDate => 'Veuillez sélectionner votre date de naissance';
+
+  @override
+  String get walletActivatedSuccess => 'Porte-monnaie activé avec succès !';
+
+  @override
+  String get helpPageComingSoon => 'Page d\'aide à venir';
+
+  @override
+  String get topUpComingSoon => 'Fonctionnalité de recharge à venir';
+
+  @override
+  String get withdrawalComingSoon => 'Fonctionnalité de retrait à venir';
+
+  @override
+  String get activatedStr => 'Activé';
+
+  @override
+  String get deactivatedStr => 'Désactivé';
+
+  @override
+  String get listings => 'Annonces';
+
+  @override
+  String get reviews => 'Évaluations';
+
+  @override
+  String get aboutTab => 'À propos';
+
+  @override
+  String get addItems => 'Ajoute des articles...';
+
+  @override
+  String get verifiedInfo => 'Informations vérifiées :';
+
+  @override
+  String get pendingAmount => 'Montant en attente';
+
+  @override
+  String get pendingAmountInfo =>
+      'Lorsqu\'un acheteur valide un achat, le montant est mis en attente jusqu\'à la réception et la confirmation du produit.';
+
+  @override
+  String get learnMore => 'En savoir plus';
+
+  @override
+  String get availableAmount => 'Montant disponible';
+
+  @override
+  String get activateWallet => 'Activer le porte-monnaie';
+
+  @override
+  String get topUpWallet => 'Recharger';
+
+  @override
+  String get withdrawWallet => 'Retirer';
+
+  @override
+  String get accountHolderFirstName => 'Prénom(s) du titulaire du compte';
+
+  @override
+  String get accountHolderLastName => 'Nom de famille du titulaire du compte';
+
+  @override
+  String get nationality => 'Nationalité';
+
+  @override
+  String get selectNationalityPlaceholder => 'Sélectionne une nationalité';
+
+  @override
+  String get birthDate => 'Date de naissance';
+
+  @override
+  String get productDescriptionTitle => 'Description';
+
+  @override
+  String get readMore => 'plus';
+
+  @override
+  String get readLess => 'moins';
+
+  @override
+  String get productCategory => 'Catégorie';
+
+  @override
+  String get productSize => 'Taille';
+
+  @override
+  String get productCondition => 'État';
+
+  @override
+  String get productColor => 'Couleur';
+
+  @override
+  String get productAddedDate => 'Ajouté';
+
+  @override
+  String get notSpecified => 'Non spécifiée';
+
+  @override
+  String get membersWardrobe => 'Dressing du membre';
+
+  @override
+  String get similarItems => 'Articles similaires';
+
+  @override
+  String get boostProduct => 'Booster';
+
+  @override
+  String get shareProduct => 'Partager';
+
+  @override
+  String get priceIncl => 'incl.';
+
+  @override
+  String get subtotalForBuyer => '(sous-total pour l\'acheteur)';
+
+  @override
+  String get deleteProductConfirmationMessage =>
+      'Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.';
+
+  @override
+  String get noReviewsYet => 'Pas encore d\'évaluations';
+
+  @override
+  String get priceFilterDevelopment =>
+      'Filtre de prix en cours de développement';
+
+  @override
+  String get noReviewsSubtitle =>
+      'Demande à la personne avec qui tu as effectué une transaction réussie de te laisser une évaluation.';
+
+  @override
+  String get messageButton => 'Message';
+
+  @override
+  String get buyerProtectionTitle => 'Frais de Protection acheteurs';
+
+  @override
+  String get buyerProtectionDescription =>
+      'Pour tout achat effectué par le biais du bouton Acheter, nous appliquons des frais couvrant notre Protection acheteurs.';
+
+  @override
+  String get deleteProduct => 'Supprimer';
+
+  @override
+  String get makeOffer => 'Faire une offre';
+
+  @override
+  String get buyNow => 'Acheter';
+
+  @override
+  String get noProductsAvailable => 'Aucun produit disponible';
+
+  @override
+  String get timeAgoYear => 'Il y a 1 an';
+
+  @override
+  String timeAgoYears(int count) {
+    return 'Il y a $count ans';
+  }
+
+  @override
+  String timeAgoMonths(int count) {
+    return 'Il y a $count mois';
+  }
+
+  @override
+  String get timeAgoDay => 'Il y a 1 jour';
+
+  @override
+  String timeAgoDays(int count) {
+    return 'Il y a $count jours';
+  }
+
+  @override
+  String get timeAgoHour => 'Il y a 1 heure';
+
+  @override
+  String timeAgoHours(int count) {
+    return 'Il y a $count heures';
+  }
+
+  @override
+  String get timeAgoMinute => 'Il y a 1 minute';
+
+  @override
+  String timeAgoMinutes(int count) {
+    return 'Il y a $count minutes';
+  }
+
+  @override
+  String get timeAgoJustNow => 'À l\'instant';
+
+  @override
+  String get followButton => 'Suivre';
+
+  @override
+  String followComingSoon(String username) {
+    return 'Suivre $username bientôt disponible !';
+  }
+
+  @override
+  String get sendMessagePlaceholder => 'Envoyer un message';
+
+  @override
+  String get offerAcceptedSuccess => 'Offre acceptée !';
+
+  @override
+  String get offerRejectedSuccess => 'Offre refusée';
+
+  @override
+  String get chatTitle => 'Chat';
+
+  @override
+  String get conversationNotFound => 'Conversation introuvable';
+
+  @override
+  String chatWelcomeMessage(String username) {
+    return 'Bonjour ! Moi c\'est $username';
+  }
+
+  @override
+  String memberSinceYear(int year) {
+    return 'Membre depuis $year';
+  }
+
+  @override
+  String get systemMessage => 'Message système';
+
+  @override
+  String heyUserMadeOffer(String name) {
+    return 'Hey, $name t\'a fait une offre';
+  }
+
+  @override
+  String get defaultUser => 'un utilisateur';
+
+  @override
+  String get offerStatusAccepted => 'Acceptée';
+
+  @override
+  String get offerStatusRejected => 'Refusée';
+
+  @override
+  String get offerStatusPending => 'En attente';
+
+  @override
+  String get acceptButton => 'Accepter';
+
+  @override
+  String get rejectButton => 'Refuser';
+
+  @override
+  String get counterOffer => 'Contre-offre';
+
+  @override
+  String get errorLoading => 'Erreur de chargement';
+
+  @override
+  String get pleaseLogin => 'Veuillez vous connecter';
 }

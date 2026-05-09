@@ -6,6 +6,7 @@ import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/link.dart';
 import '../../../../shared/widgets/product_card.dart';
 import '../../../auth/application/auth_providers.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../product_fav/presentation/providers/product_fav_provider.dart';
 import '../../../product_fav/presentation/widgets/fav_toggle.dart';
@@ -15,7 +16,9 @@ import '../../../messages/domain/models/participant_details.dart';
 import '../../../messages/domain/models/product_details.dart';
 import '../providers/category_provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/paginated_products_provider.dart';
 import 'package:ablony/features/make_offer_feature/presentation/widgets/make_offer_bottom_sheet.dart';
+import 'package:ablony/features/sell/presentation/widgets/sell_bottom_sheet.dart';
 
 /// Page de détail d'un produit
 class ProductDetailPage extends ConsumerStatefulWidget {
@@ -199,7 +202,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             children: [
               const Icon(Icons.error_outline, size: 64),
               const SizedBox(height: 16),
-              Text('Produit introuvable', style: theme.textTheme.titleLarge),
+              Text(AppLocalizations.of(context)!.productNotFound, style: theme.textTheme.titleLarge),
             ],
           ),
         ),
@@ -207,6 +210,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     }
 
     final product = _product!;
+    final currentUser = ref.watch(authStateProvider).value;
+    final isSeller = currentUser != null && currentUser.uid == product.sellerId;
+
     final favoriteCountAsync = ref.watch(
       productFavoriteCountProvider(product.id),
     );
@@ -263,33 +269,34 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           ),
                         ),
                       ),
-                      // Toggle favoris + nombre réel (collection fav)
-                      Positioned(
-                        bottom: 16,
-                        right: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            children: [
-                              FavToggle(productId: product.id, size: 20),
-                              const SizedBox(width: 4),
-                              Text(
-                                '$favoriteCount',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white,
+                      // Toggle favoris (uniquement pour les acheteurs)
+                      if (!isSeller)
+                        Positioned(
+                          bottom: 16,
+                          right: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              children: [
+                                FavToggle(productId: product.id, size: 20),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$favoriteCount',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -385,14 +392,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                       Row(
                         children: [
                           Text(
-                            '${(product.price * 1.05).toStringAsFixed(2)} € ',
+                            '${(product.price * 1.05).toStringAsFixed(2)} FCFA ${AppLocalizations.of(context)!.priceIncl} ',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          Text(
-                            'Inclut la Protection acheteurs',
-                            style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.primary,
                             ),
                           ),
@@ -401,13 +402,23 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                             size: 16,
                             color: theme.colorScheme.primary,
                           ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context)!.subtotalForBuyer,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
 
                       // Section Description
                       Text(
-                        'Description',
+                        AppLocalizations.of(context)!.productDescriptionTitle,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -428,7 +439,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
                       // Bouton "plus" pour afficher/masquer les détails du produit
                       Link(
-                        text: 'plus',
+                        text: _isDescriptionExpanded ? AppLocalizations.of(context)!.readLess : AppLocalizations.of(context)!.readMore,
                         onTap: () {
                           setState(() {
                             _isDescriptionExpanded = !_isDescriptionExpanded;
@@ -445,7 +456,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         // Catégorie finale (sous-catégorie)
                         _buildDetailRow(
                           theme,
-                          'Catégorie',
+                          AppLocalizations.of(context)!.productCategory,
                           _subcategoryName ?? product.subcategoryId,
                           showArrow: true,
                         ),
@@ -454,7 +465,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         // Taille
                         _buildDetailRow(
                           theme,
-                          'Taille',
+                          AppLocalizations.of(context)!.productSize,
                           product.primarySizeValue != null
                               ? ref
                                         .watch(
@@ -465,8 +476,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                           )),
                                         )
                                         .value ??
-                                    'Non spécifiée'
-                              : 'Non spécifiée',
+                                    AppLocalizations.of(context)!.notSpecified
+                              : AppLocalizations.of(context)!.notSpecified,
                           showArrow: true,
                         ),
                         const Divider(height: 1),
@@ -474,7 +485,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         // État
                         _buildDetailRow(
                           theme,
-                          'État',
+                          AppLocalizations.of(context)!.productCondition,
                           ref
                                   .watch(
                                     attributeLabelProvider((
@@ -492,7 +503,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         if (product.attributes['color'] != null)
                           _buildDetailRow(
                             theme,
-                            'Couleur',
+                            AppLocalizations.of(context)!.productColor,
                             ref
                                     .watch(
                                       attributeLabelProvider((
@@ -508,219 +519,221 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           const Divider(height: 1),
 
                         // Date d'ajout
-                        _buildDetailRow(
-                          theme,
-                          'Ajouté',
-                          _formatTimeSince(product.createdAt),
-                          showArrow: false,
-                        ),
+                         _buildDetailRow(
+                           theme,
+                           AppLocalizations.of(context)!.productAddedDate,
+                           _formatTimeSince(context, product.createdAt),
+                           showArrow: false,
+                         ),
 
                         const SizedBox(height: 16),
                       ],
 
                       // Bouton traduire
-                      OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.language, size: 20),
-                        label: const Text('Clique ici pour traduire'),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: theme.colorScheme.primary),
+                      if (!isSeller) ...[
+                        OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.language, size: 20),
+                          label: Text(AppLocalizations.of(context)!.clickToTranslate),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: theme.colorScheme.primary),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
+                      ],
 
-                      // Section Profil du vendeur
-                      _isLoadingSeller
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          : _seller != null
-                          ? Row(
-                              children: [
-                                // Avatar du vendeur
-                                CircleAvatar(
-                                  radius: 24,
-                                  backgroundImage: _seller!.photoUrl != null
-                                      ? NetworkImage(_seller!.photoUrl!)
-                                      : null,
-                                  child: _seller!.photoUrl == null
-                                      ? Text(
-                                          _seller!.username[0].toUpperCase(),
-                                          style: theme.textTheme.titleLarge,
-                                        )
-                                      : null,
+                      // Section Profil du vendeur (cachée si c'est le vendeur lui-même)
+                      if (!isSeller) ...[
+                        _isLoadingSeller
+                            ? const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: CircularProgressIndicator(),
                                 ),
-                                const SizedBox(width: 12),
+                              )
+                            : _seller != null
+                            ? Row(
+                                children: [
+                                  // Avatar du vendeur
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundImage: _seller!.photoUrl != null
+                                        ? NetworkImage(_seller!.photoUrl!)
+                                        : null,
+                                    child: _seller!.photoUrl == null
+                                        ? Text(
+                                            _seller!.username[0].toUpperCase(),
+                                            style: theme.textTheme.titleLarge,
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 12),
 
-                                // Informations du vendeur (username + évaluations)
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        _seller!.username,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      // TODO: Ajouter les vraies évaluations depuis Firestore
-                                      Row(
-                                        children: [
-                                          Row(
-                                            children: List.generate(
-                                              5,
-                                              (index) => Icon(
-                                                index < 4
-                                                    ? Icons.star
-                                                    : Icons.star_half,
-                                                size: 16,
-                                                color: Colors.orange,
+                                  // Informations du vendeur (username + évaluations)
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          _seller!.username,
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Row(
+                                              children: List.generate(
+                                                5,
+                                                (index) => Icon(
+                                                  index < 4
+                                                      ? Icons.star
+                                                      : Icons.star_half,
+                                                  size: 16,
+                                                  color: Colors.orange,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '(0)', // TODO: Afficher le vrai nombre d'évaluations
-                                            style: theme.textTheme.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Bouton Message pour contacter le vendeur
-                                SecondaryButton(
-                                  text: 'Message',
-                                  onPressed: () async {
-                                    final currentUser = ref
-                                        .read(authStateProvider)
-                                        .value;
-                                    if (currentUser == null) return;
-
-                                    // Vérifier si une conversation existe déjà
-                                    final messageRepo = ref.read(
-                                      messageRepositoryProvider,
-                                    );
-                                    String? conversationId = await messageRepo
-                                        .findConversation(
-                                          userId1: currentUser.uid,
-                                          userId2: _product!.sellerId,
-                                          productId: _product!.id,
-                                        );
-
-                                    // Si pas de conversation, la créer
-                                    if (conversationId == null) {
-                                      final authRepo = ref.read(
-                                        authRepositoryProvider,
-                                      );
-                                      final buyer = await authRepo.getUserById(
-                                        currentUser.uid,
-                                      );
-                                      final seller = await authRepo.getUserById(
-                                        _product!.sellerId,
-                                      );
-
-                                      conversationId = await messageRepo
-                                          .createConversation(
-                                            buyerId: buyer.uid,
-                                            sellerId: seller.uid,
-                                            buyerDetails: ParticipantDetails(
-                                              name: buyer.username,
-                                              avatar: buyer.photoUrl,
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '(0)',
+                                              style: theme.textTheme.bodySmall,
                                             ),
-                                            sellerDetails: ParticipantDetails(
-                                              name: seller.username,
-                                              avatar: seller.photoUrl,
-                                            ),
-                                            productId: _product!.id,
-                                            productDetails: ProductDetails(
-                                              title: _product!.title,
-                                              price: _product!.price,
-                                              image:
-                                                  _product!.imageUrls.isNotEmpty
-                                                  ? _product!.imageUrls.first
-                                                  : null,
-                                              sellerId: seller.uid,
-                                            ),
-                                          );
-                                    }
-
-                                    // Rediriger vers la conversation
-                                    if (context.mounted) {
-                                      context.push('/chat/$conversationId');
-                                    }
-                                  },
-                                  isFullWidth: false,
-                                ),
-                              ],
-                            )
-                          : const SizedBox.shrink(),
-                      const SizedBox(height: 12),
-
-                      // Badges
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          Chip(
-                            avatar: const Icon(Icons.flash_on, size: 16),
-                            label: const Text('Publie activement'),
-                            backgroundColor: theme.colorScheme.primary
-                                .withOpacity(0.1),
-                            side: BorderSide.none,
-                          ),
-                          Chip(
-                            avatar: const Icon(Icons.send, size: 16),
-                            label: const Text('Envoie rapidement'),
-                            backgroundColor: theme.colorScheme.primary
-                                .withOpacity(0.1),
-                            side: BorderSide.none,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Frais de Protection
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.verified_user,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Frais de Protection acheteurs',
-                                    style: theme.textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Pour tout achat effectué par le biais du bouton Acheter, nous appliquons des frais couvrant notre Protection acheteurs.',
-                                    style: theme.textTheme.bodySmall,
+
+                                  // Bouton Message pour contacter le vendeur
+                                  SecondaryButton(
+                                     text: AppLocalizations.of(context)!.messageButton,
+                                     onPressed: () async {
+                                      final currentUser = ref
+                                          .read(authStateProvider)
+                                          .value;
+                                      if (currentUser == null) return;
+
+                                      final messageRepo = ref.read(
+                                        messageRepositoryProvider,
+                                      );
+                                      String? conversationId = await messageRepo
+                                          .findConversation(
+                                            userId1: currentUser.uid,
+                                            userId2: _product!.sellerId,
+                                            productId: _product!.id,
+                                          );
+
+                                      if (conversationId == null) {
+                                        final authRepo = ref.read(
+                                          authRepositoryProvider,
+                                        );
+                                        final buyer = await authRepo.getUserById(
+                                          currentUser.uid,
+                                        );
+                                        final seller = await authRepo.getUserById(
+                                          _product!.sellerId,
+                                        );
+
+                                        conversationId = await messageRepo
+                                            .createConversation(
+                                              buyerId: buyer.uid,
+                                              sellerId: seller.uid,
+                                              buyerDetails: ParticipantDetails(
+                                                name: buyer.username,
+                                                avatar: buyer.photoUrl,
+                                              ),
+                                              sellerDetails: ParticipantDetails(
+                                                name: seller.username,
+                                                avatar: seller.photoUrl,
+                                              ),
+                                              productId: _product!.id,
+                                              productDetails: ProductDetails(
+                                                title: _product!.title,
+                                                price: _product!.price,
+                                                image:
+                                                    _product!.imageUrls.isNotEmpty
+                                                    ? _product!.imageUrls.first
+                                                    : null,
+                                                sellerId: seller.uid,
+                                              ),
+                                            );
+                                      }
+
+                                      if (context.mounted) {
+                                        context.push('/chat/$conversationId');
+                                      }
+                                    },
+                                    isFullWidth: false,
                                   ),
                                 ],
-                              ),
+                              )
+                            : const SizedBox.shrink(),
+                        const SizedBox(height: 12),
+
+                        // Badges
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            Chip(
+                              avatar: const Icon(Icons.flash_on, size: 16),
+                              label: Text(AppLocalizations.of(context)!.activelyPublishes),
+                              backgroundColor: theme.colorScheme.primary
+                                  .withOpacity(0.1),
+                              side: BorderSide.none,
+                            ),
+                            Chip(
+                              avatar: const Icon(Icons.send, size: 16),
+                              label: Text(AppLocalizations.of(context)!.sendsQuickly),
+                              backgroundColor: theme.colorScheme.primary
+                                  .withOpacity(0.1),
+                              side: BorderSide.none,
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // Frais de Protection
+                      if (!isSeller) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.verified_user,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)!.buyerProtectionTitle,
+                                      style: theme.textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      AppLocalizations.of(context)!.buyerProtectionDescription,
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
                       // Onglets
                       TabBar(
@@ -728,9 +741,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                         labelColor: theme.colorScheme.primary,
                         unselectedLabelColor: theme.textTheme.bodySmall?.color,
                         indicatorColor: theme.colorScheme.primary,
-                        tabs: const [
-                          Tab(text: 'Dressing du membre'),
-                          Tab(text: 'Articles similaires'),
+                        tabs: [
+                          Tab(text: AppLocalizations.of(context)!.membersWardrobe),
+                          Tab(text: AppLocalizations.of(context)!.similarItems),
                         ],
                       ),
                     ],
@@ -771,16 +784,66 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             ),
           ),
 
-          // Menu 3 points (fixe en haut à droite)
+          // Menu 3 points (fixe en haut à droite) - différent selon vendeur/acheteur
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,
             child: CircleAvatar(
               backgroundColor: Colors.black.withOpacity(0.5),
-              child: IconButton(
-                icon: const Icon(Icons.more_horiz, color: Colors.white),
-                onPressed: () {},
-              ),
+              child: isSeller
+                  ? PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_horiz, color: Colors.white),
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'vendu':
+                            _handleMarkAsSold(context, ref, product.id);
+                            break;
+                          case 'reserve':
+                            // TODO: Marquer comme réservé
+                            break;
+                          case 'modifier':
+                            SellBottomSheet.show(context, initialProduct: product);
+                            break;
+                          case 'masquer':
+                            // TODO: Masquer
+                            break;
+                          case 'supprimer':
+                            _handleDeleteProduct(context, ref, product.id);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'vendu',
+                          child: Text(AppLocalizations.of(context)!.markAsSold),
+                        ),
+                        PopupMenuItem(
+                          value: 'reserve',
+                          child: Text(AppLocalizations.of(context)!.markAsReserved),
+                        ),
+                        PopupMenuItem(
+                          value: 'modifier',
+                          child: Text(AppLocalizations.of(context)!.edit),
+                        ),
+                        PopupMenuItem(
+                          value: 'masquer',
+                          child: Text(AppLocalizations.of(context)!.hide),
+                        ),
+                         PopupMenuItem(
+                           value: 'supprimer',
+                           child: Text(
+                             AppLocalizations.of(context)!.deleteProduct,
+                             style: TextStyle(color: theme.colorScheme.error),
+                           ),
+                         ),
+                      ],
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.more_horiz, color: Colors.white),
+                      onPressed: () {
+                        // TODO: menu acheteur (signaler, etc.)
+                      },
+                    ),
             ),
           ),
 
@@ -801,40 +864,61 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                   ),
                 ],
               ),
-              child: Row(
-                children: [
-                  // Bouton "Faire une offre" (action secondaire)
-                  Expanded(
-                    child: SecondaryButton(
-                      text: 'Faire une offre',
-                      onPressed: () {
-                        if (_product != null) {
-                          MakeOfferBottomSheet.show(context, _product!);
-                        }
-                      },
+              child: isSeller
+                  // Vue Vendeur : Booster + Partager
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PrimaryButton(
+                          text: AppLocalizations.of(context)!.boostProduct,
+                          onPressed: () {
+                            // TODO: Implémenter le boost du produit
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        SecondaryButton(
+                          text: AppLocalizations.of(context)!.shareProduct,
+                          icon: Icons.share,
+                          onPressed: () {
+                            // TODO: Implémenter le partage du produit
+                          },
+                        ),
+                      ],
+                    )
+                  // Vue Acheteur : Faire une offre + Acheter
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: SecondaryButton(
+                            text: AppLocalizations.of(context)!.makeOffer,
+                            onPressed: () {
+                              if (_product != null) {
+                                MakeOfferBottomSheet.show(context, _product!);
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: PrimaryButton(
+                            text: AppLocalizations.of(context)!.buyNow,
+                            onPressed: () {
+                              if (_product != null) {
+                                context.push('/payment', extra: _product);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Bouton "Acheter" (action principale)
-                  Expanded(
-                    child: PrimaryButton(
-                      text: 'Acheter',
-                      onPressed: () {
-                        if (_product != null) {
-                          context.push('/payment', extra: _product);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
       ),
     );
   }
+
+
 
   /// Construit une ligne de détail avec label et valeur
   ///
@@ -879,25 +963,26 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
   /// Formate le temps écoulé depuis la création du produit
   ///
-  /// Retourne une chaîne comme "Il y a 2 heures", "Il y a 3 jours", etc.
-  String _formatTimeSince(DateTime dateTime) {
+  /// Retourne une chaîne localisée comme "1 year ago", "Il y a 3 jours", etc.
+  String _formatTimeSince(BuildContext context, DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 365) {
       final years = (difference.inDays / 365).floor();
-      return 'Il y a $years ${years == 1 ? 'an' : 'ans'}';
+      return years == 1 ? l10n.timeAgoYear : l10n.timeAgoYears(years);
     } else if (difference.inDays > 30) {
       final months = (difference.inDays / 30).floor();
-      return 'Il y a $months mois';
+      return l10n.timeAgoMonths(months);
     } else if (difference.inDays > 0) {
-      return 'Il y a ${difference.inDays} ${difference.inDays == 1 ? 'jour' : 'jours'}';
+      return difference.inDays == 1 ? l10n.timeAgoDay : l10n.timeAgoDays(difference.inDays);
     } else if (difference.inHours > 0) {
-      return 'Il y a ${difference.inHours} ${difference.inHours == 1 ? 'heure' : 'heures'}';
+      return difference.inHours == 1 ? l10n.timeAgoHour : l10n.timeAgoHours(difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return 'Il y a ${difference.inMinutes} ${difference.inMinutes == 1 ? 'minute' : 'minutes'}';
+      return difference.inMinutes == 1 ? l10n.timeAgoMinute : l10n.timeAgoMinutes(difference.inMinutes);
     } else {
-      return 'À l\'instant';
+      return l10n.timeAgoJustNow;
     }
   }
 
@@ -916,7 +1001,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
           // Affiche un message si aucun produit n'est disponible
           ? Center(
               child: Text(
-                'Aucun produit disponible',
+                AppLocalizations.of(context)!.noProductsAvailable,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.textTheme.bodySmall?.color,
                 ),
@@ -942,5 +1027,100 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
               },
             ),
     );
+  }
+
+  /// Marque le produit comme vendu
+  Future<void> _handleMarkAsSold(
+    BuildContext context,
+    WidgetRef ref,
+    String productId,
+  ) async {
+    try {
+      await ref.read(productRepositoryProvider).markAsSold(productId);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.productMarkedAsSold),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Rafraîchir les providers pour mettre à jour l'UI partout
+        ref.invalidate(productByIdProvider(productId));
+        ref.invalidate(paginatedProductsProvider);
+        if (_product != null) {
+          ref.invalidate(sellerProductsProvider(_product!.sellerId));
+        }
+        ref.invalidate(allProductsProvider);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString())),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Supprime le produit après confirmation
+  Future<void> _handleDeleteProduct(
+    BuildContext context,
+    WidgetRef ref,
+    String productId,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(AppLocalizations.of(context)!.deleteProductConfirm),
+            content: Text(
+              AppLocalizations.of(context)!.deleteProductConfirmationMessage,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(AppLocalizations.of(context)!.deleteProductBtn, style: const TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(productRepositoryProvider).deleteProduct(productId);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.productDeletedSuccess),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Rafraîchir les providers et quitter la page
+          ref.invalidate(paginatedProductsProvider);
+          if (_product != null) {
+            ref.invalidate(sellerProductsProvider(_product!.sellerId));
+          }
+          ref.invalidate(allProductsProvider);
+          context.pop();
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString())),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }

@@ -28,15 +28,21 @@ import '../widgets/image_picker_grid.dart';
 /// - Sélectionner catégorie, état, prix
 /// - Remplir les attributs dynamiques selon la catégorie
 class SellBottomSheet extends ConsumerStatefulWidget {
-  const SellBottomSheet({super.key});
+  /// Produit initial pour le mode édition (optionnel)
+  final Product? initialProduct;
+
+  const SellBottomSheet({
+    super.key,
+    this.initialProduct,
+  });
 
   /// Affiche le bottom sheet en plein écran
-  static void show(BuildContext context) {
+  static void show(BuildContext context, {Product? initialProduct}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const SellBottomSheet(),
+      builder: (context) => SellBottomSheet(initialProduct: initialProduct),
     );
   }
 
@@ -62,8 +68,8 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
   // ÉTAT DU FORMULAIRE
   // ============================================================
 
-  /// Liste des images sélectionnées par l'utilisateur (1-6 photos)
-  List<File> _selectedImages = [];
+  /// Liste des images (peut contenir des File ou des String URL en mode édition)
+  List<dynamic> _selectedImages = [];
 
   /// Nom de la catégorie sélectionnée (pour affichage)
   String? _selectedCategory;
@@ -92,6 +98,58 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
   // ============================================================
   // CYCLE DE VIE
   // ============================================================
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialisation en mode édition
+    if (widget.initialProduct != null) {
+      final p = widget.initialProduct!;
+
+      _titleController.text = p.title;
+      _descriptionController.text = p.description;
+      _priceController.text = p.price.toString();
+
+      _selectedImages = List<dynamic>.from(p.imageUrls);
+      _selectedCategoryId = p.subcategoryId;
+      _selectedParentCategoryId = p.categoryId;
+
+      // Copier les attributs
+      _attributeValues = Map<String, dynamic>.from(p.attributes);
+
+      // Charger les attributs et le nom de la catégorie
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializeEditMode();
+      });
+    }
+  }
+
+  /// Charge les données nécessaires pour le mode édition (noms, attributs)
+  Future<void> _initializeEditMode() async {
+    if (_selectedCategoryId == null) return;
+
+    try {
+      final l10n = AppLocalizations.of(context)!;
+      // 1. Récupérer le nom de la catégorie
+      final categoryRepo = ref.read(categoryRepositoryProvider);
+      final subcat = await categoryRepo.getSubcategoryById(_selectedCategoryId!);
+
+      setState(() {
+        _selectedCategory = CategoryTranslator.translate(l10n, subcat.id, subcat.name);
+      });
+
+      // 2. Charger les attributs dynamiques
+      if (subcat.attributes.isNotEmpty) {
+        final attributesRequest = await categoryRepo.getAttributesByIds(subcat.attributes);
+        setState(() {
+          _categoryAttributes = attributesRequest;
+        });
+      }
+    } catch (e) {
+      debugPrint('Erreur lors de l\'initialisation du mode édition : $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -751,24 +809,34 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       // Récupérer le service d'upload d'images
       final imageUploadService = ref.read(imageUploadServiceProvider);
 
-      // Uploader toutes les images et récupérer leurs URLs
-      // Le service gère automatiquement :
-      // - La compression des images
-      // - L'organisation dans Storage (products/{userId}/{productId}/image_{index}.jpg)
-      // - Les métadonnées (contentType, uploadedBy, etc.)
+      // Uploader uniquement les nouvelles images (File)
+      // et conserver les URLs des images existantes (String)
       List<String> imageUrls = [];
-      try {
-        imageUrls = await imageUploadService.uploadProductImages(
-          _selectedImages,
-          userId,
-          tempProductId,
-        );
-        debugPrint('✅ Upload terminé: ${imageUrls.length} images');
-      } catch (uploadError) {
-        debugPrint('❌ Erreur upload: $uploadError');
-        throw Exception(
-          'Échec de l\'upload des images: ${uploadError.toString()}',
-        );
+      List<File> newImagesToUpload = [];
+
+      for (var img in _selectedImages) {
+        if (img is String) {
+          imageUrls.add(img);
+        } else if (img is File) {
+          newImagesToUpload.add(img);
+        }
+      }
+
+      if (newImagesToUpload.isNotEmpty) {
+        try {
+          final uploadedUrls = await imageUploadService.uploadProductImages(
+            newImagesToUpload,
+            userId,
+            widget.initialProduct?.id ?? tempProductId,
+          );
+          imageUrls.addAll(uploadedUrls);
+          debugPrint('✅ Upload terminé: ${uploadedUrls.length} nouvelles images');
+        } catch (uploadError) {
+          debugPrint('❌ Erreur upload: $uploadError');
+          throw Exception(
+            'Échec de l\'upload des images: ${uploadError.toString()}',
+          );
+        }
       }
 
       // ============================================================
@@ -790,56 +858,55 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       }
 
       // Créer l'objet Product avec toutes les informations
-      final product = Product(
-        id: '', // Sera généré automatiquement par Firestore
+      final product = (widget.initialProduct ??
+              Product(
+                id: '',
+                title: '',
+                description: '',
+                price: 0,
+                imageUrls: [],
+                condition: condition,
+                sellerId: userId,
+                categoryId: _selectedParentCategoryId!,
+                subcategoryId: _selectedCategoryId!,
+                attributes: {},
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ))
+          .copyWith(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         price: price,
         imageUrls: imageUrls,
         condition: condition,
-        sellerId: userId,
-
-        // IMPORTANT :
-        // - categoryId = catégorie parente (ex: "femme", "homme")
-        // - subcategoryId = sous-catégorie finale (ex: "talon_femme", "chemise_homme")
-        // Ex: Si l'utilisateur choisit Femme > Chaussures > Talons,
-        // categoryId = "femme" et subcategoryId = "talon_femme"
         categoryId: _selectedParentCategoryId!,
         subcategoryId: _selectedCategoryId!,
-        // Attributs dynamiques (Marque, Taille, Couleur, etc.)
-        // selon la catégorie sélectionnée
         attributes: _attributeValues,
-
-        // Dates de création et modification
-        createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-
-        // Valeurs par défaut pour les autres champs
-        isBoosted: false,
-        isSold: false,
-        viewsCount: 0,
-        favoritesCount: 0,
       );
 
       // ============================================================
       // ÉTAPE 4 : ENREGISTRER DANS FIRESTORE
       // ============================================================
-
-      // Récupérer le repository des produits
       final productRepository = ref.read(productRepositoryProvider);
 
-      // Créer le produit dans Firestore
-      // Cette méthode génère automatiquement l'ID et sauvegarde le document
-      final createdProduct = await productRepository.createProduct(product);
+      // Enregistrer dans Firestore
+      if (widget.initialProduct != null) {
+        await productRepository.updateProduct(product);
+      } else {
+        await productRepository.createProduct(product);
+      }
 
       // ============================================================
       // ÉTAPE 5 : RAFRAÎCHIR LA LISTE DES PRODUITS
       // ============================================================
 
-      // Invalider le provider pour recharger les produits
+      // Invalider le provider pour recharger les produits sur Home
       ref.invalidate(paginatedProductsProvider);
-
-      // ============================================================
+      // Invalider la liste globale
+      ref.invalidate(allProductsProvider);
+      // Invalider la liste des annonces du vendeur
+      ref.invalidate(sellerProductsProvider(userId));
       // ÉTAPE 6 : SUCCÈS - AFFICHER UN MESSAGE ET FERMER
       // ============================================================
 

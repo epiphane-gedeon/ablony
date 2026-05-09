@@ -829,48 +829,467 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsTab => 'Notifications';
 
   @override
-  String get noMessages => 'Pas encore de messages';
+  String get noMessages => 'No messages';
 
   @override
-  String get noNotifications => 'Pas encore de notifications';
+  String get noNotifications => 'No notifications yet';
 
   @override
-  String get makeOfferTitle => 'Faire une offre';
+  String get makeOfferTitle => 'Make an offer';
 
   @override
   String itemPrice(String price) {
-    return 'prix de l\'article : $price';
+    return 'Item price: $price';
   }
 
   @override
   String reductionLabel(int percent) {
-    return '$percent% de réduction';
+    return '$percent% off';
   }
 
   @override
-  String get otherOffer => 'Autre';
+  String get otherOffer => 'Other';
 
   @override
-  String get otherOfferHint => 'Propose un prix';
+  String get otherOfferHint => 'Suggest a price';
 
   @override
   String proposeButton(String amount) {
-    return 'Proposer $amount';
+    return 'Propose $amount';
   }
 
   @override
-  String get proposeButtonSimple => 'Proposer';
+  String get proposeButtonSimple => 'Propose';
 
   @override
   String offerLimitError(String minAmount, int limit) {
-    return 'Ton offre doit être de $minAmount minimum (-$limit%)';
+    return 'Your offer must be at least $minAmount (-$limit%)';
   }
 
   @override
   String suggestionsRemaining(int count) {
-    return '$count propositions restante(s) pour aujourd\'hui';
+    return '$count suggestion(s) remaining today';
   }
 
   @override
-  String get whyLink => 'Pourquoi ?';
+  String get whyLink => 'Why?';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get profileInfo => 'Profile information';
+
+  @override
+  String get accountSettings => 'Account settings';
+
+  @override
+  String get payments => 'Payments';
+
+  @override
+  String get shipping => 'Shipping';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get mobile => 'Mobile';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get appLanguage => 'App language';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get darkMode => 'Dark mode';
+
+  @override
+  String get privacySettings => 'Privacy settings';
+
+  @override
+  String get logout => 'Log out';
+
+  @override
+  String appVersion(String version) {
+    return 'App version: $version';
+  }
+
+  @override
+  String get chooseLanguage => 'Choose language';
+
+  @override
+  String get cancel => 'CANCEL';
+
+  @override
+  String get logoutConfirm => 'Are you sure you want to log out?';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get inviteFriends => 'Invite friends';
+
+  @override
+  String get myWallet => 'My wallet';
+
+  @override
+  String get salesAndPurchases => 'Sales and purchases';
+
+  @override
+  String get promotionTools => 'Promotion tools';
+
+  @override
+  String get personalization => 'Personalization';
+
+  @override
+  String get bundleDiscount => 'Bundle discount';
+
+  @override
+  String get vacationMode => 'Vacation mode';
+
+  @override
+  String get donations => 'Donations';
+
+  @override
+  String get ablonyGuide => 'Your Ablony guide';
+
+  @override
+  String get helpCenter => 'Help center';
+
+  @override
+  String get cookieSettings => 'Cookie settings';
+
+  @override
+  String get aboutUs => 'About us';
+
+  @override
+  String get legalInfo => 'Legal information';
+
+  @override
+  String get viewMyListings => 'View my listings';
+
+  @override
+  String get productNotFound => 'Product not found';
+
+  @override
+  String get clickToTranslate => 'Click here to translate';
+
+  @override
+  String get activelyPublishes => 'Actively publishes';
+
+  @override
+  String get sendsQuickly => 'Sends quickly';
+
+  @override
+  String get markAsSold => 'Mark as sold';
+
+  @override
+  String get markAsReserved => 'Mark as reserved';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get hide => 'Hide';
+
+  @override
+  String get productMarkedAsSold => 'Product marked as sold';
+
+  @override
+  String get deleteProductConfirm => 'Delete product?';
+
+  @override
+  String get deleteProductBtn => 'DELETE';
+
+  @override
+  String get productDeletedSuccess => 'Product deleted successfully';
+
+  @override
+  String errorGenericMsg(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get walletConfig => 'Wallet configuration';
+
+  @override
+  String get enterFirstName => 'Please enter your first name';
+
+  @override
+  String get enterLastName => 'Please enter your last name';
+
+  @override
+  String get selectNationality => 'Please select a nationality';
+
+  @override
+  String get selectBirthDate => 'Please select your birth date';
+
+  @override
+  String get walletActivatedSuccess => 'Wallet successfully activated!';
+
+  @override
+  String get helpPageComingSoon => 'Help page coming soon';
+
+  @override
+  String get topUpComingSoon => 'Top-up feature coming soon';
+
+  @override
+  String get withdrawalComingSoon => 'Withdrawal feature coming soon';
+
+  @override
+  String get activatedStr => 'Activated';
+
+  @override
+  String get deactivatedStr => 'Deactivated';
+
+  @override
+  String get listings => 'Listings';
+
+  @override
+  String get reviews => 'Reviews';
+
+  @override
+  String get aboutTab => 'About';
+
+  @override
+  String get addItems => 'Add items...';
+
+  @override
+  String get verifiedInfo => 'Verified info:';
+
+  @override
+  String get pendingAmount => 'Pending Amount';
+
+  @override
+  String get pendingAmountInfo =>
+      'When a buyer validates a purchase, the amount is put on hold until the reception and confirmation of the product.';
+
+  @override
+  String get learnMore => 'Learn more';
+
+  @override
+  String get availableAmount => 'Available Amount';
+
+  @override
+  String get activateWallet => 'Activate Wallet';
+
+  @override
+  String get topUpWallet => 'Top up';
+
+  @override
+  String get withdrawWallet => 'Withdraw';
+
+  @override
+  String get accountHolderFirstName => 'Account holder\'s first name(s)';
+
+  @override
+  String get accountHolderLastName => 'Account holder\'s last name';
+
+  @override
+  String get nationality => 'Nationality';
+
+  @override
+  String get selectNationalityPlaceholder => 'Select a nationality';
+
+  @override
+  String get birthDate => 'Birth Date';
+
+  @override
+  String get productDescriptionTitle => 'Description';
+
+  @override
+  String get readMore => 'more';
+
+  @override
+  String get readLess => 'less';
+
+  @override
+  String get productCategory => 'Category';
+
+  @override
+  String get productSize => 'Size';
+
+  @override
+  String get productCondition => 'Condition';
+
+  @override
+  String get productColor => 'Color';
+
+  @override
+  String get productAddedDate => 'Added';
+
+  @override
+  String get notSpecified => 'Not specified';
+
+  @override
+  String get membersWardrobe => 'Member\'s wardrobe';
+
+  @override
+  String get similarItems => 'Similar items';
+
+  @override
+  String get boostProduct => 'Boost';
+
+  @override
+  String get shareProduct => 'Share';
+
+  @override
+  String get priceIncl => 'incl.';
+
+  @override
+  String get subtotalForBuyer => '(buyer subtotal)';
+
+  @override
+  String get deleteProductConfirmationMessage =>
+      'Are you sure you want to delete this product? This action is irreversible.';
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get priceFilterDevelopment => 'Price filter in development';
+
+  @override
+  String get noReviewsSubtitle =>
+      'Ask the person you completed a successful transaction with to leave you a review.';
+
+  @override
+  String get messageButton => 'Message';
+
+  @override
+  String get buyerProtectionTitle => 'Buyer protection fees';
+
+  @override
+  String get buyerProtectionDescription =>
+      'For any purchase made through the Buy button, we apply fees covering our Buyer Protection.';
+
+  @override
+  String get deleteProduct => 'Delete';
+
+  @override
+  String get makeOffer => 'Make an offer';
+
+  @override
+  String get buyNow => 'Buy';
+
+  @override
+  String get noProductsAvailable => 'No products available';
+
+  @override
+  String get timeAgoYear => '1 year ago';
+
+  @override
+  String timeAgoYears(int count) {
+    return '$count years ago';
+  }
+
+  @override
+  String timeAgoMonths(int count) {
+    return '$count months ago';
+  }
+
+  @override
+  String get timeAgoDay => '1 day ago';
+
+  @override
+  String timeAgoDays(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String get timeAgoHour => '1 hour ago';
+
+  @override
+  String timeAgoHours(int count) {
+    return '$count hours ago';
+  }
+
+  @override
+  String get timeAgoMinute => '1 minute ago';
+
+  @override
+  String timeAgoMinutes(int count) {
+    return '$count minutes ago';
+  }
+
+  @override
+  String get timeAgoJustNow => 'Just now';
+
+  @override
+  String get followButton => 'Follow';
+
+  @override
+  String followComingSoon(String username) {
+    return 'Following $username coming soon!';
+  }
+
+  @override
+  String get sendMessagePlaceholder => 'Send a message';
+
+  @override
+  String get offerAcceptedSuccess => 'Offer accepted!';
+
+  @override
+  String get offerRejectedSuccess => 'Offer rejected';
+
+  @override
+  String get chatTitle => 'Chat';
+
+  @override
+  String get conversationNotFound => 'Conversation not found';
+
+  @override
+  String chatWelcomeMessage(String username) {
+    return 'Hi! I\'m $username';
+  }
+
+  @override
+  String memberSinceYear(int year) {
+    return 'Member since $year';
+  }
+
+  @override
+  String get systemMessage => 'System message';
+
+  @override
+  String heyUserMadeOffer(String name) {
+    return 'Hey, $name made you an offer';
+  }
+
+  @override
+  String get defaultUser => 'a user';
+
+  @override
+  String get offerStatusAccepted => 'Accepted';
+
+  @override
+  String get offerStatusRejected => 'Rejected';
+
+  @override
+  String get offerStatusPending => 'Pending';
+
+  @override
+  String get acceptButton => 'Accept';
+
+  @override
+  String get rejectButton => 'Reject';
+
+  @override
+  String get counterOffer => 'Counter offer';
+
+  @override
+  String get errorLoading => 'Error loading';
+
+  @override
+  String get pleaseLogin => 'Please log in';
 }

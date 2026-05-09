@@ -7,6 +7,8 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/providers/message_providers.dart';
 import '../../domain/models/conversation.dart';
+import '../../domain/models/message_type.dart';
+import '../../domain/models/last_message.dart';
 
 /// Page de messages
 ///
@@ -50,7 +52,7 @@ class MessagesPage extends ConsumerWidget {
         body: currentUserAsync.when(
           data: (user) {
             if (user == null) {
-              return const Center(child: Text('Veuillez vous connecter'));
+              return Center(child: Text(l10n.pleaseLogin));
             }
 
             return TabBarView(
@@ -68,7 +70,7 @@ class MessagesPage extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Erreur : $error')),
+          error: (error, stack) => Center(child: Text(l10n.errorGenericMsg(error.toString()))),
         ),
       ),
     );
@@ -80,6 +82,7 @@ class MessagesPage extends ConsumerWidget {
     ThemeData theme,
     firebase_auth.User user,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final conversationsAsync = ref.watch(conversationsStreamProvider(user.uid));
 
     return conversationsAsync.when(
@@ -88,7 +91,7 @@ class MessagesPage extends ConsumerWidget {
           return _buildEmptyState(
             context,
             icon: Icons.chat_bubble_outline,
-            message: 'Aucun message',
+            message: l10n.noMessages,
           );
         }
 
@@ -109,7 +112,7 @@ class MessagesPage extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) =>
-          Center(child: Text('Erreur de chargement : $error')),
+          Center(child: Text(l10n.errorLoading + ': $error')),
     );
   }
 
@@ -119,14 +122,20 @@ class MessagesPage extends ConsumerWidget {
     Conversation conversation,
     String currentUserId,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final otherParticipant = conversation.getOtherParticipantDetails(
       currentUserId,
     );
     final unreadCount = conversation.getUnreadCount(currentUserId);
     final hasUnread = unreadCount > 0;
 
-    // Configure la locale française pour timeago
-    timeago.setLocaleMessages('fr', timeago.FrMessages());
+    // Configure la locale pour timeago
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'fr') {
+      timeago.setLocaleMessages('fr', timeago.FrMessages());
+    } else {
+      timeago.setLocaleMessages('en', timeago.EnMessages());
+    }
 
     return Container(
       color: hasUnread
@@ -149,7 +158,7 @@ class MessagesPage extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                otherParticipant?.name ?? 'Utilisateur',
+                otherParticipant?.name ?? l10n.defaultUser,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: hasUnread ? FontWeight.bold : FontWeight.w600,
                 ),
@@ -160,7 +169,7 @@ class MessagesPage extends ConsumerWidget {
               Text(
                 timeago.format(
                   conversation.lastMessage!.timestamp,
-                  locale: 'fr',
+                  locale: locale,
                 ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
@@ -176,7 +185,7 @@ class MessagesPage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    conversation.lastMessage?.text ?? '',
+                    _getLastMessageText(context, conversation.lastMessage),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -256,5 +265,22 @@ class MessagesPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _getLastMessageText(BuildContext context, LastMessage? lastMessage) {
+    if (lastMessage == null) return '';
+    final l10n = AppLocalizations.of(context)!;
+
+    if (lastMessage.type == MessageType.offer) {
+      // Tente d'extraire le montant du texte (format: "2000.00 € En attente")
+      final amount = lastMessage.text.split(' ').first;
+      return '$amount € ${l10n.offerStatusPending}';
+    } else if (lastMessage.type == MessageType.counterOffer) {
+      // Format: "2000.00 € Contre-offre"
+      final amount = lastMessage.text.split(' ').first;
+      return '$amount € ${l10n.counterOffer}';
+    }
+
+    return lastMessage.text;
   }
 }

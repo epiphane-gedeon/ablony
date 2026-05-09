@@ -5,27 +5,13 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Widget pour sélectionner et afficher 1-6 photos de produit.
-///
-/// Affiche une grille avec :
-/// - Un bouton "Ajouter photos" si moins de 6 photos
-/// - Les photos sélectionnées avec un bouton de suppression
-/// - Support du drag & drop pour réorganiser (TODO: future enhancement)
-///
-/// **Exemple d'utilisation :**
-/// ```dart
-/// ImagePickerGrid(
-///   images: selectedImages,
-///   onImagesChanged: (newImages) {
-///     setState(() => selectedImages = newImages);
-///   },
-/// )
-/// ```
+/// Supporte à la fois des fichiers local (File) et des URLs (String).
 class ImagePickerGrid extends StatelessWidget {
-  /// Liste des images sélectionnées
-  final List<File> images;
+  /// Liste des images (peut être File ou String URL)
+  final List<dynamic> images;
 
   /// Callback appelé quand les images changent
-  final ValueChanged<List<File>> onImagesChanged;
+  final ValueChanged<List<dynamic>> onImagesChanged;
 
   /// Nombre maximum d'images (par défaut 6)
   final int maxImages;
@@ -42,11 +28,9 @@ class ImagePickerGrid extends StatelessWidget {
     final picker = ImagePicker();
     
     try {
-      // Calculer combien d'images on peut encore ajouter
       final remainingSlots = maxImages - images.length;
       
       if (remainingSlots <= 0) {
-        // Afficher un message si déjà au max
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -58,7 +42,6 @@ class ImagePickerGrid extends StatelessWidget {
         return;
       }
 
-      // Sélectionner plusieurs images
       final pickedFiles = await picker.pickMultiImage(
         imageQuality: 85,
         maxWidth: 1920,
@@ -66,7 +49,6 @@ class ImagePickerGrid extends StatelessWidget {
       );
 
       if (pickedFiles.isNotEmpty) {
-        // Limiter au nombre de slots restants
         final filesToAdd = pickedFiles
             .take(remainingSlots)
             .map((xFile) => File(xFile.path))
@@ -81,7 +63,7 @@ class ImagePickerGrid extends StatelessWidget {
 
   /// Supprime une image à l'index donné
   void _removeImage(int index) {
-    final newImages = List<File>.from(images);
+    final newImages = List<dynamic>.from(images);
     newImages.removeAt(index);
     onImagesChanged(newImages);
   }
@@ -97,7 +79,6 @@ class ImagePickerGrid extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Grille d'images
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -109,12 +90,9 @@ class ImagePickerGrid extends StatelessWidget {
             ),
             itemCount: images.length + (canAddMore ? 1 : 0),
             itemBuilder: (context, index) {
-              // Bouton "Ajouter photos"
               if (index == images.length) {
                 return _buildAddButton(context, l10n);
               }
-
-              // Image existante
               return _buildImageTile(context, index);
             },
           ),
@@ -123,7 +101,6 @@ class ImagePickerGrid extends StatelessWidget {
     );
   }
 
-  /// Construit le bouton "Ajouter photos"
   Widget _buildAddButton(BuildContext context, AppLocalizations l10n) {
     final theme = Theme.of(context);
     final isFirst = images.isEmpty;
@@ -164,23 +141,28 @@ class ImagePickerGrid extends StatelessWidget {
     );
   }
 
-  /// Construit une tuile d'image avec bouton de suppression
   Widget _buildImageTile(BuildContext context, int index) {
     final theme = Theme.of(context);
+    final image = images[index];
 
     return Stack(
       children: [
-        // Image
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.file(
-            images[index],
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
+          child: image is File
+              ? Image.file(
+                  image,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                )
+              : Image.network(
+                  image as String,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
         ),
-        // Bouton de suppression
         Positioned(
           top: 4,
           right: 4,
@@ -200,7 +182,6 @@ class ImagePickerGrid extends StatelessWidget {
             ),
           ),
         ),
-        // Badge numéro (1ère image)
         if (index == 0)
           Positioned(
             bottom: 4,

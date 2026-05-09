@@ -14,7 +14,9 @@ import '../../features/search/presentation/pages/searching_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
 import '../../features/messages/presentation/pages/chat_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/public_profile_page.dart';
 import '../../features/profile/presentation/pages/user_listings_page.dart';
+import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/product_fav/presentation/pages/favorites_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
@@ -432,6 +434,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                     name: 'my-listings',
                     builder: (context, state) => const UserListingsPage(),
                   ),
+                  // Sous-route : Paramètres
+                  GoRoute(
+                    path: 'settings',
+                    name: 'settings',
+                    builder: (context, state) => const SettingsPage(),
+                  ),
                 ],
               ),
             ],
@@ -469,8 +477,24 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/search-results',
         name: 'search-results',
         builder: (context, state) {
-          final query = state.extra as String;
-          return SearchResultsPage(query: query);
+          String query = '';
+          String? categoryId;
+          String? categoryName;
+
+          if (state.extra is String) {
+            query = state.extra as String;
+          } else if (state.extra is Map<String, dynamic>) {
+            final params = state.extra as Map<String, dynamic>;
+            query = params['query'] ?? '';
+            categoryId = params['categoryId'];
+            categoryName = params['categoryName'];
+          }
+
+          return SearchResultsPage(
+            query: query,
+            categoryId: categoryId,
+            categoryName: categoryName,
+          );
         },
       ),
 
@@ -550,11 +574,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ============================================================
+      // ROUTE : PROFIL PUBLIC
+      // ============================================================
+      /// Page de profil public d'un utilisateur
+      GoRoute(
+        path: '/profile/:userId',
+        name: 'public_profile',
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+          return PublicProfilePage(userId: userId);
+        },
+      ),
+
+      // ============================================================
       // TODO: AUTRES ROUTES
       // ============================================================
       // - /search : Page de recherche
       // - /messages : Page des conversations
-      // - /profile/:userId : Page de profil utilisateur
       // - /product/add : Page d'ajout de produit
       // - /settings : Page des paramètres
       // - /notifications : Page des notifications

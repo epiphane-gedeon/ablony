@@ -19,8 +19,15 @@ import '../../../product/presentation/providers/product_provider.dart';
 /// Affiche les produits correspondant à la requête de recherche
 class SearchResultsPage extends ConsumerStatefulWidget {
   final String query;
+  final String? categoryId;
+  final String? categoryName;
 
-  const SearchResultsPage({super.key, required this.query});
+  const SearchResultsPage({
+    super.key,
+    required this.query,
+    this.categoryId,
+    this.categoryName,
+  });
 
   @override
   ConsumerState<SearchResultsPage> createState() => _SearchResultsPageState();
@@ -48,6 +55,8 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   @override
   void initState() {
     super.initState();
+    _selectedCategoryId = widget.categoryId;
+    _selectedCategoryName = widget.categoryName;
     _performSearch();
   }
 
@@ -1275,16 +1284,19 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   void _showPriceFilter() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Prix'),
-        content: const Text('Filtre de prix en cours de développement'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.filterPrice),
+          content: Text(l10n.priceFilterDevelopment),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.ok),
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -12,6 +12,7 @@ import '../../application/services/messaging_service.dart';
 import '../../domain/models/message.dart';
 import '../../domain/models/message_type.dart';
 import '../../domain/models/conversation.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   final String conversationId;
@@ -91,7 +92,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString()))));
       }
     }
   }
@@ -108,13 +109,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Offre acceptée !')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.offerAcceptedSuccess)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString()))));
       }
     }
   }
@@ -131,13 +132,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Offre refusée')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.offerRejectedSuccess)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString()))));
       }
     }
   }
@@ -158,7 +159,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString()))));
       }
     }
   }
@@ -177,7 +178,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString()))));
       }
     }
   }
@@ -272,7 +273,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     width: double.infinity,
                     height: 42,
                     child: SecondaryButton(
-                      text: "Faire une offre",
+                      text: AppLocalizations.of(context)!.makeOffer,
                       fontSize: 14,
                       borderRadius: 8,
                       padding: EdgeInsets.zero,
@@ -286,7 +287,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                         child: SizedBox(
                           height: 42,
                           child: PrimaryButton(
-                            text: "Acheter",
+                            text: AppLocalizations.of(context)!.buyNow,
                             fontSize: 14,
                             borderRadius: 8,
                             padding: EdgeInsets.zero,
@@ -299,7 +300,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                         child: SizedBox(
                           height: 42,
                           child: SecondaryButton(
-                            text: "Faire une offre",
+                            text: AppLocalizations.of(context)!.makeOffer,
                             fontSize: 14,
                             borderRadius: 8,
                             padding: EdgeInsets.zero,
@@ -323,8 +324,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
     if (currentUser == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Chat')),
-        body: const Center(child: Text('Utilisateur non connecté')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.chatTitle)),
+        body: Center(child: Text(AppLocalizations.of(context)!.userNotConnected)),
       );
     }
 
@@ -339,8 +340,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       data: (conversation) {
         if (conversation == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Chat')),
-            body: const Center(child: Text('Conversation introuvable')),
+            appBar: AppBar(title: Text(AppLocalizations.of(context)!.chatTitle)),
+            body: Center(child: Text(AppLocalizations.of(context)!.conversationNotFound)),
           );
         }
 
@@ -370,7 +371,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  otherParticipant?.name ?? 'Utilisateur',
+                  otherParticipant?.name ?? AppLocalizations.of(context)!.defaultUser,
                   style: theme.textTheme.titleMedium,
                 ),
               ],
@@ -431,12 +432,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         );
       },
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Chat')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.chatTitle)),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (error, stack) => Scaffold(
-        appBar: AppBar(title: const Text('Chat')),
-        body: Center(child: Text('Erreur : $error')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.chatTitle)),
+        body: Center(child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString()))),
       ),
     );
   }
@@ -487,7 +488,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Bonjour ! Moi c\'est ${otherUser.username}',
+                      AppLocalizations.of(context)!.chatWelcomeMessage(otherUser.username),
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 4),
@@ -497,7 +498,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '🕐 Membre depuis ${otherUser.createdAt.year}',
+                      '🕐 ${AppLocalizations.of(context)!.memberSinceYear(otherUser.createdAt.year)}',
                       style: theme.textTheme.bodyMedium,
                     ),
                   ],
@@ -528,10 +529,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         return MessageBubble(
           isMe: !isMe,
           text: message.userInfo != null
-              ? 'Bonjour ! Moi c\'est ${message.userInfo!.name}\n'
+              ? '${AppLocalizations.of(context)!.chatWelcomeMessage(message.userInfo!.name)}\n'
                     '${message.userInfo!.country != null ? '📍 ${message.userInfo!.country}\n' : ''}'
-                    '${message.userInfo!.memberSince != null ? '🕐 Membre depuis ${message.userInfo!.memberSince!.year}' : ''}'
-              : 'Message système',
+                    '${message.userInfo!.memberSince != null ? '🕐 ${AppLocalizations.of(context)!.memberSinceYear(message.userInfo!.memberSince!.year)}' : ''}'
+              : AppLocalizations.of(context)!.systemMessage,
         );
 
       case MessageType.offer:
@@ -587,7 +588,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             Expanded(
               child: Input(
                 controller: _messageController,
-                placeholder: 'Envoyer un message',
+                placeholder: AppLocalizations.of(context)!.sendMessagePlaceholder,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 10,

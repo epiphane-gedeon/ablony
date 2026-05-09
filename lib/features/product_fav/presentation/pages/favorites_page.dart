@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/product_card.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../providers/product_fav_provider.dart';
 
 /// Page affichant les favoris de l'utilisateur avec recherche locale
@@ -59,7 +60,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                   });
                 },
               )
-            : const Text('Favoris'),
+            : Text(AppLocalizations.of(context)!.favorites),
         centerTitle: !_isSearching,
         actions: [
           if (_isSearching)
@@ -138,7 +139,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Erreur: $error')),
+        error: (error, stack) => Center(child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString()))),
       ),
     );
   }
