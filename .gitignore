@@ -54,3 +54,8 @@ tools/package-lock.json
 
 # Generated Firebase import script
 tools/import_to_firestore.js
+
+functions/node_modules/
+functions/.env
+
+*/.env
