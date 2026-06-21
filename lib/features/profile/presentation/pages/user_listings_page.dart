@@ -63,6 +63,8 @@ class UserListingsPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return productsAsync.when(
+      skipLoadingOnReload: true,
+      skipError: true,
       data: (products) {
         if (products.isEmpty) {
           return Center(

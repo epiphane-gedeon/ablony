@@ -86,6 +86,8 @@ class MessagesPage extends ConsumerWidget {
     final conversationsAsync = ref.watch(conversationsStreamProvider(user.uid));
 
     return conversationsAsync.when(
+      skipLoadingOnReload: true,
+      skipError: true,
       data: (conversations) {
         if (conversations.isEmpty) {
           return _buildEmptyState(

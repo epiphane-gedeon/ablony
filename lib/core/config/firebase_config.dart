@@ -4,7 +4,9 @@ import 'package:flutter/foundation.dart';
 class FirebaseConfig {
   /// Indique si on utilise les émulateurs Firebase
   /// true en mode debug, false en production
-  static bool get useEmulators => kDebugMode;
+
+  // static bool get useEmulators => kDebugMode;
+  static bool get useEmulators => false;
 
   /// Host pour les émulateurs
   /// - Android Emulator: '10.0.2.2' (pointe vers localhost de l'hôte)

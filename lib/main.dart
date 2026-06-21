@@ -24,30 +24,33 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  if (FirebaseConfig.useEmulators) {
-    try {
-      final host = FirebaseConfig.emulatorHost;
+  FirebaseConfig.printConfig(); 
 
-      await FirebaseAuth.instance.useAuthEmulator(
-        host,
-        FirebaseConfig.authPort,
-      );
 
-      FirebaseFirestore.instance.useFirestoreEmulator(
-        host,
-        FirebaseConfig.firestorePort,
-      );
+  // if (FirebaseConfig.useEmulators) {
+  //   try {
+  //     final host = FirebaseConfig.emulatorHost;
 
-      await FirebaseStorage.instance.useStorageEmulator(
-        host,
-        FirebaseConfig.storagePort,
-      );
+  //     await FirebaseAuth.instance.useAuthEmulator(
+  //       host,
+  //       FirebaseConfig.authPort,
+  //     );
 
-      FirebaseConfig.printConfig();
-    } catch (e) {
-      debugPrint('⚠️ Erreur configuration émulateurs: $e');
-    }
-  }
+  //     FirebaseFirestore.instance.useFirestoreEmulator(
+  //       host,
+  //       FirebaseConfig.firestorePort,
+  //     );
+
+  //     await FirebaseStorage.instance.useStorageEmulator(
+  //       host,
+  //       FirebaseConfig.storagePort,
+  //     );
+
+  //     FirebaseConfig.printConfig();
+  //   } catch (e) {
+  //     debugPrint('⚠️ Erreur configuration émulateurs: $e');
+  //   }
+  // }
 
   runApp(const ProviderScope(child: MainApp()));
 }
