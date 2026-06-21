@@ -78,7 +78,12 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
       await Future.delayed(const Duration(seconds: 1)); // Simulation
 
       if (mounted) {
-        context.pop(_selectedMethod);
+        context.pop({
+          'method': _selectedMethod,
+          'phoneNumber': _selectedMethod == 'tmoney'
+              ? _tmoneyPhoneController.text
+              : (_selectedMethod == 'flooz' ? _floozPhoneController.text : null),
+        });
       }
     } catch (e) {
       if (mounted) {

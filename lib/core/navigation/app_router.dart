@@ -519,8 +519,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/payment',
         name: 'payment',
         builder: (context, state) {
-          final product = state.extra as Product;
-          return PaymentPage(product: product);
+          if (state.extra is Product) {
+            return PaymentPage(product: state.extra as Product);
+          } else if (state.extra is Map<String, dynamic>) {
+            final extra = state.extra as Map<String, dynamic>;
+            return PaymentPage(
+              product: extra['product'] as Product?,
+              amount: extra['amount'] as double?,
+            );
+          }
+          return const Scaffold(
+            body: Center(child: Text('Erreur de navigation')),
+          );
         },
       ),
 

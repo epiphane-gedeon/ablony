@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/presentation/dynamic_ui/dynamic_selection_view.dart';
 import '../../../../core/presentation/pages/selection_screen.dart';
@@ -137,14 +138,7 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                   Expanded(
                     child: PrimaryButton(
                       text: AppLocalizations.of(context)!.topUpWallet,
-                      onPressed: () {
-                        // TODO: Implémenter la recharge
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(AppLocalizations.of(context)!.topUpComingSoon),
-                          ),
-                        );
-                      },
+                      onPressed: () => _showTopUpDialog(context),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -176,6 +170,62 @@ class _WalletPageState extends ConsumerState<WalletPage> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (context) => const _WalletSetupForm()));
+  }
+
+  void _showTopUpDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recharger le portefeuille'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Saisissez le montant à recharger (Min: 200 FCFA) :'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                suffixText: 'FCFA',
+                hintText: 'Ex: 5000',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () {
+              final amountStr = controller.text.trim();
+              if (amountStr.isEmpty) return;
+              final amount = double.tryParse(amountStr);
+              if (amount == null || amount < 200) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Veuillez entrer un montant valide supérieur ou égal à 200 FCFA'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              Navigator.of(context).pop(); // Fermer le dialogue
+              // Rediriger vers la page de paiement avec les paramètres de recharge
+              context.push('/payment', extra: {
+                'amount': amount,
+                'product': null,
+              });
+            },
+            child: const Text('Valider'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
