@@ -202,7 +202,7 @@ class MessageRepository {
 
     // Mettre à jour le dernier message
     final lastMessage = LastMessage(
-      text: '${offer.amount.toStringAsFixed(2)} € En attente',
+      text: '${offer.amount.toStringAsFixed(2)} FCFA En attente',
       senderId: senderId,
       timestamp: now,
       type: MessageType.offer,
@@ -253,7 +253,7 @@ class MessageRepository {
         .add(message.toFirestore());
 
     final lastMessage = LastMessage(
-      text: '${counterOffer.amount.toStringAsFixed(2)} € Contre-offre',
+      text: '${counterOffer.amount.toStringAsFixed(2)} FCFA Contre-offre',
       senderId: senderId,
       timestamp: now,
       type: MessageType.counterOffer,
@@ -304,6 +304,56 @@ class MessageRepository {
       senderId: senderId,
       timestamp: now,
       type: MessageType.text,
+    );
+
+    await updateLastMessage(
+      conversationId: conversationId,
+      lastMessage: lastMessage,
+    );
+
+    final conversation = await getConversation(conversationId);
+    if (conversation != null) {
+      final currentUnread = conversation.unreadCount[receiverId] ?? 0;
+      await updateUnreadCount(
+        conversationId: conversationId,
+        userId: receiverId,
+        count: currentUnread + 1,
+      );
+    }
+  }
+
+  /// Envoie une photo (déjà uploadée sur Storage, [imageUrl] = son URL de
+  /// téléchargement)
+  Future<void> sendImageMessage({
+    required String conversationId,
+    required String senderId,
+    required String receiverId,
+    required String imageUrl,
+    String? caption,
+  }) async {
+    final now = DateTime.now();
+
+    final message = Message(
+      id: '',
+      senderId: senderId,
+      type: MessageType.image,
+      timestamp: now,
+      read: false,
+      imageUrl: imageUrl,
+      text: caption,
+    );
+
+    await _firestore
+        .collection('conversations')
+        .doc(conversationId)
+        .collection('messages')
+        .add(message.toFirestore());
+
+    final lastMessage = LastMessage(
+      text: caption != null && caption.isNotEmpty ? '📷 $caption' : '📷',
+      senderId: senderId,
+      timestamp: now,
+      type: MessageType.image,
     );
 
     await updateLastMessage(

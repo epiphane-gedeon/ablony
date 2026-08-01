@@ -44,6 +44,20 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
               Navigator.of(context).pop(false);
             }
           },
+          onNavigationRequest: (NavigationRequest request) {
+            final url = request.url;
+            debugPrint('[WebView] Navigation détectée : $url');
+            if (url.contains('success') || url.contains('completed') || url.contains('callback')) {
+              debugPrint('[WebView] Succès détecté via URL');
+              Navigator.of(context).pop(true);
+              return NavigationDecision.prevent;
+            } else if (url.contains('cancel') || url.contains('failed') || url.contains('error')) {
+              debugPrint('[WebView] Annulation/Échec détecté via URL');
+              Navigator.of(context).pop(false);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
           onWebResourceError: (WebResourceError error) {
             debugPrint('Web Resource Error: ${error.description}');
           },

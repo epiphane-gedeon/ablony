@@ -44,32 +44,150 @@ service cloud.firestore {
         && request.resource.data.username.size() <= 30
         && request.resource.data.acceptedTerms == true;
       
-      // Mise à jour : Uniquement le propriétaire peut modifier son profil
-      // Empêche la modification des champs sensibles
-      allow update: if isOwner(userId)
-        && request.resource.data.uid == resource.data.uid
-        && request.resource.data.email == resource.data.email
-        && request.resource.data.authProvider == resource.data.authProvider
-        && request.resource.data.createdAt == resource.data.createdAt
-        // Validation du wallet si présent
-        && (!request.resource.data.keys().hasAny(['wallet']) 
-          || (request.resource.data.wallet is map
-            && request.resource.data.wallet.keys().hasAll(['firstName', 'lastName', 'nationality', 'birthDate', 'availableAmount', 'pendingAmount', 'isActivated'])
-            && request.resource.data.wallet.firstName is string
-            && request.resource.data.wallet.lastName is string
-            && request.resource.data.wallet.nationality is string
-            && request.resource.data.wallet.availableAmount is int
-            && request.resource.data.wallet.pendingAmount is int
-            && request.resource.data.wallet.isActivated is bool
-            // Une fois activé, le wallet ne peut pas être désactivé
-            && (!resource.data.keys().hasAny(['wallet']) 
-              || !resource.data.wallet.isActivated 
-              || request.resource.data.wallet.isActivated == true)
-          ));
-      
+      // Mise à jour :
+      // 1) le propriétaire peut modifier son profil (champs sensibles protégés)
+      // 2) tout utilisateur authentifié peut uniquement incrémenter/décrémenter
+      //    followersCount de 1 (lorsqu'il suit/ne suit plus ce profil)
+      allow update: if (
+          isOwner(userId)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.email == resource.data.email
+          && request.resource.data.authProvider == resource.data.authProvider
+          && request.resource.data.createdAt == resource.data.createdAt
+          // Validation du wallet si présent
+          && (!request.resource.data.keys().hasAny(['wallet'])
+            || (request.resource.data.wallet is map
+              && request.resource.data.wallet.keys().hasAll(['firstName', 'lastName', 'nationality', 'birthDate', 'availableAmount', 'pendingAmount', 'isActivated'])
+              && request.resource.data.wallet.firstName is string
+              && request.resource.data.wallet.lastName is string
+              && request.resource.data.wallet.nationality is string
+              && request.resource.data.wallet.availableAmount is int
+              && request.resource.data.wallet.pendingAmount is int
+              && request.resource.data.wallet.isActivated is bool
+              // Une fois activé, le wallet ne peut pas être désactivé
+              && (!resource.data.keys().hasAny(['wallet'])
+                || !resource.data.wallet.isActivated
+                || request.resource.data.wallet.isActivated == true)
+            ))
+        ) || (
+          isAuthenticated()
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['followersCount'])
+          && request.resource.data.followersCount is int
+          && request.resource.data.followersCount >= 0
+          && (
+            // Cas 1 : le compte n'a pas encore de followersCount (compte créé avant
+            // cette fonctionnalité) → le premier abonné doit l'initialiser à 1
+            (!resource.data.keys().hasAny(['followersCount']) && request.resource.data.followersCount == 1)
+            // Cas 2 : le champ existe déjà → on ne peut le déplacer que de ±1
+            || (resource.data.followersCount is int
+              && (
+                request.resource.data.followersCount == resource.data.followersCount + 1
+                || request.resource.data.followersCount == resource.data.followersCount - 1
+              ))
+          )
+        );
+
       // Suppression : Uniquement le propriétaire (et dans le futur, les admins)
       allow delete: if isOwner(userId);
 
+    }
+
+    // ============================================================
+    // COLLECTION : notifications
+    // ============================================================
+    // Notifications in-app, entièrement générées par les Cloud Functions
+    // (Admin SDK, contourne ces règles). Le client ne peut que lire les
+    // siennes et les marquer comme lues.
+    match /notifications/{notificationId} {
+      // Lecture : uniquement le destinataire
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Création : réservée aux Cloud Functions (Admin SDK, hors règles)
+      allow create: if false;
+
+      // Mise à jour : le destinataire peut uniquement marquer comme lu/non lu
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['read'])
+        && request.resource.data.read is bool;
+
+      // Suppression : le destinataire peut supprimer sa propre notification
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ============================================================
+    // COLLECTION : receipts
+    // ============================================================
+    // Reçus d'achat, entièrement générés par les Cloud Functions (Admin SDK).
+    // Lecture réservée à l'acheteur et au vendeur concernés.
+    match /receipts/{receiptId} {
+      allow read: if isAuthenticated()
+        && (resource.data.buyerId == request.auth.uid || resource.data.sellerId == request.auth.uid);
+
+      allow create, update, delete: if false;
+    }
+
+    // ============================================================
+    // COLLECTION : qrcodes
+    // ============================================================
+    // Relie l'id opaque encodé dans le QR de remise en main propre à la
+    // transaction réelle (transactionRef, sellerId, buyerId). Entièrement
+    // généré et lu par les Cloud Functions (Admin SDK) : le client ne
+    // manipule jamais que l'id du document, jamais son contenu directement.
+    match /qrcodes/{qrCodeId} {
+      allow read, write: if false;
+    }
+
+    // ============================================================
+    // COLLECTION : reviews
+    // ============================================================
+    // Avis laissés par un acheteur sur un vendeur, un seul par transaction
+    // complétée. L'id du document = référence de la transaction : ça
+    // garantit l'unicité (un 2e essai d'écriture tombe sous "update",
+    // interdit ci-dessous) et permet de vérifier l'achat réel via `get()`.
+    match /reviews/{reviewId} {
+      // Lecture : publique (affichée sur le profil du vendeur)
+      allow read: if true;
+
+      // Création : uniquement l'acheteur, pour un achat réellement complété
+      // et correspondant (même vendeur, même produit, même acheteur).
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['buyerId', 'sellerId', 'productId', 'rating', 'transactionRef', 'createdAt'])
+        && request.resource.data.buyerId == request.auth.uid
+        && request.resource.data.transactionRef == reviewId
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && exists(/databases/$(database)/documents/transactions/$(reviewId))
+        && get(/databases/$(database)/documents/transactions/$(reviewId)).data.status == 'completed'
+        && get(/databases/$(database)/documents/transactions/$(reviewId)).data.userId == request.auth.uid
+        && get(/databases/$(database)/documents/transactions/$(reviewId)).data.sellerId == request.resource.data.sellerId
+        && get(/databases/$(database)/documents/transactions/$(reviewId)).data.productId == request.resource.data.productId;
+
+      // Mise à jour / suppression : jamais (avis immuable)
+      allow update, delete: if false;
+    }
+
+    // ============================================================
+    // COLLECTION : follows
+    // ============================================================
+    // Relation d'abonnement : un document par paire (followerId, followedId)
+    match /follows/{followId} {
+      // Lecture : publique (listes d'abonnés/abonnements visibles sur les profils)
+      allow read: if true;
+
+      // Création : uniquement pour soi-même, on ne peut pas se suivre soi-même
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['followerId', 'followedId', 'createdAt'])
+        && request.resource.data.followerId == request.auth.uid
+        && request.resource.data.followedId is string
+        && request.resource.data.followedId != request.auth.uid;
+
+      // Mise à jour : non autorisée (toggle = create/delete)
+      allow update: if false;
+
+      // Suppression : uniquement celui qui suit peut se désabonner
+      allow delete: if isAuthenticated() && resource.data.followerId == request.auth.uid;
     }
 
     // ============================================================

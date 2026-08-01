@@ -32,6 +32,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   String? _paymentPhoneNumber;
 
   bool _isProcessing = false;
+  bool _isMixedPayment = false;
+  double _walletContribution = 0.0;
+  double _externalAmount = 0.0;
 
   // Calcul des frais
   double get _protectionFees =>
@@ -46,6 +49,8 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   // Helper pour formater le nom de la méthode de paiement
   String _getPaymentMethodLabel(String method) {
     switch (method) {
+      case 'wallet':
+        return 'Porte-monnaie';
       case 'tmoney':
         return 'T-Money';
       case 'flooz':
@@ -65,6 +70,21 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       return;
     }
 
+    if (widget.product != null && widget.product!.isSold) {
+      _showErrorSnackBar('Cet article a déjà été vendu');
+      return;
+    }
+
+    if (widget.product != null && _selectedAddress == null) {
+      _showErrorSnackBar('Veuillez renseigner une adresse de livraison');
+      return;
+    }
+
+    if (widget.product != null && _selectedDeliveryOption == 'relay' && _selectedRelayPoint == null) {
+      _showErrorSnackBar('Veuillez sélectionner un point relais');
+      return;
+    }
+
     setState(() => _isProcessing = true);
 
     try {
@@ -78,7 +98,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
 
       final responseData = await paymentService.initiatePayment(
         userId: user.uid,
-        amount: _totalAmount,
+        amount: _isMixedPayment ? _externalAmount : _totalAmount,
         paymentMethod: _selectedPaymentMethod!,
         phone: phone,
         name: user.displayName,
@@ -86,13 +106,27 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
         description: widget.product != null 
             ? 'Achat : ${widget.product!.title}'
             : 'Recharge portefeuille Ablony',
+        type: widget.product != null ? 'purchase' : 'recharge',
+        productId: widget.product?.id,
+        sellerId: widget.product?.sellerId,
+        productPrice: widget.product != null ? widget.product!.price.toDouble() : null,
+        walletDeduction: _isMixedPayment ? _walletContribution : null,
       );
 
       debugPrint('[Payment] responseData reçu: $responseData');
 
+      // Si le paiement est déjà complété (ex: via le porte-monnaie à 100%)
+      if (responseData['status'] == 'completed' || responseData['completed'] == true) {
+        setState(() => _isProcessing = false);
+        _showSuccessDialog(transactionRef: responseData['reference'] as String?);
+        return;
+      }
+
       final paymentUrl = responseData['paymentUrl'] as String?;
+      final reference = responseData['reference'] as String?;
 
       debugPrint('[Payment] paymentUrl extrait: $paymentUrl');
+      debugPrint('[Payment] reference extrait: $reference');
 
       if (!mounted) return;
 
@@ -106,8 +140,23 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
 
         if (!mounted) return;
 
-        if (paymentCompleted == true) {
-          _showSuccessDialog();
+        if (paymentCompleted == true && reference != null) {
+          // Confirmer le paiement côté serveur : débiter le wallet,
+          // créditer le vendeur en pendingAmount, marquer le produit vendu
+          try {
+            debugPrint('[Payment] Confirmation serveur pour la référence: $reference');
+            await paymentService.confirmPayment(reference: reference);
+            if (!mounted) return;
+            _showSuccessDialog(transactionRef: reference);
+          } catch (confirmError) {
+            debugPrint('[Payment] Erreur confirmation: $confirmError');
+            if (!mounted) return;
+            // Le paiement externe a réussi mais la finalisation a échoué
+            _showErrorSnackBar(
+              'Le paiement a été reçu mais la finalisation a échoué. '
+              'Veuillez contacter le support avec la référence : $reference'
+            );
+          }
         } else {
           _showErrorSnackBar('Le paiement a échoué ou a été annulé');
         }
@@ -125,27 +174,49 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog({String? transactionRef}) {
+    // Invalider le provider pour forcer le rafraîchissement immédiat du solde utilisateur dans l'application
+    ref.invalidate(currentUserProvider);
+
+    final isPurchase = widget.product != null;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Paiement réussi'),
+            const Icon(Icons.check_circle, color: Colors.green),
+            const SizedBox(width: 8),
+            Text(isPurchase ? 'Achat réussi' : 'Paiement réussi'),
           ],
         ),
-        content: const Text(
-          'Votre compte a été rechargé avec succès. '
-          'Le solde de votre portefeuille a été mis à jour.',
+        content: Text(
+          isPurchase
+              ? 'Votre achat a été finalisé avec succès. L\'article est maintenant marqué comme vendu.'
+              : 'Votre compte a été rechargé avec succès. Le solde de votre portefeuille a été mis à jour.',
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Fermer le dialogue
-              context.go('/profile/wallet'); // Rediriger vers le wallet
+              if (isPurchase) {
+                if (transactionRef != null) {
+                  // Proposer à l'acheteur de noter le vendeur
+                  context.go(
+                    '/rate-seller',
+                    extra: {
+                      'transactionRef': transactionRef,
+                      'sellerId': widget.product!.sellerId,
+                      'productId': widget.product!.id,
+                      'productTitle': widget.product!.title,
+                    },
+                  );
+                } else {
+                  context.go('/messages');
+                }
+              } else {
+                context.go('/profile/wallet'); // Rediriger vers le wallet
+              }
             },
             child: const Text('OK'),
           ),
@@ -420,17 +491,89 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                     ? _getPaymentMethodLabel(_selectedPaymentMethod!) +
                         (_paymentPhoneNumber != null
                             ? ' ($_paymentPhoneNumber)'
-                            : '')
+                            : '') +
+                        (_isMixedPayment ? ' (+ Portefeuille)' : '')
                     : null,
                 placeholder: 'Sélectionne un mode de paiement',
                 isRequired: true,
                 onTap: () async {
-                  final result = await context.push('/payment-method/select');
+                  final user = ref.read(currentUserProvider).value;
+                  final wallet = user?.wallet;
+                  final isRecharge = widget.product == null;
+
+                  final result = await context.push(
+                    '/payment-method/select',
+                    extra: {'isRecharge': isRecharge},
+                  );
                   if (result != null && result is Map<String, dynamic>) {
-                    setState(() {
-                      _selectedPaymentMethod = result['method'] as String?;
-                      _paymentPhoneNumber = result['phoneNumber'] as String?;
-                    });
+                    final selectedMethod = result['method'] as String?;
+                    final phone = result['phoneNumber'] as String?;
+
+                    if (selectedMethod == 'wallet' && wallet != null) {
+                      final walletAvailable = wallet.availableAmountInXOF;
+                      if (walletAvailable < _totalAmount) {
+                        if (!mounted) return;
+                        // Solde insuffisant pour payer la totalité
+                        final diff = _totalAmount - walletAvailable;
+                        final proceedWithMixed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Solde insuffisant'),
+                            content: Text(
+                              'Le solde de votre porte-monnaie (${walletAvailable.toStringAsFixed(0)} FCFA) '
+                              'est insuffisant pour régler le total de ${_totalAmount.toStringAsFixed(0)} FCFA.\n\n'
+                              'Voulez-vous payer la différence de ${diff.toStringAsFixed(0)} FCFA par un autre moyen de paiement ?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: const Text('Annuler'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(true),
+                                child: const Text('Payer la différence'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (proceedWithMixed == true) {
+                          if (!mounted) return;
+                          // Sélectionner un autre moyen de paiement pour la différence
+                          final mixedResult = await context.push(
+                            '/payment-method/select',
+                            extra: {'isRecharge': true}, // true exclut l'option wallet
+                          );
+                          if (mixedResult != null && mixedResult is Map<String, dynamic>) {
+                            setState(() {
+                              _isMixedPayment = true;
+                              _walletContribution = walletAvailable;
+                              _externalAmount = diff;
+                              _selectedPaymentMethod = mixedResult['method'] as String?;
+                              _paymentPhoneNumber = mixedResult['phoneNumber'] as String?;
+                            });
+                          }
+                        }
+                      } else {
+                        // Solde suffisant pour un paiement 100% wallet
+                        setState(() {
+                          _isMixedPayment = false;
+                          _walletContribution = _totalAmount;
+                          _externalAmount = 0.0;
+                          _selectedPaymentMethod = 'wallet';
+                          _paymentPhoneNumber = null;
+                        });
+                      }
+                    } else {
+                      // Paiement standard sans portefeuille
+                      setState(() {
+                        _isMixedPayment = false;
+                        _walletContribution = 0.0;
+                        _externalAmount = _totalAmount;
+                        _selectedPaymentMethod = selectedMethod;
+                        _paymentPhoneNumber = phone;
+                      });
+                    }
                   }
                 },
               ),
@@ -458,6 +601,18 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                             'Frais de port',
                             '${_shippingCost.toStringAsFixed(0)} FCFA',
                           ),
+                          if (_isMixedPayment) ...[
+                            SizedBox(height: screenWidth * 0.03),
+                            _buildPriceRow(
+                              'Déduit du porte-monnaie',
+                              '-${_walletContribution.toStringAsFixed(0)} FCFA',
+                            ),
+                            SizedBox(height: screenWidth * 0.03),
+                            _buildPriceRow(
+                              'Reste à payer',
+                              '${_externalAmount.toStringAsFixed(0)} FCFA',
+                            ),
+                          ],
                         ]
                       : [
                           _buildPriceRow(
@@ -496,13 +651,15 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Total à payer',
+                        _isMixedPayment ? 'Reste à payer' : 'Total à payer',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
-                        '${_totalAmount.toStringAsFixed(0)} FCFA',
+                        _isMixedPayment
+                            ? '${_externalAmount.toStringAsFixed(0)} FCFA'
+                            : '${_totalAmount.toStringAsFixed(0)} FCFA',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -515,7 +672,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   PrimaryButton(
                     text: _selectedPaymentMethod == 'card'
                         ? 'Procéder au paiement par carte'
-                        : 'Valider le paiement',
+                        : (_selectedPaymentMethod == 'wallet' && !_isMixedPayment)
+                            ? 'Payer avec le porte-monnaie'
+                            : 'Valider le paiement',
                     isLoading: _isProcessing,
                     onPressed: _selectedPaymentMethod == null || _isProcessing
                         ? null

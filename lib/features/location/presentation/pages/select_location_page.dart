@@ -215,6 +215,36 @@ class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
             ),
           ),
 
+          // Bouton adresse par défaut (temporaire, sans Google Maps API)
+          Positioned(
+            left: 16,
+            bottom: _selectedLocation != null ? 200 : 100,
+            child: FloatingActionButton.extended(
+              heroTag: 'default_location',
+              onPressed: () {
+                setState(() {
+                  _selectedLocation = const LocationData(
+                    latitude: 6.1256,
+                    longitude: 1.2221,
+                    formattedAddress: 'Boulevard du 13 Janvier, Lomé, Togo',
+                    street: 'Boulevard du 13 Janvier',
+                    city: 'Lomé',
+                    postalCode: '',
+                    country: 'Togo',
+                  );
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Adresse par défaut sélectionnée (Lomé)'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.home_outlined),
+              label: const Text('Adresse par défaut'),
+            ),
+          ),
+
           // Bouton position actuelle
           Positioned(
             right: 16,

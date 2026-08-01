@@ -61,6 +61,8 @@ class UserModel extends User {
     super.salesCount,
     super.rating,
     super.reviewsCount,
+    super.followersCount,
+    super.followingCount,
     super.wallet,
   });
 
@@ -105,6 +107,8 @@ class UserModel extends User {
       salesCount: user.salesCount,
       rating: user.rating,
       reviewsCount: user.reviewsCount,
+      followersCount: user.followersCount,
+      followingCount: user.followingCount,
       wallet: user.wallet,
     );
   }
@@ -231,6 +235,8 @@ class UserModel extends User {
         salesCount: data['salesCount'] as int? ?? 0,
         rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
         reviewsCount: data['reviewsCount'] as int? ?? 0,
+        followersCount: data['followersCount'] as int? ?? 0,
+        followingCount: data['followingCount'] as int? ?? 0,
 
         // PORTEFEUILLE (optionnel)
         wallet: data['wallet'] != null
@@ -289,6 +295,8 @@ class UserModel extends User {
       salesCount: json['salesCount'] as int? ?? 0,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       reviewsCount: json['reviewsCount'] as int? ?? 0,
+      followersCount: json['followersCount'] as int? ?? 0,
+      followingCount: json['followingCount'] as int? ?? 0,
       wallet: json['wallet'] != null
           ? Wallet.fromFirestore(json['wallet'] as Map<String, dynamic>)
           : null,
@@ -347,6 +355,8 @@ class UserModel extends User {
       'salesCount': salesCount,
       'rating': rating,
       'reviewsCount': reviewsCount,
+      'followersCount': followersCount,
+      'followingCount': followingCount,
     };
 
     // Ajouter les champs optionnels seulement s'ils ne sont pas null
@@ -411,6 +421,8 @@ class UserModel extends User {
       'salesCount': salesCount,
       'rating': rating,
       'reviewsCount': reviewsCount,
+      'followersCount': followersCount,
+      'followingCount': followingCount,
     };
 
     // Ajouter les champs optionnels
@@ -504,6 +516,8 @@ class UserModel extends User {
     int? salesCount,
     double? rating,
     int? reviewsCount,
+    int? followersCount,
+    int? followingCount,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -529,6 +543,8 @@ class UserModel extends User {
       salesCount: salesCount ?? this.salesCount,
       rating: rating ?? this.rating,
       reviewsCount: reviewsCount ?? this.reviewsCount,
+      followersCount: followersCount ?? this.followersCount,
+      followingCount: followingCount ?? this.followingCount,
     );
   }
 }

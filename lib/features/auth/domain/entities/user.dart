@@ -243,6 +243,18 @@ class User extends Equatable {
   /// Plus ce nombre est élevé, plus la note moyenne est fiable.
   final int reviewsCount;
 
+  /// Nombre d'utilisateurs qui suivent ce profil
+  ///
+  /// Compteur dénormalisé, maintenu à jour via des transactions sur la
+  /// collection `follows` à chaque abonnement/désabonnement.
+  final int followersCount;
+
+  /// Nombre d'utilisateurs suivis par ce profil
+  ///
+  /// Compteur dénormalisé, maintenu à jour via des transactions sur la
+  /// collection `follows` à chaque abonnement/désabonnement.
+  final int followingCount;
+
   // ============================================================
   // PORTEFEUILLE
   // ============================================================
@@ -284,6 +296,8 @@ class User extends Equatable {
     this.salesCount = 0,
     this.rating = 0.0,
     this.reviewsCount = 0,
+    this.followersCount = 0,
+    this.followingCount = 0,
     this.wallet,
   });
 
@@ -325,6 +339,8 @@ class User extends Equatable {
     int? salesCount,
     double? rating,
     int? reviewsCount,
+    int? followersCount,
+    int? followingCount,
     Wallet? wallet,
   }) {
     return User(
@@ -350,6 +366,8 @@ class User extends Equatable {
       salesCount: salesCount ?? this.salesCount,
       rating: rating ?? this.rating,
       reviewsCount: reviewsCount ?? this.reviewsCount,
+      followersCount: followersCount ?? this.followersCount,
+      followingCount: followingCount ?? this.followingCount,
       wallet: wallet ?? this.wallet,
     );
   }

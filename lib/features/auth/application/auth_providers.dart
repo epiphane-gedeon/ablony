@@ -421,3 +421,15 @@ final usernameSuggestionProvider = FutureProvider<String>((ref) async {
     email: firebaseUser.email,
   );
 });
+
+/// Écoute en temps réel le profil complet d'un utilisateur par son UID
+/// (profil public, reçus, listes d'abonnés/abonnements, etc.).
+///
+/// Un [StreamProvider] plutôt qu'un [FutureProvider] : les compteurs
+/// (followersCount, rating, ...) doivent rester à jour même sans action
+/// explicite de l'utilisateur affiché (ex : quelqu'un d'autre le suit
+/// pendant qu'il regarde sa propre page).
+final userByIdProvider = StreamProvider.family<User, String>((ref, userId) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return authRepository.getUserStream(userId);
+});

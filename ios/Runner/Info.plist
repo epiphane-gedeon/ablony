@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Ablony utilise l'appareil photo pour scanner un code QR et prendre des photos à envoyer dans les conversations.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ablony a besoin d'accéder à vos photos pour les envoyer dans vos conversations.</string>
 </dict>
 </plist>

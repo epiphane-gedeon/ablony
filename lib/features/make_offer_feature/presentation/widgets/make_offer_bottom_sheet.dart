@@ -13,6 +13,7 @@ import 'package:ablony/features/messages/domain/models/participant_details.dart'
 import 'package:ablony/features/messages/domain/models/product_details.dart'
     as msg;
 import 'package:ablony/features/messages/domain/models/user_info.dart';
+import 'package:ablony/features/product/presentation/providers/product_provider.dart';
 
 /// Bottom sheet plein écran pour faire une offre.
 /// Envoie l'offre au vendeur via le système de messagerie.
@@ -23,6 +24,15 @@ class MakeOfferBottomSheet extends ConsumerStatefulWidget {
 
   /// Affiche le bottom sheet en plein écran
   static Future<void> show(BuildContext context, Product product) {
+    if (product.isSold) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cet article a déjà été vendu'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return Future.value();
+    }
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -129,6 +139,12 @@ class _MakeOfferBottomSheetState extends ConsumerState<MakeOfferBottomSheet> {
         throw Exception('Utilisateur non connecté');
       }
 
+      // Vérifier si l'article est déjà vendu en direct depuis Firestore
+      final liveProduct = await ref.read(productRepositoryProvider).getProductById(widget.product.id);
+      if (liveProduct.isSold) {
+        throw Exception('Cet article a déjà été vendu');
+      }
+
       // Récupérer les données complètes de l'utilisateur actuel (buyer)
       final authRepository = ref.read(authRepositoryProvider);
       final buyer = await authRepository.getUserById(currentUser.uid);
@@ -212,9 +228,7 @@ class _MakeOfferBottomSheetState extends ConsumerState<MakeOfferBottomSheet> {
     final screenHeight = MediaQuery.of(context).size.height;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    // Calcul des frais (Pour l'instant formule standard, à adapter pour FCFA si besoin)
-    // En FCFA les montants sont grands, les frais fixes (0.70€) doivent être convertis ~460 FCFA
-    // On garde une estimation ici pour le prototype : 5% + 500 FCFA
+    // Calcul des frais : 5% + 500 FCFA de frais fixes
     final protectionFees = (_currentAmount * 0.05) + 500;
     final totalAmount = _currentAmount + protectionFees;
 

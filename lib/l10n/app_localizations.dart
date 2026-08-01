@@ -2420,11 +2420,203 @@ abstract class AppLocalizations {
   /// **'Suivre'**
   String get followButton;
 
-  /// Snackbar message when follow is tapped
+  /// Button label when already following this user (tap to unfollow)
   ///
   /// In fr, this message translates to:
-  /// **'Suivre {username} bientôt disponible !'**
-  String followComingSoon(String username);
+  /// **'Suivi'**
+  String get unfollowButton;
+
+  /// Followers count label
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} abonnés'**
+  String followersCountLabel(int count);
+
+  /// Following count label
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} abonnements'**
+  String followingCountLabel(int count);
+
+  /// Followers list page title
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnés'**
+  String get followersPageTitle;
+
+  /// Following list page title
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get followingPageTitle;
+
+  /// Empty followers list state
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun abonné pour le moment'**
+  String get noFollowersYet;
+
+  /// Empty following list state
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne suit personne pour le moment'**
+  String get noFollowingYet;
+
+  /// Receipt page title
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçu'**
+  String get receiptPageTitle;
+
+  /// Receipt: transaction reference label
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence'**
+  String get receiptReference;
+
+  /// Receipt: date label
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get receiptDate;
+
+  /// Receipt: seller label
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendeur'**
+  String get receiptSeller;
+
+  /// Receipt: buyer label
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheteur'**
+  String get receiptBuyer;
+
+  /// Receipt: payment method label
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen de paiement'**
+  String get receiptPaymentMethod;
+
+  /// Receipt: product price label
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix de l\'article'**
+  String get receiptProductPrice;
+
+  /// Receipt: total paid label
+  ///
+  /// In fr, this message translates to:
+  /// **'Total payé'**
+  String get receiptTotalPaid;
+
+  /// Receipt: download button
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger le reçu'**
+  String get receiptDownloadButton;
+
+  /// Rate seller page title
+  ///
+  /// In fr, this message translates to:
+  /// **'Notez votre vendeur'**
+  String get rateSellerPageTitle;
+
+  /// Rate seller page headline
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment s\'est passé votre achat de \"{productTitle}\" ?'**
+  String rateSellerHeadline(String productTitle);
+
+  /// Rate seller: comment field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un commentaire (facultatif)'**
+  String get rateSellerCommentHint;
+
+  /// Rate seller: submit button
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer mon avis'**
+  String get rateSellerSubmitButton;
+
+  /// Seller button: show delivery confirmation QR code
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher le code QR'**
+  String get showDeliveryQrButton;
+
+  /// Buyer button: open QR scanner to confirm delivery
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la réception'**
+  String get confirmDeliveryButton;
+
+  /// Disabled button label when the product is sold to someone else
+  ///
+  /// In fr, this message translates to:
+  /// **'Article déjà vendu'**
+  String get productAlreadySold;
+
+  /// Show delivery QR page title
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de remise'**
+  String get deliveryQrPageTitle;
+
+  /// Show delivery QR page instructions
+  ///
+  /// In fr, this message translates to:
+  /// **'Faites scanner ce code par l\'acheteur au moment de la remise pour débloquer le paiement.'**
+  String get deliveryQrInstructions;
+
+  /// Shown when delivery has already been confirmed
+  ///
+  /// In fr, this message translates to:
+  /// **'Réception confirmée'**
+  String get deliveryAlreadyConfirmed;
+
+  /// Scan delivery QR page title
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner le code'**
+  String get scanQrPageTitle;
+
+  /// Scan delivery QR page instructions
+  ///
+  /// In fr, this message translates to:
+  /// **'Scannez le code QR affiché par le vendeur pour confirmer la réception'**
+  String get scanQrInstructions;
+
+  /// Delivery confirmed dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Réception confirmée !'**
+  String get deliveryConfirmedTitle;
+
+  /// Delivery confirmed dialog message
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci ! Le paiement a été débloqué pour le vendeur.'**
+  String get deliveryConfirmedMessage;
+
+  /// Image source sheet: camera option
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get imageSourceCameraOption;
+
+  /// Image source sheet: gallery option
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir depuis la galerie'**
+  String get imageSourceGalleryOption;
+
+  /// Last message preview for an image message
+  ///
+  /// In fr, this message translates to:
+  /// **'📷 Photo'**
+  String get photoMessage;
 
   /// Placeholder for chat input field
   ///

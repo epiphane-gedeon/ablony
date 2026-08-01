@@ -2,7 +2,8 @@ enum MessageType {
   system,
   offer,
   counterOffer,
-  text;
+  text,
+  image;
 
   String toFirestore() {
     switch (this) {
@@ -14,6 +15,8 @@ enum MessageType {
         return 'counter_offer';
       case MessageType.text:
         return 'text';
+      case MessageType.image:
+        return 'image';
     }
   }
 
@@ -27,6 +30,8 @@ enum MessageType {
         return MessageType.counterOffer;
       case 'text':
         return MessageType.text;
+      case 'image':
+        return MessageType.image;
       default:
         return MessageType.text;
     }

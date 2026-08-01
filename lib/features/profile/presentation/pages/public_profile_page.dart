@@ -5,22 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../product/presentation/providers/product_provider.dart';
+import '../../../follow/presentation/widgets/follow_button.dart';
+import '../../../reviews/presentation/providers/review_provider.dart';
+import '../../../reviews/presentation/widgets/star_rating.dart';
 import '../../../../shared/widgets/product_card.dart';
-import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../l10n/app_localizations.dart';
-
-/// Provider pour charger un utilisateur par son ID
-final userByIdProvider = FutureProvider.family<User, String>((ref, userId) async {
-  final authRepository = ref.read(authRepositoryProvider);
-  return authRepository.getUserById(userId);
-});
 
 /// Page de profil public d'un autre utilisateur.
 ///
-/// Affichée quand on clique sur un utilisateur depuis la recherche.
-/// Contient les mêmes onglets que [UserListingsPage] (Annonces, Évaluations, À propos)
-/// mais charge les données depuis l'ID passé en paramètre.
-/// Un bouton "Suivre" est fixé en bas de l'écran.
+/// Affichée quand on clique sur un utilisateur depuis la fiche produit ou la recherche.
+/// Contient les onglets Annonces, Évaluations, À propos.
+/// Un bouton "Suivre" s'affiche dans les onglets Annonces et À propos (si ce n'est pas notre profil).
 class PublicProfilePage extends ConsumerWidget {
   final String userId;
 
@@ -33,7 +28,6 @@ class PublicProfilePage extends ConsumerWidget {
 
     return userAsync.when(
       data: (user) {
-        // Vérifier si c'est notre propre profil → rediriger
         final currentUser = currentUserAsync.value;
         final isOwnProfile = currentUser?.uid == userId;
 
@@ -57,37 +51,11 @@ class PublicProfilePage extends ConsumerWidget {
             ),
             body: TabBarView(
               children: [
-                _buildListingsTab(context, ref, user.uid),
-                _buildReviewsTab(context),
-                _buildAboutTab(context, user),
+                _buildListingsTab(context, ref, user, isOwnProfile),
+                _buildReviewsTab(context, ref, user),
+                _buildAboutTab(context, ref, user, isOwnProfile),
               ],
             ),
-            // Bouton "Suivre" fixé en bas (uniquement si ce n'est pas notre profil)
-            bottomNavigationBar: isOwnProfile
-                ? null
-                : SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: PrimaryButton(
-                        text: AppLocalizations.of(context)!.followButton,
-                        onPressed: () {
-                          // TODO: Implémenter la logique de suivi
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                AppLocalizations.of(context)!
-                                    .followComingSoon(user.username),
-                              ),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
           ),
         );
       },
@@ -114,86 +82,223 @@ class PublicProfilePage extends ConsumerWidget {
     );
   }
 
-  /// Onglet "Annonces" — affiche la grille de produits du membre
-  Widget _buildListingsTab(BuildContext context, WidgetRef ref, String uid) {
-    final productsAsync = ref.watch(sellerProductsProvider(uid));
+  /// Onglet "Annonces" — en-tête avec infos vendeur + grille de produits non vendus
+  Widget _buildListingsTab(BuildContext context, WidgetRef ref, User user, bool isOwnProfile) {
+    final productsAsync = ref.watch(sellerProductsProvider(user.uid));
     final theme = Theme.of(context);
 
-    return productsAsync.when(
-      skipLoadingOnReload: true,
-      skipError: true,
-      data: (products) {
-        if (products.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Text(
-                AppLocalizations.of(context)!.noProductsAvailable,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-                textAlign: TextAlign.center,
+    return Column(
+      children: [
+        // ── En-tête infos vendeur ──
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundImage: user.photoUrl != null
+                    ? NetworkImage(user.photoUrl!)
+                    : null,
+                child: user.photoUrl == null
+                    ? Text(
+                        user.username.substring(0, 1).toUpperCase(),
+                        style: theme.textTheme.headlineSmall,
+                      )
+                    : null,
               ),
-            ),
-          );
-        }
-
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.5,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 16,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.username,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    StarRatingDisplay(rating: user.rating, reviewsCount: user.reviewsCount),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_outlined,
+                            size: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                        const SizedBox(width: 4),
+                        Text(
+                          user.country.name,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    _FollowCountsRow(user: user),
+                  ],
+                ),
+              ),
+            ],
           ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return ProductCard(
-              product: product,
-              onTap: () => context.push('/product/${product.id}'),
-            );
-          },
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString())),
+        ),
+
+        // ── Bouton Suivre (uniquement si ce n'est pas notre profil) ──
+        if (!isOwnProfile)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: FollowButton(
+              targetUserId: user.uid,
+              onChanged: () => ref.invalidate(userByIdProvider(user.uid)),
+            ),
+          ),
+
+        const Divider(height: 1),
+
+        // ── Grille de produits (non vendus uniquement) ──
+        Expanded(
+          child: productsAsync.when(
+            skipLoadingOnReload: true,
+            skipError: true,
+            data: (products) {
+              final unsoldProducts = products.where((p) => !p.isSold).toList();
+
+              if (unsoldProducts.isEmpty) {
+                return _buildEmptyState(context, theme);
+              }
+
+              return GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.5,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: unsoldProducts.length,
+                itemBuilder: (context, index) {
+                  final product = unsoldProducts[index];
+                  return ProductCard(
+                    product: product,
+                    onTap: () => context.push('/product/${product.id}'),
+                  );
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString())),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, ThemeData theme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.checkroom_outlined,
+              size: 64,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context)!.noProductsAvailable,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Quand le membre ajoute un article, il apparaît ici',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   /// Onglet "Évaluations"
-  Widget _buildReviewsTab(BuildContext context) {
+  Widget _buildReviewsTab(BuildContext context, WidgetRef ref, User user) {
     final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.noReviewsYet,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+    final l10n = AppLocalizations.of(context)!;
+    final reviewsAsync = ref.watch(sellerReviewsProvider(user.uid));
+
+    return reviewsAsync.when(
+      data: (reviews) {
+        if (reviews.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  l10n.noReviewsYet,
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    l10n.noReviewsSubtitle,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              AppLocalizations.of(context)!.noReviewsSubtitle,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-          ),
-        ],
-      ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: reviews.length,
+          separatorBuilder: (context, index) => const Divider(height: 24),
+          itemBuilder: (context, index) {
+            final review = reviews[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: List.generate(
+                    5,
+                    (i) => Icon(
+                      i < review.rating ? Icons.star : Icons.star_border,
+                      size: 18,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(review.productTitle, style: theme.textTheme.bodySmall),
+                if (review.comment != null && review.comment!.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(review.comment!, style: theme.textTheme.bodyMedium),
+                ],
+              ],
+            );
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text(l10n.errorGenericMsg(error.toString()))),
     );
   }
 
-  /// Onglet "À propos" — informations du membre
-  Widget _buildAboutTab(BuildContext context, User user) {
+  /// Onglet "À propos" — informations du membre avec bouton Suivre
+  Widget _buildAboutTab(BuildContext context, WidgetRef ref, User user, bool isOwnProfile) {
     final theme = Theme.of(context);
 
     return ListView(
@@ -228,16 +333,11 @@ class PublicProfilePage extends ConsumerWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context)!.verifiedInfo,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildInfoRow(context, Icons.check_circle_outline, 'E-mail', true),
-              const SizedBox(height: 24),
+              const SizedBox(height: 6),
+              StarRatingDisplay(rating: user.rating, reviewsCount: user.reviewsCount),
+              const SizedBox(height: 12),
+              _buildInfoRow(context, Icons.check_circle_outline, 'E-mail, Google', true),
+              const SizedBox(height: 4),
               _buildInfoRow(
                 context,
                 Icons.location_on_outlined,
@@ -245,13 +345,23 @@ class PublicProfilePage extends ConsumerWidget {
                 true,
                 color: theme.colorScheme.onSurface,
               ),
-              _buildInfoRow(
-                context,
-                Icons.rss_feed,
-                '0 Abonné, 0 Abonnement',
-                true,
-                color: theme.colorScheme.onSurface,
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.rss_feed, size: 20, color: theme.colorScheme.onSurface),
+                    const SizedBox(width: 8),
+                    _FollowCountsRow(user: user, color: theme.colorScheme.onSurface),
+                  ],
+                ),
               ),
+              if (!isOwnProfile) ...[
+                const SizedBox(height: 20),
+                FollowButton(
+                  targetUserId: user.uid,
+                  onChanged: () => ref.invalidate(userByIdProvider(user.uid)),
+                ),
+              ],
             ],
           ),
         ),
@@ -282,6 +392,37 @@ class PublicProfilePage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Ligne "N abonnés · N abonnements", tappable vers les listes correspondantes.
+class _FollowCountsRow extends StatelessWidget {
+  final User user;
+  final Color? color;
+
+  const _FollowCountsRow({required this.user, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final textColor = color ?? theme.colorScheme.onSurface.withValues(alpha: 0.5);
+    final textStyle = theme.textTheme.bodySmall?.copyWith(color: textColor);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () => context.push('/profile/${user.uid}/followers'),
+          child: Text(l10n.followersCountLabel(user.followersCount), style: textStyle),
+        ),
+        Text(' · ', style: textStyle),
+        GestureDetector(
+          onTap: () => context.push('/profile/${user.uid}/following'),
+          child: Text(l10n.followingCountLabel(user.followingCount), style: textStyle),
+        ),
+      ],
     );
   }
 }

@@ -1624,12 +1624,146 @@
   "@followButton": {
     "description": "Follow user button"
   },
-  "followComingSoon": "Following {username} coming soon!",
-  "@followComingSoon": {
-    "description": "Snackbar message when follow is tapped",
+  "unfollowButton": "Following",
+  "@unfollowButton": {
+    "description": "Button label when already following this user (tap to unfollow)"
+  },
+  "followersCountLabel": "{count} followers",
+  "@followersCountLabel": {
+    "description": "Followers count label",
     "placeholders": {
-      "username": { "type": "String" }
+      "count": { "type": "int" }
     }
+  },
+  "followingCountLabel": "{count} following",
+  "@followingCountLabel": {
+    "description": "Following count label",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "followersPageTitle": "Followers",
+  "@followersPageTitle": {
+    "description": "Followers list page title"
+  },
+  "followingPageTitle": "Following",
+  "@followingPageTitle": {
+    "description": "Following list page title"
+  },
+  "noFollowersYet": "No followers yet",
+  "@noFollowersYet": {
+    "description": "Empty followers list state"
+  },
+  "noFollowingYet": "Not following anyone yet",
+  "@noFollowingYet": {
+    "description": "Empty following list state"
+  },
+  "receiptPageTitle": "Receipt",
+  "@receiptPageTitle": {
+    "description": "Receipt page title"
+  },
+  "receiptReference": "Reference",
+  "@receiptReference": {
+    "description": "Receipt: transaction reference label"
+  },
+  "receiptDate": "Date",
+  "@receiptDate": {
+    "description": "Receipt: date label"
+  },
+  "receiptSeller": "Seller",
+  "@receiptSeller": {
+    "description": "Receipt: seller label"
+  },
+  "receiptBuyer": "Buyer",
+  "@receiptBuyer": {
+    "description": "Receipt: buyer label"
+  },
+  "receiptPaymentMethod": "Payment method",
+  "@receiptPaymentMethod": {
+    "description": "Receipt: payment method label"
+  },
+  "receiptProductPrice": "Item price",
+  "@receiptProductPrice": {
+    "description": "Receipt: product price label"
+  },
+  "receiptTotalPaid": "Total paid",
+  "@receiptTotalPaid": {
+    "description": "Receipt: total paid label"
+  },
+  "receiptDownloadButton": "Download receipt",
+  "@receiptDownloadButton": {
+    "description": "Receipt: download button"
+  },
+  "rateSellerPageTitle": "Rate your seller",
+  "@rateSellerPageTitle": {
+    "description": "Rate seller page title"
+  },
+  "rateSellerHeadline": "How was your purchase of \"{productTitle}\"?",
+  "@rateSellerHeadline": {
+    "description": "Rate seller page headline",
+    "placeholders": {
+      "productTitle": { "type": "String" }
+    }
+  },
+  "rateSellerCommentHint": "Add a comment (optional)",
+  "@rateSellerCommentHint": {
+    "description": "Rate seller: comment field hint"
+  },
+  "rateSellerSubmitButton": "Send my review",
+  "@rateSellerSubmitButton": {
+    "description": "Rate seller: submit button"
+  },
+  "showDeliveryQrButton": "Show QR code",
+  "@showDeliveryQrButton": {
+    "description": "Seller button: show delivery confirmation QR code"
+  },
+  "confirmDeliveryButton": "Confirm receipt",
+  "@confirmDeliveryButton": {
+    "description": "Buyer button: open QR scanner to confirm delivery"
+  },
+  "productAlreadySold": "Item already sold",
+  "@productAlreadySold": {
+    "description": "Disabled button label when the product is sold to someone else"
+  },
+  "deliveryQrPageTitle": "Handover code",
+  "@deliveryQrPageTitle": {
+    "description": "Show delivery QR page title"
+  },
+  "deliveryQrInstructions": "Have the buyer scan this code at handover to release the payment.",
+  "@deliveryQrInstructions": {
+    "description": "Show delivery QR page instructions"
+  },
+  "deliveryAlreadyConfirmed": "Receipt confirmed",
+  "@deliveryAlreadyConfirmed": {
+    "description": "Shown when delivery has already been confirmed"
+  },
+  "scanQrPageTitle": "Scan code",
+  "@scanQrPageTitle": {
+    "description": "Scan delivery QR page title"
+  },
+  "scanQrInstructions": "Scan the QR code shown by the seller to confirm receipt",
+  "@scanQrInstructions": {
+    "description": "Scan delivery QR page instructions"
+  },
+  "deliveryConfirmedTitle": "Receipt confirmed!",
+  "@deliveryConfirmedTitle": {
+    "description": "Delivery confirmed dialog title"
+  },
+  "deliveryConfirmedMessage": "Thank you! The payment has been released to the seller.",
+  "@deliveryConfirmedMessage": {
+    "description": "Delivery confirmed dialog message"
+  },
+  "imageSourceCameraOption": "Take a photo",
+  "@imageSourceCameraOption": {
+    "description": "Image source sheet: camera option"
+  },
+  "imageSourceGalleryOption": "Choose from gallery",
+  "@imageSourceGalleryOption": {
+    "description": "Image source sheet: gallery option"
+  },
+  "photoMessage": "📷 Photo",
+  "@photoMessage": {
+    "description": "Last message preview for an image message"
   },
   "sendMessagePlaceholder": "Send a message",
   "@sendMessagePlaceholder": {

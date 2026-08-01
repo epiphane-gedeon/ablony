@@ -5,6 +5,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/application/auth_providers.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
+import '../../../notifications/domain/models/app_notification.dart';
 import '../../application/providers/message_providers.dart';
 import '../../domain/models/conversation.dart';
 import '../../domain/models/message_type.dart';
@@ -61,11 +63,7 @@ class MessagesPage extends ConsumerWidget {
                 _buildConversationsList(context, ref, theme, user),
 
                 // Onglet Notifications
-                _buildEmptyState(
-                  context,
-                  icon: Icons.notifications_none_outlined,
-                  message: l10n.noNotifications,
-                ),
+                _buildNotificationsList(context, ref, theme, user.uid),
               ],
             );
           },
@@ -116,6 +114,124 @@ class MessagesPage extends ConsumerWidget {
       error: (error, stack) =>
           Center(child: Text(l10n.errorLoading + ': $error')),
     );
+  }
+
+  Widget _buildNotificationsList(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeData theme,
+    String userId,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final notificationsAsync = ref.watch(notificationsProvider(userId));
+
+    return notificationsAsync.when(
+      skipLoadingOnReload: true,
+      skipError: true,
+      data: (notifications) {
+        if (notifications.isEmpty) {
+          return _buildEmptyState(
+            context,
+            icon: Icons.notifications_none_outlined,
+            message: l10n.noNotifications,
+          );
+        }
+
+        return ListView.separated(
+          itemCount: notifications.length,
+          separatorBuilder: (context, index) =>
+              Divider(color: theme.dividerColor.withOpacity(0.1), height: 1),
+          itemBuilder: (context, index) {
+            return _buildNotificationTile(context, ref, theme, notifications[index]);
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) =>
+          Center(child: Text(l10n.errorLoading + ': $error')),
+    );
+  }
+
+  Widget _buildNotificationTile(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeData theme,
+    AppNotification notification,
+  ) {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'fr') {
+      timeago.setLocaleMessages('fr', timeago.FrMessages());
+    } else {
+      timeago.setLocaleMessages('en', timeago.EnMessages());
+    }
+
+    IconData icon;
+    switch (notification.type) {
+      case AppNotificationType.purchaseReceived:
+        icon = Icons.storefront_outlined;
+        break;
+      case AppNotificationType.purchaseConfirmed:
+        icon = Icons.receipt_long_outlined;
+        break;
+      case AppNotificationType.newProductFromFollowed:
+        icon = Icons.new_releases_outlined;
+        break;
+      case AppNotificationType.unknown:
+        icon = Icons.notifications_none_outlined;
+        break;
+    }
+
+    return Container(
+      color: !notification.read
+          ? theme.colorScheme.primary.withOpacity(0.05)
+          : Colors.transparent,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+          child: Icon(icon, color: theme.colorScheme.primary),
+        ),
+        title: Text(
+          notification.title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: !notification.read ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(notification.body),
+        trailing: Text(
+          timeago.format(notification.createdAt, locale: locale),
+          style: theme.textTheme.bodySmall,
+        ),
+        onTap: () => _handleNotificationTap(context, ref, notification),
+      ),
+    );
+  }
+
+  void _handleNotificationTap(
+    BuildContext context,
+    WidgetRef ref,
+    AppNotification notification,
+  ) {
+    if (!notification.read) {
+      ref.markNotificationAsRead(notification.id);
+    }
+
+    switch (notification.type) {
+      case AppNotificationType.purchaseConfirmed:
+        final receiptId = notification.data['receiptId'] as String?;
+        if (receiptId != null) {
+          context.push('/receipt/$receiptId');
+        }
+        break;
+      case AppNotificationType.purchaseReceived:
+      case AppNotificationType.newProductFromFollowed:
+        final productId = notification.data['productId'] as String?;
+        if (productId != null) {
+          context.push('/product/$productId');
+        }
+        break;
+      case AppNotificationType.unknown:
+        break;
+    }
   }
 
   Widget _buildConversationTile(
@@ -274,13 +390,16 @@ class MessagesPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     if (lastMessage.type == MessageType.offer) {
-      // Tente d'extraire le montant du texte (format: "2000.00 € En attente")
+      // Tente d'extraire le montant du texte (format: "2000.00 FCFA En attente")
       final amount = lastMessage.text.split(' ').first;
-      return '$amount € ${l10n.offerStatusPending}';
+      return '$amount FCFA ${l10n.offerStatusPending}';
     } else if (lastMessage.type == MessageType.counterOffer) {
-      // Format: "2000.00 € Contre-offre"
+      // Format: "2000.00 FCFA Contre-offre"
       final amount = lastMessage.text.split(' ').first;
-      return '$amount € ${l10n.counterOffer}';
+      return '$amount FCFA ${l10n.counterOffer}';
+    } else if (lastMessage.type == MessageType.image) {
+      // Le texte stocké est déjà "📷" ou "📷 <légende>" (cf. sendImageMessage)
+      return lastMessage.text.trim() == '📷' ? l10n.photoMessage : lastMessage.text;
     }
 
     return lastMessage.text;

@@ -17,6 +17,8 @@ import '../../../messages/domain/models/product_details.dart';
 import '../providers/category_provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/paginated_products_provider.dart';
+import '../../../reviews/presentation/widgets/star_rating.dart';
+import '../../../receipt/presentation/providers/receipt_provider.dart';
 import 'package:ablony/features/make_offer_feature/presentation/widgets/make_offer_bottom_sheet.dart';
 import 'package:ablony/features/sell/presentation/widgets/sell_bottom_sheet.dart';
 
@@ -152,7 +154,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         product.sellerId,
       );
       final filteredSellerProducts = sellerProducts
-          .where((p) => p.id != product.id)
+          .where((p) => p.id != product.id && !p.isSold)
           .toList();
 
       // Charger les produits similaires (même sous-catégorie, excluant le produit actuel)
@@ -383,7 +385,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
                       // Prix
                       Text(
-                        '${product.price.toStringAsFixed(2)} €',
+                        '${product.price.toStringAsFixed(2)} FCFA',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -554,56 +556,45 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                             : _seller != null
                             ? Row(
                                 children: [
-                                  // Avatar du vendeur
-                                  CircleAvatar(
-                                    radius: 24,
-                                    backgroundImage: _seller!.photoUrl != null
-                                        ? NetworkImage(_seller!.photoUrl!)
-                                        : null,
-                                    child: _seller!.photoUrl == null
-                                        ? Text(
-                                            _seller!.username[0].toUpperCase(),
-                                            style: theme.textTheme.titleLarge,
-                                          )
-                                        : null,
+                                  // Avatar du vendeur (cliquable → profil public)
+                                  GestureDetector(
+                                    onTap: () => context.push('/profile/${_seller!.uid}'),
+                                    child: CircleAvatar(
+                                      radius: 24,
+                                      backgroundImage: _seller!.photoUrl != null
+                                          ? NetworkImage(_seller!.photoUrl!)
+                                          : null,
+                                      child: _seller!.photoUrl == null
+                                          ? Text(
+                                              _seller!.username[0].toUpperCase(),
+                                              style: theme.textTheme.titleLarge,
+                                            )
+                                          : null,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
 
-                                  // Informations du vendeur (username + évaluations)
+                                  // Informations du vendeur (username + évaluations — cliquables)
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          _seller!.username,
-                                          style: theme.textTheme.titleMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Row(
-                                              children: List.generate(
-                                                5,
-                                                (index) => Icon(
-                                                  index < 4
-                                                      ? Icons.star
-                                                      : Icons.star_half,
-                                                  size: 16,
-                                                  color: Colors.orange,
+                                    child: GestureDetector(
+                                      onTap: () => context.push('/profile/${_seller!.uid}'),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _seller!.username,
+                                            style: theme.textTheme.titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '(0)',
-                                              style: theme.textTheme.bodySmall,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                          ),
+                                          StarRatingDisplay(
+                                            rating: _seller!.rating,
+                                            reviewsCount: _seller!.reviewsCount,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
 
@@ -865,52 +856,58 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                 ],
               ),
               child: isSeller
-                  // Vue Vendeur : Booster + Partager
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        PrimaryButton(
-                          text: AppLocalizations.of(context)!.boostProduct,
-                          onPressed: () {
-                            // TODO: Implémenter le boost du produit
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        SecondaryButton(
-                          text: AppLocalizations.of(context)!.shareProduct,
-                          icon: Icons.share,
-                          onPressed: () {
-                            // TODO: Implémenter le partage du produit
-                          },
-                        ),
-                      ],
-                    )
-                  // Vue Acheteur : Faire une offre + Acheter
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: SecondaryButton(
-                            text: AppLocalizations.of(context)!.makeOffer,
-                            onPressed: () {
-                              if (_product != null) {
-                                MakeOfferBottomSheet.show(context, _product!);
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: PrimaryButton(
-                            text: AppLocalizations.of(context)!.buyNow,
-                            onPressed: () {
-                              if (_product != null) {
-                                context.push('/payment', extra: _product);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                  ? (product.isSold
+                        // Vue Vendeur, article vendu : code QR de remise en main propre
+                        ? _buildSellerDeliveryButton(context, ref, product, currentUser.uid)
+                        // Vue Vendeur, article en vente : Booster + Partager
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              PrimaryButton(
+                                text: AppLocalizations.of(context)!.boostProduct,
+                                onPressed: () {
+                                  // TODO: Implémenter le boost du produit
+                                },
+                              ),
+                              const SizedBox(height: 8),
+                              SecondaryButton(
+                                text: AppLocalizations.of(context)!.shareProduct,
+                                icon: Icons.share,
+                                onPressed: () {
+                                  // TODO: Implémenter le partage du produit
+                                },
+                              ),
+                            ],
+                          ))
+                  : (product.isSold
+                        // Vue Acheteur, article vendu : confirmer la réception (si c'est bien son achat)
+                        ? _buildBuyerDeliveryButton(context, ref, product, currentUser?.uid)
+                        // Vue Acheteur, article en vente : Faire une offre + Acheter
+                        : Row(
+                            children: [
+                              Expanded(
+                                child: SecondaryButton(
+                                  text: AppLocalizations.of(context)!.makeOffer,
+                                  onPressed: () {
+                                    if (_product != null) {
+                                      MakeOfferBottomSheet.show(context, _product!);
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: PrimaryButton(
+                                  text: AppLocalizations.of(context)!.buyNow,
+                                  onPressed: () {
+                                    if (_product != null) {
+                                      context.push('/payment', extra: _product);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          )),
             ),
           ),
         ],
@@ -919,6 +916,83 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
   }
 
 
+
+  /// Bouton "Afficher le code QR" côté vendeur, une fois l'article vendu.
+  /// L'acheteur scanne ce code pour confirmer la réception et débloquer
+  /// le paiement (pendingAmount → availableAmount).
+  Widget _buildSellerDeliveryButton(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+    String sellerId,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final receiptAsync = ref.watch(receiptForSellerProvider((product.id, sellerId)));
+
+    return receiptAsync.when(
+      data: (receipt) {
+        if (receipt == null || receipt.qrCodeId == null) {
+          return PrimaryButton(text: l10n.showDeliveryQrButton, onPressed: null);
+        }
+        return PrimaryButton(
+          text: receipt.deliveryConfirmed ? l10n.deliveryAlreadyConfirmed : l10n.showDeliveryQrButton,
+          icon: Icons.qr_code,
+          onPressed: () => context.push(
+            '/delivery/show-qr',
+            extra: {
+              'qrCodeId': receipt.qrCodeId,
+              'deliveryConfirmed': receipt.deliveryConfirmed,
+            },
+          ),
+        );
+      },
+      loading: () => const Center(
+        child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (error, stack) => PrimaryButton(text: l10n.showDeliveryQrButton, onPressed: null),
+    );
+  }
+
+  /// Bouton "Confirmer la réception" côté acheteur, une fois l'article vendu
+  /// — affiché uniquement si l'utilisateur courant est bien l'acheteur.
+  Widget _buildBuyerDeliveryButton(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+    String? currentUserId,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (currentUserId == null) {
+      return PrimaryButton(text: l10n.productAlreadySold, onPressed: null);
+    }
+
+    final receiptAsync = ref.watch(receiptForBuyerProvider((product.id, currentUserId)));
+
+    return receiptAsync.when(
+      data: (receipt) {
+        if (receipt == null) {
+          return PrimaryButton(text: l10n.productAlreadySold, onPressed: null);
+        }
+        if (receipt.deliveryConfirmed) {
+          return PrimaryButton(
+            text: l10n.deliveryAlreadyConfirmed,
+            icon: Icons.check_circle_outline,
+            onPressed: null,
+          );
+        }
+        return PrimaryButton(
+          text: l10n.confirmDeliveryButton,
+          icon: Icons.qr_code_scanner,
+          onPressed: () => context.push('/delivery/scan-qr'),
+        );
+      },
+      loading: () => const Center(
+        child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (error, stack) => PrimaryButton(text: l10n.productAlreadySold, onPressed: null),
+    );
+  }
 
   /// Construit une ligne de détail avec label et valeur
   ///

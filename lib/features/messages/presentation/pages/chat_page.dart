@@ -1,16 +1,21 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/message_bubble.dart';
 import '../../../../shared/widgets/input.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
+import '../../../../shared/widgets/image_source_sheet.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../product/presentation/providers/product_provider.dart';
 import '../../../make_offer_feature/presentation/widgets/make_offer_bottom_sheet.dart';
 import '../../application/providers/message_providers.dart';
 import '../../application/services/messaging_service.dart';
+import '../../data/services/chat_image_upload_service.dart';
 import '../../domain/models/message.dart';
 import '../../domain/models/message_type.dart';
+import '../../domain/models/offer_status.dart';
 import '../../domain/models/conversation.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -26,6 +31,8 @@ class ChatPage extends ConsumerStatefulWidget {
 class _ChatPageState extends ConsumerState<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  File? _pendingImage;
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -52,12 +59,28 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     super.dispose();
   }
 
+  /// Ouvre le sélecteur caméra/galerie et met la photo en attente au-dessus
+  /// du champ de saisie — elle n'est envoyée qu'au tap sur "Envoyer",
+  /// pour laisser le temps d'ajouter un message avec.
+  Future<void> _pickImage() async {
+    final image = await pickImageFromSourceSheet(context);
+    if (image == null || !mounted) return;
+    setState(() => _pendingImage = image);
+  }
+
+  void _removePendingImage() {
+    setState(() => _pendingImage = null);
+  }
+
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
-    if (text.isEmpty) return;
+    final image = _pendingImage;
+    if (text.isEmpty && image == null) return;
 
     final currentUser = ref.read(authStateProvider).value;
     if (currentUser == null) return;
+
+    setState(() => _isSending = true);
 
     try {
       final conversation = await ref.read(
@@ -67,16 +90,37 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
       final receiverId = conversation.getOtherParticipantId(currentUser.uid);
 
-      await ref
-          .read(messagingServiceProvider)
-          .sendMessage(
-            conversationId: widget.conversationId,
-            senderId: currentUser.uid,
-            receiverId: receiverId,
-            text: text,
-          );
+      if (image != null) {
+        final imageUrl = await ref
+            .read(chatImageUploadServiceProvider)
+            .uploadChatImage(
+              image: image,
+              conversationId: widget.conversationId,
+              senderId: currentUser.uid,
+            );
+
+        await ref
+            .read(messagingServiceProvider)
+            .sendImageMessage(
+              conversationId: widget.conversationId,
+              senderId: currentUser.uid,
+              receiverId: receiverId,
+              imageUrl: imageUrl,
+              caption: text.isEmpty ? null : text,
+            );
+      } else {
+        await ref
+            .read(messagingServiceProvider)
+            .sendMessage(
+              conversationId: widget.conversationId,
+              senderId: currentUser.uid,
+              receiverId: receiverId,
+              text: text,
+            );
+      }
 
       _messageController.clear();
+      setState(() => _pendingImage = null);
 
       // Scroll vers le bas après l'envoi
       Future.delayed(const Duration(milliseconds: 100), () {
@@ -94,6 +138,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           context,
         ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString()))));
       }
+    } finally {
+      if (mounted) setState(() => _isSending = false);
     }
   }
 
@@ -143,17 +189,53 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
-  Future<void> _buyProduct(Conversation conversation) async {
+  Future<void> _buyProduct(Conversation conversation, {double? explicitAgreedPrice}) async {
     try {
-      // Utiliser directement productId de la conversation (pas de requête supplémentaire)
-      // Le produit est probablement déjà en cache si on vient de la page produit
-      final product = await ref.read(
-        productByIdProvider(conversation.productId).future,
-      );
+      // Invalider le provider et récupérer le produit en direct depuis Firestore (pour ne pas utiliser un vieux cache)
+      ref.invalidate(productByIdProvider(conversation.productId));
+      final rawProduct = await ref.read(
+        productRepositoryProvider,
+      ).getProductById(conversation.productId);
+
+      if (rawProduct == null) return;
+
+      // 1. Vérifier si l'article est déjà vendu
+      if (rawProduct.isSold) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cet article a déjà été vendu'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // 2. Déterminer le prix convenu :
+      // Soit explicitement transmis, soit en cherchant l'offre acceptée la plus récente dans les messages
+      double? agreedPrice = explicitAgreedPrice;
+      if (agreedPrice == null) {
+        final messages = ref.read(messagesStreamProvider(widget.conversationId)).value;
+        if (messages != null) {
+          for (final msg in messages.reversed) {
+            if ((msg.type == MessageType.offer || msg.type == MessageType.counterOffer) &&
+                msg.offer?.status == OfferStatus.accepted &&
+                msg.offer?.amount != null) {
+              agreedPrice = msg.offer!.amount;
+              break;
+            }
+          }
+        }
+      }
+
+      final productToBuy = (agreedPrice != null && agreedPrice > 0)
+          ? rawProduct.copyWith(price: agreedPrice)
+          : rawProduct;
 
       if (mounted) {
         // Naviguer vers la page de paiement avec le produit
-        context.push('/payment', extra: product);
+        context.push('/payment', extra: productToBuy);
       }
     } catch (e) {
       if (mounted) {
@@ -166,10 +248,26 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   Future<void> _showMakeOfferBottomSheet(Conversation conversation) async {
     try {
-      // Récupérer le produit complet depuis le productId
+      // Récupérer le produit en direct depuis Firestore
+      ref.invalidate(productByIdProvider(conversation.productId));
       final product = await ref.read(
-        productByIdProvider(conversation.productId).future,
-      );
+        productRepositoryProvider,
+      ).getProductById(conversation.productId);
+
+      if (product == null) return;
+
+      // Vérifier si l'article est déjà vendu
+      if (product.isSold) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cet article a déjà été vendu'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
 
       if (mounted) {
         await MakeOfferBottomSheet.show(context, product);
@@ -558,7 +656,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           // 1. L'offre est acceptée
           // 2. L'utilisateur actuel est l'acheteur (pas le vendeur)
           onBuy: message.offer?.status.name == 'accepted' && isBuyer
-              ? () => _buyProduct(conversation)
+              ? () => _buyProduct(conversation, explicitAgreedPrice: message.offer?.amount)
               : null,
           // Le bouton "Faire une offre" dans la bulle appelle la même fonction que celle du haut
           onCounterOffer: () => _showMakeOfferBottomSheet(conversation),
@@ -566,6 +664,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
       case MessageType.text:
         return MessageBubble(isMe: isMe, text: message.text ?? '');
+
+      case MessageType.image:
+        return MessageBubble(isMe: isMe, imageUrl: message.imageUrl, text: message.text);
     }
   }
 
@@ -579,27 +680,80 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         ),
       ),
       child: SafeArea(
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: const Icon(Icons.camera_alt_outlined),
-              onPressed: () {},
-            ),
-            Expanded(
-              child: Input(
-                controller: _messageController,
-                placeholder: AppLocalizations.of(context)!.sendMessagePlaceholder,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+            if (_pendingImage != null) _buildPendingImagePreview(theme),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.camera_alt_outlined),
+                  onPressed: _isSending ? null : _pickImage,
                 ),
-                borderRadius: 7,
-                borderColor: Colors.transparent,
-                focusedBorderColor: Colors.transparent,
-                onSubmitted: (value) => _sendMessage(),
+                Expanded(
+                  child: Input(
+                    controller: _messageController,
+                    placeholder: AppLocalizations.of(context)!.sendMessagePlaceholder,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    borderRadius: 7,
+                    borderColor: Colors.transparent,
+                    focusedBorderColor: Colors.transparent,
+                    onSubmitted: (value) => _sendMessage(),
+                  ),
+                ),
+                IconButton(
+                  icon: _isSending
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send),
+                  onPressed: _isSending ? null : _sendMessage,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPendingImagePreview(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                _pendingImage!,
+                height: 72,
+                width: 72,
+                fit: BoxFit.cover,
               ),
             ),
-            IconButton(icon: const Icon(Icons.send), onPressed: _sendMessage),
+            Positioned(
+              top: -6,
+              right: -6,
+              child: GestureDetector(
+                onTap: _isSending ? null : _removePendingImage,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, size: 14, color: Colors.white),
+                ),
+              ),
+            ),
           ],
         ),
       ),

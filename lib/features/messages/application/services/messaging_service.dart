@@ -136,6 +136,23 @@ class MessagingService {
     );
   }
 
+  /// Envoie une photo dans la conversation
+  Future<void> sendImageMessage({
+    required String conversationId,
+    required String senderId,
+    required String receiverId,
+    required String imageUrl,
+    String? caption,
+  }) async {
+    await _repository.sendImageMessage(
+      conversationId: conversationId,
+      senderId: senderId,
+      receiverId: receiverId,
+      imageUrl: imageUrl,
+      caption: caption,
+    );
+  }
+
   /// Marque une conversation comme lue
   Future<void> markAsRead({
     required String conversationId,

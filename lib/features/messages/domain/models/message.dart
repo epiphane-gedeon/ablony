@@ -19,6 +19,9 @@ class Message {
   // Pour type text
   final String? text;
 
+  // Pour type image
+  final String? imageUrl;
+
   const Message({
     required this.id,
     required this.senderId,
@@ -28,6 +31,7 @@ class Message {
     this.userInfo,
     this.offer,
     this.text,
+    this.imageUrl,
   });
 
   factory Message.fromFirestore(DocumentSnapshot doc) {
@@ -46,6 +50,7 @@ class Message {
           ? Offer.fromFirestore(data['offer'] as Map<String, dynamic>)
           : null,
       text: data['text'] as String?,
+      imageUrl: data['imageUrl'] as String?,
     );
   }
 
@@ -58,6 +63,7 @@ class Message {
       if (userInfo != null) 'userInfo': userInfo!.toFirestore(),
       if (offer != null) 'offer': offer!.toFirestore(),
       if (text != null) 'text': text,
+      if (imageUrl != null) 'imageUrl': imageUrl,
     };
   }
 
@@ -70,6 +76,7 @@ class Message {
     UserInfo? userInfo,
     Offer? offer,
     String? text,
+    String? imageUrl,
   }) {
     return Message(
       id: id ?? this.id,
@@ -80,6 +87,7 @@ class Message {
       userInfo: userInfo ?? this.userInfo,
       offer: offer ?? this.offer,
       text: text ?? this.text,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

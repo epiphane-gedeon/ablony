@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../features/auth/application/auth_providers.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/custom_checkbox.dart';
 import '../../../../shared/widgets/input.dart';
 
 /// Page de sélection du mode de paiement
 class PaymentMethodPage extends ConsumerStatefulWidget {
-  const PaymentMethodPage({super.key});
+  final bool isRecharge;
+  const PaymentMethodPage({super.key, this.isRecharge = false});
 
   @override
   ConsumerState<PaymentMethodPage> createState() => _PaymentMethodPageState();
 }
 
 class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
-  String _selectedMethod = ''; // 'tmoney', 'flooz', 'card'
+  String _selectedMethod = ''; // 'tmoney', 'flooz', 'card', 'wallet'
   final _formKey = GlobalKey<FormState>();
 
   // Contrôleurs pour le formulaire de carte
@@ -49,6 +51,14 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
           content: Text('Veuillez sélectionner un mode de paiement'),
         ),
       );
+      return;
+    }
+
+    if (_selectedMethod == 'wallet') {
+      context.pop({
+        'method': 'wallet',
+        'phoneNumber': null,
+      });
       return;
     }
 
@@ -102,6 +112,8 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
+    final userAsync = ref.watch(currentUserProvider);
+    final wallet = userAsync.value?.wallet;
 
     return Scaffold(
       appBar: AppBar(
@@ -118,6 +130,31 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
+                // Porte-monnaie (affiché seulement si ce n'est pas une recharge et que le wallet est activé)
+                if (!widget.isRecharge && wallet != null && wallet.isActivated) ...[
+                  _buildPaymentCard(
+                    title: 'Porte-monnaie Ablony',
+                    subtitle: 'Payer avec votre solde (${wallet.availableAmountInXOF.toStringAsFixed(0)} FCFA)',
+                    icon: Icons.account_balance_wallet,
+                    method: 'wallet',
+                    expandedContent: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Solde disponible : ${wallet.availableAmountInXOF.toStringAsFixed(0)} FCFA',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Le montant sera débité directement de votre porte-monnaie.',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
                 // T-Money (Mix by Yas)
                 _buildPaymentCard(
                   title: 'T-Money (Mix by Yas)',

@@ -1237,9 +1237,112 @@ class AppLocalizationsFr extends AppLocalizations {
   String get followButton => 'Suivre';
 
   @override
-  String followComingSoon(String username) {
-    return 'Suivre $username bientôt disponible !';
+  String get unfollowButton => 'Suivi';
+
+  @override
+  String followersCountLabel(int count) {
+    return '$count abonnés';
   }
+
+  @override
+  String followingCountLabel(int count) {
+    return '$count abonnements';
+  }
+
+  @override
+  String get followersPageTitle => 'Abonnés';
+
+  @override
+  String get followingPageTitle => 'Abonnements';
+
+  @override
+  String get noFollowersYet => 'Aucun abonné pour le moment';
+
+  @override
+  String get noFollowingYet => 'Ne suit personne pour le moment';
+
+  @override
+  String get receiptPageTitle => 'Reçu';
+
+  @override
+  String get receiptReference => 'Référence';
+
+  @override
+  String get receiptDate => 'Date';
+
+  @override
+  String get receiptSeller => 'Vendeur';
+
+  @override
+  String get receiptBuyer => 'Acheteur';
+
+  @override
+  String get receiptPaymentMethod => 'Moyen de paiement';
+
+  @override
+  String get receiptProductPrice => 'Prix de l\'article';
+
+  @override
+  String get receiptTotalPaid => 'Total payé';
+
+  @override
+  String get receiptDownloadButton => 'Télécharger le reçu';
+
+  @override
+  String get rateSellerPageTitle => 'Notez votre vendeur';
+
+  @override
+  String rateSellerHeadline(String productTitle) {
+    return 'Comment s\'est passé votre achat de \"$productTitle\" ?';
+  }
+
+  @override
+  String get rateSellerCommentHint => 'Ajouter un commentaire (facultatif)';
+
+  @override
+  String get rateSellerSubmitButton => 'Envoyer mon avis';
+
+  @override
+  String get showDeliveryQrButton => 'Afficher le code QR';
+
+  @override
+  String get confirmDeliveryButton => 'Confirmer la réception';
+
+  @override
+  String get productAlreadySold => 'Article déjà vendu';
+
+  @override
+  String get deliveryQrPageTitle => 'Code de remise';
+
+  @override
+  String get deliveryQrInstructions =>
+      'Faites scanner ce code par l\'acheteur au moment de la remise pour débloquer le paiement.';
+
+  @override
+  String get deliveryAlreadyConfirmed => 'Réception confirmée';
+
+  @override
+  String get scanQrPageTitle => 'Scanner le code';
+
+  @override
+  String get scanQrInstructions =>
+      'Scannez le code QR affiché par le vendeur pour confirmer la réception';
+
+  @override
+  String get deliveryConfirmedTitle => 'Réception confirmée !';
+
+  @override
+  String get deliveryConfirmedMessage =>
+      'Merci ! Le paiement a été débloqué pour le vendeur.';
+
+  @override
+  String get imageSourceCameraOption => 'Prendre une photo';
+
+  @override
+  String get imageSourceGalleryOption => 'Choisir depuis la galerie';
+
+  @override
+  String get photoMessage => '📷 Photo';
 
   @override
   String get sendMessagePlaceholder => 'Envoyer un message';

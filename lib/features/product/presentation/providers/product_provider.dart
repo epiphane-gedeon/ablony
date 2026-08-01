@@ -77,6 +77,14 @@ final productByIdProvider = FutureProvider.family<Product, String>((
   return ref.watch(productRepositoryProvider).getProductById(productId);
 });
 
+/// Provider pour écouter les modifications d'un produit en temps réel (ex: isSold).
+final productStreamByIdProvider = StreamProvider.family<Product, String>((
+  ref,
+  productId,
+) {
+  return ref.watch(productRepositoryProvider).getProductStream(productId);
+});
+
 /// Provider pour récupérer toutes les valeurs d'un attribut par son nom
 /// (ex: 'brand', 'color', 'size', 'material')
 /// Récupère TOUTES les valeurs possibles depuis la base, pas seulement celles utilisées dans les produits

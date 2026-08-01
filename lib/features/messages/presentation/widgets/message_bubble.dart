@@ -6,6 +6,7 @@ import '../../../../l10n/app_localizations.dart';
 class MessageBubble extends StatelessWidget {
   final bool isMe;
   final String? text;
+  final String? imageUrl;
 
   // Paramètres pour les offres
   final bool isOffer;
@@ -24,6 +25,7 @@ class MessageBubble extends StatelessWidget {
     super.key,
     required this.isMe,
     this.text,
+    this.imageUrl,
     this.isOffer = false,
     this.offerAmount,
     this.offerStatus,
@@ -38,6 +40,10 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (imageUrl != null) {
+      return _buildImageBubble(context);
+    }
 
     // Couleurs définies dans le thème (MessageBubbleColors extension)
     // Messages envoyés: background noir, texte blanc (clair et sombre)
@@ -84,6 +90,94 @@ class MessageBubble extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageBubble(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasCaption = text != null && text!.isNotEmpty;
+
+    final backgroundColor = isMe
+        ? theme.colorScheme.bubbleSentBackground
+        : theme.colorScheme.bubbleReceivedBackground;
+    final textColor = isMe
+        ? theme.colorScheme.bubbleSentText
+        : theme.colorScheme.bubbleReceivedText;
+
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.6,
+        ),
+        decoration: hasCaption
+            ? BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(14),
+                border: isMe ? null : Border.all(color: theme.dividerColor.withOpacity(0.3)),
+              )
+            : null,
+        clipBehavior: hasCaption ? Clip.antiAlias : Clip.none,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: hasCaption
+                  ? const BorderRadius.vertical(top: Radius.circular(14))
+                  : BorderRadius.circular(14),
+              child: GestureDetector(
+                onTap: () => _openFullScreenImage(context),
+                child: Image.network(
+                  imageUrl!,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const SizedBox(
+                      height: 180,
+                      width: 180,
+                      child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    );
+                  },
+                  errorBuilder: (context, error, stack) => const SizedBox(
+                    height: 180,
+                    width: 180,
+                    child: Center(child: Icon(Icons.broken_image_outlined)),
+                  ),
+                ),
+              ),
+            ),
+            if (hasCaption)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Text(
+                  text!,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: textColor, height: 1.2),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openFullScreenImage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              child: Image.network(imageUrl!),
+            ),
+          ),
         ),
       ),
     );

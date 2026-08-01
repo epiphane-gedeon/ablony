@@ -27,7 +27,7 @@ service firebase.storage {
     function isValidSize() {
       return request.resource.size < 5 * 1024 * 1024;
     }
-    
+
     // ============================================================
     // IMAGES DE PRODUITS
     // ============================================================
@@ -65,6 +65,28 @@ service firebase.storage {
       allow delete: if isOwner(userId);
     }
     
+    // ============================================================
+    // PHOTOS DE CHAT
+    // ============================================================
+    // Structure : chat_images/{conversationId}/{senderId}/{timestamp}.jpg
+    //
+    // Storage Rules ne peuvent pas référencer les données Firestore (pas de
+    // lookup croisé "est-il participant de cette conversation ?"), donc la
+    // vérification se fait uniquement via le chemin, comme pour products/ et
+    // users/ ci-dessus. Lecture ouverte aux utilisateurs authentifiés (comme
+    // partout ailleurs dans ce fichier, les URLs de téléchargement portent de
+    // toute façon un token d'accès non devinable) ; écriture/suppression
+    // strictement réservées à l'expéditeur du fichier.
+    match /chat_images/{conversationId}/{senderId}/{fileName} {
+      allow read: if isAuthenticated();
+
+      allow write: if isOwner(senderId)
+        && isImage()
+        && isValidSize();
+
+      allow delete: if isOwner(senderId);
+    }
+
     // ============================================================
     // RÈGLE PAR DÉFAUT : TOUT REFUSER
     // ============================================================
