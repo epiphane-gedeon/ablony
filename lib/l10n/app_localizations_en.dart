@@ -1144,6 +1144,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareProduct => 'Share';
 
   @override
+  String shareProductSubtitle(String price, String condition) {
+    return '$price FCFA ($condition)';
+  }
+
+  @override
   String get priceIncl => 'incl.';
 
   @override
@@ -1326,6 +1331,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deliveryConfirmedMessage =>
       'Thank you! The payment has been released to the seller.';
+
+  @override
+  String get scanQrManualEntryButton => 'Enter receipt reference';
+
+  @override
+  String get scanQrManualEntryDialogTitle => 'Confirm with reference';
+
+  @override
+  String get scanQrManualEntryHint => 'Receipt reference';
+
+  @override
+  String get scanQrManualEntryError => 'Please enter a reference';
+
+  @override
+  String get reportProduct => 'Report this item';
+
+  @override
+  String get reportDialogTitle => 'Why are you reporting this item?';
+
+  @override
+  String get reportReasonCounterfeit => 'Counterfeit';
+
+  @override
+  String get reportReasonInappropriate => 'Inappropriate content';
+
+  @override
+  String get reportReasonScam => 'Potential scam';
+
+  @override
+  String get reportReasonOther => 'Other';
+
+  @override
+  String get reportCommentHint => 'Details (optional)';
+
+  @override
+  String get reportSubmitButton => 'Send report';
+
+  @override
+  String get reportSuccessMessage =>
+      'Report sent, thanks for keeping the community safe.';
 
   @override
   String get imageSourceCameraOption => 'Take a photo';

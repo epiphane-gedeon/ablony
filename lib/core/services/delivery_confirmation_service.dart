@@ -12,8 +12,12 @@ class DeliveryConfirmationService {
 
   /// [qrCodeId] est l'id opaque scanné dans le QR (collection `qrcodes`),
   /// jamais la référence de transaction directement — c'est le serveur qui
-  /// résout ce lien.
-  Future<void> confirmDelivery({required String qrCodeId}) async {
+  /// résout ce lien. En secours, [transactionRef] (la référence affichée sur
+  /// le reçu) peut être fourni à la place lorsque l'acheteur saisit la
+  /// référence manuellement plutôt que de scanner le code.
+  Future<void> confirmDelivery({String? qrCodeId, String? transactionRef}) async {
+    assert(qrCodeId != null || transactionRef != null);
+
     final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
     if (idToken == null) {
       throw Exception('Utilisateur non authentifié');
@@ -25,7 +29,10 @@ class DeliveryConfirmationService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $idToken',
       },
-      body: jsonEncode({'qrCodeId': qrCodeId}),
+      body: jsonEncode({
+        if (qrCodeId != null) 'qrCodeId': qrCodeId,
+        if (transactionRef != null) 'transactionRef': transactionRef,
+      }),
     );
 
     final data = jsonDecode(response.body);

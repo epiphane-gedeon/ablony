@@ -26,6 +26,16 @@ class MessagesPage extends ConsumerWidget {
 
     // Récupérer l'utilisateur connecté
     final currentUserAsync = ref.watch(authStateProvider);
+    final currentUser = currentUserAsync.value;
+
+    // Pastilles par onglet, alimentées par le même système que le badge de
+    // la bottom nav (cf. main_layout.dart).
+    final unreadMessages = currentUser != null
+        ? ref.watch(totalUnreadCountStreamProvider(currentUser.uid)).value ?? 0
+        : 0;
+    final unreadNotifications = currentUser != null
+        ? ref.watch(unreadNotificationsCountProvider(currentUser.uid))
+        : 0;
 
     return DefaultTabController(
       length: 2,
@@ -35,8 +45,8 @@ class MessagesPage extends ConsumerWidget {
           centerTitle: true,
           bottom: TabBar(
             tabs: [
-              Tab(text: l10n.messagesTab),
-              Tab(text: l10n.notificationsTab),
+              Tab(child: _buildTabLabel(l10n.messagesTab, unreadMessages)),
+              Tab(child: _buildTabLabel(l10n.notificationsTab, unreadNotifications)),
             ],
             indicatorColor: theme.colorScheme.primary,
             indicatorSize: TabBarIndicatorSize.tab,
@@ -72,6 +82,11 @@ class MessagesPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildTabLabel(String text, int unreadCount) {
+    if (unreadCount == 0) return Text(text);
+    return Badge(label: Text(unreadCount.toString()), child: Text(text));
   }
 
   Widget _buildConversationsList(

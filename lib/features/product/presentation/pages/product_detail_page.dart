@@ -19,6 +19,9 @@ import '../providers/product_provider.dart';
 import '../providers/paginated_products_provider.dart';
 import '../../../reviews/presentation/widgets/star_rating.dart';
 import '../../../receipt/presentation/providers/receipt_provider.dart';
+import '../../../reports/presentation/widgets/report_product_dialog.dart';
+import '../../../share/domain/models/shareable_content.dart';
+import '../../../share/presentation/services/share_service.dart';
 import 'package:ablony/features/make_offer_feature/presentation/widgets/make_offer_bottom_sheet.dart';
 import 'package:ablony/features/sell/presentation/widgets/sell_bottom_sheet.dart';
 
@@ -204,7 +207,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             children: [
               const Icon(Icons.error_outline, size: 64),
               const SizedBox(height: 16),
-              Text(AppLocalizations.of(context)!.productNotFound, style: theme.textTheme.titleLarge),
+              Text(
+                AppLocalizations.of(context)!.productNotFound,
+                style: theme.textTheme.titleLarge,
+              ),
             ],
           ),
         ),
@@ -223,126 +229,285 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         ? product.imageUrls
         : ['https://picsum.photos/400/600'];
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              // Carousel d'images
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 500,
-                  child: Stack(
-                    children: [
-                      PageView.builder(
-                        itemCount: images.length,
-                        onPageChanged: (index) {
-                          setState(() {
-                            _currentImageIndex = index;
-                          });
-                        },
-                        itemBuilder: (context, index) {
-                          return Image.network(
-                            images[index],
-                            fit: BoxFit.cover,
-                          );
-                        },
-                      ),
-                      // Indicateur d'images (3 points)
-                      Positioned(
-                        bottom: 16,
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            images.length,
-                            (index) => Container(
-                              width: 8,
-                              height: 8,
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _currentImageIndex == index
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.5),
+    // Accessible via un lien partagé (cf. lib/features/share/) : lancée à
+    // froid, cette page peut être la toute première route, sans rien en
+    // dessous dans la pile. Un back (bouton ou geste système) doit alors
+    // ramener à l'accueil plutôt que laisser un écran noir / quitter l'app.
+    return PopScope(
+      canPop: Navigator.of(context).canPop(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.go('/home');
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                // Carousel d'images
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 500,
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          itemCount: images.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            return Image.network(
+                              images[index],
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                        // Indicateur d'images (3 points)
+                        Positioned(
+                          bottom: 16,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              images.length,
+                              (index) => Container(
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _currentImageIndex == index
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.5),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      // Toggle favoris (uniquement pour les acheteurs)
-                      if (!isSeller)
-                        Positioned(
-                          bottom: 16,
-                          right: 16,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.7),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              children: [
-                                FavToggle(productId: product.id, size: 20),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '$favoriteCount',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
+                        // Toggle favoris (uniquement pour les acheteurs)
+                        if (!isSeller)
+                          Positioned(
+                            bottom: 16,
+                            right: 16,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.7),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  FavToggle(productId: product.id, size: 20),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$favoriteCount',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Contenu
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Titre
-                      Text(
-                        product.title,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                // Contenu
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Titre
+                        Text(
+                          product.title,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                      // Taille / État / Marque
-                      Row(
-                        children: [
-                          // Taille
-                          if (product.primarySizeValue != null) ...[
+                        // Taille / État / Marque
+                        Row(
+                          children: [
+                            // Taille
+                            if (product.primarySizeValue != null) ...[
+                              Text(
+                                ref
+                                        .watch(
+                                          attributeLabelProvider((
+                                            attributeId:
+                                                product.primarySizeAttributeId!,
+                                            value: product.primarySizeValue,
+                                          )),
+                                        )
+                                        .value ??
+                                    '',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              Text(' · ', style: theme.textTheme.bodyMedium),
+                            ],
+
+                            // État
                             Text(
                               ref
                                       .watch(
                                         attributeLabelProvider((
-                                          attributeId:
-                                              product.primarySizeAttributeId!,
-                                          value: product.primarySizeValue,
+                                          attributeId: 'condition',
+                                          value: product.condition.index,
                                         )),
                                       )
                                       .value ??
-                                  '',
+                                  product.condition.label,
                               style: theme.textTheme.bodyMedium,
                             ),
-                            Text(' · ', style: theme.textTheme.bodyMedium),
+
+                            // Marque (si elle existe)
+                            if (product.primaryBrandValue != null) ...[
+                              Text(' · ', style: theme.textTheme.bodyMedium),
+                              Link(
+                                text:
+                                    ref
+                                        .watch(
+                                          attributeLabelProvider((
+                                            attributeId: product
+                                                .primaryBrandAttributeId!,
+                                            value: product.primaryBrandValue,
+                                          )),
+                                        )
+                                        .value ??
+                                    product.primaryBrandValue.toString(),
+                                onTap: () {
+                                  // TODO: Rediriger vers la page de la marque
+                                },
+                                underline: true,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ],
                           ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Prix
+                        Text(
+                          '${product.price.toStringAsFixed(2)} FCFA',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text(
+                              '${(product.price * 1.05).toStringAsFixed(2)} FCFA ${AppLocalizations.of(context)!.priceIncl} ',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            Icon(
+                              Icons.verified_user,
+                              size: 16,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                AppLocalizations.of(context)!.subtotalForBuyer,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Section Description
+                        Text(
+                          AppLocalizations.of(context)!.productDescriptionTitle,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Texte de la description (tronqué ou complet selon l'état)
+                        Text(
+                          _isDescriptionExpanded
+                              ? product
+                                    .description // Affiche toute la description
+                              : product.description.length > 100
+                              ? '${product.description.substring(0, 100)}...' // Tronque à 100 caractères
+                              : product
+                                    .description, // Description courte affichée en entier
+                          style: theme.textTheme.bodyMedium,
+                        ),
+
+                        // Bouton "plus" pour afficher/masquer les détails du produit
+                        Link(
+                          text: _isDescriptionExpanded
+                              ? AppLocalizations.of(context)!.readLess
+                              : AppLocalizations.of(context)!.readMore,
+                          onTap: () {
+                            setState(() {
+                              _isDescriptionExpanded = !_isDescriptionExpanded;
+                            });
+                          },
+                          style: TextStyle(color: theme.colorScheme.primary),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Sections détaillées du produit (affichées après avoir cliqué sur "plus")
+                        if (_isDescriptionExpanded) ...[
+                          const Divider(height: 32),
+
+                          // Catégorie finale (sous-catégorie)
+                          _buildDetailRow(
+                            theme,
+                            AppLocalizations.of(context)!.productCategory,
+                            _subcategoryName ?? product.subcategoryId,
+                            showArrow: true,
+                          ),
+                          const Divider(height: 1),
+
+                          // Taille
+                          _buildDetailRow(
+                            theme,
+                            AppLocalizations.of(context)!.productSize,
+                            product.primarySizeValue != null
+                                ? ref
+                                          .watch(
+                                            attributeLabelProvider((
+                                              attributeId: product
+                                                  .primarySizeAttributeId!,
+                                              value: product.primarySizeValue,
+                                            )),
+                                          )
+                                          .value ??
+                                      AppLocalizations.of(context)!.notSpecified
+                                : AppLocalizations.of(context)!.notSpecified,
+                            showArrow: true,
+                          ),
+                          const Divider(height: 1),
 
                           // État
-                          Text(
+                          _buildDetailRow(
+                            theme,
+                            AppLocalizations.of(context)!.productCondition,
                             ref
                                     .watch(
                                       attributeLabelProvider((
@@ -352,570 +517,536 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                     )
                                     .value ??
                                 product.condition.label,
-                            style: theme.textTheme.bodyMedium,
+                            showArrow: true,
                           ),
+                          const Divider(height: 1),
 
-                          // Marque (si elle existe)
-                          if (product.primaryBrandValue != null) ...[
-                            Text(' · ', style: theme.textTheme.bodyMedium),
-                            Link(
-                              text:
-                                  ref
+                          // Couleur
+                          if (product.attributes['color'] != null)
+                            _buildDetailRow(
+                              theme,
+                              AppLocalizations.of(context)!.productColor,
+                              ref
                                       .watch(
                                         attributeLabelProvider((
-                                          attributeId:
-                                              product.primaryBrandAttributeId!,
-                                          value: product.primaryBrandValue,
+                                          attributeId: 'color',
+                                          value: product.attributes['color'],
                                         )),
                                       )
                                       .value ??
-                                  product.primaryBrandValue.toString(),
-                              onTap: () {
-                                // TODO: Rediriger vers la page de la marque
-                              },
-                              underline: true,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                              ),
+                                  product.attributes['color'].toString(),
+                              showArrow: false,
                             ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                          if (product.attributes['color'] != null)
+                            const Divider(height: 1),
 
-                      // Prix
-                      Text(
-                        '${product.price.toStringAsFixed(2)} FCFA',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            '${(product.price * 1.05).toStringAsFixed(2)} FCFA ${AppLocalizations.of(context)!.priceIncl} ',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          Icon(
-                            Icons.verified_user,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              AppLocalizations.of(context)!.subtotalForBuyer,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Section Description
-                      Text(
-                        AppLocalizations.of(context)!.productDescriptionTitle,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Texte de la description (tronqué ou complet selon l'état)
-                      Text(
-                        _isDescriptionExpanded
-                            ? product
-                                  .description // Affiche toute la description
-                            : product.description.length > 100
-                            ? '${product.description.substring(0, 100)}...' // Tronque à 100 caractères
-                            : product
-                                  .description, // Description courte affichée en entier
-                        style: theme.textTheme.bodyMedium,
-                      ),
-
-                      // Bouton "plus" pour afficher/masquer les détails du produit
-                      Link(
-                        text: _isDescriptionExpanded ? AppLocalizations.of(context)!.readLess : AppLocalizations.of(context)!.readMore,
-                        onTap: () {
-                          setState(() {
-                            _isDescriptionExpanded = !_isDescriptionExpanded;
-                          });
-                        },
-                        style: TextStyle(color: theme.colorScheme.primary),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Sections détaillées du produit (affichées après avoir cliqué sur "plus")
-                      if (_isDescriptionExpanded) ...[
-                        const Divider(height: 32),
-
-                        // Catégorie finale (sous-catégorie)
-                        _buildDetailRow(
-                          theme,
-                          AppLocalizations.of(context)!.productCategory,
-                          _subcategoryName ?? product.subcategoryId,
-                          showArrow: true,
-                        ),
-                        const Divider(height: 1),
-
-                        // Taille
-                        _buildDetailRow(
-                          theme,
-                          AppLocalizations.of(context)!.productSize,
-                          product.primarySizeValue != null
-                              ? ref
-                                        .watch(
-                                          attributeLabelProvider((
-                                            attributeId:
-                                                product.primarySizeAttributeId!,
-                                            value: product.primarySizeValue,
-                                          )),
-                                        )
-                                        .value ??
-                                    AppLocalizations.of(context)!.notSpecified
-                              : AppLocalizations.of(context)!.notSpecified,
-                          showArrow: true,
-                        ),
-                        const Divider(height: 1),
-
-                        // État
-                        _buildDetailRow(
-                          theme,
-                          AppLocalizations.of(context)!.productCondition,
-                          ref
-                                  .watch(
-                                    attributeLabelProvider((
-                                      attributeId: 'condition',
-                                      value: product.condition.index,
-                                    )),
-                                  )
-                                  .value ??
-                              product.condition.label,
-                          showArrow: true,
-                        ),
-                        const Divider(height: 1),
-
-                        // Couleur
-                        if (product.attributes['color'] != null)
+                          // Date d'ajout
                           _buildDetailRow(
                             theme,
-                            AppLocalizations.of(context)!.productColor,
-                            ref
-                                    .watch(
-                                      attributeLabelProvider((
-                                        attributeId: 'color',
-                                        value: product.attributes['color'],
-                                      )),
-                                    )
-                                    .value ??
-                                product.attributes['color'].toString(),
+                            AppLocalizations.of(context)!.productAddedDate,
+                            _formatTimeSince(context, product.createdAt),
                             showArrow: false,
                           ),
-                        if (product.attributes['color'] != null)
-                          const Divider(height: 1),
 
-                        // Date d'ajout
-                         _buildDetailRow(
-                           theme,
-                           AppLocalizations.of(context)!.productAddedDate,
-                           _formatTimeSince(context, product.createdAt),
-                           showArrow: false,
-                         ),
+                          const SizedBox(height: 16),
+                        ],
 
-                        const SizedBox(height: 16),
-                      ],
-
-                      // Bouton traduire
-                      if (!isSeller) ...[
-                        OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.language, size: 20),
-                          label: Text(AppLocalizations.of(context)!.clickToTranslate),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: theme.colorScheme.primary),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // Section Profil du vendeur (cachée si c'est le vendeur lui-même)
-                      if (!isSeller) ...[
-                        _isLoadingSeller
-                            ? const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            : _seller != null
-                            ? Row(
-                                children: [
-                                  // Avatar du vendeur (cliquable → profil public)
-                                  GestureDetector(
-                                    onTap: () => context.push('/profile/${_seller!.uid}'),
-                                    child: CircleAvatar(
-                                      radius: 24,
-                                      backgroundImage: _seller!.photoUrl != null
-                                          ? NetworkImage(_seller!.photoUrl!)
-                                          : null,
-                                      child: _seller!.photoUrl == null
-                                          ? Text(
-                                              _seller!.username[0].toUpperCase(),
-                                              style: theme.textTheme.titleLarge,
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-
-                                  // Informations du vendeur (username + évaluations — cliquables)
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => context.push('/profile/${_seller!.uid}'),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _seller!.username,
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                          StarRatingDisplay(
-                                            rating: _seller!.rating,
-                                            reviewsCount: _seller!.reviewsCount,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-
-                                  // Bouton Message pour contacter le vendeur
-                                  SecondaryButton(
-                                     text: AppLocalizations.of(context)!.messageButton,
-                                     onPressed: () async {
-                                      final currentUser = ref
-                                          .read(authStateProvider)
-                                          .value;
-                                      if (currentUser == null) return;
-
-                                      final messageRepo = ref.read(
-                                        messageRepositoryProvider,
-                                      );
-                                      String? conversationId = await messageRepo
-                                          .findConversation(
-                                            userId1: currentUser.uid,
-                                            userId2: _product!.sellerId,
-                                            productId: _product!.id,
-                                          );
-
-                                      if (conversationId == null) {
-                                        final authRepo = ref.read(
-                                          authRepositoryProvider,
-                                        );
-                                        final buyer = await authRepo.getUserById(
-                                          currentUser.uid,
-                                        );
-                                        final seller = await authRepo.getUserById(
-                                          _product!.sellerId,
-                                        );
-
-                                        conversationId = await messageRepo
-                                            .createConversation(
-                                              buyerId: buyer.uid,
-                                              sellerId: seller.uid,
-                                              buyerDetails: ParticipantDetails(
-                                                name: buyer.username,
-                                                avatar: buyer.photoUrl,
-                                              ),
-                                              sellerDetails: ParticipantDetails(
-                                                name: seller.username,
-                                                avatar: seller.photoUrl,
-                                              ),
-                                              productId: _product!.id,
-                                              productDetails: ProductDetails(
-                                                title: _product!.title,
-                                                price: _product!.price,
-                                                image:
-                                                    _product!.imageUrls.isNotEmpty
-                                                    ? _product!.imageUrls.first
-                                                    : null,
-                                                sellerId: seller.uid,
-                                              ),
-                                            );
-                                      }
-
-                                      if (context.mounted) {
-                                        context.push('/chat/$conversationId');
-                                      }
-                                    },
-                                    isFullWidth: false,
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                        const SizedBox(height: 12),
-
-                        // Badges
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            Chip(
-                              avatar: const Icon(Icons.flash_on, size: 16),
-                              label: Text(AppLocalizations.of(context)!.activelyPublishes),
-                              backgroundColor: theme.colorScheme.primary
-                                  .withOpacity(0.1),
-                              side: BorderSide.none,
+                        // Bouton traduire
+                        if (!isSeller) ...[
+                          OutlinedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.language, size: 20),
+                            label: Text(
+                              AppLocalizations.of(context)!.clickToTranslate,
                             ),
-                            Chip(
-                              avatar: const Icon(Icons.send, size: 16),
-                              label: Text(AppLocalizations.of(context)!.sendsQuickly),
-                              backgroundColor: theme.colorScheme.primary
-                                  .withOpacity(0.1),
-                              side: BorderSide.none,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // Frais de Protection
-                      if (!isSeller) ...[
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.verified_user,
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
                                 color: theme.colorScheme.primary,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // Section Profil du vendeur (cachée si c'est le vendeur lui-même)
+                        if (!isSeller) ...[
+                          _isLoadingSeller
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : _seller != null
+                              ? Row(
                                   children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.buyerProtectionTitle,
-                                      style: theme.textTheme.titleSmall?.copyWith(
-                                        fontWeight: FontWeight.bold,
+                                    // Avatar du vendeur (cliquable → profil public)
+                                    GestureDetector(
+                                      onTap: () => context.push(
+                                        '/profile/${_seller!.uid}',
+                                      ),
+                                      child: CircleAvatar(
+                                        radius: 24,
+                                        backgroundImage:
+                                            _seller!.photoUrl != null
+                                            ? NetworkImage(_seller!.photoUrl!)
+                                            : null,
+                                        child: _seller!.photoUrl == null
+                                            ? Text(
+                                                _seller!.username[0]
+                                                    .toUpperCase(),
+                                                style:
+                                                    theme.textTheme.titleLarge,
+                                              )
+                                            : null,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      AppLocalizations.of(context)!.buyerProtectionDescription,
-                                      style: theme.textTheme.bodySmall,
+                                    const SizedBox(width: 12),
+
+                                    // Informations du vendeur (username + évaluations — cliquables)
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => context.push(
+                                          '/profile/${_seller!.uid}',
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              _seller!.username,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
+                                            StarRatingDisplay(
+                                              rating: _seller!.rating,
+                                              reviewsCount:
+                                                  _seller!.reviewsCount,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Bouton Message pour contacter le vendeur
+                                    SecondaryButton(
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.messageButton,
+                                      onPressed: () async {
+                                        final currentUser = ref
+                                            .read(authStateProvider)
+                                            .value;
+                                        if (currentUser == null) return;
+
+                                        final messageRepo = ref.read(
+                                          messageRepositoryProvider,
+                                        );
+                                        String? conversationId =
+                                            await messageRepo.findConversation(
+                                              userId1: currentUser.uid,
+                                              userId2: _product!.sellerId,
+                                              productId: _product!.id,
+                                            );
+
+                                        if (conversationId == null) {
+                                          final authRepo = ref.read(
+                                            authRepositoryProvider,
+                                          );
+                                          final buyer = await authRepo
+                                              .getUserById(currentUser.uid);
+                                          final seller = await authRepo
+                                              .getUserById(_product!.sellerId);
+
+                                          conversationId = await messageRepo
+                                              .createConversation(
+                                                buyerId: buyer.uid,
+                                                sellerId: seller.uid,
+                                                buyerDetails:
+                                                    ParticipantDetails(
+                                                      name: buyer.username,
+                                                      avatar: buyer.photoUrl,
+                                                    ),
+                                                sellerDetails:
+                                                    ParticipantDetails(
+                                                      name: seller.username,
+                                                      avatar: seller.photoUrl,
+                                                    ),
+                                                productId: _product!.id,
+                                                productDetails: ProductDetails(
+                                                  title: _product!.title,
+                                                  price: _product!.price,
+                                                  image:
+                                                      _product!
+                                                          .imageUrls
+                                                          .isNotEmpty
+                                                      ? _product!
+                                                            .imageUrls
+                                                            .first
+                                                      : null,
+                                                  sellerId: seller.uid,
+                                                ),
+                                              );
+                                        }
+
+                                        if (context.mounted) {
+                                          context.push('/chat/$conversationId');
+                                        }
+                                      },
+                                      isFullWidth: false,
                                     ),
                                   ],
+                                )
+                              : const SizedBox.shrink(),
+                          const SizedBox(height: 12),
+
+                          // Badges
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              Chip(
+                                avatar: const Icon(Icons.flash_on, size: 16),
+                                label: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.activelyPublishes,
                                 ),
+                                backgroundColor: theme.colorScheme.primary
+                                    .withOpacity(0.1),
+                                side: BorderSide.none,
+                              ),
+                              Chip(
+                                avatar: const Icon(Icons.send, size: 16),
+                                label: Text(
+                                  AppLocalizations.of(context)!.sendsQuickly,
+                                ),
+                                backgroundColor: theme.colorScheme.primary
+                                    .withOpacity(0.1),
+                                side: BorderSide.none,
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // Onglets
-                      TabBar(
-                        controller: _tabController,
-                        labelColor: theme.colorScheme.primary,
-                        unselectedLabelColor: theme.textTheme.bodySmall?.color,
-                        indicatorColor: theme.colorScheme.primary,
-                        tabs: [
-                          Tab(text: AppLocalizations.of(context)!.membersWardrobe),
-                          Tab(text: AppLocalizations.of(context)!.similarItems),
+                          const SizedBox(height: 24),
                         ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
-              // Contenu des onglets
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 600,
-                  child: _isLoadingTabData
-                      ? const Center(child: CircularProgressIndicator())
-                      : TabBarView(
+                        // Frais de Protection
+                        if (!isSeller) ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.verified_user,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.buyerProtectionTitle,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.buyerProtectionDescription,
+                                        style: theme.textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // Onglets
+                        TabBar(
                           controller: _tabController,
-                          children: [
-                            _buildProductGrid(theme, _sellerProducts),
-                            _buildProductGrid(theme, _similarProducts),
+                          labelColor: theme.colorScheme.primary,
+                          unselectedLabelColor:
+                              theme.textTheme.bodySmall?.color,
+                          indicatorColor: theme.colorScheme.primary,
+                          tabs: [
+                            Tab(
+                              text: AppLocalizations.of(
+                                context,
+                              )!.membersWardrobe,
+                            ),
+                            Tab(
+                              text: AppLocalizations.of(context)!.similarItems,
+                            ),
                           ],
                         ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Contenu des onglets
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 600,
+                    child: _isLoadingTabData
+                        ? const Center(child: CircularProgressIndicator())
+                        : TabBarView(
+                            controller: _tabController,
+                            children: [
+                              _buildProductGrid(theme, _sellerProducts),
+                              _buildProductGrid(theme, _similarProducts),
+                            ],
+                          ),
+                  ),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
+            ),
+
+            // Bouton retour (fixe en haut à gauche)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 16,
+              child: CircleAvatar(
+                backgroundColor: Colors.black.withOpacity(0.5),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.of(context).canPop()
+                      ? Navigator.of(context).pop()
+                      : context.go('/home'),
                 ),
               ),
+            ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ],
-          ),
-
-          // Bouton retour (fixe en haut à gauche)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 16,
-            child: CircleAvatar(
-              backgroundColor: Colors.black.withOpacity(0.5),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
+            // Menu 3 points (fixe en haut à droite) - différent selon vendeur/acheteur
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              right: 16,
+              child: CircleAvatar(
+                backgroundColor: Colors.black.withOpacity(0.5),
+                child: isSeller
+                    ? PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_horiz, color: Colors.white),
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'vendu':
+                              _handleMarkAsSold(context, ref, product.id);
+                              break;
+                            case 'reserve':
+                              // TODO: Marquer comme réservé
+                              break;
+                            case 'modifier':
+                              SellBottomSheet.show(
+                                context,
+                                initialProduct: product,
+                              );
+                              break;
+                            case 'masquer':
+                              // TODO: Masquer
+                              break;
+                            case 'supprimer':
+                              _handleDeleteProduct(context, ref, product.id);
+                              break;
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'vendu',
+                            child: Text(
+                              AppLocalizations.of(context)!.markAsSold,
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'reserve',
+                            child: Text(
+                              AppLocalizations.of(context)!.markAsReserved,
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'modifier',
+                            child: Text(AppLocalizations.of(context)!.edit),
+                          ),
+                          PopupMenuItem(
+                            value: 'masquer',
+                            child: Text(AppLocalizations.of(context)!.hide),
+                          ),
+                          PopupMenuItem(
+                            value: 'supprimer',
+                            child: Text(
+                              AppLocalizations.of(context)!.deleteProduct,
+                              style: TextStyle(color: theme.colorScheme.error),
+                            ),
+                          ),
+                        ],
+                      )
+                    : PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_horiz, color: Colors.white),
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'partager':
+                              _shareProduct(context, product);
+                              break;
+                            case 'signaler':
+                              ReportProductDialog.show(
+                                context,
+                                productId: product.id,
+                                productTitle: product.title,
+                                sellerId: product.sellerId,
+                              );
+                              break;
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'partager',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.share, size: 20),
+                                const SizedBox(width: 12),
+                                Text(
+                                  AppLocalizations.of(context)!.shareProduct,
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'signaler',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.flag_outlined,
+                                  size: 20,
+                                  color: theme.colorScheme.error,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  AppLocalizations.of(context)!.reportProduct,
+                                  style: TextStyle(
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
-          ),
 
-          // Menu 3 points (fixe en haut à droite) - différent selon vendeur/acheteur
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            right: 16,
-            child: CircleAvatar(
-              backgroundColor: Colors.black.withOpacity(0.5),
-              child: isSeller
-                  ? PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_horiz, color: Colors.white),
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'vendu':
-                            _handleMarkAsSold(context, ref, product.id);
-                            break;
-                          case 'reserve':
-                            // TODO: Marquer comme réservé
-                            break;
-                          case 'modifier':
-                            SellBottomSheet.show(context, initialProduct: product);
-                            break;
-                          case 'masquer':
-                            // TODO: Masquer
-                            break;
-                          case 'supprimer':
-                            _handleDeleteProduct(context, ref, product.id);
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'vendu',
-                          child: Text(AppLocalizations.of(context)!.markAsSold),
-                        ),
-                        PopupMenuItem(
-                          value: 'reserve',
-                          child: Text(AppLocalizations.of(context)!.markAsReserved),
-                        ),
-                        PopupMenuItem(
-                          value: 'modifier',
-                          child: Text(AppLocalizations.of(context)!.edit),
-                        ),
-                        PopupMenuItem(
-                          value: 'masquer',
-                          child: Text(AppLocalizations.of(context)!.hide),
-                        ),
-                         PopupMenuItem(
-                           value: 'supprimer',
-                           child: Text(
-                             AppLocalizations.of(context)!.deleteProduct,
-                             style: TextStyle(color: theme.colorScheme.error),
-                           ),
-                         ),
-                      ],
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.more_horiz, color: Colors.white),
-                      onPressed: () {
-                        // TODO: menu acheteur (signaler, etc.)
-                      },
+            // Boutons d'action fixes en bas de l'écran
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
                     ),
-            ),
-          ),
-
-          // Boutons d'action fixes en bas de l'écran
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+                  ],
+                ),
+                child: isSeller
+                    ? (product.isSold
+                          // Vue Vendeur, article vendu : code QR de remise en main propre
+                          ? _buildSellerDeliveryButton(
+                              context,
+                              ref,
+                              product,
+                              currentUser.uid,
+                            )
+                          // Vue Vendeur, article en vente : Booster + Partager
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                PrimaryButton(
+                                  text: AppLocalizations.of(
+                                    context,
+                                  )!.boostProduct,
+                                  onPressed: () {
+                                    // TODO: Implémenter le boost du produit
+                                  },
+                                ),
+                                const SizedBox(height: 8),
+                                SecondaryButton(
+                                  text: AppLocalizations.of(
+                                    context,
+                                  )!.shareProduct,
+                                  icon: Icons.share,
+                                  onPressed: () =>
+                                      _shareProduct(context, product),
+                                ),
+                              ],
+                            ))
+                    : (product.isSold
+                          // Vue Acheteur, article vendu : confirmer la réception (si c'est bien son achat)
+                          ? _buildBuyerDeliveryButton(
+                              context,
+                              ref,
+                              product,
+                              currentUser?.uid,
+                            )
+                          // Vue Acheteur, article en vente : Faire une offre + Acheter
+                          : Row(
+                              children: [
+                                Expanded(
+                                  child: SecondaryButton(
+                                    text: AppLocalizations.of(
+                                      context,
+                                    )!.makeOffer,
+                                    onPressed: () {
+                                      if (_product != null) {
+                                        MakeOfferBottomSheet.show(
+                                          context,
+                                          _product!,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: PrimaryButton(
+                                    text: AppLocalizations.of(context)!.buyNow,
+                                    onPressed: () {
+                                      if (_product != null) {
+                                        context.push(
+                                          '/payment',
+                                          extra: _product,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            )),
               ),
-              child: isSeller
-                  ? (product.isSold
-                        // Vue Vendeur, article vendu : code QR de remise en main propre
-                        ? _buildSellerDeliveryButton(context, ref, product, currentUser.uid)
-                        // Vue Vendeur, article en vente : Booster + Partager
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              PrimaryButton(
-                                text: AppLocalizations.of(context)!.boostProduct,
-                                onPressed: () {
-                                  // TODO: Implémenter le boost du produit
-                                },
-                              ),
-                              const SizedBox(height: 8),
-                              SecondaryButton(
-                                text: AppLocalizations.of(context)!.shareProduct,
-                                icon: Icons.share,
-                                onPressed: () {
-                                  // TODO: Implémenter le partage du produit
-                                },
-                              ),
-                            ],
-                          ))
-                  : (product.isSold
-                        // Vue Acheteur, article vendu : confirmer la réception (si c'est bien son achat)
-                        ? _buildBuyerDeliveryButton(context, ref, product, currentUser?.uid)
-                        // Vue Acheteur, article en vente : Faire une offre + Acheter
-                        : Row(
-                            children: [
-                              Expanded(
-                                child: SecondaryButton(
-                                  text: AppLocalizations.of(context)!.makeOffer,
-                                  onPressed: () {
-                                    if (_product != null) {
-                                      MakeOfferBottomSheet.show(context, _product!);
-                                    }
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: PrimaryButton(
-                                  text: AppLocalizations.of(context)!.buyNow,
-                                  onPressed: () {
-                                    if (_product != null) {
-                                      context.push('/payment', extra: _product);
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
-                          )),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-
-
 
   /// Bouton "Afficher le code QR" côté vendeur, une fois l'article vendu.
   /// L'acheteur scanne ce code pour confirmer la réception et débloquer
@@ -927,15 +1058,22 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     String sellerId,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    final receiptAsync = ref.watch(receiptForSellerProvider((product.id, sellerId)));
+    final receiptAsync = ref.watch(
+      receiptForSellerProvider((product.id, sellerId)),
+    );
 
     return receiptAsync.when(
       data: (receipt) {
         if (receipt == null || receipt.qrCodeId == null) {
-          return PrimaryButton(text: l10n.showDeliveryQrButton, onPressed: null);
+          return PrimaryButton(
+            text: l10n.showDeliveryQrButton,
+            onPressed: null,
+          );
         }
         return PrimaryButton(
-          text: receipt.deliveryConfirmed ? l10n.deliveryAlreadyConfirmed : l10n.showDeliveryQrButton,
+          text: receipt.deliveryConfirmed
+              ? l10n.deliveryAlreadyConfirmed
+              : l10n.showDeliveryQrButton,
           icon: Icons.qr_code,
           onPressed: () => context.push(
             '/delivery/show-qr',
@@ -947,9 +1085,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         );
       },
       loading: () => const Center(
-        child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+        child: SizedBox(
+          height: 24,
+          width: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
       ),
-      error: (error, stack) => PrimaryButton(text: l10n.showDeliveryQrButton, onPressed: null),
+      error: (error, stack) =>
+          PrimaryButton(text: l10n.showDeliveryQrButton, onPressed: null),
     );
   }
 
@@ -967,7 +1110,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
       return PrimaryButton(text: l10n.productAlreadySold, onPressed: null);
     }
 
-    final receiptAsync = ref.watch(receiptForBuyerProvider((product.id, currentUserId)));
+    final receiptAsync = ref.watch(
+      receiptForBuyerProvider((product.id, currentUserId)),
+    );
 
     return receiptAsync.when(
       data: (receipt) {
@@ -988,9 +1133,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         );
       },
       loading: () => const Center(
-        child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+        child: SizedBox(
+          height: 24,
+          width: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
       ),
-      error: (error, stack) => PrimaryButton(text: l10n.productAlreadySold, onPressed: null),
+      error: (error, stack) =>
+          PrimaryButton(text: l10n.productAlreadySold, onPressed: null),
     );
   }
 
@@ -1050,11 +1200,17 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
       final months = (difference.inDays / 30).floor();
       return l10n.timeAgoMonths(months);
     } else if (difference.inDays > 0) {
-      return difference.inDays == 1 ? l10n.timeAgoDay : l10n.timeAgoDays(difference.inDays);
+      return difference.inDays == 1
+          ? l10n.timeAgoDay
+          : l10n.timeAgoDays(difference.inDays);
     } else if (difference.inHours > 0) {
-      return difference.inHours == 1 ? l10n.timeAgoHour : l10n.timeAgoHours(difference.inHours);
+      return difference.inHours == 1
+          ? l10n.timeAgoHour
+          : l10n.timeAgoHours(difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return difference.inMinutes == 1 ? l10n.timeAgoMinute : l10n.timeAgoMinutes(difference.inMinutes);
+      return difference.inMinutes == 1
+          ? l10n.timeAgoMinute
+          : l10n.timeAgoMinutes(difference.inMinutes);
     } else {
       return l10n.timeAgoJustNow;
     }
@@ -1103,6 +1259,25 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     );
   }
 
+  /// Partage la fiche produit via la fonctionnalité de partage centralisée
+  /// (cf. `lib/features/share/`), qui génère le lien et ouvre le sheet natif.
+  void _shareProduct(BuildContext context, Product product) {
+    final l10n = AppLocalizations.of(context)!;
+    ref
+        .read(shareServiceProvider)
+        .share(
+          context,
+          ShareableContent.product(
+            id: product.id,
+            title: product.title,
+            subtitle: l10n.shareProductSubtitle(
+              product.price.toStringAsFixed(0),
+              product.condition.label,
+            ),
+          ),
+        );
+  }
+
   /// Marque le produit comme vendu
   Future<void> _handleMarkAsSold(
     BuildContext context,
@@ -1131,7 +1306,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.errorGenericMsg(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -1147,23 +1324,25 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.deleteProductConfirm),
-            content: Text(
-              AppLocalizations.of(context)!.deleteProductConfirmationMessage,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(AppLocalizations.of(context)!.deleteProductBtn, style: const TextStyle(color: Colors.red)),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.deleteProductConfirm),
+        content: Text(
+          AppLocalizations.of(context)!.deleteProductConfirmationMessage,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              AppLocalizations.of(context)!.deleteProductBtn,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true) {
@@ -1173,7 +1352,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.productDeletedSuccess),
+              content: Text(
+                AppLocalizations.of(context)!.productDeletedSuccess,
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -1189,7 +1370,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString())),
+              content: Text(
+                AppLocalizations.of(context)!.errorGenericMsg(e.toString()),
+              ),
               backgroundColor: Colors.red,
             ),
           );

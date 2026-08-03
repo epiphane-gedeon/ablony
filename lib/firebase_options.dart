@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAH6dy7zGcgvXUdALv6l8Km8GvndcDIcNA',
-    appId: '1:2762433205:android:7faf7535e9abf78e3ad4fc',
+    appId: '1:2762433205:android:af2391c2d5d0b5ac3ad4fc',
     messagingSenderId: '2762433205',
     projectId: 'ablony-a5db9',
     storageBucket: 'ablony-a5db9.firebasestorage.app',
@@ -66,10 +66,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCSjZiU1bUb9o7zV3ImGOXHRwY1yOtC7PI',
-    appId: '1:2762433205:ios:98dd32101ee57f593ad4fc',
+    appId: '1:2762433205:ios:df7f5dac495454143ad4fc',
     messagingSenderId: '2762433205',
     projectId: 'ablony-a5db9',
     storageBucket: 'ablony-a5db9.firebasestorage.app',
-    iosBundleId: 'com.example.ablony',
+    androidClientId: '2762433205-4e87knanpqa0ikm0u9ns79vaa18pbghc.apps.googleusercontent.com',
+    iosClientId: '2762433205-33dv8i71vtufo5i1bph165ika4upuepr.apps.googleusercontent.com',
+    iosBundleId: 'com.ablony.app',
   );
+
 }

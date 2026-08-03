@@ -31,6 +31,13 @@
 
   <title>Ablony</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Google Maps (sélection de localisation). Une clé API web y est
+       toujours visible côté client (protection via restriction par référent
+       HTTP dans Google Cloud Console, pas par secret) — remplace le
+       placeholder ci-dessous par ta vraie clé restreinte au domaine web,
+       puis relance `flutter build web --release` + redeploy. -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYwEUMV9Fm-epx2HZg4mC37yfDSofJqxI" async defer></script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

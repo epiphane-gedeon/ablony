@@ -2276,6 +2276,12 @@ abstract class AppLocalizations {
   /// **'Partager'**
   String get shareProduct;
 
+  /// Subtitle line included when sharing a product listing
+  ///
+  /// In fr, this message translates to:
+  /// **'{price} FCFA ({condition})'**
+  String shareProductSubtitle(String price, String condition);
+
   /// priceIncl
   ///
   /// In fr, this message translates to:
@@ -2599,6 +2605,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Merci ! Le paiement a été débloqué pour le vendeur.'**
   String get deliveryConfirmedMessage;
+
+  /// Button to switch to manual receipt reference entry instead of scanning
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir la référence du reçu'**
+  String get scanQrManualEntryButton;
+
+  /// Manual receipt reference entry dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer avec la référence'**
+  String get scanQrManualEntryDialogTitle;
+
+  /// Manual receipt reference text field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence du reçu'**
+  String get scanQrManualEntryHint;
+
+  /// Validation error when the manual reference field is empty
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez saisir une référence'**
+  String get scanQrManualEntryError;
+
+  /// Buyer menu item to report a product
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler cet article'**
+  String get reportProduct;
+
+  /// Report product dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi signalez-vous cet article ?'**
+  String get reportDialogTitle;
+
+  /// Report reason: counterfeit item
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrefaçon'**
+  String get reportReasonCounterfeit;
+
+  /// Report reason: inappropriate content
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu inapproprié'**
+  String get reportReasonInappropriate;
+
+  /// Report reason: potential scam
+  ///
+  /// In fr, this message translates to:
+  /// **'Arnaque potentielle'**
+  String get reportReasonScam;
+
+  /// Report reason: other
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get reportReasonOther;
+
+  /// Report product optional comment field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisions (facultatif)'**
+  String get reportCommentHint;
+
+  /// Report product dialog submit button
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le signalement'**
+  String get reportSubmitButton;
+
+  /// Confirmation shown after a report is submitted
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé, merci pour votre vigilance.'**
+  String get reportSuccessMessage;
 
   /// Image source sheet: camera option
   ///

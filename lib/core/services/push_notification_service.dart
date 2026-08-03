@@ -2,13 +2,18 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 import '../navigation/navigator_key.dart';
 
 /// Gère l'enregistrement du device pour les notifications push (FCM) et
 /// le routage vers l'écran concerné lors d'un tap sur une notification.
+///
+/// Chaque notification serveur écrit aussi un document dans la collection
+/// `notifications`, ce qui met à jour en temps réel la pastille de l'onglet
+/// Messages (cf. [unreadNotificationsCountProvider]) — pas de bannière
+/// intrusive à l'ouverture de l'app, comme pour les messages.
 ///
 /// Deux notifications déclenchées côté serveur (Cloud Functions) sont
 /// gérées ici :
@@ -86,9 +91,10 @@ class PushNotificationService {
     if (_listenersInitialized) return;
     _listenersInitialized = true;
 
-    // App au premier plan : FCM n'affiche pas de notification système,
-    // on affiche donc un SnackBar cliquable.
-    FirebaseMessaging.onMessage.listen(_showForegroundBanner);
+    // App au premier plan : pas de bannière, la pastille sur l'onglet
+    // Messages (badge messages + notifications) suffit à signaler la
+    // nouveauté, alimentée directement par le document Firestore écrit
+    // côté serveur en parallèle du push.
 
     // Tap sur la notification alors que l'app est en arrière-plan.
     FirebaseMessaging.onMessageOpenedApp.listen(_handleTap);
@@ -97,24 +103,6 @@ class PushNotificationService {
     _messaging.getInitialMessage().then((message) {
       if (message != null) _handleTap(message);
     });
-  }
-
-  void _showForegroundBanner(RemoteMessage message) {
-    final notification = message.notification;
-    final context = rootNavigatorKey.currentContext;
-    if (notification == null || context == null) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${notification.title ?? ''}\n${notification.body ?? ''}'),
-        duration: const Duration(seconds: 4),
-        onVisible: () {},
-        action: SnackBarAction(
-          label: '→',
-          onPressed: () => _handleTap(message),
-        ),
-      ),
-    );
   }
 
   void _handleTap(RemoteMessage message) {

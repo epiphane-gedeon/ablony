@@ -1,24 +1,6 @@
-// IMPORTANT: Cette page nécessite l'installation des packages suivants :
-//
-// Dans pubspec.yaml:
-//   google_maps_flutter: ^2.5.0
-//   geolocator: ^10.1.0
-//   geocoding: ^2.1.1
-//
-// Configuration Android (android/app/src/main/AndroidManifest.xml):
-//   <application>
-//     <meta-data
-//       android:name="com.google.android.geo.API_KEY"
-//       android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
-//   </application>
-//
-// Configuration iOS (ios/Runner/AppDelegate.swift):
-//   import GoogleMaps
-//   GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY")
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../data/models/location_data.dart';
@@ -33,21 +15,21 @@ class SelectLocationPage extends ConsumerStatefulWidget {
 }
 
 class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
-  // GoogleMapController? _mapController;
+  GoogleMapController? _mapController;
   LocationData? _selectedLocation;
   bool _isLoadingCurrentLocation = false;
 
   // Position initiale (Lomé, Togo)
-  // final CameraPosition _initialPosition = const CameraPosition(
-  //   target: LatLng(6.1256, 1.2221),
-  //   zoom: 14,
-  // );
+  final CameraPosition _initialPosition = const CameraPosition(
+    target: LatLng(6.1256, 1.2221),
+    zoom: 14,
+  );
 
-  // Set<Marker> _markers = {};
+  Set<Marker> _markers = {};
 
   @override
   void dispose() {
-    // _mapController?.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -62,13 +44,13 @@ class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
       if (location != null) {
         setState(() {
           _selectedLocation = location;
-          // Déplacer la caméra vers la position actuelle
-          // _mapController?.animateCamera(
-          //   CameraUpdate.newLatLng(LatLng(location.latitude, location.longitude)),
-          // );
-          // Ajouter un marker
-          // _updateMarker(location.latitude, location.longitude);
         });
+        // Déplacer la caméra vers la position actuelle
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLng(LatLng(location.latitude, location.longitude)),
+        );
+        // Ajouter un marker
+        _updateMarker(location.latitude, location.longitude);
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -99,8 +81,6 @@ class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
 
   /// Met à jour le marker sur la carte
   void _updateMarker(double lat, double lng) {
-    // TODO: Décommenter après installation de google_maps_flutter
-    /*
     setState(() {
       _markers = {
         Marker(
@@ -113,7 +93,6 @@ class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
         ),
       };
     });
-    */
   }
 
   /// Appelé quand l'utilisateur sélectionne une position
@@ -160,8 +139,6 @@ class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
       body: Stack(
         children: [
           // Carte Google Maps
-          // TODO: Décommenter après installation de google_maps_flutter
-          /*
           GoogleMap(
             initialCameraPosition: _initialPosition,
             onMapCreated: (controller) {
@@ -175,44 +152,6 @@ class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
-          ),
-          */
-
-          // Placeholder temporaire
-          Center(
-            child: Container(
-              margin: const EdgeInsets.all(24),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.map, size: 64, color: theme.colorScheme.primary),
-                  const SizedBox(height: 16),
-                  Text('Google Maps', style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Installez les packages requis:\n'
-                    '• google_maps_flutter: ^2.5.0\n'
-                    '• geolocator: ^10.1.0\n'
-                    '• geocoding: ^2.1.1\n\n'
-                    'Puis configurez votre clé API Google Maps',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
           ),
 
           // Bouton adresse par défaut (temporaire, sans Google Maps API)
@@ -233,6 +172,7 @@ class _SelectLocationPageState extends ConsumerState<SelectLocationPage> {
                     country: 'Togo',
                   );
                 });
+                _updateMarker(6.1256, 1.2221);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Adresse par défaut sélectionnée (Lomé)'),

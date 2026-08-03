@@ -95,7 +95,15 @@ class _ReceiptView extends ConsumerWidget {
           SecondaryButton(
             text: l10n.confirmDeliveryButton,
             icon: Icons.qr_code_scanner,
-            onPressed: () => context.push('/delivery/scan-qr'),
+            onPressed: () => context.push(
+              '/delivery/scan-qr',
+              extra: {
+                'transactionRef': receipt.transactionRef,
+                'sellerId': receipt.sellerId,
+                'productId': receipt.productId,
+                'productTitle': receipt.productTitle,
+              },
+            ),
           ),
         ] else if (isBuyer && receipt.deliveryConfirmed) ...[
           const SizedBox(height: 32),

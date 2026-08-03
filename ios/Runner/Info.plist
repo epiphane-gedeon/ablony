@@ -55,5 +55,9 @@
 	<string>Ablony utilise l'appareil photo pour scanner un code QR et prendre des photos à envoyer dans les conversations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Ablony a besoin d'accéder à vos photos pour les envoyer dans vos conversations.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ablony a besoin de votre position pour faciliter la saisie de votre adresse.</string>
+	<key>GMSApiKey</key>
+	<string>$(GOOGLE_MAPS_API_KEY)</string>
 </dict>
 </plist>

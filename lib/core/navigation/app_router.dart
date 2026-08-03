@@ -227,8 +227,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           '/home', // Permettre l'accès à la home sans être connecté
         ];
 
+        // Les fiches produit sont publiques (lecture Firestore ouverte, cf.
+        // firestore.rules) : un lien partagé (cf. lib/features/share/) doit
+        // amener droit dessus même sans compte, sinon le contenu partagé se
+        // perd derrière l'onboarding.
+        final isPublicProductRoute = location.startsWith('/product/');
+
         // Si l'utilisateur essaie d'accéder à une route protégée
-        if (!publicRoutes.contains(location)) {
+        if (!publicRoutes.contains(location) && !isPublicProductRoute) {
           return '/onboarding'; // Rediriger vers l'onboarding
         }
 
@@ -635,7 +641,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/delivery/scan-qr',
         name: 'scan_delivery_qr',
-        builder: (context, state) => const ScanDeliveryQrPage(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return ScanDeliveryQrPage(
+            transactionRef: extra['transactionRef'] as String,
+            sellerId: extra['sellerId'] as String,
+            productId: extra['productId'] as String,
+            productTitle: extra['productTitle'] as String,
+          );
+        },
       ),
 
       // ============================================================

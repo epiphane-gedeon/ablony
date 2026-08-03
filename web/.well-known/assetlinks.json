@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ablony.app",
+      "sha256_cert_fingerprints": [
+        "57:F2:F8:4F:43:11:CC:49:E8:F7:60:C2:E6:37:A5:AA:A4:7D:C9:4F:97:B1:FE:B0:E5:F1:85:25:6B:E8:0E:41"
+      ]
+    }
+  }
+]

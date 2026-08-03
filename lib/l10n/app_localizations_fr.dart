@@ -1151,6 +1151,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shareProduct => 'Partager';
 
   @override
+  String shareProductSubtitle(String price, String condition) {
+    return '$price FCFA ($condition)';
+  }
+
+  @override
   String get priceIncl => 'incl.';
 
   @override
@@ -1334,6 +1339,46 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get deliveryConfirmedMessage =>
       'Merci ! Le paiement a été débloqué pour le vendeur.';
+
+  @override
+  String get scanQrManualEntryButton => 'Saisir la référence du reçu';
+
+  @override
+  String get scanQrManualEntryDialogTitle => 'Confirmer avec la référence';
+
+  @override
+  String get scanQrManualEntryHint => 'Référence du reçu';
+
+  @override
+  String get scanQrManualEntryError => 'Veuillez saisir une référence';
+
+  @override
+  String get reportProduct => 'Signaler cet article';
+
+  @override
+  String get reportDialogTitle => 'Pourquoi signalez-vous cet article ?';
+
+  @override
+  String get reportReasonCounterfeit => 'Contrefaçon';
+
+  @override
+  String get reportReasonInappropriate => 'Contenu inapproprié';
+
+  @override
+  String get reportReasonScam => 'Arnaque potentielle';
+
+  @override
+  String get reportReasonOther => 'Autre';
+
+  @override
+  String get reportCommentHint => 'Précisions (facultatif)';
+
+  @override
+  String get reportSubmitButton => 'Envoyer le signalement';
+
+  @override
+  String get reportSuccessMessage =>
+      'Signalement envoyé, merci pour votre vigilance.';
 
   @override
   String get imageSourceCameraOption => 'Prendre une photo';

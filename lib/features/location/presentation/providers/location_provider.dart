@@ -1,20 +1,6 @@
-// IMPORTANT: Cette feature nécessite l'installation des packages suivants :
-//
-// Dans pubspec.yaml:
-//   geolocator: ^10.1.0
-//   geocoding: ^2.1.1
-//
-// Configuration Android (android/app/src/main/AndroidManifest.xml):
-//   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-//   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-//
-// Configuration iOS (ios/Runner/Info.plist):
-//   <key>NSLocationWhenInUseUsageDescription</key>
-//   <string>Nous avons besoin de votre localisation pour faciliter la saisie de votre adresse</string>
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:geolocator/geolocator.dart';
-// import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 import '../../data/models/location_data.dart';
 
@@ -26,8 +12,6 @@ final locationServiceProvider = Provider<LocationService>((ref) {
 class LocationService {
   /// Vérifie et demande les permissions de localisation
   Future<bool> _checkPermissions() async {
-    // TODO: Décommenter après installation de geolocator
-    /*
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -51,8 +35,6 @@ class LocationService {
     }
 
     return true;
-    */
-    return false; // Temporaire jusqu'à installation du package
   }
 
   /// Obtient la position actuelle de l'utilisateur
@@ -64,8 +46,6 @@ class LocationService {
         throw Exception('Permission de localisation refusée');
       }
 
-      // TODO: Décommenter après installation de geolocator
-      /*
       // Obtient la position
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -76,9 +56,6 @@ class LocationService {
         position.latitude,
         position.longitude,
       );
-      */
-
-      return null; // Temporaire
     } catch (e) {
       rethrow;
     }
@@ -90,11 +67,9 @@ class LocationService {
     double longitude,
   ) async {
     try {
-      // TODO: Décommenter après installation de geocoding
-      /*
       // Reverse geocoding
       final placemarks = await placemarkFromCoordinates(latitude, longitude);
-      
+
       if (placemarks.isEmpty) {
         return null;
       }
@@ -113,24 +88,19 @@ class LocationService {
         city: place.locality,
         country: place.country,
       );
-      */
-
-      return null; // Temporaire
     } catch (e) {
       rethrow;
     }
   }
 
   /// Formate une adresse à partir d'un Placemark
-  String _formatAddress(dynamic place) {
-    // TODO: Décommenter après installation de geocoding
-    /*
+  String _formatAddress(Placemark place) {
     final parts = <String>[];
-    
+
     if (place.street != null && place.street!.isNotEmpty) {
       parts.add(place.street!);
     }
-    
+
     if (place.postalCode != null && place.postalCode!.isNotEmpty) {
       if (place.locality != null && place.locality!.isNotEmpty) {
         parts.add('${place.postalCode} ${place.locality}');
@@ -140,20 +110,16 @@ class LocationService {
     } else if (place.locality != null && place.locality!.isNotEmpty) {
       parts.add(place.locality!);
     }
-    
+
     if (place.country != null && place.country!.isNotEmpty) {
       parts.add(place.country!);
     }
-    
-    return parts.join(', ');
-    */
 
-    return ''; // Temporaire
+    return parts.join(', ');
   }
 
   /// Ouvre les paramètres de localisation
   Future<void> openLocationSettings() async {
-    // TODO: Décommenter après installation de geolocator
-    // await Geolocator.openLocationSettings();
+    await Geolocator.openLocationSettings();
   }
 }

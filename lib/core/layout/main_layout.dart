@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../features/sell/presentation/widgets/sell_bottom_sheet.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/messages/application/providers/message_providers.dart';
+import '../../features/notifications/presentation/providers/notification_provider.dart';
 
 /// Layout principal de l'application avec BottomNavigationBar
 ///
@@ -48,82 +49,97 @@ class MainLayout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Récupérer le nombre de messages non lus
+    // Badge de l'onglet Messages = messages non lus + notifications non lues
+    // (les notifications n'ont pas leur propre onglet dans la bottom nav,
+    // elles vivent dans un second onglet de la page Messages).
     final currentUser = ref.watch(authStateProvider).value;
-    final unreadCountAsync = currentUser != null
-        ? ref.watch(totalUnreadCountStreamProvider(currentUser.uid))
-        : const AsyncValue<int>.data(0);
+    final unreadMessages = currentUser != null
+        ? ref.watch(totalUnreadCountStreamProvider(currentUser.uid)).value ?? 0
+        : 0;
+    final unreadNotifications = currentUser != null
+        ? ref.watch(unreadNotificationsCountProvider(currentUser.uid))
+        : 0;
+    final unreadCount = unreadMessages + unreadNotifications;
 
-    final unreadCount = unreadCountAsync.value ?? 0;
+    // Sur l'onglet Accueil, un back normal (quitte l'app) reste attendu.
+    // Sur les autres onglets, à la racine de leur pile (rien à dépiler dans
+    // la branche elle-même — go_router gère déjà ce cas), un back doit
+    // ramener à Accueil plutôt que fermer l'app.
+    return PopScope(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _onItemTapped(context, 0, navigationShell);
+      },
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: navigationShell.currentIndex,
+          onTap: (index) => _onItemTapped(context, index, navigationShell),
+          type: BottomNavigationBarType.fixed,
 
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) => _onItemTapped(context, index, navigationShell),
-        type: BottomNavigationBarType.fixed,
+          // Couleurs adaptées au thème
+          backgroundColor: Theme.of(
+            context,
+          ).bottomNavigationBarTheme.backgroundColor,
+          selectedItemColor: Theme.of(context).colorScheme.primary,
+          unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color,
 
-        // Couleurs adaptées au thème
-        backgroundColor: Theme.of(
-          context,
-        ).bottomNavigationBarTheme.backgroundColor,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color,
+          // Style du texte
+          selectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.normal,
+          ),
 
-        // Style du texte
-        selectedLabelStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          // Toujours afficher les labels
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+
+          // Élévation pour l'ombre
+          elevation: 8,
+
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: l10n.navHome,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.search),
+              activeIcon: const Icon(Icons.search),
+              label: l10n.navSearch,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.add_circle_outline),
+              activeIcon: const Icon(Icons.add_circle),
+              label: l10n.navSell,
+            ),
+            BottomNavigationBarItem(
+              icon: unreadCount > 0
+                  ? Badge(
+                      label: Text(unreadCount.toString()),
+                      child: const Icon(Icons.mail_outline),
+                    )
+                  : const Icon(Icons.mail_outline),
+              activeIcon: unreadCount > 0
+                  ? Badge(
+                      label: Text(unreadCount.toString()),
+                      child: const Icon(Icons.mail),
+                    )
+                  : const Icon(Icons.mail),
+              label: l10n.navMessages,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: l10n.navProfile,
+            ),
+          ],
         ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-        ),
-
-        // Toujours afficher les labels
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-
-        // Élévation pour l'ombre
-        elevation: 8,
-
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
-            label: l10n.navHome,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.search),
-            activeIcon: const Icon(Icons.search),
-            label: l10n.navSearch,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.add_circle_outline),
-            activeIcon: const Icon(Icons.add_circle),
-            label: l10n.navSell,
-          ),
-          BottomNavigationBarItem(
-            icon: unreadCount > 0
-                ? Badge(
-                    label: Text(unreadCount.toString()),
-                    child: const Icon(Icons.mail_outline),
-                  )
-                : const Icon(Icons.mail_outline),
-            activeIcon: unreadCount > 0
-                ? Badge(
-                    label: Text(unreadCount.toString()),
-                    child: const Icon(Icons.mail),
-                  )
-                : const Icon(Icons.mail),
-            label: l10n.navMessages,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outline),
-            activeIcon: const Icon(Icons.person),
-            label: l10n.navProfile,
-          ),
-        ],
       ),
     );
   }

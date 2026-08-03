@@ -7,6 +7,7 @@ import '../../../../shared/widgets/choice_card_widget.dart';
 import '../../../../shared/widgets/selection_tile.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../product/domain/entities/product.dart';
+import '../../../relay_point/domain/models/relay_point.dart';
 import '../../../../core/services/payment_service.dart';
 import 'payment_web_view_page.dart';
 
@@ -200,17 +201,11 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
             onPressed: () {
               Navigator.of(context).pop(); // Fermer le dialogue
               if (isPurchase) {
+                // La notation du vendeur est proposée après la confirmation
+                // de réception (cf. scan_delivery_qr_page.dart), pas ici —
+                // l'acheteur n'a pas encore reçu l'article à ce stade.
                 if (transactionRef != null) {
-                  // Proposer à l'acheteur de noter le vendeur
-                  context.go(
-                    '/rate-seller',
-                    extra: {
-                      'transactionRef': transactionRef,
-                      'sellerId': widget.product!.sellerId,
-                      'productId': widget.product!.id,
-                      'productTitle': widget.product!.title,
-                    },
-                  );
+                  context.go('/receipt/$transactionRef');
                 } else {
                   context.go('/messages');
                 }
@@ -473,9 +468,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                     isRequired: true,
                     onTap: () async {
                       final result = await context.push('/relay-point/select');
-                      if (result != null && result is Map) {
+                      if (result != null && result is RelayPoint) {
                         setState(() {
-                          _selectedRelayPoint = result['name'] as String?;
+                          _selectedRelayPoint = result.name;
                         });
                       }
                     },

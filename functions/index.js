@@ -844,24 +844,30 @@ exports.confirmDelivery = onRequest(async (req, res) => {
   }
 
   const buyerId = decodedToken.uid;
-  const { qrCodeId } = req.body;
+  const { qrCodeId, transactionRef: transactionRefInput } = req.body;
 
-  if (!qrCodeId) {
-    return res.status(400).json({ success: false, error: { message: "Paramètre requis manquant : qrCodeId" } });
+  if (!qrCodeId && !transactionRefInput) {
+    return res.status(400).json({ success: false, error: { message: "Paramètre requis manquant : qrCodeId ou transactionRef" } });
   }
 
   try {
-    // Le QR scanné ne contient que l'id de la collection "qrcodes" — jamais
-    // la transactionRef directement — on la résout ici côté serveur.
-    const qrDoc = await db.collection("qrcodes").doc(qrCodeId).get();
-    if (!qrDoc.exists) {
-      return res.status(404).json({ success: false, error: { message: "Code QR invalide ou expiré" } });
+    // Deux façons d'identifier la commande à confirmer : le QR scanné (qui ne
+    // contient que l'id de la collection "qrcodes", jamais la transactionRef
+    // directement) ou, en secours, la référence du reçu saisie manuellement
+    // par l'acheteur. Dans les deux cas, l'appartenance à l'acheteur est
+    // vérifiée plus bas via tx.userId dans la transaction Firestore.
+    let transactionRef = transactionRefInput;
+    if (qrCodeId) {
+      const qrDoc = await db.collection("qrcodes").doc(qrCodeId).get();
+      if (!qrDoc.exists) {
+        return res.status(404).json({ success: false, error: { message: "Code QR invalide ou expiré" } });
+      }
+      const qrData = qrDoc.data();
+      if (qrData.buyerId !== buyerId) {
+        return res.status(403).json({ success: false, error: { message: "Ce code QR ne correspond pas à votre achat" } });
+      }
+      transactionRef = qrData.transactionRef;
     }
-    const qrData = qrDoc.data();
-    if (qrData.buyerId !== buyerId) {
-      return res.status(403).json({ success: false, error: { message: "Ce code QR ne correspond pas à votre achat" } });
-    }
-    const transactionRef = qrData.transactionRef;
 
     const txRef = db.collection("transactions").doc(transactionRef);
 

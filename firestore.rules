@@ -169,6 +169,26 @@ service cloud.firestore {
     }
 
     // ============================================================
+    // COLLECTION : reports
+    // ============================================================
+    // Signalements d'articles par les utilisateurs (contrefaçon, contenu
+    // inapproprié, arnaque...). Aucune lecture côté client : uniquement
+    // consultés côté modération via la console/Admin SDK.
+    match /reports/{reportId} {
+      allow read: if false;
+
+      // Création : uniquement l'auteur du signalement, jamais sur son propre article
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['productId', 'sellerId', 'reporterId', 'reason', 'createdAt'])
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.sellerId != request.auth.uid
+        && request.resource.data.reason is string;
+
+      // Mise à jour / suppression : jamais (signalement immuable)
+      allow update, delete: if false;
+    }
+
+    // ============================================================
     // COLLECTION : follows
     // ============================================================
     // Relation d'abonnement : un document par paire (followerId, followedId)
@@ -235,6 +255,16 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid;
     }
     
+    // ============================================================
+    // COLLECTION : relayPoints
+    // ============================================================
+    // Points relais pour la livraison (choix à l'étape paiement).
+    // Lecture publique, écriture admin uniquement (gérés côté backend).
+    match /relayPoints/{relayPointId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // ============================================================
     // COLLECTION : config (categories, subcategories, attributes)
     // ============================================================

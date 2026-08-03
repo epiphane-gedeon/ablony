@@ -1,61 +1,75 @@
 {
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "storage": {
-    "rules": "storage.rules"
-  },
-  "flutter": {
-    "platforms": {
-      "android": {
-        "default": {
-          "projectId": "ablony-a5db9",
-          "appId": "1:2762433205:android:7faf7535e9abf78e3ad4fc",
-          "fileOutput": "android/app/google-services.json"
-        }
-      },
-      "dart": {
-        "lib/firebase_options.dart": {
-          "projectId": "ablony-a5db9",
-          "configurations": {
-            "android": "1:2762433205:android:7faf7535e9abf78e3ad4fc",
-            "ios": "1:2762433205:ios:98dd32101ee57f593ad4fc",
-            "web": "1:2762433205:web:f214f935e6543ed33ad4fc"
-          }
-        }
-      }
-    }
-  },
-  "functions": [
-    {
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "source": "functions"
-    }
-  ],
-  "emulators": {
-    "auth": {
-      "port": 9099
-    },
-    "functions": {
-      "port": 5001
-    },
     "firestore": {
-      "port": 8080
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
     },
     "storage": {
-      "port": 9199
+        "rules": "storage.rules"
     },
-    "ui": {
-      "enabled": true
+    "hosting": {
+        "public": "build/web",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "!**/.well-known/**"
+        ],
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
     },
-    "singleProjectMode": true
-  }
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "ablony-a5db9",
+                    "appId": "1:2762433205:android:af2391c2d5d0b5ac3ad4fc",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "ablony-a5db9",
+                    "configurations": {
+                        "android": "1:2762433205:android:af2391c2d5d0b5ac3ad4fc",
+                        "ios": "1:2762433205:ios:df7f5dac495454143ad4fc",
+                        "web": "1:2762433205:web:f214f935e6543ed33ad4fc"
+                    }
+                }
+            }
+        }
+    },
+    "functions": [
+        {
+            "codebase": "default",
+            "ignore": [
+                "node_modules",
+                ".git",
+                "firebase-debug.log",
+                "firebase-debug.*.log",
+                "*.local"
+            ],
+            "source": "functions"
+        }
+    ],
+    "emulators": {
+        "auth": {
+            "port": 9099
+        },
+        "functions": {
+            "port": 5001
+        },
+        "firestore": {
+            "port": 8080
+        },
+        "storage": {
+            "port": 9199
+        },
+        "ui": {
+            "enabled": true
+        },
+        "singleProjectMode": true
+    }
 }

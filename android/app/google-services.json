@@ -7,6 +7,50 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:2762433205:android:af2391c2d5d0b5ac3ad4fc",
+        "android_client_info": {
+          "package_name": "com.ablony.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2762433205-5g932l8v4jr1c53q5l5men3rs37kkgta.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ablony.app",
+            "certificate_hash": "74af5e822a94209bddb5de7547df56b51eec30ed"
+          }
+        },
+        {
+          "client_id": "2762433205-qd3fesoffe98hk9oto62151mgdg235f1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH6dy7zGcgvXUdALv6l8Km8GvndcDIcNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2762433205-qd3fesoffe98hk9oto62151mgdg235f1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "2762433205-33dv8i71vtufo5i1bph165ika4upuepr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ablony.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:2762433205:android:7faf7535e9abf78e3ad4fc",
         "android_client_info": {
           "package_name": "com.example.ablony"
@@ -39,10 +83,10 @@
               "client_type": 3
             },
             {
-              "client_id": "2762433205-46oi9rgq668r56370k0qrfshkb4277gs.apps.googleusercontent.com",
+              "client_id": "2762433205-33dv8i71vtufo5i1bph165ika4upuepr.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.ablony"
+                "bundle_id": "com.ablony.app"
               }
             }
           ]

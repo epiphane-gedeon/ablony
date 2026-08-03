@@ -1531,6 +1531,14 @@
   "@shareProduct": {
     "description": "shareProduct"
   },
+  "shareProductSubtitle": "{price} FCFA ({condition})",
+  "@shareProductSubtitle": {
+    "description": "Subtitle line included when sharing a product listing",
+    "placeholders": {
+      "price": { "type": "String" },
+      "condition": { "type": "String" }
+    }
+  },
   "priceIncl": "incl.",
   "@priceIncl": {
     "description": "priceIncl"
@@ -1770,6 +1778,58 @@
   "deliveryConfirmedMessage": "Merci ! Le paiement a été débloqué pour le vendeur.",
   "@deliveryConfirmedMessage": {
     "description": "Delivery confirmed dialog message"
+  },
+  "scanQrManualEntryButton": "Saisir la référence du reçu",
+  "@scanQrManualEntryButton": {
+    "description": "Button to switch to manual receipt reference entry instead of scanning"
+  },
+  "scanQrManualEntryDialogTitle": "Confirmer avec la référence",
+  "@scanQrManualEntryDialogTitle": {
+    "description": "Manual receipt reference entry dialog title"
+  },
+  "scanQrManualEntryHint": "Référence du reçu",
+  "@scanQrManualEntryHint": {
+    "description": "Manual receipt reference text field hint"
+  },
+  "scanQrManualEntryError": "Veuillez saisir une référence",
+  "@scanQrManualEntryError": {
+    "description": "Validation error when the manual reference field is empty"
+  },
+  "reportProduct": "Signaler cet article",
+  "@reportProduct": {
+    "description": "Buyer menu item to report a product"
+  },
+  "reportDialogTitle": "Pourquoi signalez-vous cet article ?",
+  "@reportDialogTitle": {
+    "description": "Report product dialog title"
+  },
+  "reportReasonCounterfeit": "Contrefaçon",
+  "@reportReasonCounterfeit": {
+    "description": "Report reason: counterfeit item"
+  },
+  "reportReasonInappropriate": "Contenu inapproprié",
+  "@reportReasonInappropriate": {
+    "description": "Report reason: inappropriate content"
+  },
+  "reportReasonScam": "Arnaque potentielle",
+  "@reportReasonScam": {
+    "description": "Report reason: potential scam"
+  },
+  "reportReasonOther": "Autre",
+  "@reportReasonOther": {
+    "description": "Report reason: other"
+  },
+  "reportCommentHint": "Précisions (facultatif)",
+  "@reportCommentHint": {
+    "description": "Report product optional comment field hint"
+  },
+  "reportSubmitButton": "Envoyer le signalement",
+  "@reportSubmitButton": {
+    "description": "Report product dialog submit button"
+  },
+  "reportSuccessMessage": "Signalement envoyé, merci pour votre vigilance.",
+  "@reportSuccessMessage": {
+    "description": "Confirmation shown after a report is submitted"
   },
   "imageSourceCameraOption": "Prendre une photo",
   "@imageSourceCameraOption": {

@@ -10,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'core/config/firebase_config.dart';
 import 'core/navigation/app_router.dart';
 import 'core/providers/locale_provider.dart';
@@ -32,6 +33,12 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Marqée async car elle initialise Firebase de manière asynchrone.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Sur le web, sert des URLs propres (/product/xyz) plutôt que des URLs à
+  // fragment (/#/product/xyz) — nécessaire pour que les liens de partage
+  // (cf. lib/features/share/) soient lisibles et fonctionnent une fois
+  // ouverts directement dans un navigateur. No-op sur les autres plateformes.
+  usePathUrlStrategy();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
