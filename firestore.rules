@@ -302,12 +302,16 @@ service cloud.firestore {
         && request.resource.data.imageUrls.size() <= 6;
       
       // Mise à jour :
-      // 1) le vendeur peut modifier son produit
+      // 1) le vendeur peut modifier son produit (mais jamais isBoosted/boostExpiresAt
+      //    directement : le boost est payant, seule la Cloud Function finalizeBoost
+      //    — via l'Admin SDK, qui contourne ces règles — peut les modifier)
       // 2) tout utilisateur authentifié peut uniquement incrémenter/décrémenter favoritesCount de 1
       allow update: if (
           isOwner(resource.data.sellerId)
           && request.resource.data.sellerId == resource.data.sellerId
           && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.get('isBoosted', false) == resource.data.get('isBoosted', false)
+          && request.resource.data.get('boostExpiresAt', null) == resource.data.get('boostExpiresAt', null)
         ) || (
           isAuthenticated()
           && request.resource.data.diff(resource.data).changedKeys().hasOnly(['favoritesCount'])

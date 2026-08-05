@@ -11,6 +11,7 @@ import '../../application/providers/message_providers.dart';
 import '../../domain/models/conversation.dart';
 import '../../domain/models/message_type.dart';
 import '../../domain/models/last_message.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page de messages
 ///
@@ -46,7 +47,12 @@ class MessagesPage extends ConsumerWidget {
           bottom: TabBar(
             tabs: [
               Tab(child: _buildTabLabel(l10n.messagesTab, unreadMessages)),
-              Tab(child: _buildTabLabel(l10n.notificationsTab, unreadNotifications)),
+              Tab(
+                child: _buildTabLabel(
+                  l10n.notificationsTab,
+                  unreadNotifications,
+                ),
+              ),
             ],
             indicatorColor: theme.colorScheme.primary,
             indicatorSize: TabBarIndicatorSize.tab,
@@ -61,24 +67,29 @@ class MessagesPage extends ConsumerWidget {
             dividerColor: Colors.transparent,
           ),
         ),
-        body: currentUserAsync.when(
-          data: (user) {
-            if (user == null) {
-              return Center(child: Text(l10n.pleaseLogin));
-            }
+        body: ContentContainer(
+          applyPadding: false,
+          maxWidth: ContentWidth.standard,
+          child: currentUserAsync.when(
+            data: (user) {
+              if (user == null) {
+                return Center(child: Text(l10n.pleaseLogin));
+              }
 
-            return TabBarView(
-              children: [
-                // Onglet Messages
-                _buildConversationsList(context, ref, theme, user),
+              return TabBarView(
+                children: [
+                  // Onglet Messages
+                  _buildConversationsList(context, ref, theme, user),
 
-                // Onglet Notifications
-                _buildNotificationsList(context, ref, theme, user.uid),
-              ],
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text(l10n.errorGenericMsg(error.toString()))),
+                  // Onglet Notifications
+                  _buildNotificationsList(context, ref, theme, user.uid),
+                ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) =>
+                Center(child: Text(l10n.errorGenericMsg(error.toString()))),
+          ),
         ),
       ),
     );
@@ -157,7 +168,12 @@ class MessagesPage extends ConsumerWidget {
           separatorBuilder: (context, index) =>
               Divider(color: theme.dividerColor.withOpacity(0.1), height: 1),
           itemBuilder: (context, index) {
-            return _buildNotificationTile(context, ref, theme, notifications[index]);
+            return _buildNotificationTile(
+              context,
+              ref,
+              theme,
+              notifications[index],
+            );
           },
         );
       },
@@ -414,7 +430,9 @@ class MessagesPage extends ConsumerWidget {
       return '$amount FCFA ${l10n.counterOffer}';
     } else if (lastMessage.type == MessageType.image) {
       // Le texte stocké est déjà "📷" ou "📷 <légende>" (cf. sendImageMessage)
-      return lastMessage.text.trim() == '📷' ? l10n.photoMessage : lastMessage.text;
+      return lastMessage.text.trim() == '📷'
+          ? l10n.photoMessage
+          : lastMessage.text;
     }
 
     return lastMessage.text;

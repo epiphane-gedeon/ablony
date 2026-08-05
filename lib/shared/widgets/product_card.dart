@@ -149,6 +149,10 @@ class ProductCard extends ConsumerWidget {
 
                 // Bouton favoris (coin supérieur droit)
                 Positioned(top: 8, right: 8, child: _buildFavButton()),
+
+                // Badge "Boosté" (coin supérieur gauche)
+                if (_isActivelyBoosted)
+                  Positioned(top: 8, left: 8, child: _buildBoostBadge(context)),
               ],
             ),
           ),
@@ -220,6 +224,38 @@ class ProductCard extends ConsumerWidget {
                   ],
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// true si le produit est boosté et que le boost n'est pas expiré
+  /// (isBoosted peut rester `true` en base jusqu'à l'expiration naturelle
+  /// des 48h, donc on revérifie la date côté affichage par sécurité).
+  bool get _isActivelyBoosted =>
+      product?.isBoosted == true &&
+      (product?.boostExpiresAt?.isAfter(DateTime.now()) ?? false);
+
+  Widget _buildBoostBadge(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.bolt, size: 12, color: Colors.white),
+          const SizedBox(width: 2),
+          Text(
+            AppLocalizations.of(context)!.boostedBadge,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

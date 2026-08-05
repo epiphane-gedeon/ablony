@@ -26,6 +26,7 @@ import '../../../../l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/language_selector_dialog.dart';
 import '../../../auth/presentation/widgets/auth_widgets.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page d'onboarding affichée après le splash screen.
 ///
@@ -71,7 +72,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = context.layoutHeight();
 
     return Scaffold(
       // Fond adapté au thème (blanc en clair, noir en sombre)
@@ -244,7 +245,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     required bool reverse,
     required List<String> images, // Liste des chemins d'images à afficher
   }) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = context.layoutHeight();
     // Hauteur adaptable : 22% de la hauteur de l'écran pour chaque ligne
     final rowHeight = screenHeight * 0.22;
 
@@ -310,7 +311,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   /// Pour ajouter de vraies images :
   /// Remplacer le Container par Image.asset() avec ClipRRect
   Widget _buildProductCard(String imagePath) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = context.layoutHeight();
     // Hauteur de la carte : 22% de la hauteur de l'écran
     final cardHeight = screenHeight * 0.22;
     // Largeur de la carte : ratio 0.6 pour garder des cartes verticales

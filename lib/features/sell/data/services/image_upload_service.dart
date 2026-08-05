@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// Service pour uploader les images de produits vers Firebase Storage.
 ///
@@ -33,7 +32,7 @@ class ImageUploadService {
   /// );
   /// ```
   Future<List<String>> uploadProductImages(
-    List<File> images,
+    List<XFile> images,
     String userId,
     String productId,
   ) async {
@@ -74,7 +73,8 @@ class ImageUploadService {
 
         // Upload
         try {
-          final uploadTask = ref.putFile(file, metadata);
+          final bytes = await file.readAsBytes();
+          final uploadTask = ref.putData(bytes, metadata);
           final snapshot = await uploadTask;
 
           // Récupérer l'URL de téléchargement
@@ -173,7 +173,7 @@ class ImageUploadService {
   /// **Retourne :**
   /// - URL de téléchargement de la nouvelle image
   Future<String> replaceProductImage(
-    File newImage,
+    XFile newImage,
     String userId,
     String productId,
     int index,
@@ -194,7 +194,8 @@ class ImageUploadService {
       },
     );
 
-    final uploadTask = ref.putFile(newImage, metadata);
+    final bytes = await newImage.readAsBytes();
+    final uploadTask = ref.putData(bytes, metadata);
     final snapshot = await uploadTask;
 
     return await snapshot.ref.getDownloadURL();

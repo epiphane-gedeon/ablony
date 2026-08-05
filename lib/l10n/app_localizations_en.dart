@@ -1141,6 +1141,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boostProduct => 'Boost';
 
   @override
+  String get boostedBadge => 'Boosted';
+
+  @override
+  String get boostSheetTitle => 'Boost this product';
+
+  @override
+  String boostSheetDescription(int hours) {
+    return 'Your product will appear in featured slots for ${hours}h.';
+  }
+
+  @override
+  String boostAlreadyActive(String date) {
+    return 'This product is already boosted until $date.';
+  }
+
+  @override
+  String get boostPay => 'Pay';
+
+  @override
+  String get boostSuccess => 'Product boosted successfully!';
+
+  @override
+  String get boostInsufficientBalance =>
+      'Insufficient balance. Choose another payment method.';
+
+  @override
   String get shareProduct => 'Share';
 
   @override

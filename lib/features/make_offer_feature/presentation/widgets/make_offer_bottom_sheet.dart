@@ -14,6 +14,7 @@ import 'package:ablony/features/messages/domain/models/product_details.dart'
     as msg;
 import 'package:ablony/features/messages/domain/models/user_info.dart';
 import 'package:ablony/features/product/presentation/providers/product_provider.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Bottom sheet plein écran pour faire une offre.
 /// Envoie l'offre au vendeur via le système de messagerie.
@@ -225,7 +226,7 @@ class _MakeOfferBottomSheetState extends ConsumerState<MakeOfferBottomSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.sizeOf(context).height;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     // Calcul des frais : 5% + 500 FCFA de frais fixes
@@ -253,7 +254,7 @@ class _MakeOfferBottomSheetState extends ConsumerState<MakeOfferBottomSheet> {
           // AppBar Custom (Match SellBottomSheet style)
           Container(
             padding: EdgeInsets.only(
-              top: screenHeight * 0.05, // 5% de la hauteur de l'écran
+              top: context.layoutHeight() * 0.05,
             ),
             decoration: BoxDecoration(
               border: Border(

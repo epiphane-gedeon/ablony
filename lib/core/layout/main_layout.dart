@@ -3,27 +3,52 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../responsive/responsive.dart';
 import '../../features/sell/presentation/widgets/sell_bottom_sheet.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/messages/application/providers/message_providers.dart';
 import '../../features/notifications/presentation/providers/notification_provider.dart';
 
-/// Layout principal de l'application avec BottomNavigationBar
+/// Décrit un onglet de navigation, indépendamment de la façon dont il est
+/// rendu (barre en bas, rail compact ou rail étendu).
+class _NavDestination {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+
+  const _NavDestination({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
+}
+
+/// Layout principal de l'application, avec une navigation **adaptative**.
 ///
-/// Ce widget wrappera toutes les pages principales de l'app et affichera
-/// une barre de navigation en bas avec 5 onglets.
+/// La navigation change de forme selon la largeur de fenêtre, en suivant les
+/// recommandations Material 3 :
 ///
-/// **Onglets :**
-/// - Accueil (Home)
-/// - Rechercher (Search)
-/// - Vendre (Sell) - Ouvre un bottom sheet
-/// - Messages (avec badge de notification)
-/// - Profil
+/// | Largeur      | Navigation                        |
+/// |--------------|-----------------------------------|
+/// | < 600        | Barre en bas (`BottomNavigationBar`) |
+/// | 600 – 1199   | Rail latéral (icônes + libellés courts) |
+/// | ≥ 1200       | Rail latéral étendu (icônes + libellés) |
+///
+/// Le raisonnement se fait sur la **largeur de fenêtre**, pas sur le type
+/// d'appareil : une fenêtre de navigateur réduite sur un grand écran retombe
+/// naturellement sur la barre du bas.
+///
+/// **Onglets :** Accueil, Rechercher, Vendre (ouvre un bottom sheet),
+/// Messages (avec badge), Profil.
 class MainLayout extends ConsumerWidget {
   /// Shell de navigation fourni par go_router
   final StatefulNavigationShell navigationShell;
 
   const MainLayout({super.key, required this.navigationShell});
+
+  /// Index de l'onglet « Vendre », qui n'est pas une vraie branche de
+  /// navigation mais ouvre un bottom sheet.
+  static const int _sellIndex = 2;
 
   /// Gère la navigation entre les onglets
   void _onItemTapped(
@@ -31,8 +56,8 @@ class MainLayout extends ConsumerWidget {
     int index,
     StatefulNavigationShell shell,
   ) {
-    // Si c'est le bouton "Vendre" (index 2), on ouvre le bottom sheet
-    if (index == 2) {
+    // Si c'est le bouton "Vendre", on ouvre le bottom sheet
+    if (index == _sellIndex) {
       SellBottomSheet.show(context);
       return;
     }
@@ -61,6 +86,38 @@ class MainLayout extends ConsumerWidget {
         : 0;
     final unreadCount = unreadMessages + unreadNotifications;
 
+    final destinations = <_NavDestination>[
+      _NavDestination(
+        icon: Icons.home_outlined,
+        activeIcon: Icons.home,
+        label: l10n.navHome,
+      ),
+      _NavDestination(
+        icon: Icons.search,
+        activeIcon: Icons.search,
+        label: l10n.navSearch,
+      ),
+      _NavDestination(
+        icon: Icons.add_circle_outline,
+        activeIcon: Icons.add_circle,
+        label: l10n.navSell,
+      ),
+      _NavDestination(
+        icon: Icons.mail_outline,
+        activeIcon: Icons.mail,
+        label: l10n.navMessages,
+      ),
+      _NavDestination(
+        icon: Icons.person_outline,
+        activeIcon: Icons.person,
+        label: l10n.navProfile,
+      ),
+    ];
+
+    final screenSize = context.screenSize;
+    final useRail = screenSize.isWide;
+    final useExtendedRail = screenSize.isAtLeast(ScreenSize.large);
+
     // Sur l'onglet Accueil, un back normal (quitte l'app) reste attendu.
     // Sur les autres onglets, à la racine de leur pile (rien à dépiler dans
     // la branche elle-même — go_router gère déjà ce cas), un back doit
@@ -72,75 +129,150 @@ class MainLayout extends ConsumerWidget {
         _onItemTapped(context, 0, navigationShell);
       },
       child: Scaffold(
-        body: navigationShell,
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: navigationShell.currentIndex,
-          onTap: (index) => _onItemTapped(context, index, navigationShell),
-          type: BottomNavigationBarType.fixed,
+        body: useRail
+            ? Row(
+                children: [
+                  _buildRail(
+                    context,
+                    destinations: destinations,
+                    unreadCount: unreadCount,
+                    extended: useExtendedRail,
+                  ),
+                  const VerticalDivider(width: 1, thickness: 1),
+                  Expanded(child: navigationShell),
+                ],
+              )
+            : navigationShell,
+        bottomNavigationBar: useRail
+            ? null
+            : _buildBottomBar(
+                context,
+                destinations: destinations,
+                unreadCount: unreadCount,
+              ),
+      ),
+    );
+  }
 
-          // Couleurs adaptées au thème
-          backgroundColor: Theme.of(
-            context,
-          ).bottomNavigationBarTheme.backgroundColor,
-          selectedItemColor: Theme.of(context).colorScheme.primary,
-          unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color,
+  /// Ajoute le badge de messages non lus à une icône, le cas échéant.
+  Widget _withBadge(Widget icon, int unreadCount) {
+    if (unreadCount <= 0) return icon;
+    return Badge(label: Text(unreadCount.toString()), child: icon);
+  }
 
-          // Style du texte
-          selectedLabelStyle: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+  /// Navigation latérale, pour les écrans à partir de 600 px.
+  ///
+  /// [extended] passe du rail compact (icône + libellé sous l'icône) au rail
+  /// étendu (icône + libellé côte à côte), à partir de 1200 px.
+  Widget _buildRail(
+    BuildContext context, {
+    required List<_NavDestination> destinations,
+    required int unreadCount,
+    required bool extended,
+  }) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        // Un rail plus haut que la fenêtre (petit écran en paysage) doit
+        // pouvoir défiler plutôt que déborder.
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.sizeOf(context).height -
+                MediaQuery.paddingOf(context).vertical,
           ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.normal,
+          child: IntrinsicHeight(
+            child: NavigationRail(
+              selectedIndex: navigationShell.currentIndex,
+              onDestinationSelected: (index) =>
+                  _onItemTapped(context, index, navigationShell),
+              extended: extended,
+              labelType: extended ? null : NavigationRailLabelType.all,
+              backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
+              selectedIconTheme: IconThemeData(
+                color: theme.colorScheme.primary,
+              ),
+              unselectedIconTheme: IconThemeData(
+                color: theme.textTheme.bodySmall?.color,
+              ),
+              selectedLabelTextStyle: TextStyle(
+                color: theme.colorScheme.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+              unselectedLabelTextStyle: TextStyle(
+                color: theme.textTheme.bodySmall?.color,
+                fontSize: 12,
+              ),
+              destinations: [
+                for (var i = 0; i < destinations.length; i++)
+                  NavigationRailDestination(
+                    icon: i == 3
+                        ? _withBadge(Icon(destinations[i].icon), unreadCount)
+                        : Icon(destinations[i].icon),
+                    selectedIcon: i == 3
+                        ? _withBadge(
+                            Icon(destinations[i].activeIcon),
+                            unreadCount,
+                          )
+                        : Icon(destinations[i].activeIcon),
+                    label: Text(destinations[i].label),
+                  ),
+              ],
+            ),
           ),
-
-          // Toujours afficher les labels
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-
-          // Élévation pour l'ombre
-          elevation: 8,
-
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: const Icon(Icons.home),
-              label: l10n.navHome,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.search),
-              activeIcon: const Icon(Icons.search),
-              label: l10n.navSearch,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.add_circle_outline),
-              activeIcon: const Icon(Icons.add_circle),
-              label: l10n.navSell,
-            ),
-            BottomNavigationBarItem(
-              icon: unreadCount > 0
-                  ? Badge(
-                      label: Text(unreadCount.toString()),
-                      child: const Icon(Icons.mail_outline),
-                    )
-                  : const Icon(Icons.mail_outline),
-              activeIcon: unreadCount > 0
-                  ? Badge(
-                      label: Text(unreadCount.toString()),
-                      child: const Icon(Icons.mail),
-                    )
-                  : const Icon(Icons.mail),
-              label: l10n.navMessages,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
-              label: l10n.navProfile,
-            ),
-          ],
         ),
       ),
+    );
+  }
+
+  /// Navigation en bas d'écran, pour les téléphones en portrait (< 600 px).
+  Widget _buildBottomBar(
+    BuildContext context, {
+    required List<_NavDestination> destinations,
+    required int unreadCount,
+  }) {
+    final theme = Theme.of(context);
+
+    return BottomNavigationBar(
+      currentIndex: navigationShell.currentIndex,
+      onTap: (index) => _onItemTapped(context, index, navigationShell),
+      type: BottomNavigationBarType.fixed,
+
+      // Couleurs adaptées au thème
+      backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
+      selectedItemColor: theme.colorScheme.primary,
+      unselectedItemColor: theme.textTheme.bodySmall?.color,
+
+      // Style du texte
+      selectedLabelStyle: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.normal,
+      ),
+
+      // Toujours afficher les labels
+      showSelectedLabels: true,
+      showUnselectedLabels: true,
+
+      // Élévation pour l'ombre
+      elevation: 8,
+
+      items: [
+        for (var i = 0; i < destinations.length; i++)
+          BottomNavigationBarItem(
+            icon: i == 3
+                ? _withBadge(Icon(destinations[i].icon), unreadCount)
+                : Icon(destinations[i].icon),
+            activeIcon: i == 3
+                ? _withBadge(Icon(destinations[i].activeIcon), unreadCount)
+                : Icon(destinations[i].activeIcon),
+            label: destinations[i].label,
+          ),
+      ],
     );
   }
 }

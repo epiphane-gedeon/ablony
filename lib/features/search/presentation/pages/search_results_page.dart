@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/presentation/dynamic_ui/dynamic_selection_view.dart';
 import '../../../../core/presentation/pages/selection_screen.dart';
 import '../../../../core/presentation/pages/selection_sheet.dart';
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/category_translator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
@@ -916,18 +917,12 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                         ),
                         // Grille de produits
                         Expanded(
-                          child: GridView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  childAspectRatio: 0.5,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 16,
-                                ),
-                            itemCount: _filteredResults.length,
-                            itemBuilder: (context, index) {
-                              final product = _filteredResults[index];
+                          child: ResponsiveProductGrid<Product>(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: context.pagePadding,
+                            ),
+                            itemsBuilder: (_) => _filteredResults,
+                            itemBuilder: (context, product) {
                               return ProductCard(
                                 product: product,
                                 onTap: () {

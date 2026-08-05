@@ -19,6 +19,14 @@ const GENIUSPAY_CONFIG = {
   BASE_URL: "https://pay.genius.ci/api/v1/merchant"
 };
 
+// Configuration du boost de produit (prix fixe, imposé côté serveur —
+// jamais celui envoyé par le client — et durée du boost).
+// Garder en phase avec BOOST_PRICE_XOF côté client (lib/features/product/...).
+const BOOST_CONFIG = {
+  PRICE_XOF: 500,
+  DURATION_HOURS: 48
+};
+
 /*
 exports.verifyRecaptcha = onRequest(async (req, res) => {
   const token = req.body.token;
@@ -44,6 +52,40 @@ exports.verifyRecaptcha = onRequest(async (req, res) => {
   }
 });
 */
+
+// ============================================================================
+// FONCTION UTILITAIRE : construit un objet wallet toujours complet
+// ============================================================================
+
+/**
+ * Construit l'objet `wallet` complet à écrire dans Firestore, en conservant
+ * les champs personnels existants (ou `null` si le wallet n'a jamais été
+ * activé) et en appliquant les montants fournis dans `patch`.
+ *
+ * Évite d'écrire un wallet partiel (ex : `{pendingAmount, updatedAt}` sans
+ * firstName/lastName/nationality/birthDate/isActivated) quand un vendeur
+ * reçoit un premier crédit avant d'avoir activé son wallet — un wallet
+ * partiel fait planter la désérialisation côté client (Wallet.fromFirestore)
+ * et bloque l'utilisateur sur l'écran de complétion de profil.
+ *
+ * @param {Object} existingWallet - `userData.wallet || {}`
+ * @param {Object} patch - Champs à mettre à jour (ex : {pendingAmount: 500})
+ * @returns {Object} Objet wallet complet prêt pour un `update({wallet: ...})`
+ */
+function buildWalletUpdate(existingWallet, patch) {
+  return {
+    firstName: existingWallet.firstName || null,
+    lastName: existingWallet.lastName || null,
+    nationality: existingWallet.nationality || null,
+    birthDate: existingWallet.birthDate || null,
+    isActivated: existingWallet.isActivated || false,
+    activatedAt: existingWallet.activatedAt || null,
+    availableAmount: Number(existingWallet.availableAmount || 0),
+    pendingAmount: Number(existingWallet.pendingAmount || 0),
+    ...patch,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  };
+}
 
 // ============================================================================
 // FONCTION UTILITAIRE PARTAGÉE : Finalisation d'un achat
@@ -112,15 +154,17 @@ async function finalizePurchase({
     // 1. Débiter le wallet de l'acheteur si nécessaire
     if (walletDeduction > 0) {
       dbTx.update(buyerRef, {
-        "wallet.availableAmount": buyerAvailable - walletDeduction,
-        "wallet.updatedAt": admin.firestore.FieldValue.serverTimestamp()
+        wallet: buildWalletUpdate(buyerWallet, {
+          availableAmount: buyerAvailable - walletDeduction
+        })
       });
     }
 
     // 2. Créditer le pendingAmount du vendeur (TOUJOURS, quel que soit le moyen de paiement)
     dbTx.update(sellerRef, {
-      "wallet.pendingAmount": sellerPending + productPrice,
-      "wallet.updatedAt": admin.firestore.FieldValue.serverTimestamp()
+      wallet: buildWalletUpdate(sellerWallet, {
+        pendingAmount: sellerPending + productPrice
+      })
     });
 
     // 3. Marquer le produit comme vendu
@@ -176,6 +220,107 @@ async function finalizePurchase({
       console.error(`⚠️ Échec notifications/reçu pour ${transactionRef}:`, notifyError);
     }
   }
+}
+
+// ============================================================================
+// FONCTION UTILITAIRE : Finalisation d'un boost de produit
+// Appelée par : initiatePayment (wallet-only), confirmPayment, geniusPayWebhook
+// ============================================================================
+
+/**
+ * Finalise le boost d'un produit de manière atomique :
+ * 1. Débite le wallet du vendeur si le boost est payé (en tout ou partie) via le wallet
+ * 2. Marque le produit comme boosté, avec expiration dans BOOST_CONFIG.DURATION_HOURS
+ * 3. Met à jour / crée la transaction comme "completed"
+ *
+ * Le prix (BOOST_CONFIG.PRICE_XOF) n'est jamais lu depuis le paramètre `amount`
+ * fourni par le client — il est toujours imposé par la constante serveur.
+ *
+ * @param {Object} params
+ * @param {string} params.userId - UID du vendeur qui boost son produit
+ * @param {string} params.productId - ID du produit à booster
+ * @param {number} params.walletDeduction - Montant à débiter du wallet (0 si payé 100% par carte/mobile money)
+ * @param {string} params.transactionRef - Référence de la transaction Firestore
+ */
+async function finalizeBoost({ userId, productId, walletDeduction, transactionRef }) {
+  const userRef = db.collection("users").doc(userId);
+  const productRef = db.collection("products").doc(productId);
+  const txDocRef = db.collection("transactions").doc(transactionRef);
+
+  await db.runTransaction(async (dbTx) => {
+    // ── PHASE LECTURES ──────────────────────────────────────────────────
+    const txDoc = await dbTx.get(txDocRef);
+
+    // Vérifier idempotence
+    if (txDoc.exists && txDoc.data().status === "completed") {
+      console.log(`Boost ${transactionRef} déjà complété, ignoré.`);
+      return;
+    }
+
+    const userDoc = await dbTx.get(userRef);
+    const productDoc = await dbTx.get(productRef);
+
+    if (!userDoc.exists) throw new Error("Utilisateur introuvable");
+    if (!productDoc.exists) throw new Error("Produit introuvable");
+
+    const productData = productDoc.data();
+    if (productData.sellerId !== userId) {
+      throw new Error("Seul le vendeur peut booster ce produit");
+    }
+    if (productData.isSold) {
+      throw new Error("Impossible de booster un produit déjà vendu");
+    }
+
+    const userData = userDoc.data();
+    const userWallet = userData.wallet || {};
+    const userAvailable = Number(userWallet.availableAmount || 0);
+
+    if (walletDeduction > 0 && userAvailable < walletDeduction) {
+      throw new Error("Solde insuffisant dans le porte-monnaie");
+    }
+
+    // ── PHASE ÉCRITURES (après toutes les lectures) ────────────────────────
+
+    // 1. Débiter le wallet si le boost est (en partie) payé depuis le solde
+    if (walletDeduction > 0) {
+      dbTx.update(userRef, {
+        wallet: buildWalletUpdate(userWallet, {
+          availableAmount: userAvailable - walletDeduction
+        })
+      });
+    }
+
+    // 2. Marquer le produit comme boosté
+    const boostExpiresAt = new Date(Date.now() + BOOST_CONFIG.DURATION_HOURS * 60 * 60 * 1000);
+    dbTx.update(productRef, {
+      isBoosted: true,
+      boostExpiresAt: admin.firestore.Timestamp.fromDate(boostExpiresAt),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    // 3. Créer ou mettre à jour la transaction comme complétée
+    if (txDoc.exists) {
+      dbTx.update(txDocRef, {
+        status: "completed",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      dbTx.set(txDocRef, {
+        reference: transactionRef,
+        userId: userId,
+        amount: BOOST_CONFIG.PRICE_XOF,
+        paymentMethod: "wallet",
+        status: "completed",
+        type: "boost",
+        productId: productId,
+        walletDeduction: walletDeduction || 0,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  });
+
+  console.log(`✅ Boost finalisé : utilisateur=${userId}, produit=${productId}, ref=${transactionRef}`);
 }
 
 // ============================================================================
@@ -318,7 +463,7 @@ exports.initiatePayment = onRequest(async (req, res) => {
     return;
   }
 
-  const { amount, paymentMethod, phone, userId, email, name, description, type, productId, sellerId, productPrice, walletDeduction } = req.body;
+  let { amount, paymentMethod, phone, userId, email, name, description, type, productId, sellerId, productPrice, walletDeduction } = req.body;
 
   if (!amount || !paymentMethod || !userId) {
     return res.status(400).json({
@@ -334,11 +479,65 @@ exports.initiatePayment = onRequest(async (req, res) => {
     });
   }
 
+  if (type === "boost") {
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        error: { message: "Paramètre requis manquant pour un boost : productId" }
+      });
+    }
+
+    const productSnap = await db.collection("products").doc(productId).get();
+    if (!productSnap.exists) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "Produit introuvable" }
+      });
+    }
+    const productData = productSnap.data();
+    if (productData.sellerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: { message: "Seul le vendeur peut booster ce produit" }
+      });
+    }
+    if (productData.isSold) {
+      return res.status(400).json({
+        success: false,
+        error: { message: "Impossible de booster un produit déjà vendu" }
+      });
+    }
+
+    // Le prix du boost est toujours imposé par le serveur, jamais par le client
+    amount = BOOST_CONFIG.PRICE_XOF;
+    if (walletDeduction != null) walletDeduction = Math.min(Number(walletDeduction), amount);
+  }
+
   try {
     // =============================================
     // CAS 1 : Paiement 100% wallet → finalisation immédiate
     // =============================================
     if (paymentMethod === "wallet") {
+      if (type === "boost") {
+        const reference = "TX-BST-" + Date.now();
+
+        await finalizeBoost({
+          userId: userId,
+          productId: productId,
+          walletDeduction: Number(amount),
+          transactionRef: reference
+        });
+
+        return res.status(200).json({
+          success: true,
+          data: {
+            reference: reference,
+            status: "completed",
+            completed: true
+          }
+        });
+      }
+
       const reference = "TX-WLT-" + Date.now();
 
       await finalizePurchase({
@@ -371,7 +570,7 @@ exports.initiatePayment = onRequest(async (req, res) => {
     const requestBody = {
       amount: Number(amount),
       currency: "XOF",
-      description: description || (type === "purchase" ? "Achat article Ablony" : "Recharge portefeuille Ablony"),
+      description: description || (type === "purchase" ? "Achat article Ablony" : type === "boost" ? "Boost produit Ablony" : "Recharge portefeuille Ablony"),
       success_url: "https://geniuspaywebhook-mahukqtfea-uc.a.run.app/success",
       error_url: "https://geniuspaywebhook-mahukqtfea-uc.a.run.app/cancel",
       metadata: {
@@ -552,6 +751,14 @@ exports.confirmPayment = onRequest(async (req, res) => {
         totalAmount: Number(transaction.amount)
       });
 
+    } else if (transaction.type === "boost") {
+      await finalizeBoost({
+        userId: transaction.userId,
+        productId: transaction.productId,
+        walletDeduction: Number(transaction.walletDeduction || 0),
+        transactionRef: reference
+      });
+
     } else {
       // Recharge de portefeuille
       await finalizeRecharge(transaction.userId, Number(transaction.amount), reference);
@@ -601,8 +808,9 @@ async function finalizeRecharge(userId, amount, transactionRef) {
 
     // Créditer le solde disponible
     dbTx.update(userRef, {
-      "wallet.availableAmount": currentAvailable + amount,
-      "wallet.updatedAt": admin.firestore.FieldValue.serverTimestamp()
+      wallet: buildWalletUpdate(currentWallet, {
+        availableAmount: currentAvailable + amount
+      })
     });
 
     // Mettre à jour la transaction
@@ -693,6 +901,15 @@ exports.geniusPayWebhook = onRequest(async (req, res) => {
           transactionRef: transactionRef,
           paymentMethod: transaction.paymentMethod,
           totalAmount: amount
+        });
+
+      } else if (transaction.type === "boost") {
+        // Utiliser la fonction partagée finalizeBoost
+        await finalizeBoost({
+          userId: transaction.userId,
+          productId: transaction.productId,
+          walletDeduction: Number(transaction.walletDeduction || 0),
+          transactionRef: transactionRef
         });
 
       } else {
@@ -894,9 +1111,10 @@ exports.confirmDelivery = onRequest(async (req, res) => {
       const amount = Number(tx.productPrice || tx.amount);
 
       dbTx.update(sellerRef, {
-        "wallet.pendingAmount": Math.max(0, pending - amount),
-        "wallet.availableAmount": available + amount,
-        "wallet.updatedAt": admin.firestore.FieldValue.serverTimestamp()
+        wallet: buildWalletUpdate(sellerWallet, {
+          pendingAmount: Math.max(0, pending - amount),
+          availableAmount: available + amount
+        })
       });
 
       dbTx.update(txRef, {

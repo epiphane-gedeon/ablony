@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../auth/application/auth_providers.dart';
+import '../../../../core/responsive/responsive.dart';
+import '../../../product/domain/entities/entities.dart';
 import '../../../product/presentation/providers/product_provider.dart';
+import '../../../product/presentation/widgets/boost_bottom_sheet.dart';
 import '../../../sell/presentation/widgets/sell_bottom_sheet.dart';
 import '../../../../shared/widgets/product_card.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
@@ -97,20 +100,36 @@ class UserListingsPage extends ConsumerWidget {
           );
         }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.5,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return ProductCard(
-              product: product,
-              onTap: () => context.push('/product/${product.id}'),
+        return ResponsiveProductGrid<Product>(
+          itemsBuilder: (_) => products,
+          itemBuilder: (context, product) {
+            return Stack(
+              children: [
+                ProductCard(
+                  product: product,
+                  onTap: () => context.push('/product/${product.id}'),
+                ),
+                if (!product.isSold)
+                  Positioned(
+                    bottom: 40,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () => BoostBottomSheet.show(context, product),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.bolt,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
         );

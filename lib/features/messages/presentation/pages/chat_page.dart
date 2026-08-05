@@ -18,6 +18,7 @@ import '../../domain/models/message_type.dart';
 import '../../domain/models/offer_status.dart';
 import '../../domain/models/conversation.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/responsive/responsive.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   final String conversationId;
@@ -568,7 +569,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             children: [
               Container(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.75,
+                  maxWidth: context.layoutWidth(ContentWidth.standard) * 0.75,
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/link.dart';
+import '../../responsive/responsive.dart';
 
 /// Bottom sheet générique pour les sélections dynamiques.
 ///
@@ -67,7 +68,7 @@ class SelectionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
     return Container(
       height: screenHeight, // Plein écran
@@ -80,7 +81,7 @@ class SelectionSheet extends StatelessWidget {
           // Header
           Container(
             padding: EdgeInsets.only(
-              top: screenHeight * 0.05, // 5% de la hauteur de l'écran
+              top: context.layoutHeight() * 0.05,
               left: 16,
               right: 16,
               bottom: 16,

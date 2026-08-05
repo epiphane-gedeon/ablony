@@ -8,6 +8,7 @@ import '../../../../shared/widgets/input.dart';
 import '../../../../shared/widgets/custom_checkbox.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/providers.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page de saisie du nom d'utilisateur lors de l'inscription.
 ///
@@ -218,8 +219,8 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
   @override
   Widget build(BuildContext context) {
     // Récupérer la hauteur de l'écran pour le responsive
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = context.layoutHeight();
+    final screenWidth = context.layoutWidth();
 
     // Écouter l'état d'inscription pour afficher les erreurs
     final registrationState = ref.watch(registrationProvider);

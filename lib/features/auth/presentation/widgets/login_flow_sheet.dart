@@ -5,7 +5,7 @@
 ///
 /// Utilise le thème de l'application avec un fond blanc.
 
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +13,7 @@ import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/link.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/providers.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Bottom sheet présentant les options d'authentification.
 ///
@@ -62,8 +63,8 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isIOS = Platform.isIOS;
+    final screenHeight = context.layoutHeight();
+    final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     final l10n = AppLocalizations.of(context)!;
 
     return Container(

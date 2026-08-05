@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -120,33 +121,64 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User?> signInWithGoogle() async {
     try {
-      // ÉTAPE 1 : Déclencher le flow d'authentification Google
-      // Cela affiche le sélecteur de compte Google natif
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      firebase_auth.User? firebaseUser;
+      String? providerId;
 
-      // Si l'utilisateur annule la sélection, googleUser sera null
-      if (googleUser == null) {
-        return null; // L'utilisateur a annulé
+      if (kIsWeb) {
+        // Sur web, google_sign_in ne fournit pas de idToken de façon fiable
+        // (limitation documentée du package) : on passe par le popup natif
+        // de firebase_auth à la place.
+        try {
+          final userCredential = await _firebaseAuth.signInWithPopup(
+            firebase_auth.GoogleAuthProvider(),
+          );
+          firebaseUser = userCredential.user;
+        } on firebase_auth.FirebaseAuthException catch (e) {
+          if (e.code == 'popup-closed-by-user' ||
+              e.code == 'cancelled-popup-request') {
+            return null; // L'utilisateur a annulé
+          }
+          rethrow;
+        }
+
+        if (firebaseUser != null) {
+          providerId = firebaseUser.providerData
+              .firstWhere(
+                (p) => p.providerId == 'google.com',
+                orElse: () => firebaseUser!.providerData.first,
+              )
+              .uid;
+        }
+      } else {
+        // ÉTAPE 1 : Déclencher le flow d'authentification Google
+        // Cela affiche le sélecteur de compte Google natif
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+        // Si l'utilisateur annule la sélection, googleUser sera null
+        if (googleUser == null) {
+          return null; // L'utilisateur a annulé
+        }
+
+        // ÉTAPE 2 : Obtenir les détails d'authentification depuis Google
+        // Ces détails contiennent les tokens OAuth nécessaires
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        // ÉTAPE 3 : Créer les credentials Firebase depuis les tokens Google
+        // Firebase utilise ces credentials pour authentifier l'utilisateur
+        final credential = firebase_auth.GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // ÉTAPE 4 : Se connecter à Firebase avec les credentials Google
+        // Cette opération crée automatiquement le compte s'il n'existe pas
+        final firebase_auth.UserCredential userCredential =
+            await _firebaseAuth.signInWithCredential(credential);
+
+        firebaseUser = userCredential.user;
+        providerId = googleUser.id;
       }
-
-      // ÉTAPE 2 : Obtenir les détails d'authentification depuis Google
-      // Ces détails contiennent les tokens OAuth nécessaires
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // ÉTAPE 3 : Créer les credentials Firebase depuis les tokens Google
-      // Firebase utilise ces credentials pour authentifier l'utilisateur
-      final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // ÉTAPE 4 : Se connecter à Firebase avec les credentials Google
-      // Cette opération crée automatiquement le compte s'il n'existe pas
-      final firebase_auth.UserCredential userCredential = await _firebaseAuth
-          .signInWithCredential(credential);
-
-      final firebase_auth.User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
         throw UnknownException(
@@ -177,7 +209,7 @@ class AuthRepositoryImpl implements AuthRepository {
           displayName: firebaseUser.displayName,
           photoUrl: firebaseUser.photoURL,
           authProvider: AuthProvider.google,
-          providerId: googleUser.id,
+          providerId: providerId,
           country: Country.togo, // Valeur temporaire, sera changée
           acceptedTerms: false, // Sera défini dans le flow d'inscription
           acceptedTermsDate: DateTime.now(),

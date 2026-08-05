@@ -1527,6 +1527,40 @@
   "@boostProduct": {
     "description": "boostProduct"
   },
+  "boostedBadge": "Boosté",
+  "@boostedBadge": {
+    "description": "boostedBadge"
+  },
+  "boostSheetTitle": "Booster ce produit",
+  "@boostSheetTitle": {
+    "description": "boostSheetTitle"
+  },
+  "boostSheetDescription": "Ton produit apparaîtra dans les emplacements mis en avant pendant {hours}h.",
+  "@boostSheetDescription": {
+    "description": "boostSheetDescription",
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "boostAlreadyActive": "Ce produit est déjà boosté jusqu'au {date}.",
+  "@boostAlreadyActive": {
+    "description": "boostAlreadyActive",
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "boostPay": "Payer",
+  "@boostPay": {
+    "description": "boostPay"
+  },
+  "boostSuccess": "Produit boosté avec succès !",
+  "@boostSuccess": {
+    "description": "boostSuccess"
+  },
+  "boostInsufficientBalance": "Solde insuffisant. Choisis un autre moyen de paiement.",
+  "@boostInsufficientBalance": {
+    "description": "boostInsufficientBalance"
+  },
   "shareProduct": "Partager",
   "@shareProduct": {
     "description": "shareProduct"

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/entities/entities.dart';
 import '../../application/providers.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page de sélection du pays lors de l'inscription.
 ///
@@ -172,8 +173,8 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
   @override
   Widget build(BuildContext context) {
     // Récupérer les dimensions de l'écran pour le responsive
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = context.layoutHeight();
+    final screenWidth = context.layoutWidth();
 
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
@@ -301,8 +302,8 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = context.layoutHeight();
+    final screenWidth = context.layoutWidth();
 
     return Material(
       color: Colors.transparent,

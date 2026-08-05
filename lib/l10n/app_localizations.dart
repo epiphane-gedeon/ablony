@@ -2270,6 +2270,48 @@ abstract class AppLocalizations {
   /// **'Booster'**
   String get boostProduct;
 
+  /// boostedBadge
+  ///
+  /// In fr, this message translates to:
+  /// **'Boosté'**
+  String get boostedBadge;
+
+  /// boostSheetTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Booster ce produit'**
+  String get boostSheetTitle;
+
+  /// boostSheetDescription
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton produit apparaîtra dans les emplacements mis en avant pendant {hours}h.'**
+  String boostSheetDescription(int hours);
+
+  /// boostAlreadyActive
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce produit est déjà boosté jusqu\'au {date}.'**
+  String boostAlreadyActive(String date);
+
+  /// boostPay
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer'**
+  String get boostPay;
+
+  /// boostSuccess
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit boosté avec succès !'**
+  String get boostSuccess;
+
+  /// boostInsufficientBalance
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde insuffisant. Choisis un autre moyen de paiement.'**
+  String get boostInsufficientBalance;
+
   /// shareProduct
   ///
   /// In fr, this message translates to:

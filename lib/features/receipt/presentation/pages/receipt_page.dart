@@ -11,6 +11,7 @@ import '../../domain/models/receipt.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page de détail d'un reçu d'achat, avec téléchargement/partage en PDF.
 class ReceiptPage extends ConsumerWidget {
@@ -32,11 +33,14 @@ class ReceiptPage extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: receiptAsync.when(
-        data: (receipt) => _ReceiptView(receipt: receipt),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text(l10n.errorGenericMsg(error.toString())),
+      body: ContentContainer(
+        applyPadding: false,
+        maxWidth: ContentWidth.standard,
+        child: receiptAsync.when(
+          data: (receipt) => _ReceiptView(receipt: receipt),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) =>
+              Center(child: Text(l10n.errorGenericMsg(error.toString()))),
         ),
       ),
     );
@@ -54,7 +58,9 @@ class _ReceiptView extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final buyerAsync = ref.watch(userByIdProvider(receipt.buyerId));
     final sellerAsync = ref.watch(userByIdProvider(receipt.sellerId));
-    final dateFormat = DateFormat.yMMMMd(Localizations.localeOf(context).languageCode);
+    final dateFormat = DateFormat.yMMMMd(
+      Localizations.localeOf(context).languageCode,
+    );
     final currentUser = ref.watch(authStateProvider).value;
     final isBuyer = currentUser?.uid == receipt.buyerId;
 
@@ -66,11 +72,19 @@ class _ReceiptView extends ConsumerWidget {
         Text(
           receipt.productTitle,
           textAlign: TextAlign.center,
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 24),
-        _ReceiptRow(label: l10n.receiptReference, value: receipt.transactionRef),
-        _ReceiptRow(label: l10n.receiptDate, value: dateFormat.format(receipt.createdAt)),
+        _ReceiptRow(
+          label: l10n.receiptReference,
+          value: receipt.transactionRef,
+        ),
+        _ReceiptRow(
+          label: l10n.receiptDate,
+          value: dateFormat.format(receipt.createdAt),
+        ),
         _ReceiptRow(
           label: l10n.receiptSeller,
           value: sellerAsync.value?.username ?? '—',
@@ -79,7 +93,10 @@ class _ReceiptView extends ConsumerWidget {
           label: l10n.receiptBuyer,
           value: buyerAsync.value?.username ?? '—',
         ),
-        _ReceiptRow(label: l10n.receiptPaymentMethod, value: receipt.paymentMethod),
+        _ReceiptRow(
+          label: l10n.receiptPaymentMethod,
+          value: receipt.paymentMethod,
+        ),
         const Divider(height: 32),
         _ReceiptRow(
           label: l10n.receiptProductPrice,
@@ -112,7 +129,10 @@ class _ReceiptView extends ConsumerWidget {
             children: [
               Icon(Icons.check_circle, size: 18, color: Colors.green),
               const SizedBox(width: 6),
-              Text(l10n.deliveryAlreadyConfirmed, style: theme.textTheme.bodyMedium),
+              Text(
+                l10n.deliveryAlreadyConfirmed,
+                style: theme.textTheme.bodyMedium,
+              ),
             ],
           ),
         ],
@@ -153,10 +173,16 @@ class _ReceiptView extends ConsumerWidget {
               children: [
                 pw.Text(
                   'Ablony',
-                  style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                    fontSize: 24,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
                 ),
                 pw.SizedBox(height: 8),
-                pw.Text('Reçu d\'achat', style: const pw.TextStyle(fontSize: 16)),
+                pw.Text(
+                  'Reçu d\'achat',
+                  style: const pw.TextStyle(fontSize: 16),
+                ),
                 pw.SizedBox(height: 24),
                 _pdfRow('Article', receipt.productTitle),
                 _pdfRow('Référence', receipt.transactionRef),
@@ -165,8 +191,14 @@ class _ReceiptView extends ConsumerWidget {
                 _pdfRow('Acheteur', buyerUsername ?? receipt.buyerId),
                 _pdfRow('Moyen de paiement', receipt.paymentMethod),
                 pw.Divider(),
-                _pdfRow('Prix de l\'article', '${receipt.productPrice.toStringAsFixed(0)} FCFA'),
-                _pdfRow('Total payé', '${receipt.totalAmount.toStringAsFixed(0)} FCFA'),
+                _pdfRow(
+                  'Prix de l\'article',
+                  '${receipt.productPrice.toStringAsFixed(0)} FCFA',
+                ),
+                _pdfRow(
+                  'Total payé',
+                  '${receipt.totalAmount.toStringAsFixed(0)} FCFA',
+                ),
               ],
             ),
           );
@@ -210,7 +242,11 @@ class _ReceiptRow extends StatelessWidget {
   final String value;
   final bool isBold;
 
-  const _ReceiptRow({required this.label, required this.value, this.isBold = false});
+  const _ReceiptRow({
+    required this.label,
+    required this.value,
+    this.isBold = false,
+  });
 
   @override
   Widget build(BuildContext context) {

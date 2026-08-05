@@ -91,10 +91,14 @@ abstract class ProductRepository {
   // ============================================================
   // BOOST
   // ============================================================
+  //
+  // Le boost est payant (voir BoostBottomSheet / Cloud Function
+  // `finalizeBoost`) — ce repository n'expose donc volontairement aucune
+  // méthode d'écriture directe sur isBoosted/boostExpiresAt (firestore.rules
+  // l'interdit d'ailleurs explicitement pour le client).
 
-  /// Booste un produit (le met en avant)
+  /// Récupère les produits actuellement boostés (boost non expiré, non vendus)
   ///
-  /// [productId] : ID du produit
-  /// [duration] : Durée du boost
-  Future<void> boostProduct(String productId, Duration duration);
+  /// [limit] : Nombre maximum de produits boostés à récupérer
+  Future<List<Product>> getActiveBoostedProducts({int limit = 50});
 }

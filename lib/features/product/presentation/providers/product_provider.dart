@@ -18,6 +18,19 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepositoryImpl();
 });
 
+/// Provider pour récupérer les produits actuellement boostés (boost payant,
+/// non expiré, non vendus) — utilisé pour réserver une ligne sur trois dans
+/// la grille de la page d'accueil (voir `boosted_grid.dart`).
+///
+/// `autoDispose` + pas de cache long : le boost expire avec le temps, pas
+/// seulement avec une écriture Firestore, donc on veut une lecture fraîche
+/// à chaque ouverture/rafraîchissement de la page d'accueil plutôt qu'un
+/// résultat mis en cache indéfiniment.
+final activeBoostedProductsProvider =
+    FutureProvider.autoDispose<List<Product>>((ref) async {
+      return ref.watch(productRepositoryProvider).getActiveBoostedProducts();
+    });
+
 /// Provider pour récupérer un attribut complet par son ID.
 final attributeByIdProvider = FutureProvider.family<ProductAttribute, String>((
   ref,

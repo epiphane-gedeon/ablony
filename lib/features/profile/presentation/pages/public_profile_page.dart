@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/user.dart';
+import '../../../product/domain/entities/entities.dart';
 import '../../../product/presentation/providers/product_provider.dart';
 import '../../../follow/presentation/widgets/follow_button.dart';
 import '../../../reviews/presentation/providers/review_provider.dart';
 import '../../../reviews/presentation/widgets/star_rating.dart';
 import '../../../../shared/widgets/product_card.dart';
+import '../../../../core/responsive/responsive.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Page de profil public d'un autre utilisateur.
@@ -167,17 +169,9 @@ class PublicProfilePage extends ConsumerWidget {
                 return _buildEmptyState(context, theme);
               }
 
-              return GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.5,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: unsoldProducts.length,
-                itemBuilder: (context, index) {
-                  final product = unsoldProducts[index];
+              return ResponsiveProductGrid<Product>(
+                itemsBuilder: (_) => unsoldProducts,
+                itemBuilder: (context, product) {
                   return ProductCard(
                     product: product,
                     onTap: () => context.push('/product/${product.id}'),

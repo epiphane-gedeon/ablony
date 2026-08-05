@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/presentation/dynamic_ui/dynamic_selection_view.dart';
 import '../../../../core/presentation/pages/selection_screen.dart';
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/category_translator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../product/presentation/providers/category_provider.dart';
@@ -32,7 +33,10 @@ class SearchPage extends ConsumerWidget {
               },
               child: Container(
                 margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: theme.brightness == Brightness.dark
                       ? Colors.grey[800]
@@ -62,54 +66,83 @@ class SearchPage extends ConsumerWidget {
             Expanded(
               child: categoriesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString()))),
+                error: (error, stack) => Center(
+                  child: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.errorGenericMsg(error.toString()),
+                  ),
+                ),
                 data: (categories) {
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 1.2,
-                    ),
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      final category = categories[index];
-                      final translatedName = CategoryTranslator.translate(
-                        l10n,
-                        category.id,
-                        category.name,
-                      );
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final gridWidth = constraints.maxWidth > ContentWidth.grid
+                          ? ContentWidth.grid
+                          : constraints.maxWidth;
 
-                      return InkWell(
-                        onTap: () => _openCategorySelection(
-                          context,
-                          ref,
-                          category.id,
-                          translatedName,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: theme.brightness == Brightness.dark
-                                ? Colors.grey[900]
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: theme.dividerColor.withOpacity(0.05),
-                            ),
+                      return Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: ContentWidth.grid,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Align(
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                translatedName,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                          child: GridView.builder(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: context.pagePadding,
                             ),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount:
+                                      ResponsiveGrid.categoryColumns(gridWidth),
+                                  mainAxisSpacing: 16,
+                                  crossAxisSpacing: 16,
+                                  childAspectRatio: 1.2,
+                                ),
+                            itemCount: categories.length,
+                            itemBuilder: (context, index) {
+                              final category = categories[index];
+                              final translatedName =
+                                  CategoryTranslator.translate(
+                                    l10n,
+                                    category.id,
+                                    category.name,
+                                  );
+
+                              return InkWell(
+                                onTap: () => _openCategorySelection(
+                                  context,
+                                  ref,
+                                  category.id,
+                                  translatedName,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: theme.brightness == Brightness.dark
+                                        ? Colors.grey[900]
+                                        : Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.dividerColor.withOpacity(
+                                        0.05,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text(
+                                        translatedName,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       );
@@ -213,29 +246,36 @@ class SearchPage extends ConsumerWidget {
         final selectedIds = result['selectedIds'] as List<dynamic>;
         if (selectedIds.isNotEmpty) {
           final selectedId = selectedIds.first as String;
-          
+
           if (selectedId != parentId) {
-             finalCategoryId = selectedId;
-             // Trouver le vrai nom de la catégorie (car it might be deep)
-             final foundName = await _findCategoryName(ref, selectedId, parentId);
-             if (foundName != null) {
-               finalCategoryName = CategoryTranslator.translate(
-                 l10n,
-                 selectedId,
-                 foundName,
-               );
-             }
+            finalCategoryId = selectedId;
+            // Trouver le vrai nom de la catégorie (car it might be deep)
+            final foundName = await _findCategoryName(
+              ref,
+              selectedId,
+              parentId,
+            );
+            if (foundName != null) {
+              finalCategoryName = CategoryTranslator.translate(
+                l10n,
+                selectedId,
+                foundName,
+              );
+            }
           }
         }
       }
 
       // Navigue vers les résultats de recherche avec la catégorie présélectionnée
       if (context.mounted) {
-        context.push('/search-results', extra: {
-          'query': '',
-          'categoryId': finalCategoryId,
-          'categoryName': finalCategoryName,
-        });
+        context.push(
+          '/search-results',
+          extra: {
+            'query': '',
+            'categoryId': finalCategoryId,
+            'categoryName': finalCategoryName,
+          },
+        );
       }
     }
   }

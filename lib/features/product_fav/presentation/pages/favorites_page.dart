@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/product_card.dart';
+import '../../../../core/responsive/responsive.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../product/domain/entities/entities.dart';
 import '../providers/product_fav_provider.dart';
 
 /// Page affichant les favoris de l'utilisateur avec recherche locale
@@ -118,17 +120,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
             );
           }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.5,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: filteredProducts.length,
-            itemBuilder: (context, index) {
-              final product = filteredProducts[index];
+          return ResponsiveProductGrid<Product>(
+            itemsBuilder: (_) => filteredProducts,
+            itemBuilder: (context, product) {
               return ProductCard(
                 product: product,
                 onTap: () {

@@ -560,20 +560,25 @@ class ProductRepositoryImpl implements ProductRepository {
   // ============================================================
 
   @override
-  Future<void> boostProduct(String productId, Duration duration) async {
+  Future<List<Product>> getActiveBoostedProducts({int limit = 50}) async {
     try {
-      final expiresAt = DateTime.now().add(duration);
+      final snapshot = await _firestore
+          .collection('products')
+          .where('isBoosted', isEqualTo: true)
+          .where('isSold', isEqualTo: false)
+          .where('boostExpiresAt', isGreaterThan: Timestamp.now())
+          .orderBy('boostExpiresAt', descending: true)
+          .limit(limit)
+          .get();
 
-      await _firestore.collection('products').doc(productId).update({
-        'isBoosted': true,
-        'boostExpiresAt': Timestamp.fromDate(expiresAt),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
+          .toList();
     } on FirebaseException catch (e, stackTrace) {
       throw handleFirebaseException(e, stackTrace: stackTrace);
     } catch (e, stackTrace) {
       throw UnknownException(
-        message: 'Erreur lors du boost du produit',
+        message: 'Erreur lors du chargement des produits boostés',
         originalException: e as Exception?,
         stackTrace: stackTrace,
       );

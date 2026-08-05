@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ablony/shared/widgets/buttons/buttons.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/responsive/responsive.dart';
 
 class MessageBubble extends StatelessWidget {
   final bool isMe;
@@ -64,7 +65,7 @@ class MessageBubble extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.85,
+          maxWidth: context.layoutWidth(ContentWidth.standard) * 0.85,
         ),
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -111,7 +112,7 @@ class MessageBubble extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.6,
+          maxWidth: context.layoutWidth(ContentWidth.standard) * 0.6,
         ),
         decoration: hasCaption
             ? BoxDecoration(

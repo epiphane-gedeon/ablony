@@ -12,6 +12,7 @@ import '../../../auth/application/auth_providers.dart';
 import '../../data/nationalities.dart';
 import '../../domain/models/wallet.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page du porte-monnaie utilisateur
 class WalletPage extends ConsumerStatefulWidget {
@@ -33,135 +34,149 @@ class _WalletPageState extends ConsumerState<WalletPage> {
         title: Text(AppLocalizations.of(context)!.myWallet),
         centerTitle: false,
       ),
-      body: ListView(
-        children: [
-          // Montant en attente
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.pendingAmount,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      wallet != null
-                          ? '${wallet.pendingAmountInXOF.toStringAsFixed(0)} FCFA'
-                          : '0 FCFA',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    InfoBubble(
-                      message: AppLocalizations.of(context)!.pendingAmountInfo,
-                      link: TextButton(
-                        onPressed: () {
-                          // TODO: Naviguer vers la page d'aide
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(AppLocalizations.of(context)!.helpPageComingSoon),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)!.learnMore,
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      displayDuration: 5,
-                      iconColor: theme.colorScheme.onSurface.withOpacity(0.5),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 40),
-
-          // Montant disponible - grand affichage
-          Column(
-            children: [
-              Text(
-                wallet != null
-                    ? '${wallet.availableAmountInXOF.toStringAsFixed(0)} FCFA'
-                    : '0 FCFA',
-                style: theme.textTheme.displayLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 48,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.of(context)!.availableAmount,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
-
-          // Bouton "Activer le porte-monnaie" (affiché seulement si non activé)
-          if (wallet == null || !wallet.isActivated)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: PrimaryButton(
-                text: AppLocalizations.of(context)!.activateWallet,
-                onPressed: () => _openWalletSetup(context),
-              ),
-            ),
-
-          // Boutons Recharger et Retirer (affichés seulement si le wallet est activé)
-          if (wallet != null && wallet.isActivated) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+      body: ContentContainer(
+        applyPadding: false,
+        maxWidth: ContentWidth.standard,
+        child: ListView(
+          children: [
+            // Montant en attente
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: PrimaryButton(
-                      text: AppLocalizations.of(context)!.topUpWallet,
-                      onPressed: () => _showTopUpDialog(context),
+                  Text(
+                    AppLocalizations.of(context)!.pendingAmount,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SecondaryButton(
-                      text: AppLocalizations.of(context)!.withdrawWallet,
-                      onPressed: () {
-                        // TODO: Implémenter le retrait
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(AppLocalizations.of(context)!.withdrawalComingSoon),
+                  Row(
+                    children: [
+                      Text(
+                        wallet != null
+                            ? '${wallet.pendingAmountInXOF.toStringAsFixed(0)} FCFA'
+                            : '0 FCFA',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InfoBubble(
+                        message: AppLocalizations.of(
+                          context,
+                        )!.pendingAmountInfo,
+                        link: TextButton(
+                          onPressed: () {
+                            // TODO: Naviguer vers la page d'aide
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.helpPageComingSoon,
+                                ),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                        );
-                      },
-                    ),
+                          child: Text(
+                            AppLocalizations.of(context)!.learnMore,
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        displayDuration: 5,
+                        iconColor: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ],
 
-          const SizedBox(height: 80), // Espace pour la nav bar
-        ],
+            const SizedBox(height: 40),
+
+            // Montant disponible - grand affichage
+            Column(
+              children: [
+                Text(
+                  wallet != null
+                      ? '${wallet.availableAmountInXOF.toStringAsFixed(0)} FCFA'
+                      : '0 FCFA',
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 48,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.of(context)!.availableAmount,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
+            // Bouton "Activer le porte-monnaie" (affiché seulement si non activé)
+            if (wallet == null || !wallet.isActivated)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: PrimaryButton(
+                  text: AppLocalizations.of(context)!.activateWallet,
+                  onPressed: () => _openWalletSetup(context),
+                ),
+              ),
+
+            // Boutons Recharger et Retirer (affichés seulement si le wallet est activé)
+            if (wallet != null && wallet.isActivated) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: PrimaryButton(
+                        text: AppLocalizations.of(context)!.topUpWallet,
+                        onPressed: () => _showTopUpDialog(context),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SecondaryButton(
+                        text: AppLocalizations.of(context)!.withdrawWallet,
+                        onPressed: () {
+                          // TODO: Implémenter le retrait
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.withdrawalComingSoon,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 80), // Espace pour la nav bar
+          ],
+        ),
       ),
     );
   }
@@ -208,7 +223,9 @@ class _WalletPageState extends ConsumerState<WalletPage> {
               if (amount == null || amount < 200) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Veuillez entrer un montant valide supérieur ou égal à 200 FCFA'),
+                    content: Text(
+                      'Veuillez entrer un montant valide supérieur ou égal à 200 FCFA',
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -216,10 +233,10 @@ class _WalletPageState extends ConsumerState<WalletPage> {
               }
               Navigator.of(context).pop(); // Fermer le dialogue
               // Rediriger vers la page de paiement avec les paramètres de recharge
-              context.push('/payment', extra: {
-                'amount': amount,
-                'product': null,
-              });
+              context.push(
+                '/payment',
+                extra: {'amount': amount, 'product': null},
+              );
             },
             child: const Text('Valider'),
           ),
@@ -359,7 +376,9 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
             SelectionTile(
               label: AppLocalizations.of(context)!.nationality,
               value: _selectedNationality,
-              placeholder: AppLocalizations.of(context)!.selectNationalityPlaceholder,
+              placeholder: AppLocalizations.of(
+                context,
+              )!.selectNationalityPlaceholder,
               onTap: () => _showNationalityPicker(context),
               isRequired: true,
             ),
@@ -412,16 +431,16 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
 
     if (_selectedNationality == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.selectNationality)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.selectNationality),
+        ),
       );
       return;
     }
 
     if (_selectedBirthDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.selectBirthDate),
-        ),
+        SnackBar(content: Text(AppLocalizations.of(context)!.selectBirthDate)),
       );
       return;
     }
@@ -433,14 +452,17 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
         throw Exception('Utilisateur non connecté');
       }
 
-      // Créer l'objet Wallet
+      // Créer l'objet Wallet — on conserve les montants déjà accumulés
+      // (ex : pendingAmount d'une vente reçue avant activation du wallet),
+      // l'activation ne doit jamais remettre les soldes à zéro.
+      final existingWallet = user.wallet;
       final wallet = Wallet(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         nationality: _selectedNationality!,
         birthDate: _selectedBirthDate!,
-        availableAmount: 0, // Initialiser à 0
-        pendingAmount: 0, // Initialiser à 0
+        availableAmount: existingWallet?.availableAmount ?? 0,
+        pendingAmount: existingWallet?.pendingAmount ?? 0,
         isActivated: true,
         activatedAt: DateTime.now(),
       );
@@ -469,7 +491,9 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorGenericMsg(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.errorGenericMsg(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );

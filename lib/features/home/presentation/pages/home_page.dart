@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/filter_chip_list.dart';
 import '../../../../shared/widgets/product_card.dart';
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/category_translator.dart';
 import '../../../product/presentation/providers/category_provider.dart';
 import '../../../product/presentation/providers/paginated_products_provider.dart';
 import '../../../product/presentation/providers/product_provider.dart';
+import '../../../product/domain/boosted_grid_merger.dart';
 import '../../../product/domain/entities/category.dart';
 import '../../../product/domain/entities/product.dart';
 
@@ -51,6 +53,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     final l10n = AppLocalizations.of(context)!;
     final categoriesAsync = ref.watch(categoriesProvider);
     final productsAsync = ref.watch(paginatedProductsProvider);
+    final boostedProducts =
+        ref.watch(activeBoostedProductsProvider).value ?? const [];
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -81,53 +85,38 @@ class _HomePageState extends ConsumerState<HomePage> {
             // Grille de produits
             Expanded(
               child: productsAsync.when(
-                data: (products) => products.isEmpty
-                    ? _buildEmptyState(context)
-                    : RefreshIndicator(
-                        onRefresh: () async {
-                          await ref
-                              .read(paginatedProductsProvider.notifier)
-                              .refresh();
-                        },
-                        child: GridView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio:
-                                    0.5, // Carte plus haute pour une image plus longue
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 16,
-                              ),
-                          itemCount:
-                              products.length +
-                              (ref
-                                      .read(paginatedProductsProvider.notifier)
-                                      .isLoadingMore
-                                  ? 1
-                                  : 0),
-                          itemBuilder: (context, index) {
-                            if (index >= products.length) {
-                              // Indicateur de chargement en bas
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
+                data: (products) {
+                  if (products.isEmpty) return _buildEmptyState(context);
 
-                            final product = products[index];
-                            return ProductCard(
-                              product: product,
-                              onTap: () {
-                                context.push('/product/${product.id}');
-                              },
-                            );
-                          },
-                        ),
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      ref.invalidate(activeBoostedProductsProvider);
+                      await ref
+                          .read(paginatedProductsProvider.notifier)
+                          .refresh();
+                    },
+                    child: ResponsiveProductGrid<Product>(
+                      controller: _scrollController,
+                      showTrailingLoader: ref
+                          .read(paginatedProductsProvider.notifier)
+                          .isLoadingMore,
+                      // Le merge dépend du nombre de colonnes retenu : il
+                      // réserve une ligne complète sur trois aux produits
+                      // boostés, quelle que soit la largeur d'écran.
+                      itemsBuilder: (columns) => mergeWithBoostedRows(
+                        regularProducts: products,
+                        boostedProducts: boostedProducts,
+                        crossAxisCount: columns,
                       ),
+                      itemBuilder: (context, product) => ProductCard(
+                        product: product,
+                        onTap: () {
+                          context.push('/product/${product.id}');
+                        },
+                      ),
+                    ),
+                  );
+                },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(
                   child: Column(

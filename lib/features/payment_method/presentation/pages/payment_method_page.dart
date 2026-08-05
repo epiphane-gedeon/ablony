@@ -6,6 +6,7 @@ import '../../../../features/auth/application/auth_providers.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/custom_checkbox.dart';
 import '../../../../shared/widgets/input.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page de sélection du mode de paiement
 class PaymentMethodPage extends ConsumerStatefulWidget {
@@ -111,7 +112,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = context.layoutWidth();
     final userAsync = ref.watch(currentUserProvider);
     final wallet = userAsync.value?.wallet;
 

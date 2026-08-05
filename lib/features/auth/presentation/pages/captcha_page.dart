@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/recaptcha_widget.dart';
 import '../../application/providers.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Page de vérification Captcha lors de l'inscription.
 ///
@@ -134,8 +135,8 @@ class _CaptchaPageState extends ConsumerState<CaptchaPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = context.layoutHeight();
+    final screenWidth = context.layoutWidth();
 
     return Scaffold(
       appBar: AppBar(

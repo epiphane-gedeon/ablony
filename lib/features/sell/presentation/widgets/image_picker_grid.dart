@@ -1,11 +1,13 @@
-import 'dart:io';
+import 'dart:io' show File;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../core/responsive/responsive.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Widget pour sélectionner et afficher 1-6 photos de produit.
-/// Supporte à la fois des fichiers local (File) et des URLs (String).
+/// Supporte à la fois des fichiers local (XFile) et des URLs (String).
 class ImagePickerGrid extends StatelessWidget {
   /// Liste des images (peut être File ou String URL)
   final List<dynamic> images;
@@ -26,10 +28,10 @@ class ImagePickerGrid extends StatelessWidget {
   /// Ouvre le sélecteur d'images
   Future<void> _pickImages(BuildContext context) async {
     final picker = ImagePicker();
-    
+
     try {
       final remainingSlots = maxImages - images.length;
-      
+
       if (remainingSlots <= 0) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -49,10 +51,7 @@ class ImagePickerGrid extends StatelessWidget {
       );
 
       if (pickedFiles.isNotEmpty) {
-        final filesToAdd = pickedFiles
-            .take(remainingSlots)
-            .map((xFile) => File(xFile.path))
-            .toList();
+        final filesToAdd = pickedFiles.take(remainingSlots).toList();
 
         onImagesChanged([...images, ...filesToAdd]);
       }
@@ -79,22 +78,26 @@ class ImagePickerGrid extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1,
+          LayoutBuilder(
+            builder: (context, constraints) => GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: ResponsiveGrid.photoColumns(
+                  constraints.maxWidth,
+                ),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1,
+              ),
+              itemCount: images.length + (canAddMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == images.length) {
+                  return _buildAddButton(context, l10n);
+                }
+                return _buildImageTile(context, index);
+              },
             ),
-            itemCount: images.length + (canAddMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == images.length) {
-                return _buildAddButton(context, l10n);
-              }
-              return _buildImageTile(context, index);
-            },
           ),
         ],
       ),
@@ -149,13 +152,20 @@ class ImagePickerGrid extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: image is File
-              ? Image.file(
-                  image,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                )
+          child: image is XFile
+              ? (kIsWeb
+                    ? Image.network(
+                        image.path,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      )
+                    : Image.file(
+                        File(image.path),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ))
               : Image.network(
                   image as String,
                   fit: BoxFit.cover,
@@ -174,11 +184,7 @@ class ImagePickerGrid extends StatelessWidget {
                 color: Colors.black.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.close,
-                size: 16,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
             ),
           ),
         ),

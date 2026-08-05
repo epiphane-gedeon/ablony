@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/utils/category_translator.dart';
@@ -19,6 +18,7 @@ import 'package:ablony/features/product/domain/entities/entities.dart';
 import 'package:ablony/features/auth/application/auth_providers.dart';
 import 'package:ablony/features/sell/data/services/image_upload_service.dart';
 import '../widgets/image_picker_grid.dart';
+import '../../../../core/responsive/responsive.dart';
 
 /// Bottom sheet plein écran pour créer une annonce.
 ///
@@ -163,7 +163,7 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
     return Container(
       height: screenHeight, // Plein écran
@@ -294,11 +294,9 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
     ThemeData theme,
     AppLocalizations l10n,
   ) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Container(
       padding: EdgeInsets.only(
-        top: screenHeight * 0.05, // 5% de la hauteur de l'écran
+        top: context.layoutHeight() * 0.05,
       ),
       decoration: BoxDecoration(
         border: Border(
@@ -809,15 +807,15 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       // Récupérer le service d'upload d'images
       final imageUploadService = ref.read(imageUploadServiceProvider);
 
-      // Uploader uniquement les nouvelles images (File)
+      // Uploader uniquement les nouvelles images (XFile)
       // et conserver les URLs des images existantes (String)
       List<String> imageUrls = [];
-      List<File> newImagesToUpload = [];
+      List<XFile> newImagesToUpload = [];
 
       for (var img in _selectedImages) {
         if (img is String) {
           imageUrls.add(img);
-        } else if (img is File) {
+        } else if (img is XFile) {
           newImagesToUpload.add(img);
         }
       }

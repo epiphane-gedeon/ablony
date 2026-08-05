@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -61,6 +62,13 @@ final googleSignInProvider = Provider<GoogleSignIn>((ref) {
   return GoogleSignIn(
     // Scopes optionnels supplémentaires (email et profile sont inclus par défaut)
     scopes: ['email', 'profile'],
+    // Requis par google_sign_in_web : sans clientId explicite (ou balise
+    // meta google-signin-client_id), la connexion échoue silencieusement
+    // sur web. Le client Android/iOS utilise sa propre config native,
+    // non affectée par ce paramètre.
+    clientId: kIsWeb
+        ? '2762433205-qd3fesoffe98hk9oto62151mgdg235f1.apps.googleusercontent.com'
+        : null,
   );
 });
 
