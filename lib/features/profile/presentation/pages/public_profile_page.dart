@@ -163,7 +163,12 @@ class PublicProfilePage extends ConsumerWidget {
             skipLoadingOnReload: true,
             skipError: true,
             data: (products) {
-              final unsoldProducts = products.where((p) => !p.isSold).toList();
+              // Vitrine publique : ni vendu, ni réservé, ni masqué par le
+              // vendeur (contrairement à `UserListingsPage`, la version
+              // "mes annonces" du vendeur lui-même, qui montre tout).
+              final unsoldProducts = products
+                  .where((p) => !p.isSold && !p.isReserved && !p.isHidden)
+                  .toList();
 
               if (unsoldProducts.isEmpty) {
                 return _buildEmptyState(context, theme);

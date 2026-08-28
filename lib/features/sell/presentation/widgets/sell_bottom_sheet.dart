@@ -17,8 +17,10 @@ import 'package:ablony/features/product/domain/entities/product_attribute.dart';
 import 'package:ablony/features/product/domain/entities/entities.dart';
 import 'package:ablony/features/auth/application/auth_providers.dart';
 import 'package:ablony/features/sell/data/services/image_upload_service.dart';
+import '../../application/sell_draft_provider.dart';
 import '../widgets/image_picker_grid.dart';
 import '../../../../core/responsive/responsive.dart';
+import '../../../../shared/widgets/link.dart';
 
 /// Bottom sheet plein écran pour créer une annonce.
 ///
@@ -95,6 +97,10 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
   /// (upload images + enregistrement Firestore)
   bool _isPublishing = false;
 
+  /// true dès que la publication a réussi — évite que [dispose] ne
+  /// resauvegarde un brouillon juste après qu'il ait été effacé.
+  bool _hasPublished = false;
+
   // ============================================================
   // CYCLE DE VIE
   // ============================================================
@@ -122,6 +128,25 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _initializeEditMode();
       });
+      return;
+    }
+
+    // Mode création : restaurer un éventuel brouillon laissé par une
+    // ouverture précédente du sheet fermée sans publier (par ex. parce que
+    // l'utilisateur a dû s'authentifier entre-temps).
+    final draft = ref.read(sellDraftProvider);
+    if (draft != null) {
+      _titleController.text = draft.title;
+      _descriptionController.text = draft.description;
+      _priceController.text = draft.price;
+      _selectedImages = List<dynamic>.from(draft.images);
+      _selectedCategory = draft.selectedCategory;
+      _selectedCategoryId = draft.selectedCategoryId;
+      _selectedParentCategoryId = draft.selectedParentCategoryId;
+      _categoryAttributes = List<ProductAttribute>.from(
+        draft.categoryAttributes,
+      );
+      _attributeValues = Map<String, dynamic>.from(draft.attributeValues);
     }
   }
 
@@ -153,6 +178,29 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
 
   @override
   void dispose() {
+    // Le sheet se ferme sans avoir publié : on garde la saisie en cache
+    // (mode création uniquement — l'édition ne doit pas polluer le
+    // brouillon de "nouvelle annonce").
+    if (widget.initialProduct == null && !_hasPublished) {
+      ref
+          .read(sellDraftProvider.notifier)
+          .save(
+            SellDraft(
+              title: _titleController.text,
+              description: _descriptionController.text,
+              price: _priceController.text,
+              images: List<dynamic>.from(_selectedImages),
+              selectedCategory: _selectedCategory,
+              selectedCategoryId: _selectedCategoryId,
+              selectedParentCategoryId: _selectedParentCategoryId,
+              categoryAttributes: List<ProductAttribute>.from(
+                _categoryAttributes,
+              ),
+              attributeValues: Map<String, dynamic>.from(_attributeValues),
+            ),
+          );
+    }
+
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
@@ -321,10 +369,39 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
               textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(width: 48), // Pour centrer le titre
+          // Effacer le brouillon : uniquement en mode création, jamais en
+          // édition (on ne touche pas au brouillon "nouvelle annonce").
+          if (widget.initialProduct == null)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Link(
+                text: l10n.clearDraft,
+                onTap: _clearDraft,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+            )
+          else
+            const SizedBox(width: 48), // Pour centrer le titre
         ],
       ),
     );
+  }
+
+  /// Efface le brouillon en cache et remet le formulaire à vide, pour
+  /// repartir d'une annonce neuve sans avoir à fermer/rouvrir le sheet.
+  void _clearDraft() {
+    ref.read(sellDraftProvider.notifier).clear();
+    setState(() {
+      _titleController.clear();
+      _descriptionController.clear();
+      _priceController.clear();
+      _selectedImages = [];
+      _selectedCategory = null;
+      _selectedCategoryId = null;
+      _selectedParentCategoryId = null;
+      _categoryAttributes = [];
+      _attributeValues = {};
+    });
   }
 
   /// Construit le bouton Publier avec spinner quand en cours de publication.
@@ -768,6 +845,20 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
     // mais on vérifie quand même
     if (!_canPublish()) return;
 
+    // Rédiger une annonce est libre (le sheet est accessible à tous), mais
+    // publier nécessite un compte. On ne bloque qu'ici, au moment d'agir —
+    // on renvoie vers l'onboarding et le brouillon reste en cache (dispose()
+    // le sauvegarde en fermant le sheet) pour reprendre exactement où
+    // l'utilisateur s'était arrêté une fois connecté.
+    final isAuthenticated = ref.read(currentUserProvider).value != null;
+    if (!isAuthenticated) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        context.go('/onboarding');
+      }
+      return;
+    }
+
     // Activer l'état "en cours de publication"
     // Cela va désactiver le bouton et afficher le spinner
     setState(() {
@@ -907,6 +998,13 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       ref.invalidate(sellerProductsProvider(userId));
       // ÉTAPE 6 : SUCCÈS - AFFICHER UN MESSAGE ET FERMER
       // ============================================================
+
+      // Publication réussie : plus besoin du brouillon, et il ne faut pas
+      // que dispose() en resauvegarde un vide en fermant le sheet.
+      _hasPublished = true;
+      if (widget.initialProduct == null) {
+        ref.read(sellDraftProvider.notifier).clear();
+      }
 
       // Fermer le bottom sheet
       if (mounted) {

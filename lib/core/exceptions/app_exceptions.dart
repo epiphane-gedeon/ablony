@@ -140,6 +140,31 @@ class UserDisabledException extends AuthException {
       );
 }
 
+/// Aucun compte associé à l'email fourni
+class UserNotFoundException extends AuthException {
+  UserNotFoundException({Exception? originalException, StackTrace? stackTrace})
+    : super(
+        message: 'Aucun compte n\'est associé à cet email',
+        code: 'USER_NOT_FOUND',
+        originalException: originalException,
+        stackTrace: stackTrace,
+      );
+}
+
+/// Lien de réinitialisation de mot de passe invalide, déjà utilisé ou expiré
+class InvalidOrExpiredResetLinkException extends AuthException {
+  InvalidOrExpiredResetLinkException({
+    Exception? originalException,
+    StackTrace? stackTrace,
+  }) : super(
+         message:
+             'Ce lien de réinitialisation n\'est plus valide. Demandez-en un nouveau',
+         code: 'INVALID_RESET_LINK',
+         originalException: originalException,
+         stackTrace: stackTrace,
+       );
+}
+
 /// Profil utilisateur incomplet
 class IncompleteProfileException extends AuthException {
   IncompleteProfileException({
@@ -330,6 +355,19 @@ class QuotaExceededException extends DatabaseException {
       );
 }
 
+/// Reçu de livraison introuvable
+class ReceiptNotFoundException extends DatabaseException {
+  ReceiptNotFoundException({
+    Exception? originalException,
+    StackTrace? stackTrace,
+  }) : super(
+         message: 'Le reçu n\'existe pas ou a été supprimé',
+         code: 'RECEIPT_NOT_FOUND',
+         originalException: originalException,
+         stackTrace: stackTrace,
+       );
+}
+
 // ============================================================
 // EXCEPTIONS STOCKAGE (Images)
 // ============================================================
@@ -409,6 +447,19 @@ class RequiredFieldException extends ValidationException {
        );
 }
 
+/// Tentative de se suivre soi-même
+class CannotFollowSelfException extends ValidationException {
+  CannotFollowSelfException({
+    Exception? originalException,
+    StackTrace? stackTrace,
+  }) : super(
+         message: 'Vous ne pouvez pas vous suivre vous-même',
+         code: 'CANNOT_FOLLOW_SELF',
+         originalException: originalException,
+         stackTrace: stackTrace,
+       );
+}
+
 /// Format invalide (email, URL, etc.)
 class InvalidFormatException extends ValidationException {
   final String fieldName;
@@ -459,15 +510,18 @@ AppException handleFirebaseException(
 
   // Auth errors
   if (code == 'user-not-found') {
-    return ProductNotFoundException(
-      productId: 'unknown',
-      originalException: e,
-      stackTrace: stackTrace,
-    );
+    return UserNotFoundException(originalException: e, stackTrace: stackTrace);
   }
   // Codes pour mot de passe/identifiants incorrects (ancien et nouveau)
   if (code == 'wrong-password' || code == 'invalid-credential') {
     return InvalidCredentialsException(
+      originalException: e,
+      stackTrace: stackTrace,
+    );
+  }
+  // Lien de réinitialisation de mot de passe invalide, déjà utilisé ou expiré
+  if (code == 'invalid-action-code' || code == 'expired-action-code') {
+    return InvalidOrExpiredResetLinkException(
       originalException: e,
       stackTrace: stackTrace,
     );

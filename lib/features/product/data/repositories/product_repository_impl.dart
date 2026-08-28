@@ -147,6 +147,8 @@ class ProductRepositoryImpl implements ProductRepository {
       var query = _firestore
           .collection('products')
           .where('isSold', isEqualTo: false)
+          .where('isReserved', isEqualTo: false)
+          .where('isHidden', isEqualTo: false)
           .orderBy('createdAt', descending: true)
           .limit(limit);
 
@@ -239,14 +241,12 @@ class ProductRepositoryImpl implements ProductRepository {
     String? subcategoryId,
   }) async {
     try {
-      print(
-        '🔍 [Repository] getProductsByCategory - categoryId: $categoryId, subcategoryId: $subcategoryId',
-      );
-
       Query query = _firestore
           .collection('products')
           .where('categoryId', isEqualTo: categoryId)
-          .where('isSold', isEqualTo: false);
+          .where('isSold', isEqualTo: false)
+          .where('isReserved', isEqualTo: false)
+          .where('isHidden', isEqualTo: false);
 
       // Ajouter le filtre de sous-catégorie si fourni
       if (subcategoryId != null) {
@@ -254,11 +254,6 @@ class ProductRepositoryImpl implements ProductRepository {
       }
 
       final snapshot = await query.orderBy('createdAt', descending: true).get();
-
-      print('📦 [Repository] Produits trouvés: ${snapshot.docs.length}');
-      if (snapshot.docs.isNotEmpty) {
-        print('   Premier produit: ${snapshot.docs.first.data()}');
-      }
 
       return snapshot.docs
           .map(
@@ -269,10 +264,8 @@ class ProductRepositoryImpl implements ProductRepository {
           )
           .toList();
     } on FirebaseException catch (e, stackTrace) {
-      print('❌ [Repository] Firebase error: $e');
       throw handleFirebaseException(e, stackTrace: stackTrace);
     } catch (e, stackTrace) {
-      print('❌ [Repository] Error: $e');
       throw UnknownException(
         message: 'Erreur lors du chargement des produits par catégorie',
         originalException: e as Exception?,
@@ -329,10 +322,12 @@ class ProductRepositoryImpl implements ProductRepository {
         }
       });
 
-      // Récupérer tous les produits non vendus
+      // Récupérer tous les produits non vendus, non réservés et non masqués
       final snapshot = await _firestore
           .collection('products')
           .where('isSold', isEqualTo: false)
+          .where('isReserved', isEqualTo: false)
+          .where('isHidden', isEqualTo: false)
           .get();
 
       // Filtrer côté client pour chercher dans titre, description, marque, catégorie et sous-catégorie
@@ -542,6 +537,9 @@ class ProductRepositoryImpl implements ProductRepository {
       await _firestore.collection('products').doc(productId).update({
         'isSold': true,
         'soldAt': FieldValue.serverTimestamp(),
+        // On lève une éventuelle réservation : le produit est de toute
+        // façon déjà exclu des listes publiques une fois vendu.
+        'isReserved': false,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } on FirebaseException catch (e, stackTrace) {
@@ -549,6 +547,78 @@ class ProductRepositoryImpl implements ProductRepository {
     } catch (e, stackTrace) {
       throw UnknownException(
         message: 'Erreur lors du marquage du produit comme vendu',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> markAsReserved(String productId) async {
+    try {
+      await _firestore.collection('products').doc(productId).update({
+        'isReserved': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du marquage du produit comme réservé',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> unmarkAsReserved(String productId) async {
+    try {
+      await _firestore.collection('products').doc(productId).update({
+        'isReserved': false,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'annulation de la réservation',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> hideProduct(String productId) async {
+    try {
+      await _firestore.collection('products').doc(productId).update({
+        'isHidden': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du masquage du produit',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> unhideProduct(String productId) async {
+    try {
+      await _firestore.collection('products').doc(productId).update({
+        'isHidden': false,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la republication du produit',
         originalException: e as Exception?,
         stackTrace: stackTrace,
       );
@@ -566,6 +636,8 @@ class ProductRepositoryImpl implements ProductRepository {
           .collection('products')
           .where('isBoosted', isEqualTo: true)
           .where('isSold', isEqualTo: false)
+          .where('isReserved', isEqualTo: false)
+          .where('isHidden', isEqualTo: false)
           .where('boostExpiresAt', isGreaterThan: Timestamp.now())
           .orderBy('boostExpiresAt', descending: true)
           .limit(limit)

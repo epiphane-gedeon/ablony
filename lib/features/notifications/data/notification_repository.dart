@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/exceptions/exceptions.dart';
 import '../domain/models/app_notification.dart';
 
 class NotificationRepository {
@@ -24,7 +25,17 @@ class NotificationRepository {
         );
   }
 
-  Future<void> markAsRead(String notificationId) {
-    return _notificationsRef.doc(notificationId).update({'read': true});
+  Future<void> markAsRead(String notificationId) async {
+    try {
+      await _notificationsRef.doc(notificationId).update({'read': true});
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du marquage de la notification comme lue',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

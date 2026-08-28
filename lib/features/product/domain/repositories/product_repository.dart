@@ -88,6 +88,24 @@ abstract class ProductRepository {
   /// Marque un produit comme vendu
   Future<void> markAsSold(String productId);
 
+  /// Marque un produit comme réservé — indisponible temporairement à
+  /// l'achat (le vendeur discute avec un acheteur), sans le vendre pour
+  /// autant. Exclu des listes publiques (accueil, recherche, catégories)
+  /// comme un produit vendu, mais reste visible pour le vendeur.
+  Future<void> markAsReserved(String productId);
+
+  /// Annule la réservation d'un produit, qui redevient visible et
+  /// achetable normalement.
+  Future<void> unmarkAsReserved(String productId);
+
+  /// Masque une annonce — retirée des listes publiques à la demande du
+  /// vendeur, sans être supprimée ni vendue.
+  Future<void> hideProduct(String productId);
+
+  /// Republie une annonce masquée, qui redevient visible dans les listes
+  /// publiques.
+  Future<void> unhideProduct(String productId);
+
   // ============================================================
   // BOOST
   // ============================================================

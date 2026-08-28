@@ -256,45 +256,48 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     // Largeur totale d'un cycle complet
     final totalWidth = cardWidth * cardCount;
 
+    // Construite une seule fois : la liste de cartes ne change jamais, seule
+    // sa position bouge. La reconstruire à chaque frame (comme avant, dans
+    // le `builder` ci-dessous) force le rebuild + repaint de 5 `Image.asset`
+    // 60 fois par seconde en boucle infinie, ce qui suffit à faire planter
+    // l'onglet sur Safari iOS (CanvasKit) faute de mémoire/GPU sur une page
+    // qui reste ouverte tant que l'utilisateur n'a pas quitté l'onboarding.
+    final row = Row(
+      children: List.generate(cardCount, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(right: 12.0),
+          // Passe le chemin de l'image correspondante à la carte
+          child: _buildProductCard(images[index]),
+        );
+      }),
+    );
+
     return SizedBox(
       height: rowHeight, // Hauteur adaptable
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (context, child) {
-          // Calcul de l'offset qui boucle de 0 à totalWidth
-          final offset = (controller.value * totalWidth) % totalWidth;
+      child: ClipRect(
+        child: AnimatedBuilder(
+          animation: controller,
+          // `child` est construit une seule fois par Flutter et réutilisé
+          // tel quel à chaque frame : seul `builder` retourne ici.
+          child: row,
+          builder: (context, child) {
+            // Calcul de l'offset qui boucle de 0 à totalWidth
+            final offset = (controller.value * totalWidth) % totalWidth;
 
-          return Stack(
-            children: [
-              // On affiche 2 fois la liste pour créer l'effet de boucle infinie
-              Positioned(
-                left: reverse ? offset : -offset,
-                child: Row(
-                  children: List.generate(cardCount, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      // Passe le chemin de l'image correspondante à la carte
-                      child: _buildProductCard(images[index]),
-                    );
-                  }),
+            return Stack(
+              children: [
+                // On affiche 2 fois la même liste (même instance de widget,
+                // c'est autorisé) pour créer l'effet de boucle infinie
+                Positioned(left: reverse ? offset : -offset, child: child!),
+                // Deuxième copie des images pour la boucle
+                Positioned(
+                  left: reverse ? offset - totalWidth : -offset + totalWidth,
+                  child: child,
                 ),
-              ),
-              // Deuxième copie des images pour la boucle
-              Positioned(
-                left: reverse ? offset - totalWidth : -offset + totalWidth,
-                child: Row(
-                  children: List.generate(cardCount, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      // Passe le chemin de l'image correspondante à la carte
-                      child: _buildProductCard(images[index]),
-                    );
-                  }),
-                ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

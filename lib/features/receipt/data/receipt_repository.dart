@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/exceptions/exceptions.dart';
 import '../domain/models/receipt.dart';
 
 class ReceiptRepository {
@@ -9,11 +10,26 @@ class ReceiptRepository {
   final FirebaseFirestore _firestore;
 
   Future<Receipt> getReceiptById(String receiptId) async {
-    final doc = await _firestore.collection('receipts').doc(receiptId).get();
-    if (!doc.exists) {
-      throw Exception('Reçu introuvable');
+    try {
+      final doc = await _firestore
+          .collection('receipts')
+          .doc(receiptId)
+          .get();
+      if (!doc.exists) {
+        throw ReceiptNotFoundException();
+      }
+      return Receipt.fromFirestore(doc);
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement du reçu',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
     }
-    return Receipt.fromFirestore(doc);
   }
 
   /// Écoute en temps réel le reçu d'un produit, côté vendeur.

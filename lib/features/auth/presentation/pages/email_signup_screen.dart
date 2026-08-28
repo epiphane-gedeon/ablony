@@ -1,7 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/app_urls.dart';
+import '../../../../core/presentation/pages/web_view_page.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/input.dart';
@@ -39,11 +42,34 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
   bool _termsAccepted = false;
   bool _showTermsError = false;
 
+  // Recognizers pour les liens CGU/confidentialité dans le RichText — un
+  // TextSpan n'a pas de onTap, seulement un `recognizer` à gérer soi-même.
+  late final TapGestureRecognizer _termsRecognizer = TapGestureRecognizer()
+    ..onTap = () {
+      final l10n = AppLocalizations.of(context)!;
+      WebViewPage.open(
+        context,
+        url: AppUrls.termsOfService,
+        title: l10n.termsTitle,
+      );
+    };
+  late final TapGestureRecognizer _privacyRecognizer = TapGestureRecognizer()
+    ..onTap = () {
+      final l10n = AppLocalizations.of(context)!;
+      WebViewPage.open(
+        context,
+        url: AppUrls.privacyPolicy,
+        title: l10n.privacyTitle,
+      );
+    };
+
   @override
   void dispose() {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
     super.dispose();
   }
 
@@ -218,7 +244,7 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
                             decoration: TextDecoration.underline,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          // TODO: Add tap handler for terms
+                          recognizer: _termsRecognizer,
                         ),
                         TextSpan(text: l10n.privacyPrefix),
                         TextSpan(
@@ -227,7 +253,7 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
                             decoration: TextDecoration.underline,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          // TODO: Add tap handler for privacy policy
+                          recognizer: _privacyRecognizer,
                         ),
                         TextSpan(text: l10n.termsAge),
                       ],

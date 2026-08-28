@@ -56,7 +56,11 @@ class MainLayout extends ConsumerWidget {
     int index,
     StatefulNavigationShell shell,
   ) {
-    // Si c'est le bouton "Vendre", on ouvre le bottom sheet
+    // Si c'est le bouton "Vendre", on ouvre le bottom sheet — accessible
+    // même sans compte : l'utilisateur peut rédiger son annonce librement,
+    // l'authentification n'est demandée qu'au moment de publier (cf.
+    // _handlePublish dans SellBottomSheet), avec la saisie conservée en
+    // cache pour reprendre exactement où il s'était arrêté.
     if (index == _sellIndex) {
       SellBottomSheet.show(context);
       return;

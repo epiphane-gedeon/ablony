@@ -19,3 +19,4 @@ export 'email_signup_screen.dart';
 export 'login_screen.dart';
 export 'captcha_page.dart';
 export 'country_selection_page.dart';
+export 'reset_password_page.dart';

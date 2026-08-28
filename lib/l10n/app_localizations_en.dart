@@ -258,6 +258,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginScreenSubmit => 'Log in';
 
   @override
+  String get forgotPasswordTitle => 'Forgot password';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Enter your email and we\'ll send you a link to reset your password.';
+
+  @override
+  String get resetPasswordEmailPlaceholder => 'Your email address';
+
+  @override
+  String get sendResetLink => 'Send link';
+
+  @override
+  String get resetEmailSentMessage =>
+      'If an account exists with this email, a reset link has just been sent.';
+
+  @override
+  String get resetPasswordPageTitle => 'Reset password';
+
+  @override
+  String get resetPasswordPageDescription => 'Choose a new password.';
+
+  @override
+  String get resetPasswordNewPasswordPlaceholder => 'New password';
+
+  @override
+  String get resetPasswordConfirmPasswordPlaceholder => 'Confirm password';
+
+  @override
+  String get resetPasswordMismatch => 'Passwords don\'t match';
+
+  @override
+  String get resetPasswordSubmitButton => 'Reset';
+
+  @override
+  String get resetPasswordSuccessMessage =>
+      'Password reset successfully. You can now log in.';
+
+  @override
+  String get resetLinkInvalidMessage =>
+      'This reset link is invalid or has expired. Request a new one from the login page.';
+
+  @override
   String get loginScreenForgotPassword => 'Forgot your password?';
 
   @override
@@ -268,6 +311,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sellTitle => 'Sell an item';
+
+  @override
+  String get clearDraft => 'Clear';
 
   @override
   String get addPhotos => 'Add photos';
@@ -925,10 +971,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseLanguage => 'Choose language';
 
   @override
+  String get openInBrowser => 'Open in browser';
+
+  @override
   String get cancel => 'CANCEL';
 
   @override
   String get logoutConfirm => 'Are you sure you want to log out?';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'This deletion is permanent: all your personal information will be replaced with generic data and you won\'t be able to sign back into this account. You can create a new account with the same credentials if you want to.';
+
+  @override
+  String get deleteAccountConfirmAction => 'DELETE';
+
+  @override
+  String get deleteAccountDoneTitle => 'Account deleted';
+
+  @override
+  String get deleteAccountDoneMessage =>
+      'Your account has been deleted. You can create a new account with the same credentials at any time.';
 
   @override
   String get profileTitle => 'Profile';
@@ -997,13 +1066,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markAsReserved => 'Mark as reserved';
 
   @override
+  String get cancelReservation => 'Cancel reservation';
+
+  @override
   String get edit => 'Edit';
 
   @override
   String get hide => 'Hide';
 
   @override
+  String get unhide => 'Republish';
+
+  @override
+  String get productHidden => 'Listing hidden';
+
+  @override
+  String get productUnhidden => 'Listing republished';
+
+  @override
+  String get productUnavailable => 'Product unavailable';
+
+  @override
+  String get soldBadge => 'Sold';
+
+  @override
+  String get reservedBadge => 'Reserved';
+
+  @override
+  String get hiddenBadge => 'Hidden';
+
+  @override
   String get productMarkedAsSold => 'Product marked as sold';
+
+  @override
+  String get productMarkedAsReserved => 'Product marked as reserved';
+
+  @override
+  String get reservationCancelled => 'Reservation cancelled';
+
+  @override
+  String get productReserved => 'Product reserved';
 
   @override
   String get deleteProductConfirm => 'Delete product?';
@@ -1186,6 +1288,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get minPrice => 'Minimum price';
+
+  @override
+  String get maxPrice => 'Maximum price';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get resetFilter => 'Reset';
 
   @override
   String get priceFilterDevelopment => 'Price filter in development';

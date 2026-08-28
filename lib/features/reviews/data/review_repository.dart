@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/exceptions/exceptions.dart';
 import '../domain/models/review.dart';
 
 class ReviewRepository {
@@ -14,7 +15,7 @@ class ReviewRepository {
   String get _uid {
     final uid = _auth.currentUser?.uid;
     if (uid == null || uid.isEmpty) {
-      throw Exception('Utilisateur non authentifié');
+      throw NotAuthenticatedException();
     }
     return uid;
   }
@@ -34,21 +35,44 @@ class ReviewRepository {
     required int rating,
     String? comment,
   }) async {
-    await _reviewsRef.doc(transactionRef).set({
-      'buyerId': _uid,
-      'sellerId': sellerId,
-      'productId': productId,
-      'productTitle': productTitle,
-      'rating': rating,
-      if (comment != null && comment.trim().isNotEmpty) 'comment': comment.trim(),
-      'transactionRef': transactionRef,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    try {
+      await _reviewsRef.doc(transactionRef).set({
+        'buyerId': _uid,
+        'sellerId': sellerId,
+        'productId': productId,
+        'productTitle': productTitle,
+        'rating': rating,
+        if (comment != null && comment.trim().isNotEmpty)
+          'comment': comment.trim(),
+        'transactionRef': transactionRef,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi de l\'avis',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   Future<bool> hasReviewed(String transactionRef) async {
-    final doc = await _reviewsRef.doc(transactionRef).get();
-    return doc.exists;
+    try {
+      final doc = await _reviewsRef.doc(transactionRef).get();
+      return doc.exists;
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la vérification de l\'avis',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   Stream<List<Review>> watchReviewsForSeller(String sellerId) {

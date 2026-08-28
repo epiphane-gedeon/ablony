@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../auth/application/auth_providers.dart';
+import '../../../../core/exceptions/exceptions.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/account_deletion_service.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Page des paramètres de l'application.
@@ -118,6 +120,13 @@ class SettingsPage extends ConsumerWidget {
               titleColor: Colors.red,
               showChevron: false,
               onTap: () => _showLogoutConfirmation(context, ref),
+            ),
+            _buildSettingsTile(
+              context: context,
+              title: l10n.deleteAccount,
+              titleColor: Colors.red,
+              showChevron: false,
+              onTap: () => _showDeleteAccountConfirmation(context, ref),
             ),
 
             const SizedBox(height: 32),
@@ -269,5 +278,90 @@ class SettingsPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Affiche le dialogue de confirmation de suppression de compte.
+  ///
+  /// Le texte prévient explicitement que la suppression est définitive et
+  /// qu'un nouveau compte pourra être recréé avec les mêmes identifiants —
+  /// l'utilisateur doit comprendre ça avant de confirmer, pas après.
+  void _showDeleteAccountConfirmation(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteAccountConfirmTitle),
+        content: Text(l10n.deleteAccountConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _performAccountDeletion(context, ref);
+            },
+            child: Text(
+              l10n.deleteAccountConfirmAction,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Supprime le compte (anonymisation Firestore + suppression Firebase
+  /// Auth côté serveur), déconnecte l'utilisateur puis le renvoie vers
+  /// l'onboarding.
+  Future<void> _performAccountDeletion(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await ref.read(accountDeletionServiceProvider).deleteAccount();
+      // Nettoie l'état local (tokens Firebase Auth, sessions Google/
+      // Facebook) : le compte Firebase Auth est déjà supprimé côté serveur
+      // à ce stade, mais le SDK client garde encore la session en mémoire.
+      await ref.read(authRepositoryProvider).signOut();
+
+      if (!context.mounted) return;
+      Navigator.pop(context); // Ferme le loader
+
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.deleteAccountDoneTitle),
+          content: Text(l10n.deleteAccountDoneMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.ok),
+            ),
+          ],
+        ),
+      );
+
+      if (context.mounted) context.go('/onboarding');
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context); // Ferme le loader
+      final message = e is AppException ? e.message : e.toString();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.errorGenericMsg(message)),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

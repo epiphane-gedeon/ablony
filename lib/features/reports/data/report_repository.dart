@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/exceptions/exceptions.dart';
 import '../domain/models/report_reason.dart';
 
 class ReportRepository {
@@ -14,7 +15,7 @@ class ReportRepository {
   String get _uid {
     final uid = _auth.currentUser?.uid;
     if (uid == null || uid.isEmpty) {
-      throw Exception('Utilisateur non authentifié');
+      throw NotAuthenticatedException();
     }
     return uid;
   }
@@ -26,14 +27,27 @@ class ReportRepository {
     required ReportReason reason,
     String? comment,
   }) async {
-    await _firestore.collection('reports').add({
-      'productId': productId,
-      'productTitle': productTitle,
-      'sellerId': sellerId,
-      'reporterId': _uid,
-      'reason': reason.value,
-      if (comment != null && comment.trim().isNotEmpty) 'comment': comment.trim(),
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    try {
+      await _firestore.collection('reports').add({
+        'productId': productId,
+        'productTitle': productTitle,
+        'sellerId': sellerId,
+        'reporterId': _uid,
+        'reason': reason.value,
+        if (comment != null && comment.trim().isNotEmpty)
+          'comment': comment.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi du signalement',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

@@ -322,6 +322,58 @@
   "@loginScreenSubmit": {
     "description": "Bouton de connexion"
   },
+  "forgotPasswordTitle": "Mot de passe oublié",
+  "@forgotPasswordTitle": {
+    "description": "forgotPasswordTitle"
+  },
+  "forgotPasswordDescription": "Indique ton email, on t'envoie un lien pour réinitialiser ton mot de passe.",
+  "@forgotPasswordDescription": {
+    "description": "forgotPasswordDescription"
+  },
+  "resetPasswordEmailPlaceholder": "Ton adresse email",
+  "@resetPasswordEmailPlaceholder": {
+    "description": "resetPasswordEmailPlaceholder"
+  },
+  "sendResetLink": "Envoyer le lien",
+  "@sendResetLink": {
+    "description": "sendResetLink"
+  },
+  "resetEmailSentMessage": "Si un compte existe avec cet email, un lien de réinitialisation vient d'être envoyé.",
+  "@resetEmailSentMessage": {
+    "description": "resetEmailSentMessage"
+  },
+  "resetPasswordPageTitle": "Réinitialiser le mot de passe",
+  "@resetPasswordPageTitle": {
+    "description": "resetPasswordPageTitle"
+  },
+  "resetPasswordPageDescription": "Choisis un nouveau mot de passe.",
+  "@resetPasswordPageDescription": {
+    "description": "resetPasswordPageDescription"
+  },
+  "resetPasswordNewPasswordPlaceholder": "Nouveau mot de passe",
+  "@resetPasswordNewPasswordPlaceholder": {
+    "description": "resetPasswordNewPasswordPlaceholder"
+  },
+  "resetPasswordConfirmPasswordPlaceholder": "Confirmer le mot de passe",
+  "@resetPasswordConfirmPasswordPlaceholder": {
+    "description": "resetPasswordConfirmPasswordPlaceholder"
+  },
+  "resetPasswordMismatch": "Les mots de passe ne correspondent pas",
+  "@resetPasswordMismatch": {
+    "description": "resetPasswordMismatch"
+  },
+  "resetPasswordSubmitButton": "Réinitialiser",
+  "@resetPasswordSubmitButton": {
+    "description": "resetPasswordSubmitButton"
+  },
+  "resetPasswordSuccessMessage": "Mot de passe réinitialisé avec succès. Tu peux maintenant te connecter.",
+  "@resetPasswordSuccessMessage": {
+    "description": "resetPasswordSuccessMessage"
+  },
+  "resetLinkInvalidMessage": "Ce lien de réinitialisation est invalide ou a expiré. Redemande un nouveau lien depuis la page de connexion.",
+  "@resetLinkInvalidMessage": {
+    "description": "resetLinkInvalidMessage"
+  },
   "loginScreenForgotPassword": "Tu as oublié ton mot de passe ?",
   "@loginScreenForgotPassword": {
     "description": "Lien mot de passe oublié"
@@ -337,6 +389,10 @@
   "sellTitle": "Vends un article",
   "@sellTitle": {
     "description": "Titre écran vente"
+  },
+  "clearDraft": "Effacer",
+  "@clearDraft": {
+    "description": "clearDraft"
   },
   "addPhotos": "Ajouter photos",
   "@addPhotos": {
@@ -1238,6 +1294,10 @@
   "@chooseLanguage": {
     "description": "chooseLanguage"
   },
+  "openInBrowser": "Ouvrir dans le navigateur",
+  "@openInBrowser": {
+    "description": "openInBrowser"
+  },
   "cancel": "ANNULER",
   "@cancel": {
     "description": "cancel"
@@ -1245,6 +1305,30 @@
   "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
   "@logoutConfirm": {
     "description": "logoutConfirm"
+  },
+  "deleteAccount": "Supprimer le compte",
+  "@deleteAccount": {
+    "description": "deleteAccount"
+  },
+  "deleteAccountConfirmTitle": "Supprimer le compte ?",
+  "@deleteAccountConfirmTitle": {
+    "description": "deleteAccountConfirmTitle"
+  },
+  "deleteAccountConfirmMessage": "Cette suppression sera définitive : toutes vos informations personnelles seront remplacées par des données génériques et vous ne pourrez plus vous reconnecter à ce compte. Vous pourrez créer un nouveau compte avec les mêmes identifiants si vous le souhaitez.",
+  "@deleteAccountConfirmMessage": {
+    "description": "deleteAccountConfirmMessage"
+  },
+  "deleteAccountConfirmAction": "SUPPRIMER",
+  "@deleteAccountConfirmAction": {
+    "description": "deleteAccountConfirmAction"
+  },
+  "deleteAccountDoneTitle": "Compte supprimé",
+  "@deleteAccountDoneTitle": {
+    "description": "deleteAccountDoneTitle"
+  },
+  "deleteAccountDoneMessage": "Votre compte a bien été supprimé. Vous pouvez créer un nouveau compte avec les mêmes identifiants à tout moment.",
+  "@deleteAccountDoneMessage": {
+    "description": "deleteAccountDoneMessage"
   },
   "profileTitle": "Profil",
   "@profileTitle": {
@@ -1334,6 +1418,10 @@
   "@markAsReserved": {
     "description": "markAsReserved"
   },
+  "cancelReservation": "Annuler la réservation",
+  "@cancelReservation": {
+    "description": "cancelReservation"
+  },
   "edit": "Modifier",
   "@edit": {
     "description": "edit"
@@ -1342,9 +1430,49 @@
   "@hide": {
     "description": "hide"
   },
+  "unhide": "Republier",
+  "@unhide": {
+    "description": "unhide"
+  },
+  "productHidden": "Annonce masquée",
+  "@productHidden": {
+    "description": "productHidden"
+  },
+  "productUnhidden": "Annonce republiée",
+  "@productUnhidden": {
+    "description": "productUnhidden"
+  },
+  "productUnavailable": "Produit indisponible",
+  "@productUnavailable": {
+    "description": "productUnavailable"
+  },
+  "soldBadge": "Vendu",
+  "@soldBadge": {
+    "description": "soldBadge"
+  },
+  "reservedBadge": "Réservé",
+  "@reservedBadge": {
+    "description": "reservedBadge"
+  },
+  "hiddenBadge": "Masqué",
+  "@hiddenBadge": {
+    "description": "hiddenBadge"
+  },
   "productMarkedAsSold": "Produit marqué comme vendu",
   "@productMarkedAsSold": {
     "description": "productMarkedAsSold"
+  },
+  "productMarkedAsReserved": "Produit marqué comme réservé",
+  "@productMarkedAsReserved": {
+    "description": "productMarkedAsReserved"
+  },
+  "reservationCancelled": "Réservation annulée",
+  "@reservationCancelled": {
+    "description": "reservationCancelled"
+  },
+  "productReserved": "Produit réservé",
+  "@productReserved": {
+    "description": "productReserved"
   },
   "deleteProductConfirm": "Supprimer le produit ?",
   "@deleteProductConfirm": {
@@ -1588,6 +1716,22 @@
   "noReviewsYet": "Pas encore d'évaluations",
   "@noReviewsYet": {
     "description": "noReviewsYet"
+  },
+  "minPrice": "Prix minimum",
+  "@minPrice": {
+    "description": "minPrice"
+  },
+  "maxPrice": "Prix maximum",
+  "@maxPrice": {
+    "description": "maxPrice"
+  },
+  "apply": "Appliquer",
+  "@apply": {
+    "description": "apply"
+  },
+  "resetFilter": "Réinitialiser",
+  "@resetFilter": {
+    "description": "resetFilter"
   },
   "priceFilterDevelopment": "Filtre de prix en cours de développement",
   "@priceFilterDevelopment": {

@@ -183,38 +183,35 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final location = state.uri.path;
 
+      // La page de réinitialisation de mot de passe doit être accessible
+      // par tous, quel que soit l'état d'authentification : un utilisateur
+      // qui a oublié son mot de passe n'est justement pas connecté, et le
+      // lien reçu par email doit fonctionner même si une session (partielle
+      // ou non) traîne sur l'appareil.
+      if (location == '/auth/reset-password') {
+        return null;
+      }
+
       // On utilise ref.read() ici car on ne veut pas que le routeur se recrée.
       // La logique de "watch" est gérée par le refreshListenable.
       final authState = ref.read(authStateProvider);
       final profileCompleteAsync = ref.read(isProfileCompleteProvider);
 
-      print('🟡 [Router redirect] Location: $location');
-
       // 1. Attendre que l'état d'auth soit chargé
       if (authState.isLoading) {
-        print('🟡 [Router redirect] Auth state loading...');
         return null; // Rester sur la page actuelle pendant le chargement
       }
 
       // 2. Vérifier si l'utilisateur est authentifié
       final isAuthenticated = authState.value != null;
-      print(
-        '🟡 [Router redirect] isAuthenticated: $isAuthenticated, uid: ${authState.value?.uid}',
-      );
-
-      // 3. Si authentifié, vérifier si le profil est complet
-      print('🟡 [Router redirect] profileCompleteAsync: $profileCompleteAsync');
 
       // Si le provider est en loading, ne pas rediriger (attendre les données)
       if (profileCompleteAsync.isLoading) {
-        print('🟡 [Router redirect] Provider en loading, pas de redirect');
         return null;
       }
 
       final isProfileComplete = profileCompleteAsync.value ?? false;
-      print(
-        '🟡 [Router redirect] isProfileComplete: $isProfileComplete',
-      ); // ============================================================
+      // ============================================================
       // CAS 1 : UTILISATEUR NON AUTHENTIFIÉ
       // ============================================================
       if (!isAuthenticated) {
@@ -225,6 +222,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           '/auth/signup/email',
           '/auth/login',
           '/home', // Permettre l'accès à la home sans être connecté
+          // La recherche est en pure lecture (comme /home) : un visiteur non
+          // connecté doit pouvoir parcourir/chercher des articles librement,
+          // et ne sera invité à se connecter qu'au moment d'agir (message,
+          // profil, achat, etc.).
+          '/search',
+          '/searching',
+          '/search-results',
         ];
 
         // Les fiches produit sont publiques (lecture Firestore ouverte, cf.
@@ -277,9 +281,6 @@ final routerProvider = Provider<GoRouter>((ref) {
 
         // Si l'utilisateur est sur une de ces routes
         if (unnecessaryRoutes.contains(location)) {
-          print(
-            '➡️ [Router redirect] Auth & profile complete. Redirecting from "$location" to /home',
-          );
           return '/home';
         }
 
@@ -362,6 +363,24 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
 
           // ...captcha step removed...
+
+          // ====================================================
+          // MOT DE PASSE OUBLIÉ
+          // ====================================================
+          /// Page ouverte depuis le lien reçu par email (cf.
+          /// `LoginScreen._showForgotPasswordDialog`). Le paramètre
+          /// `oobCode` est ajouté par Firebase dans l'URL — nécessite d'avoir
+          /// configuré cette URL comme "Action URL" du template
+          /// "Réinitialisation du mot de passe" dans la console Firebase
+          /// (Authentication → Templates), sinon Firebase utilise sa propre
+          /// page générique au lieu de celle-ci.
+          GoRoute(
+            path: 'reset-password',
+            name: 'reset_password',
+            builder: (context, state) => ResetPasswordPage(
+              oobCode: state.uri.queryParameters['oobCode'],
+            ),
+          ),
 
           // ====================================================
           // ÉTAPE 3 : COUNTRY

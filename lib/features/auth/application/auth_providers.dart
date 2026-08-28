@@ -321,12 +321,7 @@ final isProfileCompleteProvider = Provider<AsyncValue<bool>>((ref) {
 
   return userAsync.when(
     data: (user) {
-      print('🟣 [isProfileCompleteProvider] User data: $user');
-
       if (user == null) {
-        print(
-          '🟣 [isProfileCompleteProvider] User est null → profil incomplet',
-        );
         // Pas connecté → profil incomplet
         return const AsyncValue.data(false);
       }
@@ -338,20 +333,10 @@ final isProfileCompleteProvider = Provider<AsyncValue<bool>>((ref) {
       // Note: Le pays est obligatoire lors de la création, donc toujours défini
       final isComplete = user.username.isNotEmpty && user.acceptedTerms;
 
-      print(
-        '🟣 [isProfileCompleteProvider] username: "${user.username}", acceptedTerms: ${user.acceptedTerms}, isComplete: $isComplete',
-      );
-
       return AsyncValue.data(isComplete);
     },
-    loading: () {
-      print('🟣 [isProfileCompleteProvider] Loading...');
-      return const AsyncValue.loading();
-    },
-    error: (error, stack) {
-      print('🔴 [isProfileCompleteProvider] Error: $error');
-      return AsyncValue.error(error, stack);
-    },
+    loading: () => const AsyncValue.loading(),
+    error: (error, stack) => AsyncValue.error(error, stack),
   );
 });
 

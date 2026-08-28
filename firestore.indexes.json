@@ -54,6 +54,8 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "isSold", "order": "ASCENDING" },
+        { "fieldPath": "isReserved", "order": "ASCENDING" },
+        { "fieldPath": "isHidden", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
@@ -63,6 +65,8 @@
       "fields": [
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "isSold", "order": "ASCENDING" },
+        { "fieldPath": "isReserved", "order": "ASCENDING" },
+        { "fieldPath": "isHidden", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
@@ -73,6 +77,8 @@
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "subcategoryId", "order": "ASCENDING" },
         { "fieldPath": "isSold", "order": "ASCENDING" },
+        { "fieldPath": "isReserved", "order": "ASCENDING" },
+        { "fieldPath": "isHidden", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
@@ -82,6 +88,8 @@
       "fields": [
         { "fieldPath": "isBoosted", "order": "ASCENDING" },
         { "fieldPath": "isSold", "order": "ASCENDING" },
+        { "fieldPath": "isReserved", "order": "ASCENDING" },
+        { "fieldPath": "isHidden", "order": "ASCENDING" },
         { "fieldPath": "boostExpiresAt", "order": "DESCENDING" }
       ]
     },

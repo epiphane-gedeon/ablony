@@ -322,6 +322,58 @@
   "@loginScreenSubmit": {
     "description": "Login button"
   },
+  "forgotPasswordTitle": "Forgot password",
+  "@forgotPasswordTitle": {
+    "description": "forgotPasswordTitle"
+  },
+  "forgotPasswordDescription": "Enter your email and we'll send you a link to reset your password.",
+  "@forgotPasswordDescription": {
+    "description": "forgotPasswordDescription"
+  },
+  "resetPasswordEmailPlaceholder": "Your email address",
+  "@resetPasswordEmailPlaceholder": {
+    "description": "resetPasswordEmailPlaceholder"
+  },
+  "sendResetLink": "Send link",
+  "@sendResetLink": {
+    "description": "sendResetLink"
+  },
+  "resetEmailSentMessage": "If an account exists with this email, a reset link has just been sent.",
+  "@resetEmailSentMessage": {
+    "description": "resetEmailSentMessage"
+  },
+  "resetPasswordPageTitle": "Reset password",
+  "@resetPasswordPageTitle": {
+    "description": "resetPasswordPageTitle"
+  },
+  "resetPasswordPageDescription": "Choose a new password.",
+  "@resetPasswordPageDescription": {
+    "description": "resetPasswordPageDescription"
+  },
+  "resetPasswordNewPasswordPlaceholder": "New password",
+  "@resetPasswordNewPasswordPlaceholder": {
+    "description": "resetPasswordNewPasswordPlaceholder"
+  },
+  "resetPasswordConfirmPasswordPlaceholder": "Confirm password",
+  "@resetPasswordConfirmPasswordPlaceholder": {
+    "description": "resetPasswordConfirmPasswordPlaceholder"
+  },
+  "resetPasswordMismatch": "Passwords don't match",
+  "@resetPasswordMismatch": {
+    "description": "resetPasswordMismatch"
+  },
+  "resetPasswordSubmitButton": "Reset",
+  "@resetPasswordSubmitButton": {
+    "description": "resetPasswordSubmitButton"
+  },
+  "resetPasswordSuccessMessage": "Password reset successfully. You can now log in.",
+  "@resetPasswordSuccessMessage": {
+    "description": "resetPasswordSuccessMessage"
+  },
+  "resetLinkInvalidMessage": "This reset link is invalid or has expired. Request a new one from the login page.",
+  "@resetLinkInvalidMessage": {
+    "description": "resetLinkInvalidMessage"
+  },
   "loginScreenForgotPassword": "Forgot your password?",
   "@loginScreenForgotPassword": {
     "description": "Forgot password link"
@@ -337,6 +389,10 @@
   "sellTitle": "Sell an item",
   "@sellTitle": {
     "description": "Sell screen title"
+  },
+  "clearDraft": "Clear",
+  "@clearDraft": {
+    "description": "clearDraft"
   },
   "addPhotos": "Add photos",
   "@addPhotos": {
@@ -1148,6 +1204,10 @@
   "@chooseLanguage": {
     "description": "chooseLanguage"
   },
+  "openInBrowser": "Open in browser",
+  "@openInBrowser": {
+    "description": "openInBrowser"
+  },
   "cancel": "CANCEL",
   "@cancel": {
     "description": "cancel"
@@ -1155,6 +1215,30 @@
   "logoutConfirm": "Are you sure you want to log out?",
   "@logoutConfirm": {
     "description": "logoutConfirm"
+  },
+  "deleteAccount": "Delete account",
+  "@deleteAccount": {
+    "description": "deleteAccount"
+  },
+  "deleteAccountConfirmTitle": "Delete your account?",
+  "@deleteAccountConfirmTitle": {
+    "description": "deleteAccountConfirmTitle"
+  },
+  "deleteAccountConfirmMessage": "This deletion is permanent: all your personal information will be replaced with generic data and you won't be able to sign back into this account. You can create a new account with the same credentials if you want to.",
+  "@deleteAccountConfirmMessage": {
+    "description": "deleteAccountConfirmMessage"
+  },
+  "deleteAccountConfirmAction": "DELETE",
+  "@deleteAccountConfirmAction": {
+    "description": "deleteAccountConfirmAction"
+  },
+  "deleteAccountDoneTitle": "Account deleted",
+  "@deleteAccountDoneTitle": {
+    "description": "deleteAccountDoneTitle"
+  },
+  "deleteAccountDoneMessage": "Your account has been deleted. You can create a new account with the same credentials at any time.",
+  "@deleteAccountDoneMessage": {
+    "description": "deleteAccountDoneMessage"
   },
   "profileTitle": "Profile",
   "@profileTitle": {
@@ -1244,6 +1328,10 @@
   "@markAsReserved": {
     "description": "markAsReserved"
   },
+  "cancelReservation": "Cancel reservation",
+  "@cancelReservation": {
+    "description": "cancelReservation"
+  },
   "edit": "Edit",
   "@edit": {
     "description": "edit"
@@ -1252,9 +1340,49 @@
   "@hide": {
     "description": "hide"
   },
+  "unhide": "Republish",
+  "@unhide": {
+    "description": "unhide"
+  },
+  "productHidden": "Listing hidden",
+  "@productHidden": {
+    "description": "productHidden"
+  },
+  "productUnhidden": "Listing republished",
+  "@productUnhidden": {
+    "description": "productUnhidden"
+  },
+  "productUnavailable": "Product unavailable",
+  "@productUnavailable": {
+    "description": "productUnavailable"
+  },
+  "soldBadge": "Sold",
+  "@soldBadge": {
+    "description": "soldBadge"
+  },
+  "reservedBadge": "Reserved",
+  "@reservedBadge": {
+    "description": "reservedBadge"
+  },
+  "hiddenBadge": "Hidden",
+  "@hiddenBadge": {
+    "description": "hiddenBadge"
+  },
   "productMarkedAsSold": "Product marked as sold",
   "@productMarkedAsSold": {
     "description": "productMarkedAsSold"
+  },
+  "productMarkedAsReserved": "Product marked as reserved",
+  "@productMarkedAsReserved": {
+    "description": "productMarkedAsReserved"
+  },
+  "reservationCancelled": "Reservation cancelled",
+  "@reservationCancelled": {
+    "description": "reservationCancelled"
+  },
+  "productReserved": "Product reserved",
+  "@productReserved": {
+    "description": "productReserved"
   },
   "deleteProductConfirm": "Delete product?",
   "@deleteProductConfirm": {
@@ -1344,6 +1472,22 @@
   "noReviewsYet": "No reviews yet",
   "@noReviewsYet": {
     "description": "noReviewsYet"
+  },
+  "minPrice": "Minimum price",
+  "@minPrice": {
+    "description": "minPrice"
+  },
+  "maxPrice": "Maximum price",
+  "@maxPrice": {
+    "description": "maxPrice"
+  },
+  "apply": "Apply",
+  "@apply": {
+    "description": "apply"
+  },
+  "resetFilter": "Reset",
+  "@resetFilter": {
+    "description": "resetFilter"
   },
   "priceFilterDevelopment": "Price filter in development",
   "@priceFilterDevelopment": {

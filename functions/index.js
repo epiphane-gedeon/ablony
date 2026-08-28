@@ -134,6 +134,16 @@ async function finalizePurchase({
     // Vérifier l'existence des documents
     if (!buyerDoc.exists) throw new Error("Acheteur introuvable");
     if (!sellerDoc.exists) throw new Error("Vendeur introuvable");
+    if (!productDoc.exists) throw new Error("Produit introuvable");
+
+    // Verrou faisant autorité contre les cas de course (webhook GeniusPay
+    // concurrent à une autre finalisation, double clic, etc.) : le check
+    // équivalent dans initiatePayment n'est qu'un échec rapide côté UX, pas
+    // une garantie — seul celui-ci, dans la transaction, l'est vraiment.
+    const productDataCheck = productDoc.data();
+    if (productDataCheck.isSold) throw new Error("Ce produit a déjà été vendu");
+    if (productDataCheck.isReserved) throw new Error("Ce produit est réservé");
+    if (productDataCheck.isHidden) throw new Error("Ce produit n'est plus disponible à l'achat");
 
     // Lire les données nécessaires
     const buyerData     = buyerDoc.data();
@@ -477,6 +487,41 @@ exports.initiatePayment = onRequest(async (req, res) => {
       success: false,
       error: { message: "Paramètres requis manquants pour un achat : productId, sellerId" }
     });
+  }
+
+  if (type === "purchase") {
+    // Échec rapide avant même de contacter GeniusPay : évite de faire payer
+    // quelqu'un pour un article devenu indisponible entre l'ouverture de la
+    // fiche produit et le clic sur "Acheter" (vendu, réservé, ou masqué —
+    // notamment suite à la suppression du compte vendeur, cf. deleteAccount
+    // ci-dessous). Le vrai verrou, contre les cas de course (webhook
+    // GeniusPay concurrent, double clic), est dans finalizePurchase.
+    const productSnap = await db.collection("products").doc(productId).get();
+    if (!productSnap.exists) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "Produit introuvable" }
+      });
+    }
+    const productData = productSnap.data();
+    if (productData.isSold) {
+      return res.status(400).json({
+        success: false,
+        error: { message: "Ce produit a déjà été vendu" }
+      });
+    }
+    if (productData.isReserved) {
+      return res.status(400).json({
+        success: false,
+        error: { message: "Ce produit est réservé" }
+      });
+    }
+    if (productData.isHidden) {
+      return res.status(400).json({
+        success: false,
+        error: { message: "Ce produit n'est plus disponible à l'achat" }
+      });
+    }
   }
 
   if (type === "boost") {
@@ -1161,6 +1206,172 @@ exports.confirmDelivery = onRequest(async (req, res) => {
     return res.status(400).json({
       success: false,
       error: { message: error.message || "Erreur lors de la confirmation de réception" }
+    });
+  }
+});
+
+/**
+ * Supprime le compte de l'utilisateur authentifié.
+ *
+ * Ce n'est pas une suppression du document `users/{uid}` : products,
+ * reviews, messages, transactions, etc. référencent cet uid, et le
+ * détruire casserait toutes ces relations. À la place, on remplace tout ce
+ * qui permettrait de ré-identifier la personne par des valeurs génériques
+ * (anonymisation), puis on supprime pour de bon le compte Firebase Auth —
+ * plus aucune connexion possible ensuite, même par erreur ou par bug.
+ *
+ * Ce qui SURVIT à l'anonymisation (volontairement) :
+ * - Les compteurs d'activité (productsCount, salesCount, rating,
+ *   reviewsCount, followersCount, followingCount) : pas des données
+ *   personnelles, et l'historique doit rester cohérent pour les autres
+ *   utilisateurs.
+ * - Les montants du wallet (availableAmount/pendingAmount) : trace
+ *   comptable, ce n'est pas à cette fonction de décider quoi en faire.
+ * - reviews/messages/follows/fav : toujours liés à cet uid, mais l'uid
+ *   seul ne permet plus de retrouver qui était la personne.
+ *
+ * Ce qui CHANGE en plus de l'anonymisation :
+ * - Toutes les annonces du vendeur passent en `isHidden: true` — un compte
+ *   supprimé ne doit plus pouvoir vendre (cf. le check dans
+ *   finalizePurchase et les filtres `isHidden` de ProductRepositoryImpl).
+ */
+exports.deleteAccount = onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  if (req.method === "OPTIONS") {
+    res.set("Access-Control-Allow-Methods", "POST");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.status(204).send("");
+    return;
+  }
+
+  const authHeader = req.headers.authorization || "";
+  const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!idToken) {
+    return res.status(401).json({ success: false, error: { message: "Authentification requise" } });
+  }
+
+  let decodedToken;
+  try {
+    decodedToken = await admin.auth().verifyIdToken(idToken);
+  } catch (error) {
+    return res.status(401).json({ success: false, error: { message: "Token invalide" } });
+  }
+
+  const uid = decodedToken.uid;
+
+  try {
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ success: false, error: { message: "Compte introuvable" } });
+    }
+    const userData = userDoc.data();
+    const anonymizedUsername = `compte_supprime_${uid.substring(0, 8)}`;
+
+    await db.runTransaction(async (tx) => {
+      tx.update(userRef, {
+        email: `compte-supprime-${uid}@ablony.deleted`,
+        username: anonymizedUsername,
+        displayName: "Compte Supprimé",
+        photoUrl: admin.firestore.FieldValue.delete(),
+        phoneNumber: "0",
+        city: admin.firestore.FieldValue.delete(),
+        providerId: admin.firestore.FieldValue.delete(),
+        marketingEmailsEnabled: false,
+        isActive: false,
+        fcmTokens: [],
+        wallet: buildWalletUpdate(userData.wallet || {}, {
+          firstName: "Supprimé",
+          lastName: "Compte",
+          nationality: null,
+          birthDate: null,
+          isActivated: false
+        }),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Libère l'ancien pseudo (redevient disponible pour un autre
+      // utilisateur) et réserve le nouveau — même logique que
+      // AuthRepositoryImpl.updateUserProfile côté client.
+      if (userData.username) {
+        tx.delete(db.collection("usernames").doc(userData.username));
+      }
+      tx.set(db.collection("usernames").doc(anonymizedUsername), {
+        userId: uid,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    // Les conversations dénormalisent nom/avatar au moment de leur création
+    // (participantDetails) et ne sont jamais resynchronisées ensuite —
+    // sans ce nettoyage, l'autre participant verrait encore le vrai nom/
+    // avatar dans l'historique des messages malgré l'anonymisation.
+    const conversationsSnapshot = await db
+      .collection("conversations")
+      .where("participants", "array-contains", uid)
+      .get();
+
+    let batch = db.batch();
+    let opsInBatch = 0;
+    for (const doc of conversationsSnapshot.docs) {
+      batch.update(doc.ref, {
+        [`participantDetails.${uid}.name`]: "Compte Supprimé",
+        [`participantDetails.${uid}.avatar`]: admin.firestore.FieldValue.delete()
+      });
+      opsInBatch++;
+      if (opsInBatch >= 450) {
+        await batch.commit();
+        batch = db.batch();
+        opsInBatch = 0;
+      }
+    }
+    if (opsInBatch > 0) {
+      await batch.commit();
+    }
+
+    // Masque toutes les annonces du vendeur supprimé : `isHidden` est déjà
+    // filtré par toutes les requêtes de listing (accueil, catégorie,
+    // recherche, boost — cf. ProductRepositoryImpl côté client) et bloque
+    // aussi l'achat côté serveur (cf. le check dans finalizePurchase
+    // ci-dessus), exactement comme pour un produit déjà vendu. Un compte
+    // supprimé ne pouvant jamais être republié, pas besoin de distinguer ce
+    // masquage de celui, réversible, que le vendeur déclenche lui-même.
+    const productsSnapshot = await db
+      .collection("products")
+      .where("sellerId", "==", uid)
+      .get();
+
+    let productsBatch = db.batch();
+    let productsOpsInBatch = 0;
+    for (const doc of productsSnapshot.docs) {
+      productsBatch.update(doc.ref, {
+        isHidden: true,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      productsOpsInBatch++;
+      if (productsOpsInBatch >= 450) {
+        await productsBatch.commit();
+        productsBatch = db.batch();
+        productsOpsInBatch = 0;
+      }
+    }
+    if (productsOpsInBatch > 0) {
+      await productsBatch.commit();
+    }
+
+    // Dernière étape, volontairement : si tout ce qui précède a réussi, le
+    // profil est déjà anonymisé avant même que l'accès ne soit révoqué. En
+    // cas d'échec ici, l'utilisateur garde un accès (dégradé) à son propre
+    // compte et peut simplement réessayer plus tard.
+    await admin.auth().deleteUser(uid);
+
+    console.log(`✅ Compte ${uid} supprimé et anonymisé`);
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Erreur deleteAccount:", error);
+    return res.status(400).json({
+      success: false,
+      error: { message: error.message || "Erreur lors de la suppression du compte" }
     });
   }
 });

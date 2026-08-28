@@ -572,6 +572,84 @@ abstract class AppLocalizations {
   /// **'Se connecter'**
   String get loginScreenSubmit;
 
+  /// forgotPasswordTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié'**
+  String get forgotPasswordTitle;
+
+  /// forgotPasswordDescription
+  ///
+  /// In fr, this message translates to:
+  /// **'Indique ton email, on t\'envoie un lien pour réinitialiser ton mot de passe.'**
+  String get forgotPasswordDescription;
+
+  /// resetPasswordEmailPlaceholder
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton adresse email'**
+  String get resetPasswordEmailPlaceholder;
+
+  /// sendResetLink
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le lien'**
+  String get sendResetLink;
+
+  /// resetEmailSentMessage
+  ///
+  /// In fr, this message translates to:
+  /// **'Si un compte existe avec cet email, un lien de réinitialisation vient d\'être envoyé.'**
+  String get resetEmailSentMessage;
+
+  /// resetPasswordPageTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser le mot de passe'**
+  String get resetPasswordPageTitle;
+
+  /// resetPasswordPageDescription
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis un nouveau mot de passe.'**
+  String get resetPasswordPageDescription;
+
+  /// resetPasswordNewPasswordPlaceholder
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe'**
+  String get resetPasswordNewPasswordPlaceholder;
+
+  /// resetPasswordConfirmPasswordPlaceholder
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le mot de passe'**
+  String get resetPasswordConfirmPasswordPlaceholder;
+
+  /// resetPasswordMismatch
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mots de passe ne correspondent pas'**
+  String get resetPasswordMismatch;
+
+  /// resetPasswordSubmitButton
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser'**
+  String get resetPasswordSubmitButton;
+
+  /// resetPasswordSuccessMessage
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe réinitialisé avec succès. Tu peux maintenant te connecter.'**
+  String get resetPasswordSuccessMessage;
+
+  /// resetLinkInvalidMessage
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce lien de réinitialisation est invalide ou a expiré. Redemande un nouveau lien depuis la page de connexion.'**
+  String get resetLinkInvalidMessage;
+
   /// Lien mot de passe oublié
   ///
   /// In fr, this message translates to:
@@ -595,6 +673,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vends un article'**
   String get sellTitle;
+
+  /// clearDraft
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get clearDraft;
 
   /// Bouton ajouter photos
   ///
@@ -1844,6 +1928,12 @@ abstract class AppLocalizations {
   /// **'Choisir la langue'**
   String get chooseLanguage;
 
+  /// openInBrowser
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir dans le navigateur'**
+  String get openInBrowser;
+
   /// cancel
   ///
   /// In fr, this message translates to:
@@ -1855,6 +1945,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Êtes-vous sûr de vouloir vous déconnecter ?'**
   String get logoutConfirm;
+
+  /// deleteAccount
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le compte'**
+  String get deleteAccount;
+
+  /// deleteAccountConfirmTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le compte ?'**
+  String get deleteAccountConfirmTitle;
+
+  /// deleteAccountConfirmMessage
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette suppression sera définitive : toutes vos informations personnelles seront remplacées par des données génériques et vous ne pourrez plus vous reconnecter à ce compte. Vous pourrez créer un nouveau compte avec les mêmes identifiants si vous le souhaitez.'**
+  String get deleteAccountConfirmMessage;
+
+  /// deleteAccountConfirmAction
+  ///
+  /// In fr, this message translates to:
+  /// **'SUPPRIMER'**
+  String get deleteAccountConfirmAction;
+
+  /// deleteAccountDoneTitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte supprimé'**
+  String get deleteAccountDoneTitle;
+
+  /// deleteAccountDoneMessage
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte a bien été supprimé. Vous pouvez créer un nouveau compte avec les mêmes identifiants à tout moment.'**
+  String get deleteAccountDoneMessage;
 
   /// profileTitle
   ///
@@ -1988,6 +2114,12 @@ abstract class AppLocalizations {
   /// **'Marquer comme réservé'**
   String get markAsReserved;
 
+  /// cancelReservation
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la réservation'**
+  String get cancelReservation;
+
   /// edit
   ///
   /// In fr, this message translates to:
@@ -2000,11 +2132,71 @@ abstract class AppLocalizations {
   /// **'Masquer'**
   String get hide;
 
+  /// unhide
+  ///
+  /// In fr, this message translates to:
+  /// **'Republier'**
+  String get unhide;
+
+  /// productHidden
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce masquée'**
+  String get productHidden;
+
+  /// productUnhidden
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce republiée'**
+  String get productUnhidden;
+
+  /// productUnavailable
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit indisponible'**
+  String get productUnavailable;
+
+  /// soldBadge
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu'**
+  String get soldBadge;
+
+  /// reservedBadge
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservé'**
+  String get reservedBadge;
+
+  /// hiddenBadge
+  ///
+  /// In fr, this message translates to:
+  /// **'Masqué'**
+  String get hiddenBadge;
+
   /// productMarkedAsSold
   ///
   /// In fr, this message translates to:
   /// **'Produit marqué comme vendu'**
   String get productMarkedAsSold;
+
+  /// productMarkedAsReserved
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit marqué comme réservé'**
+  String get productMarkedAsReserved;
+
+  /// reservationCancelled
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation annulée'**
+  String get reservationCancelled;
+
+  /// productReserved
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit réservé'**
+  String get productReserved;
 
   /// deleteProductConfirm
   ///
@@ -2347,6 +2539,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pas encore d\'évaluations'**
   String get noReviewsYet;
+
+  /// minPrice
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix minimum'**
+  String get minPrice;
+
+  /// maxPrice
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix maximum'**
+  String get maxPrice;
+
+  /// apply
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer'**
+  String get apply;
+
+  /// resetFilter
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser'**
+  String get resetFilter;
 
   /// priceFilterDevelopment
   ///

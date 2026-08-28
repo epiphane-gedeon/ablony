@@ -1275,19 +1275,80 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
     );
   }
 
-  /// Affiche le filtre Prix
+  /// Affiche le filtre Prix (min / max en FCFA), appliqué dans
+  /// [_filteredResults] (déjà câblé sur `_minPrice`/`_maxPrice`).
   void _showPriceFilter() {
+    final l10n = AppLocalizations.of(context)!;
+    final minController = TextEditingController(
+      text: _minPrice != null ? _minPrice!.toStringAsFixed(0) : '',
+    );
+    final maxController = TextEditingController(
+      text: _maxPrice != null ? _maxPrice!.toStringAsFixed(0) : '',
+    );
+
     showDialog(
       context: context,
       builder: (context) {
-        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
           title: Text(l10n.filterPrice),
-          content: Text(l10n.priceFilterDevelopment),
+          content: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: minController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: l10n.minPrice,
+                    suffixText: l10n.currency,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: maxController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: l10n.maxPrice,
+                    suffixText: l10n.currency,
+                  ),
+                ),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
+              onPressed: () {
+                setState(() {
+                  _minPrice = null;
+                  _maxPrice = null;
+                });
+                Navigator.pop(context);
+              },
+              child: Text(l10n.resetFilter),
+            ),
+            TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.ok),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                var min = double.tryParse(minController.text.trim());
+                var max = double.tryParse(maxController.text.trim());
+                // Si les deux bornes sont inversées, on les échange plutôt
+                // que de renvoyer une liste vide sans explication.
+                if (min != null && max != null && min > max) {
+                  final tmp = min;
+                  min = max;
+                  max = tmp;
+                }
+                setState(() {
+                  _minPrice = min;
+                  _maxPrice = max;
+                });
+                Navigator.pop(context);
+              },
+              child: Text(l10n.apply),
             ),
           ],
         );

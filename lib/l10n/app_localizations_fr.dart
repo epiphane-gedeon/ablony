@@ -263,6 +263,50 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loginScreenSubmit => 'Se connecter';
 
   @override
+  String get forgotPasswordTitle => 'Mot de passe oublié';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Indique ton email, on t\'envoie un lien pour réinitialiser ton mot de passe.';
+
+  @override
+  String get resetPasswordEmailPlaceholder => 'Ton adresse email';
+
+  @override
+  String get sendResetLink => 'Envoyer le lien';
+
+  @override
+  String get resetEmailSentMessage =>
+      'Si un compte existe avec cet email, un lien de réinitialisation vient d\'être envoyé.';
+
+  @override
+  String get resetPasswordPageTitle => 'Réinitialiser le mot de passe';
+
+  @override
+  String get resetPasswordPageDescription => 'Choisis un nouveau mot de passe.';
+
+  @override
+  String get resetPasswordNewPasswordPlaceholder => 'Nouveau mot de passe';
+
+  @override
+  String get resetPasswordConfirmPasswordPlaceholder =>
+      'Confirmer le mot de passe';
+
+  @override
+  String get resetPasswordMismatch => 'Les mots de passe ne correspondent pas';
+
+  @override
+  String get resetPasswordSubmitButton => 'Réinitialiser';
+
+  @override
+  String get resetPasswordSuccessMessage =>
+      'Mot de passe réinitialisé avec succès. Tu peux maintenant te connecter.';
+
+  @override
+  String get resetLinkInvalidMessage =>
+      'Ce lien de réinitialisation est invalide ou a expiré. Redemande un nouveau lien depuis la page de connexion.';
+
+  @override
   String get loginScreenForgotPassword => 'Tu as oublié ton mot de passe ?';
 
   @override
@@ -273,6 +317,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sellTitle => 'Vends un article';
+
+  @override
+  String get clearDraft => 'Effacer';
 
   @override
   String get addPhotos => 'Ajouter photos';
@@ -932,10 +979,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chooseLanguage => 'Choisir la langue';
 
   @override
+  String get openInBrowser => 'Ouvrir dans le navigateur';
+
+  @override
   String get cancel => 'ANNULER';
 
   @override
   String get logoutConfirm => 'Êtes-vous sûr de vouloir vous déconnecter ?';
+
+  @override
+  String get deleteAccount => 'Supprimer le compte';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Supprimer le compte ?';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'Cette suppression sera définitive : toutes vos informations personnelles seront remplacées par des données génériques et vous ne pourrez plus vous reconnecter à ce compte. Vous pourrez créer un nouveau compte avec les mêmes identifiants si vous le souhaitez.';
+
+  @override
+  String get deleteAccountConfirmAction => 'SUPPRIMER';
+
+  @override
+  String get deleteAccountDoneTitle => 'Compte supprimé';
+
+  @override
+  String get deleteAccountDoneMessage =>
+      'Votre compte a bien été supprimé. Vous pouvez créer un nouveau compte avec les mêmes identifiants à tout moment.';
 
   @override
   String get profileTitle => 'Profil';
@@ -1004,13 +1074,46 @@ class AppLocalizationsFr extends AppLocalizations {
   String get markAsReserved => 'Marquer comme réservé';
 
   @override
+  String get cancelReservation => 'Annuler la réservation';
+
+  @override
   String get edit => 'Modifier';
 
   @override
   String get hide => 'Masquer';
 
   @override
+  String get unhide => 'Republier';
+
+  @override
+  String get productHidden => 'Annonce masquée';
+
+  @override
+  String get productUnhidden => 'Annonce republiée';
+
+  @override
+  String get productUnavailable => 'Produit indisponible';
+
+  @override
+  String get soldBadge => 'Vendu';
+
+  @override
+  String get reservedBadge => 'Réservé';
+
+  @override
+  String get hiddenBadge => 'Masqué';
+
+  @override
   String get productMarkedAsSold => 'Produit marqué comme vendu';
+
+  @override
+  String get productMarkedAsReserved => 'Produit marqué comme réservé';
+
+  @override
+  String get reservationCancelled => 'Réservation annulée';
+
+  @override
+  String get productReserved => 'Produit réservé';
 
   @override
   String get deleteProductConfirm => 'Supprimer le produit ?';
@@ -1193,6 +1296,18 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noReviewsYet => 'Pas encore d\'évaluations';
+
+  @override
+  String get minPrice => 'Prix minimum';
+
+  @override
+  String get maxPrice => 'Prix maximum';
+
+  @override
+  String get apply => 'Appliquer';
+
+  @override
+  String get resetFilter => 'Réinitialiser';
 
   @override
   String get priceFilterDevelopment =>

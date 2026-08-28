@@ -30,6 +30,8 @@ class ProductModel {
       soldAt: data['soldAt'] != null
           ? (data['soldAt'] as Timestamp).toDate()
           : null,
+      isReserved: data['isReserved'] as bool? ?? false,
+      isHidden: data['isHidden'] as bool? ?? false,
       viewsCount: data['viewsCount'] as int? ?? 0,
       favoritesCount: data['favoritesCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
@@ -56,6 +58,8 @@ class ProductModel {
       'isSold': product.isSold,
       'soldAt':
           product.soldAt != null ? Timestamp.fromDate(product.soldAt!) : null,
+      'isReserved': product.isReserved,
+      'isHidden': product.isHidden,
       'viewsCount': product.viewsCount,
       'favoritesCount': product.favoritesCount,
       'createdAt': Timestamp.fromDate(product.createdAt),
@@ -84,6 +88,8 @@ class ProductModel {
       soldAt: data['soldAt'] != null
           ? (data['soldAt'] as Timestamp).toDate()
           : null,
+      isReserved: data['isReserved'] as bool? ?? false,
+      isHidden: data['isHidden'] as bool? ?? false,
       viewsCount: data['viewsCount'] as int? ?? 0,
       favoritesCount: data['favoritesCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp).toDate(),

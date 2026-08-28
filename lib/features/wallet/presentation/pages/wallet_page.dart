@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/exceptions/exceptions.dart';
 import '../../../../core/presentation/dynamic_ui/dynamic_selection_view.dart';
 import '../../../../core/presentation/pages/selection_screen.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
@@ -449,7 +450,7 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
       // Récupérer l'utilisateur actuel
       final user = ref.read(currentUserProvider).value;
       if (user == null) {
-        throw Exception('Utilisateur non connecté');
+        throw NotAuthenticatedException();
       }
 
       // Créer l'objet Wallet — on conserve les montants déjà accumulés
@@ -489,10 +490,11 @@ class _WalletSetupFormState extends ConsumerState<_WalletSetupForm> {
       }
     } catch (e) {
       if (context.mounted) {
+        final errorMessage = e is AppException ? e.message : e.toString();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!.errorGenericMsg(e.toString()),
+              AppLocalizations.of(context)!.errorGenericMsg(errorMessage),
             ),
             backgroundColor: Colors.red,
           ),

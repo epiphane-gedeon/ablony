@@ -109,6 +109,16 @@ class UserListingsPage extends ConsumerWidget {
                   product: product,
                   onTap: () => context.push('/product/${product.id}'),
                 ),
+                // Statut visible uniquement par le vendeur sur ses propres
+                // annonces : sans ça, une annonce masquée ou réservée
+                // disparaît des vitrines publiques sans que rien ne le
+                // signale ici.
+                if (product.isSold || product.isReserved || product.isHidden)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: _buildStatusBadge(context, product),
+                  ),
                 if (!product.isSold)
                   Positioned(
                     bottom: 40,
@@ -136,6 +146,40 @@ class UserListingsPage extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text(AppLocalizations.of(context)!.errorGenericMsg(error.toString()))),
+    );
+  }
+
+  /// Badge de statut affiché sur les cartes de "mes annonces" — vendu prime
+  /// sur réservé, qui prime sur masqué (un seul badge à la fois, l'appelant
+  /// garantit qu'au moins une des trois conditions est vraie).
+  Widget _buildStatusBadge(BuildContext context, Product product) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    final String label;
+    final Color color;
+    if (product.isSold) {
+      label = l10n.soldBadge;
+      color = theme.colorScheme.error;
+    } else if (product.isReserved) {
+      label = l10n.reservedBadge;
+      color = theme.colorScheme.tertiary;
+    } else {
+      label = l10n.hiddenBadge;
+      color = theme.colorScheme.outline;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(6)),
+      child: Text(
+        label,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 

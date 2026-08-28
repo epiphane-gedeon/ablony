@@ -59,3 +59,5 @@ functions/node_modules/
 functions/.env
 
 */.env
+
+.claude

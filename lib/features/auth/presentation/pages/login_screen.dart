@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/exceptions/exceptions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/input.dart';
@@ -63,6 +64,109 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // Navigation automatique vers /home
       }
     }
+  }
+
+  // ============================================================
+  // MOT DE PASSE OUBLIÉ
+  // ============================================================
+
+  /// Affiche une popup demandant l'email pour envoyer le lien de
+  /// réinitialisation. Pré-remplie avec le champ identifiant de cet écran,
+  /// même s'il ne s'agit pas forcément d'un email (ce champ accepte aussi le
+  /// username) — la validation du champ ci-dessous le détectera.
+  void _showForgotPasswordDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    final emailController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
+    final formKey = GlobalKey<FormState>();
+    var isSending = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              title: Text(l10n.forgotPasswordTitle),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.forgotPasswordDescription),
+                    const SizedBox(height: 16),
+                    Input(
+                      controller: emailController,
+                      placeholder: l10n.resetPasswordEmailPlaceholder,
+                      type: InputType.email,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSending
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: Text(l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: isSending
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) {
+                            return;
+                          }
+                          setDialogState(() => isSending = true);
+                          try {
+                            await ref
+                                .read(loginControllerProvider.notifier)
+                                .sendPasswordResetEmail(
+                                  emailController.text.trim(),
+                                );
+                          } catch (e) {
+                            setDialogState(() => isSending = false);
+                            if (dialogContext.mounted) {
+                              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    e is AppException
+                                        ? e.message
+                                        : l10n.errorGenericMsg(e.toString()),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                            return;
+                          }
+                          if (dialogContext.mounted) {
+                            Navigator.pop(dialogContext);
+                          }
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.resetEmailSentMessage),
+                              ),
+                            );
+                          }
+                        },
+                  child: isSending
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.sendResetLink),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   // ============================================================
@@ -157,9 +261,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // ============================================================
                 Center(
                   child: TextButton(
-                    onPressed: () {
-                      // TODO: Forgot password flow
-                    },
+                    onPressed: _showForgotPasswordDialog,
                     child: Text(
                       l10n.loginScreenForgotPassword,
                       style: TextStyle(

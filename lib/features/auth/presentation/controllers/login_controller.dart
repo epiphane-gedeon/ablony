@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/auth_providers.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../../core/exceptions/exceptions.dart';
 
 /// État du formulaire de connexion.
 ///
@@ -98,6 +99,21 @@ class LoginController extends Notifier<LoginState> {
         errorMessage: e.toString().replaceAll('Exception: ', ''),
       );
       return false;
+    }
+  }
+
+  /// Envoie un email de réinitialisation de mot de passe.
+  ///
+  /// Absorbe volontairement [UserNotFoundException] : l'appelant doit
+  /// toujours afficher le même message générique de succès, qu'un compte
+  /// existe ou non avec cet email, pour ne pas permettre à quelqu'un de
+  /// deviner quels emails sont inscrits sur la plateforme (énumération de
+  /// comptes). Les autres erreurs (réseau, etc.) sont propagées normalement.
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _authRepository.sendPasswordResetEmail(email: email);
+    } on UserNotFoundException {
+      // Volontairement ignoré — voir la doc ci-dessus.
     }
   }
 

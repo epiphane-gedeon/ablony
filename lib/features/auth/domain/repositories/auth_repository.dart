@@ -523,7 +523,11 @@ abstract class AuthRepository {
   /// Envoie un email de réinitialisation du mot de passe.
   ///
   /// Envoie un email avec un lien pour réinitialiser le mot de passe
-  /// à l'adresse email fournie.
+  /// à l'adresse email fournie. Le lien redirige vers `ResetPasswordPage`
+  /// (`/auth/reset-password`), configuré directement dans l'implémentation
+  /// via `ActionCodeSettings` — indépendamment du réglage "URL d'action
+  /// personnalisée" de la console Firebase (Authentication → Templates),
+  /// qui peut être indisponible pour certains projets.
   ///
   /// **Paramètres :**
   /// - [email] : L'adresse email du compte
@@ -535,6 +539,33 @@ abstract class AuthRepository {
   /// showMessage('Email de réinitialisation envoyé');
   /// ```
   Future<void> sendPasswordResetEmail({required String email});
+
+  /// Vérifie qu'un code de réinitialisation de mot de passe (`oobCode`,
+  /// extrait de l'URL du lien reçu par email) est valide, et retourne
+  /// l'email du compte associé.
+  ///
+  /// À appeler avant d'afficher le formulaire de nouveau mot de passe, pour
+  /// détecter un lien déjà utilisé ou expiré et l'annoncer clairement plutôt
+  /// que de laisser l'utilisateur remplir le formulaire pour rien.
+  ///
+  /// **Throws :**
+  /// - [InvalidOrExpiredResetLinkException] si le code n'est plus valide
+  Future<String> verifyPasswordResetCode(String code);
+
+  /// Applique le nouveau mot de passe après vérification du code (`oobCode`)
+  /// reçu par email.
+  ///
+  /// **Paramètres :**
+  /// - [code] : Le code de réinitialisation extrait de l'URL du lien
+  /// - [newPassword] : Le nouveau mot de passe choisi par l'utilisateur
+  ///
+  /// **Throws :**
+  /// - [InvalidOrExpiredResetLinkException] si le code n'est plus valide
+  /// - [WeakPasswordException] si le mot de passe est trop faible
+  Future<void> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  });
 
   // ============================================================
   // RECHERCHE D'UTILISATEURS

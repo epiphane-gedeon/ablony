@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/exceptions/exceptions.dart';
 import '../../domain/models/conversation.dart';
 import '../../domain/models/message.dart';
 import '../../domain/models/participant_details.dart';
@@ -36,13 +37,23 @@ class MessageRepository {
 
   /// Récupère une conversation spécifique
   Future<Conversation?> getConversation(String conversationId) async {
-    final doc = await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .get();
+    try {
+      final doc = await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .get();
 
-    if (!doc.exists) return null;
-    return Conversation.fromFirestore(doc);
+      if (!doc.exists) return null;
+      return Conversation.fromFirestore(doc);
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du chargement de la conversation',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Trouve une conversation existante entre deux utilisateurs pour un produit
@@ -51,22 +62,32 @@ class MessageRepository {
     required String userId2,
     required String productId,
   }) async {
-    final query = await _firestore
-        .collection('conversations')
-        .where('participants', arrayContains: userId1)
-        .where('productId', isEqualTo: productId)
-        .get();
+    try {
+      final query = await _firestore
+          .collection('conversations')
+          .where('participants', arrayContains: userId1)
+          .where('productId', isEqualTo: productId)
+          .get();
 
-    for (var doc in query.docs) {
-      final participants = List<String>.from(
-        doc.data()['participants'] as List,
-      );
-      if (participants.contains(userId2)) {
-        return doc.id;
+      for (var doc in query.docs) {
+        final participants = List<String>.from(
+          doc.data()['participants'] as List,
+        );
+        if (participants.contains(userId2)) {
+          return doc.id;
+        }
       }
-    }
 
-    return null;
+      return null;
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la recherche de la conversation',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Crée une nouvelle conversation
@@ -78,26 +99,36 @@ class MessageRepository {
     required String productId,
     required ProductDetails productDetails,
   }) async {
-    final now = DateTime.now();
+    try {
+      final now = DateTime.now();
 
-    final conversationData = {
-      'participants': [buyerId, sellerId],
-      'participantDetails': {
-        buyerId: buyerDetails.toFirestore(),
-        sellerId: sellerDetails.toFirestore(),
-      },
-      'productId': productId,
-      'productDetails': productDetails.toFirestore(),
-      'unreadCount': {buyerId: 0, sellerId: 0},
-      'createdAt': Timestamp.fromDate(now),
-      'updatedAt': Timestamp.fromDate(now),
-    };
+      final conversationData = {
+        'participants': [buyerId, sellerId],
+        'participantDetails': {
+          buyerId: buyerDetails.toFirestore(),
+          sellerId: sellerDetails.toFirestore(),
+        },
+        'productId': productId,
+        'productDetails': productDetails.toFirestore(),
+        'unreadCount': {buyerId: 0, sellerId: 0},
+        'createdAt': Timestamp.fromDate(now),
+        'updatedAt': Timestamp.fromDate(now),
+      };
 
-    final docRef = await _firestore
-        .collection('conversations')
-        .add(conversationData);
+      final docRef = await _firestore
+          .collection('conversations')
+          .add(conversationData);
 
-    return docRef.id;
+      return docRef.id;
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la création de la conversation',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Met à jour le compteur de messages non lus
@@ -106,9 +137,19 @@ class MessageRepository {
     required String userId,
     required int count,
   }) async {
-    await _firestore.collection('conversations').doc(conversationId).update({
-      'unreadCount.$userId': count,
-    });
+    try {
+      await _firestore.collection('conversations').doc(conversationId).update({
+        'unreadCount.$userId': count,
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la mise à jour du compteur de non lus',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Réinitialise le compteur de non lus pour un utilisateur
@@ -128,10 +169,20 @@ class MessageRepository {
     required String conversationId,
     required LastMessage lastMessage,
   }) async {
-    await _firestore.collection('conversations').doc(conversationId).update({
-      'lastMessage': lastMessage.toFirestore(),
-      'updatedAt': Timestamp.fromDate(DateTime.now()),
-    });
+    try {
+      await _firestore.collection('conversations').doc(conversationId).update({
+        'lastMessage': lastMessage.toFirestore(),
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la mise à jour du dernier message',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   // ========== MESSAGES ==========
@@ -156,20 +207,30 @@ class MessageRepository {
     required String userId,
     required UserInfo userInfo,
   }) async {
-    final message = Message(
-      id: '',
-      senderId: userId,
-      type: MessageType.system,
-      timestamp: DateTime.now(),
-      read: false,
-      userInfo: userInfo,
-    );
+    try {
+      final message = Message(
+        id: '',
+        senderId: userId,
+        type: MessageType.system,
+        timestamp: DateTime.now(),
+        read: false,
+        userInfo: userInfo,
+      );
 
-    await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .add(message.toFirestore());
+      await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .add(message.toFirestore());
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi du message système',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Envoie une offre
@@ -179,48 +240,60 @@ class MessageRepository {
     required String receiverId,
     required Offer offer,
   }) async {
-    final now = DateTime.now();
+    try {
+      final now = DateTime.now();
 
-    // Rejeter automatiquement toutes les offres en attente avant d'envoyer la nouvelle offre
-    await _rejectPendingOffers(conversationId);
+      // Rejeter automatiquement toutes les offres en attente avant d'envoyer la nouvelle offre
+      await _rejectPendingOffers(conversationId);
 
-    final message = Message(
-      id: '',
-      senderId: senderId,
-      type: MessageType.offer,
-      timestamp: now,
-      read: false,
-      offer: offer,
-    );
+      final message = Message(
+        id: '',
+        senderId: senderId,
+        type: MessageType.offer,
+        timestamp: now,
+        read: false,
+        offer: offer,
+      );
 
-    // Ajouter le message
-    await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .add(message.toFirestore());
+      // Ajouter le message
+      await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .add(message.toFirestore());
 
-    // Mettre à jour le dernier message
-    final lastMessage = LastMessage(
-      text: '${offer.amount.toStringAsFixed(2)} FCFA En attente',
-      senderId: senderId,
-      timestamp: now,
-      type: MessageType.offer,
-    );
+      // Mettre à jour le dernier message
+      final lastMessage = LastMessage(
+        text: '${offer.amount.toStringAsFixed(2)} FCFA En attente',
+        senderId: senderId,
+        timestamp: now,
+        type: MessageType.offer,
+      );
 
-    await updateLastMessage(
-      conversationId: conversationId,
-      lastMessage: lastMessage,
-    );
-
-    // Incrémenter le compteur de non lus du receveur
-    final conversation = await getConversation(conversationId);
-    if (conversation != null) {
-      final currentUnread = conversation.unreadCount[receiverId] ?? 0;
-      await updateUnreadCount(
+      await updateLastMessage(
         conversationId: conversationId,
-        userId: receiverId,
-        count: currentUnread + 1,
+        lastMessage: lastMessage,
+      );
+
+      // Incrémenter le compteur de non lus du receveur
+      final conversation = await getConversation(conversationId);
+      if (conversation != null) {
+        final currentUnread = conversation.unreadCount[receiverId] ?? 0;
+        await updateUnreadCount(
+          conversationId: conversationId,
+          userId: receiverId,
+          count: currentUnread + 1,
+        );
+      }
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi de l\'offre',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -232,45 +305,57 @@ class MessageRepository {
     required String receiverId,
     required Offer counterOffer,
   }) async {
-    final now = DateTime.now();
+    try {
+      final now = DateTime.now();
 
-    // Rejeter automatiquement toutes les offres en attente avant d'envoyer la contre-offre
-    await _rejectPendingOffers(conversationId);
+      // Rejeter automatiquement toutes les offres en attente avant d'envoyer la contre-offre
+      await _rejectPendingOffers(conversationId);
 
-    final message = Message(
-      id: '',
-      senderId: senderId,
-      type: MessageType.counterOffer,
-      timestamp: now,
-      read: false,
-      offer: counterOffer,
-    );
+      final message = Message(
+        id: '',
+        senderId: senderId,
+        type: MessageType.counterOffer,
+        timestamp: now,
+        read: false,
+        offer: counterOffer,
+      );
 
-    await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .add(message.toFirestore());
+      await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .add(message.toFirestore());
 
-    final lastMessage = LastMessage(
-      text: '${counterOffer.amount.toStringAsFixed(2)} FCFA Contre-offre',
-      senderId: senderId,
-      timestamp: now,
-      type: MessageType.counterOffer,
-    );
+      final lastMessage = LastMessage(
+        text: '${counterOffer.amount.toStringAsFixed(2)} FCFA Contre-offre',
+        senderId: senderId,
+        timestamp: now,
+        type: MessageType.counterOffer,
+      );
 
-    await updateLastMessage(
-      conversationId: conversationId,
-      lastMessage: lastMessage,
-    );
-
-    final conversation = await getConversation(conversationId);
-    if (conversation != null) {
-      final currentUnread = conversation.unreadCount[receiverId] ?? 0;
-      await updateUnreadCount(
+      await updateLastMessage(
         conversationId: conversationId,
-        userId: receiverId,
-        count: currentUnread + 1,
+        lastMessage: lastMessage,
+      );
+
+      final conversation = await getConversation(conversationId);
+      if (conversation != null) {
+        final currentUnread = conversation.unreadCount[receiverId] ?? 0;
+        await updateUnreadCount(
+          conversationId: conversationId,
+          userId: receiverId,
+          count: currentUnread + 1,
+        );
+      }
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi de la contre-offre',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -282,42 +367,54 @@ class MessageRepository {
     required String receiverId,
     required String text,
   }) async {
-    final now = DateTime.now();
+    try {
+      final now = DateTime.now();
 
-    final message = Message(
-      id: '',
-      senderId: senderId,
-      type: MessageType.text,
-      timestamp: now,
-      read: false,
-      text: text,
-    );
+      final message = Message(
+        id: '',
+        senderId: senderId,
+        type: MessageType.text,
+        timestamp: now,
+        read: false,
+        text: text,
+      );
 
-    await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .add(message.toFirestore());
+      await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .add(message.toFirestore());
 
-    final lastMessage = LastMessage(
-      text: text,
-      senderId: senderId,
-      timestamp: now,
-      type: MessageType.text,
-    );
+      final lastMessage = LastMessage(
+        text: text,
+        senderId: senderId,
+        timestamp: now,
+        type: MessageType.text,
+      );
 
-    await updateLastMessage(
-      conversationId: conversationId,
-      lastMessage: lastMessage,
-    );
-
-    final conversation = await getConversation(conversationId);
-    if (conversation != null) {
-      final currentUnread = conversation.unreadCount[receiverId] ?? 0;
-      await updateUnreadCount(
+      await updateLastMessage(
         conversationId: conversationId,
-        userId: receiverId,
-        count: currentUnread + 1,
+        lastMessage: lastMessage,
+      );
+
+      final conversation = await getConversation(conversationId);
+      if (conversation != null) {
+        final currentUnread = conversation.unreadCount[receiverId] ?? 0;
+        await updateUnreadCount(
+          conversationId: conversationId,
+          userId: receiverId,
+          count: currentUnread + 1,
+        );
+      }
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi du message',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -331,43 +428,55 @@ class MessageRepository {
     required String imageUrl,
     String? caption,
   }) async {
-    final now = DateTime.now();
+    try {
+      final now = DateTime.now();
 
-    final message = Message(
-      id: '',
-      senderId: senderId,
-      type: MessageType.image,
-      timestamp: now,
-      read: false,
-      imageUrl: imageUrl,
-      text: caption,
-    );
+      final message = Message(
+        id: '',
+        senderId: senderId,
+        type: MessageType.image,
+        timestamp: now,
+        read: false,
+        imageUrl: imageUrl,
+        text: caption,
+      );
 
-    await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .add(message.toFirestore());
+      await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .add(message.toFirestore());
 
-    final lastMessage = LastMessage(
-      text: caption != null && caption.isNotEmpty ? '📷 $caption' : '📷',
-      senderId: senderId,
-      timestamp: now,
-      type: MessageType.image,
-    );
+      final lastMessage = LastMessage(
+        text: caption != null && caption.isNotEmpty ? '📷 $caption' : '📷',
+        senderId: senderId,
+        timestamp: now,
+        type: MessageType.image,
+      );
 
-    await updateLastMessage(
-      conversationId: conversationId,
-      lastMessage: lastMessage,
-    );
-
-    final conversation = await getConversation(conversationId);
-    if (conversation != null) {
-      final currentUnread = conversation.unreadCount[receiverId] ?? 0;
-      await updateUnreadCount(
+      await updateLastMessage(
         conversationId: conversationId,
-        userId: receiverId,
-        count: currentUnread + 1,
+        lastMessage: lastMessage,
+      );
+
+      final conversation = await getConversation(conversationId);
+      if (conversation != null) {
+        final currentUnread = conversation.unreadCount[receiverId] ?? 0;
+        await updateUnreadCount(
+          conversationId: conversationId,
+          userId: receiverId,
+          count: currentUnread + 1,
+        );
+      }
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de l\'envoi de la photo',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -378,12 +487,22 @@ class MessageRepository {
     required String messageId,
     required OfferStatus newStatus,
   }) async {
-    await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .doc(messageId)
-        .update({'offer.status': newStatus.toFirestore()});
+    try {
+      await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .doc(messageId)
+          .update({'offer.status': newStatus.toFirestore()});
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la mise à jour du statut de l\'offre',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Marque un message comme lu
@@ -391,31 +510,51 @@ class MessageRepository {
     required String conversationId,
     required String messageId,
   }) async {
-    await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .doc(messageId)
-        .update({'read': true});
+    try {
+      await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .doc(messageId)
+          .update({'read': true});
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du marquage du message comme lu',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Récupère le nombre total de messages non lus pour un utilisateur
   Future<int> getTotalUnreadCount(String userId) async {
-    final conversations = await _firestore
-        .collection('conversations')
-        .where('participants', arrayContains: userId)
-        .get();
+    try {
+      final conversations = await _firestore
+          .collection('conversations')
+          .where('participants', arrayContains: userId)
+          .get();
 
-    int total = 0;
-    for (var doc in conversations.docs) {
-      final data = doc.data();
-      final unreadCount = data['unreadCount'] as Map<String, dynamic>?;
-      if (unreadCount != null) {
-        total += (unreadCount[userId] as int? ?? 0);
+      int total = 0;
+      for (var doc in conversations.docs) {
+        final data = doc.data();
+        final unreadCount = data['unreadCount'] as Map<String, dynamic>?;
+        if (unreadCount != null) {
+          total += (unreadCount[userId] as int? ?? 0);
+        }
       }
-    }
 
-    return total;
+      return total;
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du calcul des messages non lus',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Stream du nombre total de messages non lus
@@ -439,25 +578,35 @@ class MessageRepository {
 
   /// Rejette automatiquement toutes les offres en attente dans une conversation
   Future<void> _rejectPendingOffers(String conversationId) async {
-    final messagesSnapshot = await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .where('type', whereIn: ['offer', 'counterOffer'])
-        .get();
+    try {
+      final messagesSnapshot = await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .where('type', whereIn: ['offer', 'counterOffer'])
+          .get();
 
-    final batch = _firestore.batch();
+      final batch = _firestore.batch();
 
-    for (var doc in messagesSnapshot.docs) {
-      final message = Message.fromFirestore(doc);
-      if (message.offer?.status == OfferStatus.pending) {
-        final updatedOffer = message.offer!.copyWith(
-          status: OfferStatus.rejected,
-        );
-        batch.update(doc.reference, {'offer': updatedOffer.toFirestore()});
+      for (var doc in messagesSnapshot.docs) {
+        final message = Message.fromFirestore(doc);
+        if (message.offer?.status == OfferStatus.pending) {
+          final updatedOffer = message.offer!.copyWith(
+            status: OfferStatus.rejected,
+          );
+          batch.update(doc.reference, {'offer': updatedOffer.toFirestore()});
+        }
       }
-    }
 
-    await batch.commit();
+      await batch.commit();
+    } on FirebaseException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors du rejet des offres en attente',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

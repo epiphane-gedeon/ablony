@@ -159,7 +159,13 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         product.sellerId,
       );
       final filteredSellerProducts = sellerProducts
-          .where((p) => p.id != product.id && !p.isSold)
+          .where(
+            (p) =>
+                p.id != product.id &&
+                !p.isSold &&
+                !p.isReserved &&
+                !p.isHidden,
+          )
           .toList();
 
       // Charger les produits similaires (même sous-catégorie, excluant le produit actuel)
@@ -877,7 +883,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                 _handleMarkAsSold(context, ref, product.id);
                                 break;
                               case 'reserve':
-                                // TODO: Marquer comme réservé
+                                _handleMarkAsReserved(
+                                  context,
+                                  ref,
+                                  product.id,
+                                  !product.isReserved,
+                                );
                                 break;
                               case 'modifier':
                                 SellBottomSheet.show(
@@ -886,7 +897,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                 );
                                 break;
                               case 'masquer':
-                                // TODO: Masquer
+                                _handleToggleHidden(
+                                  context,
+                                  ref,
+                                  product.id,
+                                  !product.isHidden,
+                                );
                                 break;
                               case 'supprimer':
                                 _handleDeleteProduct(context, ref, product.id);
@@ -894,26 +910,43 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                             }
                           },
                           itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'vendu',
-                              child: Text(
-                                AppLocalizations.of(context)!.markAsSold,
+                            // Vendre/réserver n'a plus de sens une fois le
+                            // produit déjà vendu.
+                            if (!product.isSold) ...[
+                              PopupMenuItem(
+                                value: 'vendu',
+                                child: Text(
+                                  AppLocalizations.of(context)!.markAsSold,
+                                ),
                               ),
-                            ),
-                            PopupMenuItem(
-                              value: 'reserve',
-                              child: Text(
-                                AppLocalizations.of(context)!.markAsReserved,
+                              PopupMenuItem(
+                                value: 'reserve',
+                                child: Text(
+                                  product.isReserved
+                                      ? AppLocalizations.of(
+                                          context,
+                                        )!.cancelReservation
+                                      : AppLocalizations.of(
+                                          context,
+                                        )!.markAsReserved,
+                                ),
                               ),
-                            ),
+                            ],
                             PopupMenuItem(
                               value: 'modifier',
                               child: Text(AppLocalizations.of(context)!.edit),
                             ),
-                            PopupMenuItem(
-                              value: 'masquer',
-                              child: Text(AppLocalizations.of(context)!.hide),
-                            ),
+                            // Masquer/republier n'a d'intérêt que pour une
+                            // annonce encore en vente.
+                            if (!product.isSold)
+                              PopupMenuItem(
+                                value: 'masquer',
+                                child: Text(
+                                  product.isHidden
+                                      ? AppLocalizations.of(context)!.unhide
+                                      : AppLocalizations.of(context)!.hide,
+                                ),
+                              ),
                             PopupMenuItem(
                               value: 'supprimer',
                               child: Text(
@@ -1038,6 +1071,23 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                 ref,
                                 product,
                                 currentUser?.uid,
+                              )
+                            // Vue Acheteur, article réservé : ni offre ni achat possible
+                            : product.isReserved
+                            ? PrimaryButton(
+                                text: AppLocalizations.of(
+                                  context,
+                                )!.productReserved,
+                                onPressed: null,
+                              )
+                            // Vue Acheteur, annonce masquée : accès via un ancien lien
+                            // direct uniquement, ni offre ni achat possible
+                            : product.isHidden
+                            ? PrimaryButton(
+                                text: AppLocalizations.of(
+                                  context,
+                                )!.productUnavailable,
+                                onPressed: null,
                               )
                             // Vue Acheteur, article en vente : Faire une offre + Acheter
                             : Row(
@@ -1321,6 +1371,105 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.productMarkedAsSold),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Rafraîchir les providers pour mettre à jour l'UI partout
+        ref.invalidate(productByIdProvider(productId));
+        ref.invalidate(paginatedProductsProvider);
+        if (_product != null) {
+          ref.invalidate(sellerProductsProvider(_product!.sellerId));
+        }
+        ref.invalidate(allProductsProvider);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorGenericMsg(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Marque ou démarque le produit comme réservé — contrairement à
+  /// [_handleMarkAsSold], réversible : le vendeur peut annuler la
+  /// réservation depuis ce même menu si la vente ne se fait finalement pas.
+  Future<void> _handleMarkAsReserved(
+    BuildContext context,
+    WidgetRef ref,
+    String productId,
+    bool reserve,
+  ) async {
+    try {
+      final repository = ref.read(productRepositoryProvider);
+      if (reserve) {
+        await repository.markAsReserved(productId);
+      } else {
+        await repository.unmarkAsReserved(productId);
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              reserve
+                  ? AppLocalizations.of(context)!.productMarkedAsReserved
+                  : AppLocalizations.of(context)!.reservationCancelled,
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Rafraîchir les providers pour mettre à jour l'UI partout
+        ref.invalidate(productByIdProvider(productId));
+        ref.invalidate(paginatedProductsProvider);
+        if (_product != null) {
+          ref.invalidate(sellerProductsProvider(_product!.sellerId));
+        }
+        ref.invalidate(allProductsProvider);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorGenericMsg(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Masque ou republie l'annonce — retirée des listes publiques (accueil,
+  /// recherche, profil public) sans être vendue ni supprimée.
+  Future<void> _handleToggleHidden(
+    BuildContext context,
+    WidgetRef ref,
+    String productId,
+    bool hide,
+  ) async {
+    try {
+      final repository = ref.read(productRepositoryProvider);
+      if (hide) {
+        await repository.hideProduct(productId);
+      } else {
+        await repository.unhideProduct(productId);
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              hide
+                  ? AppLocalizations.of(context)!.productHidden
+                  : AppLocalizations.of(context)!.productUnhidden,
+            ),
             backgroundColor: Colors.green,
           ),
         );

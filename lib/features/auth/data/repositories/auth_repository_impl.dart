@@ -862,12 +862,63 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      await _firebaseAuth.sendPasswordResetEmail(
+        email: email,
+        // Fait pointer le lien directement vers notre propre page (plutôt
+        // que la page générique hébergée par Firebase), sans dépendre du
+        // réglage "URL d'action personnalisée" de la console Firebase —
+        // ce réglage vit dans l'éditeur de templates, qui peut être
+        // indisponible pour certains projets (erreur connue côté Firebase).
+        // `handleCodeInApp: true` avec seulement une `url` web (pas de
+        // androidPackageName/iOSBundleId) ne fait qu'un lien web classique,
+        // ouvert dans le navigateur — pas besoin de Firebase Dynamic Links
+        // ni de configuration App Links/Universal Links.
+        actionCodeSettings: firebase_auth.ActionCodeSettings(
+          url: 'https://ablony-a5db9.web.app/auth/reset-password',
+          handleCodeInApp: true,
+        ),
+      );
     } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
       throw handleFirebaseException(e, stackTrace: stackTrace);
     } catch (e, stackTrace) {
       throw UnknownException(
         message: 'Erreur lors de l\'envoi de l\'email de réinitialisation',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<String> verifyPasswordResetCode(String code) async {
+    try {
+      return await _firebaseAuth.verifyPasswordResetCode(code);
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la vérification du lien de réinitialisation',
+        originalException: e as Exception?,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      await _firebaseAuth.confirmPasswordReset(
+        code: code,
+        newPassword: newPassword,
+      );
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      throw handleFirebaseException(e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      throw UnknownException(
+        message: 'Erreur lors de la réinitialisation du mot de passe',
         originalException: e as Exception?,
         stackTrace: stackTrace,
       );

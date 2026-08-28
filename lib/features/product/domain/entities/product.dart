@@ -71,6 +71,16 @@ class Product {
   /// Date de vente (si vendu)
   final DateTime? soldAt;
 
+  /// Indique si le produit est réservé — temporairement indisponible à
+  /// l'achat (le vendeur discute avec un acheteur potentiel) sans être
+  /// vendu pour autant, contrairement à [isSold] qui est définitif.
+  final bool isReserved;
+
+  /// Indique si l'annonce est masquée par le vendeur — retirée des listes
+  /// publiques (accueil, recherche, profil public) à sa demande, sans être
+  /// supprimée ni vendue. Le vendeur peut la republier à tout moment.
+  final bool isHidden;
+
   /// Nombre de vues
   final int viewsCount;
 
@@ -98,6 +108,8 @@ class Product {
     this.boostExpiresAt,
     this.isSold = false,
     this.soldAt,
+    this.isReserved = false,
+    this.isHidden = false,
     this.viewsCount = 0,
     this.favoritesCount = 0,
     required this.createdAt,
@@ -120,6 +132,8 @@ class Product {
     DateTime? boostExpiresAt,
     bool? isSold,
     DateTime? soldAt,
+    bool? isReserved,
+    bool? isHidden,
     int? viewsCount,
     int? favoritesCount,
     DateTime? createdAt,
@@ -140,6 +154,8 @@ class Product {
       boostExpiresAt: boostExpiresAt ?? this.boostExpiresAt,
       isSold: isSold ?? this.isSold,
       soldAt: soldAt ?? this.soldAt,
+      isReserved: isReserved ?? this.isReserved,
+      isHidden: isHidden ?? this.isHidden,
       viewsCount: viewsCount ?? this.viewsCount,
       favoritesCount: favoritesCount ?? this.favoritesCount,
       createdAt: createdAt ?? this.createdAt,
