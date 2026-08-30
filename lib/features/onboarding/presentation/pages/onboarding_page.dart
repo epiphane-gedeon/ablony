@@ -320,6 +320,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     // Largeur de la carte : ratio 0.6 pour garder des cartes verticales
     final cardWidth = cardHeight * 0.6;
 
+    // Résolution de décodage cible (en pixels physiques) : les fichiers sources
+    // font jusqu'à 4000x6000px (photos brutes), soit ~90 Mo décodés en mémoire
+    // chacun. Sans cacheWidth/cacheHeight, Flutter décode à la résolution native
+    // du fichier avant de la réduire à l'affichage, ce qui charge ~700 Mo+ de
+    // textures pour les 10 images tant que l'onboarding reste ouvert (boucle
+    // infinie) — assez pour faire tuer l'onglet par iOS (Safari et Chrome iOS,
+    // qui partagent le même moteur WebKit et sa limite mémoire stricte).
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+    final cacheWidth = (cardWidth * dpr).round();
+    final cacheHeight = (cardHeight * dpr).round();
+
     return Container(
       width: cardWidth,
       height: cardHeight,
@@ -333,6 +344,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         child: Image.asset(
           imagePath,
           fit: BoxFit.cover, // L'image couvre tout l'espace sans déformation
+          cacheWidth: cacheWidth,
+          cacheHeight: cacheHeight,
           errorBuilder: (context, error, stackTrace) {
             // Fallback en cas d'erreur de chargement : icône par défaut
             return Center(
