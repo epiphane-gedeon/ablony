@@ -87,6 +87,16 @@ Top-level collections: `users`, `products`, `categories` (nested `subcategories`
 
 `lib/core/services/payment_service.dart` calls two deployed 2nd-gen Cloud Run HTTPS functions directly by URL (not via the Firebase Functions SDK): `initiatePayment` and `confirmPayment`. Both are implemented in `functions/index.js` alongside `geniusPayWebhook`, wrapping the GeniusPay payment provider (sandbox/live keys read from `functions/.env`, gitignored). `confirmPayment` is responsible for debiting the buyer wallet, crediting the seller's `pendingAmount`, and marking the product sold — treat it as the source of truth for transaction finalization, not the client.
 
+A purchase must carry a `delivery` object (`{method, relayPointId | address}`), built by `lib/features/delivery/domain/models/delivery_choice.dart`. `initiatePayment` validates it — the relay point must exist and be active — and recomputes the total server-side before any debit; the client's amount is only a display. Never fix fees client-side.
+
+### Delivery
+
+Ablony ships the parcels itself: relay-point pickup or home delivery. The seller prints the parcel code, sticks it on the box and drops it at a relay point — their part ends there. `notifyPurchase` creates one `parcels/{code}` document per sale, with code `AB-XXXXX-XXXXX`.
+
+**The same code is used everywhere**: printed once by the seller, scanned at every step by Ablony agents, tracked by the buyer. There is no code per step and no code per role. The code authorizes nothing — it is printed on a box anyone can read, so what grants an action is the agent who scans it, never the code itself. `parcels` is therefore read-only for both parties (`firestore.rules`); a seller able to write there would declare their own parcel delivered and get paid without shipping anything.
+
+The buyer confirms receipt from their receipt page (`confirmDelivery`, buyer-authenticated) — there is nothing to scan, since buyer and seller never meet. Automatic release after a delay requires a hand-over **witnessed by a third party**; that lands with the `delivery` service of the new backend, which records each agent scan.
+
 ### Localization
 
 `lib/l10n/app_fr.arb` (template/default) and `app_en.arb`. Always reference strings via `AppLocalizations.of(context)!.key`, never hardcode UI text. Add new keys to both ARB files, then run `flutter gen-l10n` to regenerate `lib/l10n/generated/app_localizations.dart` before referencing a new key in code.

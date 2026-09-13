@@ -1,0 +1,133 @@
+import 'package:equatable/equatable.dart';
+
+import '../../../location/data/models/location_data.dart';
+import '../../../relay_point/domain/models/relay_point.dart';
+
+/// Mode d'acheminement choisi par l'acheteur.
+enum DeliveryMethod {
+  /// Retrait dans un point relais Ablony.
+  relay,
+
+  /// Remise à l'adresse de l'acheteur.
+  home;
+
+  String get wireValue => name;
+
+  static DeliveryMethod fromWire(String? value) =>
+      value == 'home' ? DeliveryMethod.home : DeliveryMethod.relay;
+}
+
+/// Adresse de remise, recopiée sur la commande.
+///
+/// Recopiée, et non référencée : si l'acheteur déménage ensuite, le colis en
+/// cours doit continuer d'aller au bon endroit.
+class DeliveryAddress extends Equatable {
+  final String fullName;
+  final String street;
+  final String? city;
+  final String? country;
+  final double? latitude;
+  final double? longitude;
+
+  const DeliveryAddress({
+    required this.fullName,
+    required this.street,
+    this.city,
+    this.country,
+    this.latitude,
+    this.longitude,
+  });
+
+  factory DeliveryAddress.fromLocation({
+    required String fullName,
+    required LocationData location,
+  }) {
+    return DeliveryAddress(
+      fullName: fullName,
+      street: location.street?.isNotEmpty == true
+          ? location.street!
+          : location.formattedAddress,
+      city: location.city,
+      country: location.country,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    );
+  }
+
+  /// Une ligne lisible, pour l'afficher dans le récapitulatif de commande.
+  String get summary => [fullName, street, city].whereType<String>()
+      .where((part) => part.isNotEmpty)
+      .join(', ');
+
+  Map<String, dynamic> toJson() => {
+    'fullName': fullName,
+    'street': street,
+    if (city != null) 'city': city,
+    if (country != null) 'country': country,
+    if (latitude != null) 'latitude': latitude,
+    if (longitude != null) 'longitude': longitude,
+  };
+
+  factory DeliveryAddress.fromJson(Map<String, dynamic> json) {
+    return DeliveryAddress(
+      fullName: json['fullName'] as String? ?? '',
+      street: json['street'] as String? ?? '',
+      city: json['city'] as String?,
+      country: json['country'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+    );
+  }
+
+  @override
+  List<Object?> get props => [fullName, street, city, country, latitude, longitude];
+}
+
+/// Le choix de livraison, tel qu'il part vers le serveur.
+///
+/// Ce type n'existait pas : l'écran de paiement gardait le *nom* du point
+/// relais et une adresse déjà mise en forme, puis n'envoyait ni l'un ni
+/// l'autre. L'article était vendu et attendu nulle part. Ce qui compte est
+/// ici — l'identifiant du point relais, et une adresse structurée.
+class DeliveryChoice extends Equatable {
+  final DeliveryMethod method;
+
+  /// Renseigné pour [DeliveryMethod.relay] uniquement.
+  final RelayPoint? relayPoint;
+
+  /// Renseignée pour [DeliveryMethod.home] uniquement.
+  final DeliveryAddress? address;
+
+  const DeliveryChoice({required this.method, this.relayPoint, this.address});
+
+  const DeliveryChoice.relay(RelayPoint point)
+    : method = DeliveryMethod.relay,
+      relayPoint = point,
+      address = null;
+
+  const DeliveryChoice.home(DeliveryAddress destination)
+    : method = DeliveryMethod.home,
+      relayPoint = null,
+      address = destination;
+
+  /// `true` quand le choix est complet et peut accompagner un paiement.
+  bool get isComplete => switch (method) {
+    DeliveryMethod.relay => relayPoint != null,
+    DeliveryMethod.home => address != null,
+  };
+
+  /// Où le colis doit arriver, en une ligne.
+  String get destinationSummary => switch (method) {
+    DeliveryMethod.relay => relayPoint?.name ?? '',
+    DeliveryMethod.home => address?.summary ?? '',
+  };
+
+  Map<String, dynamic> toJson() => {
+    'method': method.wireValue,
+    if (relayPoint != null) 'relayPointId': relayPoint!.id,
+    if (address != null) 'address': address!.toJson(),
+  };
+
+  @override
+  List<Object?> get props => [method, relayPoint?.id, address];
+}

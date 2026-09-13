@@ -1034,7 +1034,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                   ),
                   child: isSeller
                       ? (product.isSold
-                            // Vue Vendeur, article vendu : code QR de remise en main propre
+                            // Vue Vendeur, article vendu : l'étiquette à imprimer et à coller sur le colis
                             ? _buildSellerDeliveryButton(
                                 context,
                                 ref,
@@ -1134,9 +1134,13 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     );
   }
 
-  /// Bouton "Afficher le code QR" côté vendeur, une fois l'article vendu.
-  /// L'acheteur scanne ce code pour confirmer la réception et débloquer
-  /// le paiement (pendingAmount → availableAmount).
+  /// Bouton "Voir l'étiquette du colis" côté vendeur, une fois l'article
+  /// vendu. Le vendeur imprime ce code, le colle sur le carton et le dépose
+  /// en point relais : son travail s'arrête là.
+  ///
+  /// Auparavant ce bouton affichait un QR que l'acheteur devait scanner en
+  /// main propre. Ablony achemine lui-même les colis — les deux personnes ne
+  /// se rencontrent jamais, et ce geste n'avait donc jamais lieu.
   Widget _buildSellerDeliveryButton(
     BuildContext context,
     WidgetRef ref,
@@ -1150,24 +1154,21 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
     return receiptAsync.when(
       data: (receipt) {
-        if (receipt == null || receipt.qrCodeId == null) {
+        if (receipt == null || receipt.parcelCode == null) {
+          return PrimaryButton(text: l10n.parcelLabelButton, onPressed: null);
+        }
+        if (receipt.deliveryConfirmed) {
           return PrimaryButton(
-            text: l10n.showDeliveryQrButton,
+            text: l10n.deliveryAlreadyConfirmed,
+            icon: Icons.check_circle_outline,
             onPressed: null,
           );
         }
         return PrimaryButton(
-          text: receipt.deliveryConfirmed
-              ? l10n.deliveryAlreadyConfirmed
-              : l10n.showDeliveryQrButton,
-          icon: Icons.qr_code,
-          onPressed: () => context.push(
-            '/delivery/show-qr',
-            extra: {
-              'qrCodeId': receipt.qrCodeId,
-              'deliveryConfirmed': receipt.deliveryConfirmed,
-            },
-          ),
+          text: l10n.parcelLabelButton,
+          icon: Icons.local_shipping_outlined,
+          onPressed: () =>
+              context.push('/delivery/label/${receipt.parcelCode}'),
         );
       },
       loading: () => const Center(
@@ -1178,7 +1179,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         ),
       ),
       error: (error, stack) =>
-          PrimaryButton(text: l10n.showDeliveryQrButton, onPressed: null),
+          PrimaryButton(text: l10n.parcelLabelButton, onPressed: null),
     );
   }
 
@@ -1212,10 +1213,13 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             onPressed: null,
           );
         }
+        // Vers le reçu, où la confirmation se fait. L'ancienne version
+        // ouvrait le scanner sans lui passer le moindre paramètre, alors que
+        // la route les exigeait : le bouton plantait à chaque appui.
         return PrimaryButton(
           text: l10n.confirmDeliveryButton,
-          icon: Icons.qr_code_scanner,
-          onPressed: () => context.push('/delivery/scan-qr'),
+          icon: Icons.check_circle_outline,
+          onPressed: () => context.push('/receipt/${receipt.transactionRef}'),
         );
       },
       loading: () => const Center(

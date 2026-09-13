@@ -1440,20 +1440,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rateSellerSubmitButton => 'Send my review';
 
   @override
-  String get showDeliveryQrButton => 'Show QR code';
-
-  @override
-  String get confirmDeliveryButton => 'Confirm receipt';
+  String get confirmDeliveryButton => 'I received my parcel';
 
   @override
   String get productAlreadySold => 'Item already sold';
-
-  @override
-  String get deliveryQrPageTitle => 'Handover code';
-
-  @override
-  String get deliveryQrInstructions =>
-      'Have the buyer scan this code at handover to release the payment.';
 
   @override
   String get deliveryAlreadyConfirmed => 'Receipt confirmed';
@@ -1580,4 +1570,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseLogin => 'Please log in';
+
+  @override
+  String get parcelLabelButton => 'View parcel label';
+
+  @override
+  String get receiptParcelCode => 'Parcel code';
+
+  @override
+  String get confirmDeliveryTitle => 'Confirm receipt';
+
+  @override
+  String get confirmDeliveryQuestion =>
+      'Did your parcel arrive? Payment goes to the seller right away, and this cannot be undone.';
+
+  @override
+  String get confirmDeliveryConfirm => 'Yes, I got it';
+
+  @override
+  String get deliveryConfirmedSuccess =>
+      'Receipt confirmed. The seller has been paid.';
 }

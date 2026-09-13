@@ -16,11 +16,12 @@ class Receipt extends Equatable {
   final String paymentMethod;
   final bool deliveryConfirmed;
 
-  /// Id du document `qrcodes` associé à cet achat — c'est cette valeur (et
-  /// non [transactionRef]) qui est encodée dans le QR de remise en main
-  /// propre affiché au vendeur. Peut être `null` pour un reçu antérieur à
-  /// cette fonctionnalité.
-  final String? qrCodeId;
+  /// Code du colis, de la forme `AB-XXXXX-XXXXX` — celui que le vendeur
+  /// imprime et colle sur le carton, et que l'acheteur suit.
+  ///
+  /// C'est le même code partout : un seul par vente, de l'étiquette à la
+  /// remise. `null` pour un reçu antérieur à la livraison par colis.
+  final String? parcelCode;
 
   final DateTime createdAt;
 
@@ -35,7 +36,7 @@ class Receipt extends Equatable {
     required this.totalAmount,
     required this.paymentMethod,
     required this.deliveryConfirmed,
-    this.qrCodeId,
+    this.parcelCode,
     required this.createdAt,
   });
 
@@ -52,7 +53,7 @@ class Receipt extends Equatable {
       totalAmount: (data['totalAmount'] as num?)?.toDouble() ?? 0.0,
       paymentMethod: data['paymentMethod'] as String? ?? '',
       deliveryConfirmed: data['deliveryConfirmed'] as bool? ?? false,
-      qrCodeId: data['qrCodeId'] as String?,
+      parcelCode: data['parcelCode'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }

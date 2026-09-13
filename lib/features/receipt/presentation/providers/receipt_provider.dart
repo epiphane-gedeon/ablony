@@ -15,9 +15,9 @@ final receiptByIdProvider = FutureProvider.family<Receipt, String>((
   return repository.getReceiptById(receiptId);
 });
 
-/// Reçu d'un produit vendu, vu par son vendeur — utilisé pour la remise en
-/// main propre par QR code. [StreamProvider] pour rester à jour dès que
-/// l'achat est finalisé, même si la fiche produit était déjà ouverte avant.
+/// Reçu d'un produit vendu, vu par son vendeur — il y trouve le code du colis
+/// à imprimer. [StreamProvider] pour rester à jour dès que l'achat est
+/// finalisé, même si la fiche produit était déjà ouverte avant.
 final receiptForSellerProvider = StreamProvider.family<Receipt?, (String productId, String sellerId)>((
   ref,
   params,

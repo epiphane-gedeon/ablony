@@ -1143,9 +1143,9 @@
   "@notificationsTab": {
     "description": "Tab label for notifications"
   },
-  "noMessages": "Pas encore de messages",
+  "noMessages": "Aucun message",
   "@noMessages": {
-    "description": "Empty state message for messages"
+    "description": "Empty messages state"
   },
   "noNotifications": "Pas encore de notifications",
   "@noNotifications": {
@@ -1667,14 +1667,18 @@
   "@boostSheetDescription": {
     "description": "boostSheetDescription",
     "placeholders": {
-      "hours": { "type": "int" }
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "boostAlreadyActive": "Ce produit est déjà boosté jusqu'au {date}.",
   "@boostAlreadyActive": {
     "description": "boostAlreadyActive",
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "boostPay": "Payer",
@@ -1697,8 +1701,12 @@
   "@shareProductSubtitle": {
     "description": "Subtitle line included when sharing a product listing",
     "placeholders": {
-      "price": { "type": "String" },
-      "condition": { "type": "String" }
+      "price": {
+        "type": "String"
+      },
+      "condition": {
+        "type": "String"
+      }
     }
   },
   "priceIncl": "incl.",
@@ -1777,14 +1785,18 @@
   "@timeAgoYears": {
     "description": "Time ago: multiple years",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoMonths": "Il y a {count} mois",
   "@timeAgoMonths": {
     "description": "Time ago: months",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoDay": "Il y a 1 jour",
@@ -1795,7 +1807,9 @@
   "@timeAgoDays": {
     "description": "Time ago: multiple days",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoHour": "Il y a 1 heure",
@@ -1806,7 +1820,9 @@
   "@timeAgoHours": {
     "description": "Time ago: multiple hours",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoMinute": "Il y a 1 minute",
@@ -1817,7 +1833,9 @@
   "@timeAgoMinutes": {
     "description": "Time ago: multiple minutes",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoJustNow": "À l'instant",
@@ -1836,14 +1854,18 @@
   "@followersCountLabel": {
     "description": "Followers count label",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "followingCountLabel": "{count} abonnements",
   "@followingCountLabel": {
     "description": "Following count label",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "followersPageTitle": "Abonnés",
@@ -1906,7 +1928,9 @@
   "@rateSellerHeadline": {
     "description": "Rate seller page headline",
     "placeholders": {
-      "productTitle": { "type": "String" }
+      "productTitle": {
+        "type": "String"
+      }
     }
   },
   "rateSellerCommentHint": "Ajouter un commentaire (facultatif)",
@@ -1917,25 +1941,13 @@
   "@rateSellerSubmitButton": {
     "description": "Rate seller: submit button"
   },
-  "showDeliveryQrButton": "Afficher le code QR",
-  "@showDeliveryQrButton": {
-    "description": "Seller button: show delivery confirmation QR code"
-  },
-  "confirmDeliveryButton": "Confirmer la réception",
+  "confirmDeliveryButton": "J'ai reçu mon colis",
   "@confirmDeliveryButton": {
-    "description": "Buyer button: open QR scanner to confirm delivery"
+    "description": "Buyer button: confirm the parcel was received"
   },
   "productAlreadySold": "Article déjà vendu",
   "@productAlreadySold": {
     "description": "Disabled button label when the product is sold to someone else"
-  },
-  "deliveryQrPageTitle": "Code de remise",
-  "@deliveryQrPageTitle": {
-    "description": "Show delivery QR page title"
-  },
-  "deliveryQrInstructions": "Faites scanner ce code par l'acheteur au moment de la remise pour débloquer le paiement.",
-  "@deliveryQrInstructions": {
-    "description": "Show delivery QR page instructions"
   },
   "deliveryAlreadyConfirmed": "Réception confirmée",
   "@deliveryAlreadyConfirmed": {
@@ -2045,14 +2057,18 @@
   "@chatWelcomeMessage": {
     "description": "Welcome message showing user's name in chat",
     "placeholders": {
-      "username": { "type": "String" }
+      "username": {
+        "type": "String"
+      }
     }
   },
   "memberSinceYear": "Membre depuis {year}",
   "@memberSinceYear": {
     "description": "Shows the year the user joined",
     "placeholders": {
-      "year": { "type": "int" }
+      "year": {
+        "type": "int"
+      }
     }
   },
   "systemMessage": "Message système",
@@ -2063,7 +2079,9 @@
   "@heyUserMadeOffer": {
     "description": "Notification that a user made an offer",
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "defaultUser": "un utilisateur",
@@ -2090,10 +2108,6 @@
   "@rejectButton": {
     "description": "Reject button label"
   },
-  "noMessages": "Aucun message",
-  "@noMessages": {
-    "description": "Empty messages state"
-  },
   "counterOffer": "Contre-offre",
   "@counterOffer": {
     "description": "Counter offer label"
@@ -2105,5 +2119,29 @@
   "pleaseLogin": "Veuillez vous connecter",
   "@pleaseLogin": {
     "description": "Please login message"
+  },
+  "parcelLabelButton": "Voir l'étiquette du colis",
+  "@parcelLabelButton": {
+    "description": "Seller button: open the printable parcel label"
+  },
+  "receiptParcelCode": "Code du colis",
+  "@receiptParcelCode": {
+    "description": "Receipt row: the parcel code to track the delivery"
+  },
+  "confirmDeliveryTitle": "Confirmer la réception",
+  "@confirmDeliveryTitle": {
+    "description": "Buyer confirmation dialog title"
+  },
+  "confirmDeliveryQuestion": "Avez-vous bien reçu votre colis ? Le paiement sera immédiatement versé au vendeur, et ce geste est définitif.",
+  "@confirmDeliveryQuestion": {
+    "description": "Buyer confirmation dialog question"
+  },
+  "confirmDeliveryConfirm": "Oui, je l'ai reçu",
+  "@confirmDeliveryConfirm": {
+    "description": "Buyer confirmation dialog confirm action"
+  },
+  "deliveryConfirmedSuccess": "Réception confirmée. Le vendeur a été payé.",
+  "@deliveryConfirmedSuccess": {
+    "description": "Snackbar after a successful delivery confirmation"
   }
 }

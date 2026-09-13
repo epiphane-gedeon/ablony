@@ -2,13 +2,20 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../features/delivery/domain/models/delivery_choice.dart';
+
 /// Service gérant les appels API pour les paiements via Firebase Cloud Functions
 class PaymentService {
   // URLs des Cloud Functions déployées (2nd Gen Cloud Run)
   static const String _initiateUrl = 'https://initiatepayment-mahukqtfea-uc.a.run.app';
   static const String _confirmUrl = 'https://confirmpayment-mahukqtfea-uc.a.run.app';
 
-  /// Initie un paiement auprès de GeniusPay via la Cloud Function
+  /// Initie un paiement auprès de GeniusPay via la Cloud Function.
+  ///
+  /// [delivery] est obligatoire pour un achat : le serveur refuse une commande
+  /// sans destination exploitable, et vérifie le point relais **avant** tout
+  /// débit — le découvrir après coup laisserait un achat payé et un colis que
+  /// personne ne sait où livrer.
   Future<Map<String, dynamic>> initiatePayment({
     required String userId,
     required double amount,
@@ -22,6 +29,7 @@ class PaymentService {
     String? sellerId,
     double? productPrice,
     double? walletDeduction,
+    DeliveryChoice? delivery,
   }) async {
     try {
       final response = await http.post(
@@ -40,6 +48,10 @@ class PaymentService {
           'sellerId': sellerId,
           'productPrice': productPrice,
           'walletDeduction': walletDeduction,
+          // Le maillon qui manquait : le mode de livraison, le point relais
+          // et l'adresse étaient choisis à l'écran puis jetés avant l'appel.
+          // L'article était vendu et attendu nulle part.
+          if (delivery != null) 'delivery': delivery.toJson(),
         }),
       );
 

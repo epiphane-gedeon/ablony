@@ -7,6 +7,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../providers/receipt_provider.dart';
+import '../../../../core/services/delivery_confirmation_service.dart';
+import '../../../delivery/data/parcel_repository.dart';
 import '../../domain/models/receipt.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -63,6 +65,7 @@ class _ReceiptView extends ConsumerWidget {
     );
     final currentUser = ref.watch(authStateProvider).value;
     final isBuyer = currentUser?.uid == receipt.buyerId;
+    final isSeller = currentUser?.uid == receipt.sellerId;
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -107,20 +110,32 @@ class _ReceiptView extends ConsumerWidget {
           value: '${receipt.totalAmount.toStringAsFixed(0)} FCFA',
           isBold: true,
         ),
-        if (isBuyer && !receipt.deliveryConfirmed) ...[
+        // Le vendeur n'a qu'une chose à faire, et elle doit être à portée de
+        // main : imprimer l'étiquette, coller, déposer.
+        if (isSeller && receipt.parcelCode != null) ...[
           const SizedBox(height: 32),
           SecondaryButton(
-            text: l10n.confirmDeliveryButton,
-            icon: Icons.qr_code_scanner,
+            text: l10n.parcelLabelButton,
+            icon: Icons.local_shipping_outlined,
             onPressed: () => context.push(
-              '/delivery/scan-qr',
-              extra: {
-                'transactionRef': receipt.transactionRef,
-                'sellerId': receipt.sellerId,
-                'productId': receipt.productId,
-                'productTitle': receipt.productTitle,
-              },
+              '/delivery/label/${receipt.parcelCode}',
             ),
+          ),
+        ],
+        if (isBuyer && !receipt.deliveryConfirmed) ...[
+          const SizedBox(height: 32),
+          if (receipt.parcelCode != null) ...[
+            _ReceiptRow(
+              label: l10n.receiptParcelCode,
+              value: receipt.parcelCode!,
+            ),
+            _SuiviColis(code: receipt.parcelCode!),
+            const SizedBox(height: 12),
+          ],
+          SecondaryButton(
+            text: l10n.confirmDeliveryButton,
+            icon: Icons.check_circle_outline,
+            onPressed: () => _confirmReception(context, ref, l10n, receipt),
           ),
         ] else if (isBuyer && receipt.deliveryConfirmed) ...[
           const SizedBox(height: 32),
@@ -231,6 +246,91 @@ class _ReceiptView extends ConsumerWidget {
         children: [
           pw.Text(label, style: const pw.TextStyle(color: PdfColors.grey700)),
           pw.Text(value, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Demande confirmation, puis débloque le paiement du vendeur.
+///
+/// Un dialogue, et non un scan : l'acheteur reçoit son colis d'un point relais
+/// ou d'un livreur Ablony, jamais des mains du vendeur. Lui demander de
+/// scanner l'écran de quelqu'un qu'il ne rencontrera pas n'avait pas de sens.
+Future<void> _confirmReception(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  Receipt receipt,
+) async {
+  final confirme = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.confirmDeliveryTitle),
+      content: Text(l10n.confirmDeliveryQuestion),
+      actions: [
+        TextButton(
+          onPressed: () => context.pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => context.pop(true),
+          child: Text(l10n.confirmDeliveryConfirm),
+        ),
+      ],
+    ),
+  );
+  if (confirme != true || !context.mounted) return;
+
+  try {
+    await ref
+        .read(deliveryConfirmationServiceProvider)
+        .confirmDelivery(transactionRef: receipt.transactionRef);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.deliveryConfirmedSuccess)),
+      );
+    }
+  } catch (error) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
+  }
+}
+
+/// Où en est le colis, en une ligne.
+///
+/// L'état vient du colis lui-même, alimenté par les scans de nos agents : ni
+/// l'acheteur ni le vendeur ne l'écrivent. C'est ce qui permet à l'acheteur
+/// de savoir où en est sa commande sans avoir à croire le vendeur sur parole.
+class _SuiviColis extends ConsumerWidget {
+  final String code;
+
+  const _SuiviColis({required this.code});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final parcel = ref.watch(parcelByCodeProvider(code)).value;
+    if (parcel == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4, bottom: 8),
+      child: Row(
+        children: [
+          Icon(parcel.status.icon, size: 18, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              parcel.status.buyerLabel,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

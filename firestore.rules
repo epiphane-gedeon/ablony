@@ -128,14 +128,24 @@ service cloud.firestore {
     }
 
     // ============================================================
-    // COLLECTION : qrcodes
+    // COLLECTION : parcels
     // ============================================================
-    // Relie l'id opaque encodé dans le QR de remise en main propre à la
-    // transaction réelle (transactionRef, sellerId, buyerId). Entièrement
-    // généré et lu par les Cloud Functions (Admin SDK) : le client ne
-    // manipule jamais que l'id du document, jamais son contenu directement.
-    match /qrcodes/{qrCodeId} {
-      allow read, write: if false;
+    // Un colis par vente, identifié par le code imprimé sur son étiquette
+    // (`AB-XXXXX-XXXXX`). C'est le même code partout : le vendeur l'imprime
+    // une fois, nos agents le scannent à chaque étape, l'acheteur le retrouve
+    // dans son suivi.
+    //
+    // Lecture réservée aux deux parties : le vendeur y prend son étiquette,
+    // l'acheteur y suit son colis. Écriture exclusivement par les Cloud
+    // Functions (Admin SDK) — un vendeur qui pourrait écrire ici déclarerait
+    // son colis remis et se ferait payer sans avoir rien envoyé, ce qui vide
+    // le séquestre de son sens.
+    match /parcels/{parcelCode} {
+      allow read: if request.auth != null
+        && (resource.data.buyerId == request.auth.uid
+            || resource.data.sellerId == request.auth.uid);
+
+      allow create, update, delete: if false;
     }
 
     // ============================================================

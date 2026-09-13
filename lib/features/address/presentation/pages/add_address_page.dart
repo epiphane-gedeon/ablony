@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/input.dart';
+import '../../../delivery/domain/models/delivery_choice.dart';
 import '../../../location/data/models/location_data.dart';
 import '../../../location/presentation/pages/select_location_page.dart';
 import '../../../../core/responsive/responsive.dart';
@@ -58,20 +59,22 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Sauvegarder l'adresse dans Firestore avec:
-      // - _fullNameController.text
-      // - _selectedLocation (latitude, longitude, formattedAddress, etc.)
-      await Future.delayed(const Duration(seconds: 1)); // Simulation
+      // L'adresse repart structurée, et non mise en forme en une chaîne :
+      // c'est ce que le serveur attend pour acheminer le colis. Auparavant
+      // seul un libellé « Nom, adresse » revenait — lisible, mais
+      // inexploitable, et de toute façon jamais transmis.
+      final address = DeliveryAddress.fromLocation(
+        fullName: _fullNameController.text.trim(),
+        location: _selectedLocation!,
+      );
+
+      // TODO: enregistrer aussi l'adresse dans le carnet d'adresses Firestore
+      // (collection `addresses`), pour la proposer aux achats suivants. Le
+      // colis en cours, lui, n'en dépend pas : l'adresse est recopiée sur la
+      // commande, de sorte qu'un déménagement ultérieur ne le détourne pas.
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Adresse enregistrée')));
-
-        // Retourner une adresse formatée
-        final formattedAddress =
-            '${_fullNameController.text}, ${_selectedLocation!.formattedAddress}';
-        context.pop(formattedAddress);
+        context.pop(address);
       }
     } catch (e) {
       if (mounted) {

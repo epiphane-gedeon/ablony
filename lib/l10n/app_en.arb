@@ -1605,14 +1605,18 @@
   "@boostSheetDescription": {
     "description": "boostSheetDescription",
     "placeholders": {
-      "hours": { "type": "int" }
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "boostAlreadyActive": "This product is already boosted until {date}.",
   "@boostAlreadyActive": {
     "description": "boostAlreadyActive",
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "boostPay": "Pay",
@@ -1635,8 +1639,12 @@
   "@shareProductSubtitle": {
     "description": "Subtitle line included when sharing a product listing",
     "placeholders": {
-      "price": { "type": "String" },
-      "condition": { "type": "String" }
+      "price": {
+        "type": "String"
+      },
+      "condition": {
+        "type": "String"
+      }
     }
   },
   "priceIncl": "incl.",
@@ -1687,14 +1695,18 @@
   "@timeAgoYears": {
     "description": "Time ago: multiple years",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoMonths": "{count} months ago",
   "@timeAgoMonths": {
     "description": "Time ago: months",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoDay": "1 day ago",
@@ -1705,7 +1717,9 @@
   "@timeAgoDays": {
     "description": "Time ago: multiple days",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoHour": "1 hour ago",
@@ -1716,7 +1730,9 @@
   "@timeAgoHours": {
     "description": "Time ago: multiple hours",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoMinute": "1 minute ago",
@@ -1727,7 +1743,9 @@
   "@timeAgoMinutes": {
     "description": "Time ago: multiple minutes",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeAgoJustNow": "Just now",
@@ -1742,15 +1760,21 @@
   "@itemPrice": {
     "description": "Item price label",
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "offerLimitError": "Your offer must be at least {minAmount} (-{limit}%)",
   "@offerLimitError": {
     "description": "Offer limit error message",
     "placeholders": {
-      "minAmount": { "type": "String" },
-      "limit": { "type": "int" }
+      "minAmount": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "int"
+      }
     }
   },
   "otherOffer": "Other",
@@ -1765,7 +1789,9 @@
   "@proposeButton": {
     "description": "Propose offer button with amount",
     "placeholders": {
-      "amount": { "type": "String" }
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "proposeButtonSimple": "Propose",
@@ -1776,14 +1802,18 @@
   "@reductionLabel": {
     "description": "Reduction percentage label",
     "placeholders": {
-      "percent": { "type": "int" }
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "suggestionsRemaining": "{count} suggestion(s) remaining today",
   "@suggestionsRemaining": {
     "description": "Remaining offer suggestions count",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "whyLink": "Why?",
@@ -1798,7 +1828,7 @@
   "@notificationsTab": {
     "description": "Notifications tab label"
   },
-  "noMessages": "No messages yet",
+  "noMessages": "No messages",
   "@noMessages": {
     "description": "Empty messages state"
   },
@@ -1818,14 +1848,18 @@
   "@followersCountLabel": {
     "description": "Followers count label",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "followingCountLabel": "{count} following",
   "@followingCountLabel": {
     "description": "Following count label",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "followersPageTitle": "Followers",
@@ -1888,7 +1922,9 @@
   "@rateSellerHeadline": {
     "description": "Rate seller page headline",
     "placeholders": {
-      "productTitle": { "type": "String" }
+      "productTitle": {
+        "type": "String"
+      }
     }
   },
   "rateSellerCommentHint": "Add a comment (optional)",
@@ -1899,25 +1935,13 @@
   "@rateSellerSubmitButton": {
     "description": "Rate seller: submit button"
   },
-  "showDeliveryQrButton": "Show QR code",
-  "@showDeliveryQrButton": {
-    "description": "Seller button: show delivery confirmation QR code"
-  },
-  "confirmDeliveryButton": "Confirm receipt",
+  "confirmDeliveryButton": "I received my parcel",
   "@confirmDeliveryButton": {
-    "description": "Buyer button: open QR scanner to confirm delivery"
+    "description": "Buyer button: confirm the parcel was received"
   },
   "productAlreadySold": "Item already sold",
   "@productAlreadySold": {
     "description": "Disabled button label when the product is sold to someone else"
-  },
-  "deliveryQrPageTitle": "Handover code",
-  "@deliveryQrPageTitle": {
-    "description": "Show delivery QR page title"
-  },
-  "deliveryQrInstructions": "Have the buyer scan this code at handover to release the payment.",
-  "@deliveryQrInstructions": {
-    "description": "Show delivery QR page instructions"
   },
   "deliveryAlreadyConfirmed": "Receipt confirmed",
   "@deliveryAlreadyConfirmed": {
@@ -2027,14 +2051,18 @@
   "@chatWelcomeMessage": {
     "description": "Welcome message showing user's name in chat",
     "placeholders": {
-      "username": { "type": "String" }
+      "username": {
+        "type": "String"
+      }
     }
   },
   "memberSinceYear": "Member since {year}",
   "@memberSinceYear": {
     "description": "Shows the year the user joined",
     "placeholders": {
-      "year": { "type": "int" }
+      "year": {
+        "type": "int"
+      }
     }
   },
   "systemMessage": "System message",
@@ -2045,7 +2073,9 @@
   "@heyUserMadeOffer": {
     "description": "Notification that a user made an offer",
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "defaultUser": "a user",
@@ -2072,10 +2102,6 @@
   "@rejectButton": {
     "description": "Reject button label"
   },
-  "noMessages": "No messages",
-  "@noMessages": {
-    "description": "Empty messages state"
-  },
   "counterOffer": "Counter offer",
   "@counterOffer": {
     "description": "Counter offer label"
@@ -2087,5 +2113,11 @@
   "pleaseLogin": "Please log in",
   "@pleaseLogin": {
     "description": "Please login message"
-  }
+  },
+  "parcelLabelButton": "View parcel label",
+  "receiptParcelCode": "Parcel code",
+  "confirmDeliveryTitle": "Confirm receipt",
+  "confirmDeliveryQuestion": "Did your parcel arrive? Payment goes to the seller right away, and this cannot be undone.",
+  "confirmDeliveryConfirm": "Yes, I got it",
+  "deliveryConfirmedSuccess": "Receipt confirmed. The seller has been paid."
 }

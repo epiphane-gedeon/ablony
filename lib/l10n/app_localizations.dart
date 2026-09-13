@@ -2804,16 +2804,10 @@ abstract class AppLocalizations {
   /// **'Envoyer mon avis'**
   String get rateSellerSubmitButton;
 
-  /// Seller button: show delivery confirmation QR code
+  /// Buyer button: confirm the parcel was received
   ///
   /// In fr, this message translates to:
-  /// **'Afficher le code QR'**
-  String get showDeliveryQrButton;
-
-  /// Buyer button: open QR scanner to confirm delivery
-  ///
-  /// In fr, this message translates to:
-  /// **'Confirmer la réception'**
+  /// **'J\'ai reçu mon colis'**
   String get confirmDeliveryButton;
 
   /// Disabled button label when the product is sold to someone else
@@ -2821,18 +2815,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Article déjà vendu'**
   String get productAlreadySold;
-
-  /// Show delivery QR page title
-  ///
-  /// In fr, this message translates to:
-  /// **'Code de remise'**
-  String get deliveryQrPageTitle;
-
-  /// Show delivery QR page instructions
-  ///
-  /// In fr, this message translates to:
-  /// **'Faites scanner ce code par l\'acheteur au moment de la remise pour débloquer le paiement.'**
-  String get deliveryQrInstructions;
 
   /// Shown when delivery has already been confirmed
   ///
@@ -3067,6 +3049,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Veuillez vous connecter'**
   String get pleaseLogin;
+
+  /// Seller button: open the printable parcel label
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir l\'étiquette du colis'**
+  String get parcelLabelButton;
+
+  /// Receipt row: the parcel code to track the delivery
+  ///
+  /// In fr, this message translates to:
+  /// **'Code du colis'**
+  String get receiptParcelCode;
+
+  /// Buyer confirmation dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la réception'**
+  String get confirmDeliveryTitle;
+
+  /// Buyer confirmation dialog question
+  ///
+  /// In fr, this message translates to:
+  /// **'Avez-vous bien reçu votre colis ? Le paiement sera immédiatement versé au vendeur, et ce geste est définitif.'**
+  String get confirmDeliveryQuestion;
+
+  /// Buyer confirmation dialog confirm action
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, je l\'ai reçu'**
+  String get confirmDeliveryConfirm;
+
+  /// Snackbar after a successful delivery confirmation
+  ///
+  /// In fr, this message translates to:
+  /// **'Réception confirmée. Le vendeur a été payé.'**
+  String get deliveryConfirmedSuccess;
 }
 
 class _AppLocalizationsDelegate

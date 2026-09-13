@@ -22,6 +22,101 @@ const GENIUSPAY_CONFIG = {
 // Configuration du boost de produit (prix fixe, imposé côté serveur —
 // jamais celui envoyé par le client — et durée du boost).
 // Garder en phase avec BOOST_PRICE_XOF côté client (lib/features/product/...).
+// ============================================================================
+// LIVRAISON
+// ============================================================================
+//
+// Ablony achemine lui-même les colis, en point relais ou à domicile. Le
+// vendeur imprime le code de son colis, le colle sur le carton et le dépose
+// dans un point relais : son travail s'arrête là. C'est ce qui fait d'Ablony
+// un tiers de confiance — la remise est constatée par nos agents, et non
+// déclarée par une des deux parties.
+const DELIVERY_CONFIG = {
+  FEES_XOF: { relay: 1000, home: 1500 },
+  PROTECTION_RATE: 0.05,
+  // Du paiement au dépôt. Au-delà, l'acheteur doit être remboursé : il n'a
+  // pas à attendre indéfiniment un colis qui n'est jamais parti.
+  DROPOFF_DEADLINE_DAYS: 5
+};
+
+// Alphabet sans O/0 ni I/1 : un agent doit pouvoir dicter ce code au
+// téléphone sans que son interlocuteur se trompe en le recopiant.
+const PARCEL_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+/**
+ * Génère le code imprimé sur l'étiquette du colis, de la forme
+ * `AB-XXXXX-XXXXX`.
+ *
+ * C'est **le même code partout** : le vendeur l'imprime une fois, nos agents
+ * le scannent à chaque étape, l'acheteur le retrouve dans son suivi. Il n'y a
+ * pas un code par étape ni un code par rôle.
+ *
+ * Ce code n'autorise rien : il est collé sur un carton que tout le monde peut
+ * voir. Ce n'est pas lui qui déclenche une étape, mais l'agent qui le scanne.
+ */
+function newParcelCode() {
+  const bloc = () => Array.from(
+    crypto.randomBytes(5),
+    (octet) => PARCEL_CODE_ALPHABET[octet % PARCEL_CODE_ALPHABET.length]
+  ).join("");
+  return `AB-${bloc()}-${bloc()}`;
+}
+
+/**
+ * Valide le choix de livraison envoyé par l'application, et le normalise.
+ *
+ * Vérifié **avant** tout débit : découvrir après coup qu'un point relais
+ * n'existe pas laisserait un achat payé et un colis que personne ne sait où
+ * livrer. C'est précisément ce qui arrivait — l'écran de paiement collectait
+ * le mode de livraison, le point relais et l'adresse, puis n'en transmettait
+ * rien.
+ *
+ * @returns {Promise<{method: string, relayPointId: string|null, address: Object|null, feeXof: number}>}
+ * @throws {Error} si le choix est absent, incomplet ou inexploitable.
+ */
+async function normalizeDeliveryChoice(delivery) {
+  if (!delivery || typeof delivery !== "object") {
+    throw new Error("Choisissez un mode de livraison");
+  }
+
+  const method = delivery.method === "home" ? "home" : "relay";
+  const feeXof = DELIVERY_CONFIG.FEES_XOF[method];
+
+  if (method === "relay") {
+    const relayPointId = delivery.relayPointId;
+    if (!relayPointId) throw new Error("Choisissez un point relais");
+
+    const relaySnap = await db.collection("relayPoints").doc(relayPointId).get();
+    if (!relaySnap.exists) throw new Error("Ce point relais n'est pas disponible");
+    if (relaySnap.data().isActive === false) {
+      throw new Error("Ce point relais n'est plus disponible");
+    }
+
+    return { method, relayPointId, address: null, feeXof };
+  }
+
+  const address = delivery.address;
+  if (!address || !address.fullName || !address.street) {
+    throw new Error("Renseignez une adresse de livraison");
+  }
+
+  return {
+    method,
+    relayPointId: null,
+    // Recopiée, et non référencée : si l'acheteur déménage ensuite, le colis
+    // en cours doit continuer d'aller au bon endroit.
+    address: {
+      fullName: String(address.fullName),
+      street: String(address.street),
+      city: address.city ? String(address.city) : null,
+      country: address.country ? String(address.country) : null,
+      latitude: address.latitude != null ? Number(address.latitude) : null,
+      longitude: address.longitude != null ? Number(address.longitude) : null
+    },
+    feeXof
+  };
+}
+
 const BOOST_CONFIG = {
   PRICE_XOF: 500,
   DURATION_HOURS: 48
@@ -111,7 +206,7 @@ function buildWalletUpdate(existingWallet, patch) {
  */
 async function finalizePurchase({
   buyerId, sellerId, productId, productPrice, walletDeduction,
-  transactionRef, paymentMethod, totalAmount
+  transactionRef, paymentMethod, totalAmount, delivery
 }) {
   const buyerRef = db.collection("users").doc(buyerId);
   const sellerRef = db.collection("users").doc(sellerId);
@@ -224,7 +319,7 @@ async function finalizePurchase({
         buyerId, sellerId, productId,
         productTitle: result.productTitle,
         productPrice, totalAmount, paymentMethod,
-        transactionRef
+        transactionRef, delivery
       });
     } catch (notifyError) {
       console.error(`⚠️ Échec notifications/reçu pour ${transactionRef}:`, notifyError);
@@ -384,22 +479,38 @@ async function sendPushToUser(uid, { title, body }, data) {
  */
 async function notifyPurchase({
   buyerId, sellerId, productId, productTitle, productPrice,
-  totalAmount, paymentMethod, transactionRef
+  totalAmount, paymentMethod, transactionRef, delivery
 }) {
   const receiptRef = db.collection("receipts").doc(transactionRef);
   const sellerNotifRef = db.collection("notifications").doc(`${transactionRef}_seller`);
   const buyerNotifRef = db.collection("notifications").doc(`${transactionRef}_buyer`);
-  // Le QR affiché au vendeur ne contient que cet id opaque, jamais la
-  // transactionRef directement : indirection nécessaire pour la remise en
-  // main propre, cf. collection "qrcodes" ci-dessous.
-  const qrCodeRef = db.collection("qrcodes").doc();
 
   const now = admin.firestore.FieldValue.serverTimestamp();
 
-  await qrCodeRef.set({
+  // Le colis, et son code d'étiquette. Ce code remplace l'ancienne
+  // indirection "qrcodes", qui servait une remise en main propre : le vendeur
+  // affichait un QR, l'acheteur le scannait. Ce n'est pas ce que fait Ablony.
+  // Le vendeur imprime ce code, le colle sur le carton, et le dépose en point
+  // relais — son travail s'arrête là.
+  const parcelCode = newParcelCode();
+  const dropoffDeadline = admin.firestore.Timestamp.fromMillis(
+    Date.now() + DELIVERY_CONFIG.DROPOFF_DEADLINE_DAYS * 24 * 60 * 60 * 1000
+  );
+
+  await db.collection("parcels").doc(parcelCode).set({
+    code: parcelCode,
     transactionRef,
     sellerId,
     buyerId,
+    productId,
+    productTitle,
+    method: delivery ? delivery.method : "relay",
+    relayPointId: delivery ? delivery.relayPointId : null,
+    destinationAddress: delivery ? delivery.address : null,
+    status: "awaiting_dropoff",
+    dropoffDeadline,
+    droppedOffAt: null,
+    deliveredAt: null,
     createdAt: now
   });
 
@@ -413,16 +524,21 @@ async function notifyPurchase({
     totalAmount,
     paymentMethod,
     deliveryConfirmed: false,
-    qrCodeId: qrCodeRef.id,
+    parcelCode,
+    delivery: delivery || null,
     createdAt: now
   });
+
+  const consigne = delivery && delivery.method === "home"
+    ? "Imprimez votre étiquette et déposez le colis en point relais : nous le livrons ensuite à domicile."
+    : "Imprimez votre étiquette et déposez le colis en point relais.";
 
   await sellerNotifRef.set({
     userId: sellerId,
     type: "purchase_received",
     title: "Nouvelle vente !",
-    body: `Votre article "${productTitle}" vient d'être vendu pour ${productPrice} FCFA.`,
-    data: { productId, transactionRef, buyerId },
+    body: `Votre article "${productTitle}" vient d'être vendu pour ${productPrice} FCFA. ${consigne}`,
+    data: { productId, transactionRef, buyerId, parcelCode },
     read: false,
     createdAt: now
   });
@@ -442,9 +558,9 @@ async function notifyPurchase({
       sellerId,
       {
         title: "Nouvelle vente !",
-        body: `Votre article "${productTitle}" vient d'être vendu pour ${productPrice} FCFA.`
+        body: `"${productTitle}" est vendu. Imprimez l'étiquette ${parcelCode} et déposez le colis en point relais.`
       },
-      { type: "purchase_received", productId, transactionRef }
+      { type: "purchase_received", productId, transactionRef, parcelCode }
     ),
     sendPushToUser(
       buyerId,
@@ -456,7 +572,7 @@ async function notifyPurchase({
     )
   ]);
 
-  console.log(`🔔 Notifications + reçu envoyés pour ${transactionRef}`);
+  console.log(`🔔 Notifications + reçu + colis ${parcelCode} créés pour ${transactionRef}`);
 }
 
 // ============================================================================
@@ -473,7 +589,8 @@ exports.initiatePayment = onRequest(async (req, res) => {
     return;
   }
 
-  let { amount, paymentMethod, phone, userId, email, name, description, type, productId, sellerId, productPrice, walletDeduction } = req.body;
+  let { amount, paymentMethod, phone, userId, email, name, description, type, productId, sellerId, productPrice, walletDeduction, delivery } = req.body;
+  let deliveryChoice = null;
 
   if (!amount || !paymentMethod || !userId) {
     return res.status(400).json({
@@ -520,6 +637,47 @@ exports.initiatePayment = onRequest(async (req, res) => {
       return res.status(400).json({
         success: false,
         error: { message: "Ce produit n'est plus disponible à l'achat" }
+      });
+    }
+
+    // La destination est validée ici, avant tout débit et avant d'appeler
+    // GeniusPay. Un achat sans destination exploitable est un article vendu
+    // et attendu nulle part.
+    try {
+      deliveryChoice = await normalizeDeliveryChoice(delivery);
+    } catch (deliveryError) {
+      return res.status(400).json({
+        success: false,
+        error: { message: deliveryError.message }
+      });
+    }
+
+    // Le prix vient de l'annonce, jamais de la requête : le lire dans le
+    // corps reviendrait à laisser l'acheteur fixer le prix. `productPrice`
+    // est écrasé pour que la suite de la fonction — et la finalisation —
+    // travaille sur la seule valeur qui fasse foi.
+    productPrice = Number(productData.price);
+
+    // Le total est recalculé de la même façon. Le client l'affiche, il ne le
+    // fixe pas : sans ce contrôle, il suffirait d'annoncer 0 F de frais.
+    const attendu = Math.round(
+      productPrice
+      + productPrice * DELIVERY_CONFIG.PROTECTION_RATE
+      + deliveryChoice.feeXof
+    );
+
+    // `amount` ne vaut le total que si le paiement passe par un seul canal.
+    // En paiement mixte, il ne porte que la part externe, le reste venant du
+    // porte-monnaie : c'est leur somme qu'il faut comparer. Comparer `amount`
+    // seul ferait échouer tout paiement mixte, et le remplacer par le total
+    // débiterait l'acheteur deux fois.
+    const partPorteMonnaie = walletDeduction != null ? Number(walletDeduction) : 0;
+    const totalAnnonce = Number(amount) + partPorteMonnaie;
+
+    if (Math.abs(totalAnnonce - attendu) > 1) {
+      return res.status(400).json({
+        success: false,
+        error: { message: `Montant incohérent : ${attendu} FCFA attendus` }
       });
     }
   }
@@ -593,7 +751,8 @@ exports.initiatePayment = onRequest(async (req, res) => {
         walletDeduction: Number(amount), // Pour le wallet-only, on débite le montant total
         transactionRef: reference,
         paymentMethod: "wallet",
-        totalAmount: Number(amount)
+        totalAmount: Number(amount),
+        delivery: deliveryChoice
       });
 
       return res.status(200).json({
@@ -672,6 +831,10 @@ exports.initiatePayment = onRequest(async (req, res) => {
       sellerId: sellerId || null,
       productPrice: productPrice ? Number(productPrice) : null,
       walletDeduction: walletDeduction ? Number(walletDeduction) : null,
+      // Conservée sur la transaction, et non gardée en mémoire : la
+      // finalisation arrive par `confirmPayment` ou par le rappel de
+      // GeniusPay, où le corps de la requête d'origine n'existe plus.
+      delivery: deliveryChoice,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
@@ -793,7 +956,8 @@ exports.confirmPayment = onRequest(async (req, res) => {
         walletDeduction: walletDeduction,
         transactionRef: reference,
         paymentMethod: transaction.paymentMethod,
-        totalAmount: Number(transaction.amount)
+        totalAmount: Number(transaction.amount),
+        delivery: transaction.delivery || null
       });
 
     } else if (transaction.type === "boost") {
@@ -945,7 +1109,8 @@ exports.geniusPayWebhook = onRequest(async (req, res) => {
           walletDeduction: walletDeduction,
           transactionRef: transactionRef,
           paymentMethod: transaction.paymentMethod,
-          totalAmount: amount
+          totalAmount: amount,
+          delivery: transaction.delivery || null
         });
 
       } else if (transaction.type === "boost") {
@@ -1073,15 +1238,28 @@ exports.onReviewCreated = onDocumentCreated("reviews/{reviewId}", async (event) 
 });
 
 // ============================================================================
-// CONFIRMATION DE RÉCEPTION (QR code scanné par l'acheteur)
+// CONFIRMATION DE RÉCEPTION (l'acheteur confirme depuis sa commande)
 // ============================================================================
 
 /**
- * L'acheteur scanne le QR code affiché par le vendeur pour confirmer la
- * réception de l'article. Débloque le paiement : pendingAmount du vendeur
- * → availableAmount. Authentification requise via un ID token Firebase
- * (header Authorization: Bearer <token>), pour garantir que seul le vrai
- * acheteur de la transaction peut déclencher le déblocage des fonds.
+ * L'acheteur confirme avoir reçu son article, ce qui débloque le paiement :
+ * pendingAmount du vendeur → availableAmount.
+ *
+ * Il n'y a rien à scanner. La version précédente faisait scanner à l'acheteur
+ * un QR affiché sur l'écran du vendeur — un geste de remise en main propre,
+ * alors qu'Ablony achemine lui-même les colis : les deux personnes ne se
+ * rencontrent jamais.
+ *
+ * Authentification requise via un ID token Firebase (header
+ * `Authorization: Bearer <token>`), pour garantir que seul le vrai acheteur
+ * peut déclencher le déblocage.
+ *
+ * **Limite connue de cette pile.** Ici, la confirmation de l'acheteur reste le
+ * seul signal : il n'existe pas encore d'application agent pour scanner le
+ * colis aux étapes du transport. Tant que c'est le cas, un acheteur qui ne
+ * confirme jamais bloque les fonds du vendeur. La libération automatique
+ * suppose une remise **constatée par un tiers** — elle arrive avec le service
+ * `delivery` du nouveau backend, qui enregistre chaque scan d'agent.
  */
 exports.confirmDelivery = onRequest(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
@@ -1106,31 +1284,19 @@ exports.confirmDelivery = onRequest(async (req, res) => {
   }
 
   const buyerId = decodedToken.uid;
-  const { qrCodeId, transactionRef: transactionRefInput } = req.body;
+  const { transactionRef: transactionRefInput } = req.body;
 
-  if (!qrCodeId && !transactionRefInput) {
-    return res.status(400).json({ success: false, error: { message: "Paramètre requis manquant : qrCodeId ou transactionRef" } });
+  if (!transactionRefInput) {
+    return res.status(400).json({ success: false, error: { message: "Paramètre requis manquant : transactionRef" } });
   }
 
   try {
-    // Deux façons d'identifier la commande à confirmer : le QR scanné (qui ne
-    // contient que l'id de la collection "qrcodes", jamais la transactionRef
-    // directement) ou, en secours, la référence du reçu saisie manuellement
-    // par l'acheteur. Dans les deux cas, l'appartenance à l'acheteur est
-    // vérifiée plus bas via tx.userId dans la transaction Firestore.
-    let transactionRef = transactionRefInput;
-    if (qrCodeId) {
-      const qrDoc = await db.collection("qrcodes").doc(qrCodeId).get();
-      if (!qrDoc.exists) {
-        return res.status(404).json({ success: false, error: { message: "Code QR invalide ou expiré" } });
-      }
-      const qrData = qrDoc.data();
-      if (qrData.buyerId !== buyerId) {
-        return res.status(403).json({ success: false, error: { message: "Ce code QR ne correspond pas à votre achat" } });
-      }
-      transactionRef = qrData.transactionRef;
-    }
-
+    // L'acheteur confirme depuis sa commande : il n'y a rien à scanner.
+    // L'ancienne version faisait scanner à l'acheteur un QR affiché par le
+    // vendeur — un geste de remise en main propre, qui n'a aucun sens pour un
+    // colis arrivé par point relais, les deux personnes ne se rencontrant
+    // jamais. L'appartenance est vérifiée plus bas via `tx.userId`.
+    const transactionRef = transactionRefInput;
     const txRef = db.collection("transactions").doc(transactionRef);
 
     const result = await db.runTransaction(async (dbTx) => {
@@ -1149,6 +1315,12 @@ exports.confirmDelivery = onRequest(async (req, res) => {
       const sellerRef = db.collection("users").doc(tx.sellerId);
       const sellerDoc = await dbTx.get(sellerRef);
       if (!sellerDoc.exists) throw new Error("Vendeur introuvable");
+
+      // Lu dans la même transaction, avant toute écriture (règle Firestore).
+      const parcelQuery = await dbTx.get(
+        db.collection("parcels").where("transactionRef", "==", transactionRef).limit(1)
+      );
+      const parcelSnap = parcelQuery.empty ? null : parcelQuery.docs[0];
 
       const sellerWallet = sellerDoc.data().wallet || {};
       const pending = Number(sellerWallet.pendingAmount || 0);
@@ -1172,6 +1344,15 @@ exports.confirmDelivery = onRequest(async (req, res) => {
       dbTx.update(db.collection("receipts").doc(transactionRef), {
         deliveryConfirmed: true
       });
+
+      // Et le colis, pour que le suivi ne reste pas bloqué sur « en attente
+      // de dépôt » alors que l'article est arrivé.
+      if (parcelSnap) {
+        dbTx.update(parcelSnap.ref, {
+          status: "delivered",
+          deliveredAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
 
       return {
         alreadyConfirmed: false,

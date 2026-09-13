@@ -27,8 +27,8 @@ import '../../features/follow/presentation/pages/followers_page.dart';
 import '../../features/follow/presentation/pages/following_page.dart';
 import '../../features/receipt/presentation/pages/receipt_page.dart';
 import '../../features/reviews/presentation/pages/rate_seller_page.dart';
-import '../../features/delivery_confirmation/presentation/pages/show_delivery_qr_page.dart';
-import '../../features/delivery_confirmation/presentation/pages/scan_delivery_qr_page.dart';
+import '../../features/delivery/data/parcel_repository.dart';
+import '../../features/delivery/presentation/pages/parcel_label_page.dart';
 import '../../features/product/presentation/pages/product_detail_page.dart';
 import '../../features/product/domain/entities/product.dart';
 import '../../core/layout/main_layout.dart';
@@ -640,33 +640,37 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ============================================================
-      // ROUTE : CODE QR DE REMISE EN MAIN PROPRE
+      // ROUTE : ÉTIQUETTE DU COLIS
       // ============================================================
-      /// Affichée au vendeur : l'acheteur scanne ce code pour confirmer
-      /// la réception et débloquer le paiement.
+      /// Affichée au vendeur : le code à imprimer et à coller sur le carton
+      /// avant de le déposer en point relais.
+      ///
+      /// Le code est dans l'URL, et non dans `extra` : une étiquette doit
+      /// survivre à un rafraîchissement de la page web et à un retour depuis
+      /// une notification. L'ancienne route passait l'identifiant par `extra`
+      /// et se serait vidée dans les deux cas.
       GoRoute(
-        path: '/delivery/show-qr',
-        name: 'show_delivery_qr',
+        path: '/delivery/label/:parcelCode',
+        name: 'parcel_label',
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
-          return ShowDeliveryQrPage(
-            qrCodeId: extra['qrCodeId'] as String,
-            deliveryConfirmed: extra['deliveryConfirmed'] as bool? ?? false,
-          );
-        },
-      ),
-
-      /// Scanner utilisé par l'acheteur pour confirmer la réception.
-      GoRoute(
-        path: '/delivery/scan-qr',
-        name: 'scan_delivery_qr',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
-          return ScanDeliveryQrPage(
-            transactionRef: extra['transactionRef'] as String,
-            sellerId: extra['sellerId'] as String,
-            productId: extra['productId'] as String,
-            productTitle: extra['productTitle'] as String,
+          final code = state.pathParameters['parcelCode']!;
+          return Consumer(
+            builder: (context, ref, _) {
+              final parcel = ref.watch(parcelByCodeProvider(code));
+              return parcel.when(
+                data: (colis) => colis == null
+                    ? const Scaffold(
+                        body: Center(child: Text('Colis introuvable')),
+                      )
+                    : ParcelLabelPage(parcel: colis),
+                loading: () => const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => Scaffold(
+                  body: Center(child: Text('Erreur : $error')),
+                ),
+              );
+            },
           );
         },
       ),

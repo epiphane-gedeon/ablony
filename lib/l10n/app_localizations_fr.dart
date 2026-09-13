@@ -1449,20 +1449,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rateSellerSubmitButton => 'Envoyer mon avis';
 
   @override
-  String get showDeliveryQrButton => 'Afficher le code QR';
-
-  @override
-  String get confirmDeliveryButton => 'Confirmer la réception';
+  String get confirmDeliveryButton => 'J\'ai reçu mon colis';
 
   @override
   String get productAlreadySold => 'Article déjà vendu';
-
-  @override
-  String get deliveryQrPageTitle => 'Code de remise';
-
-  @override
-  String get deliveryQrInstructions =>
-      'Faites scanner ce code par l\'acheteur au moment de la remise pour débloquer le paiement.';
 
   @override
   String get deliveryAlreadyConfirmed => 'Réception confirmée';
@@ -1589,4 +1579,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pleaseLogin => 'Veuillez vous connecter';
+
+  @override
+  String get parcelLabelButton => 'Voir l\'étiquette du colis';
+
+  @override
+  String get receiptParcelCode => 'Code du colis';
+
+  @override
+  String get confirmDeliveryTitle => 'Confirmer la réception';
+
+  @override
+  String get confirmDeliveryQuestion =>
+      'Avez-vous bien reçu votre colis ? Le paiement sera immédiatement versé au vendeur, et ce geste est définitif.';
+
+  @override
+  String get confirmDeliveryConfirm => 'Oui, je l\'ai reçu';
+
+  @override
+  String get deliveryConfirmedSuccess =>
+      'Réception confirmée. Le vendeur a été payé.';
 }

@@ -7,6 +7,8 @@ import '../../../../shared/widgets/choice_card_widget.dart';
 import '../../../../shared/widgets/selection_tile.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../product/domain/entities/product.dart';
+import '../../../delivery/domain/models/delivery_choice.dart';
+import '../../../delivery/domain/models/delivery_pricing.dart';
 import '../../../relay_point/domain/models/relay_point.dart';
 import '../../../../core/services/payment_service.dart';
 import 'payment_web_view_page.dart';
@@ -26,11 +28,14 @@ class PaymentPage extends ConsumerStatefulWidget {
 
 class _PaymentPageState extends ConsumerState<PaymentPage> {
   // Options de livraison
-  String _selectedDeliveryOption = 'relay'; // 'relay' ou 'home'
+  DeliveryMethod _deliveryMethod = DeliveryMethod.relay;
 
-  // Sélections
-  String? _selectedAddress;
-  String? _selectedRelayPoint;
+  // Sélections. Les objets entiers, et non leur libellé : la version
+  // précédente ne gardait que le *nom* du point relais et une adresse déjà
+  // mise en forme, si bien qu'il n'y avait rien à envoyer au serveur même si
+  // on l'avait voulu.
+  DeliveryAddress? _selectedAddress;
+  RelayPoint? _selectedRelayPoint;
   String? _selectedPaymentMethod;
   String? _paymentPhoneNumber;
 
@@ -39,16 +44,25 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   double _walletContribution = 0.0;
   double _externalAmount = 0.0;
 
-  // Calcul des frais
+  // Calcul des frais. Affichés ici, imposés par le serveur : il recalcule le
+  // total et refuse un écart. Un client qui fixe ses propres frais n'en paie
+  // aucun.
   double get _protectionFees => widget.product != null
-      ? widget.product!.price * 0.05
-      : 0.0; // 5% de protection
+      ? widget.product!.price * DeliveryPricing.protectionRate
+      : 0.0;
   double get _shippingCost => widget.product != null
-      ? (_selectedDeliveryOption == 'relay' ? 1000.0 : 1500.0) // FCFA
+      ? DeliveryPricing.shippingFeeFor(_deliveryMethod).toDouble()
       : 0.0;
   double get _totalAmount => widget.product != null
       ? widget.product!.price + _protectionFees + _shippingCost
       : (widget.amount ?? 0.0);
+
+  /// Le choix de livraison, tel qu'il accompagnera le paiement.
+  DeliveryChoice get _deliveryChoice => DeliveryChoice(
+    method: _deliveryMethod,
+    relayPoint: _selectedRelayPoint,
+    address: _selectedAddress,
+  );
 
   // Helper pour formater le nom de la méthode de paiement
   String _getPaymentMethodLabel(String method) {
@@ -79,15 +93,15 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       return;
     }
 
-    if (widget.product != null && _selectedAddress == null) {
-      _showErrorSnackBar('Veuillez renseigner une adresse de livraison');
-      return;
-    }
-
-    if (widget.product != null &&
-        _selectedDeliveryOption == 'relay' &&
-        _selectedRelayPoint == null) {
-      _showErrorSnackBar('Veuillez sélectionner un point relais');
+    // L'adresse n'est exigée que pour une remise à domicile. La version
+    // précédente la réclamait aussi pour un retrait en point relais, où elle
+    // ne sert à rien : on bloquait un achat sur une information inutile.
+    if (widget.product != null && !_deliveryChoice.isComplete) {
+      _showErrorSnackBar(
+        _deliveryMethod == DeliveryMethod.relay
+            ? 'Veuillez sélectionner un point relais'
+            : 'Veuillez renseigner une adresse de livraison',
+      );
       return;
     }
 
@@ -119,6 +133,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
             ? widget.product!.price.toDouble()
             : null,
         walletDeduction: _isMixedPayment ? _walletContribution : null,
+        delivery: widget.product != null ? _deliveryChoice : null,
       );
 
       debugPrint('[Payment] responseData reçu: $responseData');
@@ -213,9 +228,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
             onPressed: () {
               Navigator.of(context).pop(); // Fermer le dialogue
               if (isPurchase) {
-                // La notation du vendeur est proposée après la confirmation
-                // de réception (cf. scan_delivery_qr_page.dart), pas ici —
-                // l'acheteur n'a pas encore reçu l'article à ce stade.
+                // La notation du vendeur est proposée depuis le reçu,
+                // après la confirmation de réception — pas ici : à ce stade
+                // le colis n'est même pas encore déposé.
                 if (transactionRef != null) {
                   context.go('/receipt/$transactionRef');
                 } else {
@@ -423,23 +438,6 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   ),
                   const SizedBox(height: 8),
 
-                  // Section Adresse de livraison
-                  SelectionTile(
-                    label: 'Adresse',
-                    value: _selectedAddress,
-                    placeholder: 'Ajouter l\'adresse de livraison',
-                    isRequired: true,
-                    onTap: () async {
-                      final result = await context.push('/address/add');
-                      if (result != null) {
-                        setState(() {
-                          _selectedAddress = result.toString();
-                        });
-                      }
-                    },
-                  ),
-                  SizedBox(height: screenWidth * 0.06),
-
                   // Section Options de livraison
                   _buildSection(
                     context,
@@ -447,27 +445,29 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                     child: Column(
                       children: [
                         ChoiceCardWidget(
-                          title: 'Envoi en point relais',
-                          subTitle: 'à partir de 1 000 FCFA',
+                          title: 'Retrait en point relais',
+                          subTitle:
+                              '${DeliveryPricing.relayFeeXof} FCFA — à récupérer avec une pièce d\'identité',
                           icon: Icons.location_on_outlined,
-                          isSelected: _selectedDeliveryOption == 'relay',
+                          isSelected: _deliveryMethod == DeliveryMethod.relay,
                           showSelectionCircle: true,
                           onTap: () {
                             setState(() {
-                              _selectedDeliveryOption = 'relay';
+                              _deliveryMethod = DeliveryMethod.relay;
                             });
                           },
                         ),
                         SizedBox(height: screenWidth * 0.03),
                         ChoiceCardWidget(
-                          title: 'Envoi à domicile',
-                          subTitle: '1 500 FCFA',
+                          title: 'Livraison à domicile',
+                          subTitle:
+                              '${DeliveryPricing.homeFeeXof} FCFA — remise à votre adresse',
                           icon: Icons.home_outlined,
-                          isSelected: _selectedDeliveryOption == 'home',
+                          isSelected: _deliveryMethod == DeliveryMethod.home,
                           showSelectionCircle: true,
                           onTap: () {
                             setState(() {
-                              _selectedDeliveryOption = 'home';
+                              _deliveryMethod = DeliveryMethod.home;
                               _selectedRelayPoint = null;
                             });
                           },
@@ -477,11 +477,14 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   ),
                   SizedBox(height: screenWidth * 0.06),
 
-                  // Section Détails de la livraison (point relais)
-                  if (_selectedDeliveryOption == 'relay') ...[
+                  // La destination dépend du mode : un point relais, ou une
+                  // adresse. Demander les deux — ce que faisait l'écran —
+                  // bloquait un retrait en point relais sur une adresse qui
+                  // ne sert à personne.
+                  if (_deliveryMethod == DeliveryMethod.relay)
                     SelectionTile(
-                      label: 'Détails de la livraison',
-                      value: _selectedRelayPoint,
+                      label: 'Point relais',
+                      value: _selectedRelayPoint?.name,
                       placeholder: 'Choisir un point relais',
                       isRequired: true,
                       onTap: () async {
@@ -489,14 +492,26 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                           '/relay-point/select',
                         );
                         if (result != null && result is RelayPoint) {
-                          setState(() {
-                            _selectedRelayPoint = result.name;
-                          });
+                          // L'objet entier, et non son nom : c'est
+                          // l'identifiant que le serveur attend.
+                          setState(() => _selectedRelayPoint = result);
+                        }
+                      },
+                    )
+                  else
+                    SelectionTile(
+                      label: 'Adresse de livraison',
+                      value: _selectedAddress?.summary,
+                      placeholder: 'Ajouter l\'adresse de livraison',
+                      isRequired: true,
+                      onTap: () async {
+                        final result = await context.push('/address/add');
+                        if (result is DeliveryAddress) {
+                          setState(() => _selectedAddress = result);
                         }
                       },
                     ),
-                    SizedBox(height: screenWidth * 0.06),
-                  ],
+                  SizedBox(height: screenWidth * 0.06),
                 ],
 
                 // Section Mode de Paiement (Toujours affichée)

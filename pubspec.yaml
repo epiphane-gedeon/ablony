@@ -82,10 +82,13 @@ dependencies:
   printing: ^5.13.1
 
   # ============================================================
-  # CONFIRMATION DE RÉCEPTION (QR code)
+  # ÉTIQUETTE DE COLIS (code imprimé par le vendeur)
   # ============================================================
+  # Génération seule : c'est le vendeur qui imprime, et nos agents qui
+  # scannent avec leur propre outil. `mobile_scanner` a été retiré avec
+  # l'écran où l'acheteur scannait l'écran du vendeur — un geste de remise en
+  # main propre, alors qu'Ablony achemine lui-même les colis.
   qr_flutter: ^4.1.0
-  mobile_scanner: ^7.0.1
 
   # ============================================================
   # PARTAGE (fiche produit)

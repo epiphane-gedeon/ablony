@@ -4,20 +4,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-/// Confirme la remise en main propre d'un article via le code QR affiché
-/// par le vendeur et scanné par l'acheteur. Débloque le paiement côté
-/// serveur (pendingAmount → availableAmount du vendeur).
+/// L'acheteur confirme avoir reçu son colis, ce qui débloque le paiement du
+/// vendeur (pendingAmount → availableAmount).
+///
+/// Il n'y a rien à scanner. La version précédente faisait scanner à l'acheteur
+/// un QR affiché sur l'écran du vendeur — un geste de remise en main propre,
+/// alors qu'Ablony achemine lui-même les colis : les deux personnes ne se
+/// rencontrent jamais.
 class DeliveryConfirmationService {
   static const String _confirmUrl = 'https://us-central1-ablony-a5db9.cloudfunctions.net/confirmDelivery';
 
-  /// [qrCodeId] est l'id opaque scanné dans le QR (collection `qrcodes`),
-  /// jamais la référence de transaction directement — c'est le serveur qui
-  /// résout ce lien. En secours, [transactionRef] (la référence affichée sur
-  /// le reçu) peut être fourni à la place lorsque l'acheteur saisit la
-  /// référence manuellement plutôt que de scanner le code.
-  Future<void> confirmDelivery({String? qrCodeId, String? transactionRef}) async {
-    assert(qrCodeId != null || transactionRef != null);
-
+  /// [transactionRef] est la référence affichée sur le reçu. Le serveur
+  /// vérifie que l'appelant en est bien l'acheteur : c'est là que tient la
+  /// protection, et non dans un code quelconque.
+  Future<void> confirmDelivery({required String transactionRef}) async {
     final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
     if (idToken == null) {
       throw Exception('Utilisateur non authentifié');
@@ -29,10 +29,7 @@ class DeliveryConfirmationService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $idToken',
       },
-      body: jsonEncode({
-        if (qrCodeId != null) 'qrCodeId': qrCodeId,
-        if (transactionRef != null) 'transactionRef': transactionRef,
-      }),
+      body: jsonEncode({'transactionRef': transactionRef}),
     );
 
     final data = jsonDecode(response.body);
