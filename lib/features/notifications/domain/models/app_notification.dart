@@ -30,6 +30,14 @@ class AppNotification extends Equatable {
   final String id;
   final String userId;
   final AppNotificationType type;
+
+  /// Le `type` tel qu'il est écrit en base.
+  ///
+  /// L'énumération ci-dessus n'en connaît que quelques-uns et ramène tout le
+  /// reste à `unknown` — ce qui suffit à choisir une icône, mais pas à router.
+  /// Une notification écrite par une version plus récente du serveur doit
+  /// pouvoir mener quelque part sans qu'on republie l'application.
+  final String rawType;
   final String title;
   final String body;
   final Map<String, dynamic> data;
@@ -40,6 +48,7 @@ class AppNotification extends Equatable {
     required this.id,
     required this.userId,
     required this.type,
+    required this.rawType,
     required this.title,
     required this.body,
     required this.data,
@@ -55,6 +64,7 @@ class AppNotification extends Equatable {
       id: doc.id,
       userId: data['userId'] as String,
       type: AppNotificationType.fromString(data['type'] as String?),
+      rawType: data['type'] as String? ?? '',
       title: data['title'] as String? ?? '',
       body: data['body'] as String? ?? '',
       data: (data['data'] as Map<String, dynamic>?) ?? const {},

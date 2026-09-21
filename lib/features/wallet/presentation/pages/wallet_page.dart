@@ -140,6 +140,20 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                 ),
               ),
 
+            // Relevé : accessible même sans wallet activé — une vente peut
+            // avoir crédité le pendingAmount avant l'activation, et son
+            // titulaire doit pouvoir voir d'où vient la somme.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.receipt_long_outlined),
+                title: Text(AppLocalizations.of(context)!.walletStatement),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.pushNamed('wallet_statement'),
+              ),
+            ),
+
             // Boutons Recharger et Retirer (affichés seulement si le wallet est activé)
             if (wallet != null && wallet.isActivated) ...[
               Padding(
@@ -156,18 +170,7 @@ class _WalletPageState extends ConsumerState<WalletPage> {
                     Expanded(
                       child: SecondaryButton(
                         text: AppLocalizations.of(context)!.withdrawWallet,
-                        onPressed: () {
-                          // TODO: Implémenter le retrait
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.withdrawalComingSoon,
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: () => context.pushNamed('withdraw'),
                       ),
                     ),
                   ],
@@ -193,12 +196,12 @@ class _WalletPageState extends ConsumerState<WalletPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Recharger le portefeuille'),
+        title: Text(AppLocalizations.of(context)!.walletTopUpTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Saisissez le montant à recharger (Min: 200 FCFA) :'),
+            Text(AppLocalizations.of(context)!.walletTopUpPrompt),
             const SizedBox(height: 12),
             TextField(
               controller: controller,

@@ -374,12 +374,6 @@ abstract class AppLocalizations {
   /// **'Ablony'**
   String get homeTitle;
 
-  /// Message de bienvenue sur la home
-  ///
-  /// In fr, this message translates to:
-  /// **'Hello World! 🎉'**
-  String get homeWelcome;
-
   /// Sous-titre de la home
   ///
   /// In fr, this message translates to:
@@ -1601,7 +1595,7 @@ abstract class AppLocalizations {
   /// Search bar placeholder
   ///
   /// In fr, this message translates to:
-  /// **'Rechercher un article ou un membre...'**
+  /// **'Recherche'**
   String get searchArticlesPlaceholder;
 
   /// Close button text
@@ -2084,24 +2078,6 @@ abstract class AppLocalizations {
   /// **'Produit introuvable'**
   String get productNotFound;
 
-  /// clickToTranslate
-  ///
-  /// In fr, this message translates to:
-  /// **'Clique ici pour traduire'**
-  String get clickToTranslate;
-
-  /// activelyPublishes
-  ///
-  /// In fr, this message translates to:
-  /// **'Publie activement'**
-  String get activelyPublishes;
-
-  /// sendsQuickly
-  ///
-  /// In fr, this message translates to:
-  /// **'Envoie rapidement'**
-  String get sendsQuickly;
-
   /// markAsSold
   ///
   /// In fr, this message translates to:
@@ -2503,6 +2479,120 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Solde insuffisant. Choisis un autre moyen de paiement.'**
   String get boostInsufficientBalance;
+
+  /// Solde de boosts accumulés
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun boost en réserve} =1{1 boost en réserve} other{{count} boosts en réserve}}'**
+  String boostCreditsBalance(int count);
+
+  /// Bouton pour dépenser un crédit de boost
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser un boost'**
+  String get boostUseCredit;
+
+  /// Sous-titre du bouton utiliser un boost
+  ///
+  /// In fr, this message translates to:
+  /// **'Puisé dans votre réserve, sans payer'**
+  String get boostUseCreditSubtitle;
+
+  /// Bouton boost occasionnel payant
+  ///
+  /// In fr, this message translates to:
+  /// **'Booster maintenant · {price} FCFA'**
+  String boostPayOccasional(int price);
+
+  /// Ouvre l'achat de boosts en réserve
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheter des boosts'**
+  String get boostBuyPacks;
+
+  /// Confirmation après usage d'un crédit
+  ///
+  /// In fr, this message translates to:
+  /// **'Boost appliqué ! Il vous reste {count, plural, =0{aucun boost} =1{1 boost} other{{count} boosts}}.'**
+  String boostCreditApplied(int count);
+
+  /// Titre de la feuille d'achat de boosts
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheter des boosts'**
+  String get boostPackTitle;
+
+  /// Explication de l'achat de boosts
+  ///
+  /// In fr, this message translates to:
+  /// **'Achetez des boosts d\'avance et utilisez-les quand vous voulez, sur l\'annonce de votre choix. Chaque boost met un article en avant pendant {hours}h.'**
+  String boostPackDescription(int hours);
+
+  /// Libellé du sélecteur de quantité
+  ///
+  /// In fr, this message translates to:
+  /// **'Nombre de boosts'**
+  String get boostPackQuantity;
+
+  /// Total à payer pour le lot
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get boostPackTotal;
+
+  /// Bouton d'achat du lot
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheter {count, plural, =1{1 boost} other{{count} boosts}} · {price} FCFA'**
+  String boostPackBuy(int count, int price);
+
+  /// Confirmation d'achat de lot
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 boost ajouté} other{{count} boosts ajoutés}} à votre réserve !'**
+  String boostPackSuccess(int count);
+
+  /// Titre de la carte réserve de boosts
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos boosts en réserve'**
+  String get promotionCreditsTitle;
+
+  /// Mise en avant indisponible sur cette plateforme
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt disponible'**
+  String get promotionUnavailable;
+
+  /// Explication de l'indisponibilité
+  ///
+  /// In fr, this message translates to:
+  /// **'La mise en avant arrive prochainement sur mobile. Elle est déjà disponible depuis le site Ablony.'**
+  String get promotionUnavailableHint;
+
+  /// Sous-titre de la carte réserve
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisez-les sur n\'importe quelle annonce, quand vous voulez.'**
+  String get promotionCreditsHint;
+
+  /// Placeholder de la barre de recherche de lieu
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un lieu, un quartier…'**
+  String get locationSearchHint;
+
+  /// Recherche de lieu sans résultat
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun lieu trouvé pour « {query} »'**
+  String locationSearchNoResult(String query);
+
+  /// Erreur de recherche de lieu
+  ///
+  /// In fr, this message translates to:
+  /// **'La recherche a échoué. Vérifiez votre connexion.'**
+  String get locationSearchFailed;
 
   /// shareProduct
   ///
@@ -3085,6 +3175,1560 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réception confirmée. Le vendeur a été payé.'**
   String get deliveryConfirmedSuccess;
+
+  /// No description provided for @walletStatement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevé'**
+  String get walletStatement;
+
+  /// No description provided for @walletStatementEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun mouvement pour l\'instant'**
+  String get walletStatementEmpty;
+
+  /// No description provided for @walletStatementEmptyDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos achats, vos ventes et vos rechargements apparaîtront ici.'**
+  String get walletStatementEmptyDetail;
+
+  /// No description provided for @walletStatementError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger votre relevé.'**
+  String get walletStatementError;
+
+  /// No description provided for @walletEntryTopUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechargement'**
+  String get walletEntryTopUp;
+
+  /// No description provided for @walletEntryPurchase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat'**
+  String get walletEntryPurchase;
+
+  /// No description provided for @walletEntryBoost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise en avant'**
+  String get walletEntryBoost;
+
+  /// No description provided for @walletEntrySale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente'**
+  String get walletEntrySale;
+
+  /// No description provided for @walletEntryOnHold.
+  ///
+  /// In fr, this message translates to:
+  /// **'en attente'**
+  String get walletEntryOnHold;
+
+  /// No description provided for @scanParcelStaff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner un colis'**
+  String get scanParcelStaff;
+
+  /// No description provided for @scanParcelBuyer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner mon colis'**
+  String get scanParcelBuyer;
+
+  /// No description provided for @scanHintStaff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visez l\'étiquette collée sur le colis.'**
+  String get scanHintStaff;
+
+  /// No description provided for @scanHintBuyer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visez l\'étiquette de votre colis pour confirmer que vous l\'avez bien reçu.'**
+  String get scanHintBuyer;
+
+  /// No description provided for @scanTorch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lampe'**
+  String get scanTorch;
+
+  /// No description provided for @scanFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le scan a échoué. Réessayez.'**
+  String get scanFailed;
+
+  /// No description provided for @checkpointRecorded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape enregistrée.'**
+  String get checkpointRecorded;
+
+  /// No description provided for @parcelStatusLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'État'**
+  String get parcelStatusLabel;
+
+  /// No description provided for @parcelDestinationRelay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point relais'**
+  String get parcelDestinationRelay;
+
+  /// No description provided for @parcelDestinationHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison à domicile'**
+  String get parcelDestinationHome;
+
+  /// No description provided for @parcelRecordStep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer une étape'**
+  String get parcelRecordStep;
+
+  /// No description provided for @parcelNoStepLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce colis a terminé son parcours.'**
+  String get parcelNoStepLeft;
+
+  /// No description provided for @parcelAwaitingDropoff.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de dépôt'**
+  String get parcelAwaitingDropoff;
+
+  /// No description provided for @parcelDroppedOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déposé'**
+  String get parcelDroppedOff;
+
+  /// No description provided for @parcelInTransit.
+  ///
+  /// In fr, this message translates to:
+  /// **'En transit'**
+  String get parcelInTransit;
+
+  /// No description provided for @parcelReadyForPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'À retirer en point relais'**
+  String get parcelReadyForPickup;
+
+  /// No description provided for @parcelOutForDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours de livraison'**
+  String get parcelOutForDelivery;
+
+  /// No description provided for @parcelDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis'**
+  String get parcelDelivered;
+
+  /// No description provided for @parcelReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retourné'**
+  String get parcelReturned;
+
+  /// No description provided for @parcelLost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Égaré'**
+  String get parcelLost;
+
+  /// No description provided for @stepDroppedOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt'**
+  String get stepDroppedOff;
+
+  /// No description provided for @stepInTransit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ'**
+  String get stepInTransit;
+
+  /// No description provided for @stepArrived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivé au relais'**
+  String get stepArrived;
+
+  /// No description provided for @stepOutForDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'En tournée'**
+  String get stepOutForDelivery;
+
+  /// No description provided for @stepDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis'**
+  String get stepDelivered;
+
+  /// No description provided for @stepReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour'**
+  String get stepReturned;
+
+  /// No description provided for @stepLost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Égaré'**
+  String get stepLost;
+
+  /// No description provided for @stuckParcelsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis bloqués'**
+  String get stuckParcelsTitle;
+
+  /// No description provided for @stuckParcelsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien ne traîne. Tout avance.'**
+  String get stuckParcelsEmpty;
+
+  /// No description provided for @stuckNeverDroppedOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais déposé — délai dépassé'**
+  String get stuckNeverDroppedOff;
+
+  /// No description provided for @stuckInTransitTooLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'En transit depuis trop longtemps'**
+  String get stuckInTransitTooLong;
+
+  /// No description provided for @stuckWaitingAtRelay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attend en point relais'**
+  String get stuckWaitingAtRelay;
+
+  /// No description provided for @stuckBuyerScanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'scanné par l\'acheteur'**
+  String get stuckBuyerScanned;
+
+  /// No description provided for @staffTools.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espace personnel Ablony'**
+  String get staffTools;
+
+  /// No description provided for @walletEntryRefund.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement'**
+  String get walletEntryRefund;
+
+  /// No description provided for @refundBuyer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser l\'acheteur'**
+  String get refundBuyer;
+
+  /// No description provided for @refundReasonHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce motif est envoyé à l\'acheteur et au vendeur. Expliquez, ne résumez pas.'**
+  String get refundReasonHint;
+
+  /// No description provided for @refundReasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get refundReasonLabel;
+
+  /// No description provided for @refundConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser'**
+  String get refundConfirm;
+
+  /// No description provided for @refundDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'acheteur a été remboursé.'**
+  String get refundDone;
+
+  /// No description provided for @parcelNoTrackingYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparation en cours — le suivi détaillé s\'affichera dès le premier scan'**
+  String get parcelNoTrackingYet;
+
+  /// No description provided for @releaseSeller.
+  ///
+  /// In fr, this message translates to:
+  /// **'Verser au vendeur'**
+  String get releaseSeller;
+
+  /// No description provided for @releaseDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le vendeur a été payé.'**
+  String get releaseDone;
+
+  /// No description provided for @withdrawTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de l\'argent'**
+  String get withdrawTitle;
+
+  /// No description provided for @withdrawAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant à retirer'**
+  String get withdrawAmount;
+
+  /// No description provided for @withdrawAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout retirer'**
+  String get withdrawAll;
+
+  /// No description provided for @withdrawMethod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen de réception'**
+  String get withdrawMethod;
+
+  /// No description provided for @withdrawDestination.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où envoyer l\'argent'**
+  String get withdrawDestination;
+
+  /// No description provided for @withdrawDestinationPhoneHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'+228 90 00 00 00'**
+  String get withdrawDestinationPhoneHint;
+
+  /// No description provided for @withdrawDestinationBankHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de compte ou IBAN'**
+  String get withdrawDestinationBankHint;
+
+  /// No description provided for @withdrawAmountRequested.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant demandé'**
+  String get withdrawAmountRequested;
+
+  /// No description provided for @withdrawFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de transfert'**
+  String get withdrawFee;
+
+  /// No description provided for @withdrawYouReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous recevez'**
+  String get withdrawYouReceive;
+
+  /// No description provided for @withdrawFeeExplained.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces frais couvrent le transfert vers votre compte mobile money. Retirer une grosse somme d\'un coup coûte proportionnellement moins cher.'**
+  String get withdrawFeeExplained;
+
+  /// No description provided for @withdrawInsufficient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre solde disponible ne couvre pas ce montant.'**
+  String get withdrawInsufficient;
+
+  /// No description provided for @withdrawAlreadyPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une demande est déjà en cours de traitement. Vous pouvez en faire une autre, mais elles seront versées séparément.'**
+  String get withdrawAlreadyPending;
+
+  /// No description provided for @withdrawConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander le retrait'**
+  String get withdrawConfirm;
+
+  /// No description provided for @withdrawManualNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les versements sont effectués manuellement, sous 24 à 48 heures ouvrées.'**
+  String get withdrawManualNotice;
+
+  /// No description provided for @withdrawActivateFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez votre porte-monnaie pour pouvoir retirer'**
+  String get withdrawActivateFirst;
+
+  /// No description provided for @withdrawPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours de versement'**
+  String get withdrawPending;
+
+  /// No description provided for @withdrawPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versé'**
+  String get withdrawPaid;
+
+  /// No description provided for @withdrawRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusé'**
+  String get withdrawRejected;
+
+  /// No description provided for @withdrawMinimum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Minimum : {amount} FCFA'**
+  String withdrawMinimum(String amount);
+
+  /// No description provided for @withdrawRequested.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande enregistrée. Vous recevrez {amount} FCFA.'**
+  String withdrawRequested(String amount);
+
+  /// No description provided for @walletEntryWithdrawal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait'**
+  String get walletEntryWithdrawal;
+
+  /// No description provided for @walletEntryWithdrawalRefund.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait refusé'**
+  String get walletEntryWithdrawalRefund;
+
+  /// No description provided for @moderationCorrectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce à corriger'**
+  String get moderationCorrectionTitle;
+
+  /// No description provided for @moderationRemovedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce retirée'**
+  String get moderationRemovedTitle;
+
+  /// No description provided for @moderationCorrectionHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corrigez-la et elle repart en ligne automatiquement.'**
+  String get moderationCorrectionHint;
+
+  /// No description provided for @moderationRemovedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette annonce ne peut pas être remise en ligne.'**
+  String get moderationRemovedHint;
+
+  /// No description provided for @moderationCorrectionAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corriger l\'annonce'**
+  String get moderationCorrectionAction;
+
+  /// No description provided for @moderationReasonBlurryPhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos floues ou inexploitables'**
+  String get moderationReasonBlurryPhotos;
+
+  /// No description provided for @moderationReasonWrongCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mauvaise catégorie'**
+  String get moderationReasonWrongCategory;
+
+  /// No description provided for @moderationReasonMissingDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Description insuffisante'**
+  String get moderationReasonMissingDescription;
+
+  /// No description provided for @moderationReasonWrongPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix incohérent'**
+  String get moderationReasonWrongPrice;
+
+  /// No description provided for @moderationReasonCounterfeit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrefaçon'**
+  String get moderationReasonCounterfeit;
+
+  /// No description provided for @moderationReasonProhibitedItem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Article interdit à la vente'**
+  String get moderationReasonProhibitedItem;
+
+  /// No description provided for @moderationReasonInappropriate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu inapproprié'**
+  String get moderationReasonInappropriate;
+
+  /// No description provided for @moderationReasonFraud.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tentative de fraude'**
+  String get moderationReasonFraud;
+
+  /// No description provided for @moderationReasonOffPlatformSale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente hors de la plateforme'**
+  String get moderationReasonOffPlatformSale;
+
+  /// No description provided for @moderationReasonOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif non précisé'**
+  String get moderationReasonOther;
+
+  /// No description provided for @disputeOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai un problème avec cette commande'**
+  String get disputeOpen;
+
+  /// No description provided for @disputeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un problème'**
+  String get disputeTitle;
+
+  /// No description provided for @disputeReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que s\'est-il passé ?'**
+  String get disputeReason;
+
+  /// No description provided for @disputeNotReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je n\'ai jamais reçu le colis'**
+  String get disputeNotReceived;
+
+  /// No description provided for @disputeNotAsDescribed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'article ne correspond pas à l\'annonce'**
+  String get disputeNotAsDescribed;
+
+  /// No description provided for @disputeDamaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'article est arrivé abîmé'**
+  String get disputeDamaged;
+
+  /// Motif de litige côté vendeur
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'acheteur ne confirme pas la réception'**
+  String get disputeBuyerNotConfirming;
+
+  /// Motif de litige côté vendeur
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'acheteur réclame sans motif valable'**
+  String get disputeBuyerNoValidReason;
+
+  /// No description provided for @disputeOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get disputeOther;
+
+  /// No description provided for @disputeDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez le problème'**
+  String get disputeDescription;
+
+  /// No description provided for @disputeDescriptionHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soyez précis : c\'est ce qui permettra de trancher.'**
+  String get disputeDescriptionHint;
+
+  /// No description provided for @disputeDescriptionTooShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encore {count} caractères'**
+  String disputeDescriptionTooShort(int count);
+
+  /// No description provided for @disputePhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez des photos (jusqu\'à 4)'**
+  String get disputePhotos;
+
+  /// No description provided for @disputePhotosHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une photo vaut mieux qu\'une description.'**
+  String get disputePhotosHint;
+
+  /// No description provided for @disputeSubmit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le signalement'**
+  String get disputeSubmit;
+
+  /// No description provided for @disputeSubmitted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre signalement est enregistré. Réponse sous 48 heures.'**
+  String get disputeSubmitted;
+
+  /// No description provided for @disputeUnderReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Litige en cours d\'examen'**
+  String get disputeUnderReview;
+
+  /// No description provided for @disputeUnderReviewHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'administration examine votre dossier. Réponse sous 48 heures.'**
+  String get disputeUnderReviewHint;
+
+  /// No description provided for @disputeResolvedRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Litige tranché : vous avez été remboursé'**
+  String get disputeResolvedRefunded;
+
+  /// No description provided for @disputeResolvedReleased.
+  ///
+  /// In fr, this message translates to:
+  /// **'Litige tranché en faveur du vendeur'**
+  String get disputeResolvedReleased;
+
+  /// No description provided for @disputeOpenedByOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'autre partie a ouvert un litige sur cette commande.'**
+  String get disputeOpenedByOther;
+
+  /// No description provided for @disputeSending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi en cours…'**
+  String get disputeSending;
+
+  /// No description provided for @blockUser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer'**
+  String get blockUser;
+
+  /// No description provided for @unblockUser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloquer'**
+  String get unblockUser;
+
+  /// No description provided for @blockConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer {username} ?'**
+  String blockConfirmTitle(String username);
+
+  /// No description provided for @blockConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne pourrez plus vous écrire. Cette personne ne sera pas prévenue. Une vente en cours suit son cours normalement.'**
+  String get blockConfirmBody;
+
+  /// No description provided for @blockDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{username} a été bloqué.'**
+  String blockDone(String username);
+
+  /// No description provided for @blockAlsoReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous aussi le signaler à Ablony ?'**
+  String get blockAlsoReport;
+
+  /// No description provided for @blockedUsersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnes bloquées'**
+  String get blockedUsersTitle;
+
+  /// No description provided for @blockedUsersEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous n\'avez bloqué personne.'**
+  String get blockedUsersEmpty;
+
+  /// No description provided for @blockedUsersHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer quelqu\'un ferme la messagerie entre vous, dans les deux sens. Personne n\'en est prévenu.'**
+  String get blockedUsersHint;
+
+  /// No description provided for @blockedConversation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez bloqué cette personne.'**
+  String get blockedConversation;
+
+  /// No description provided for @blockedByOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne pouvez plus écrire dans cette conversation.'**
+  String get blockedByOther;
+
+  /// No description provided for @unblockDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déblocage effectué.'**
+  String get unblockDone;
+
+  /// No description provided for @reportUser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler'**
+  String get reportUser;
+
+  /// No description provided for @later.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get later;
+
+  /// No description provided for @ordersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes et achats'**
+  String get ordersTitle;
+
+  /// No description provided for @ordersPurchases.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achats'**
+  String get ordersPurchases;
+
+  /// No description provided for @ordersSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes'**
+  String get ordersSales;
+
+  /// No description provided for @ordersNoPurchases.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous n\'avez encore rien acheté'**
+  String get ordersNoPurchases;
+
+  /// No description provided for @ordersNoPurchasesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que vous achetez apparaît ici, avec l\'avancement de la livraison.'**
+  String get ordersNoPurchasesHint;
+
+  /// No description provided for @ordersNoSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous n\'avez encore rien vendu'**
+  String get ordersNoSales;
+
+  /// No description provided for @ordersNoSalesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettez un article en vente : dès qu\'il trouve preneur, vous le suivez d\'ici.'**
+  String get ordersNoSalesHint;
+
+  /// No description provided for @orderDropOffBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'À déposer avant le {date}'**
+  String orderDropOffBy(String date);
+
+  /// No description provided for @orderDropOffLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai dépassé — remboursement en cours'**
+  String get orderDropOffLate;
+
+  /// No description provided for @orderPrintLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer l\'étiquette'**
+  String get orderPrintLabel;
+
+  /// No description provided for @orderInTransit.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours d\'acheminement'**
+  String get orderInTransit;
+
+  /// No description provided for @orderAwaitingPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'À retirer au point relais'**
+  String get orderAwaitingPickup;
+
+  /// No description provided for @orderSellerPreparing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le vendeur prépare votre colis'**
+  String get orderSellerPreparing;
+
+  /// No description provided for @orderDeliveredWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis — paiement à venir'**
+  String get orderDeliveredWaiting;
+
+  /// No description provided for @orderConfirmReception.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmez la réception'**
+  String get orderConfirmReception;
+
+  /// No description provided for @orderPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé : {amount} FCFA'**
+  String orderPaid(String amount);
+
+  /// No description provided for @orderReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé'**
+  String get orderReceived;
+
+  /// No description provided for @orderRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursé : {amount} FCFA'**
+  String orderRefunded(String amount);
+
+  /// No description provided for @orderCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente annulée'**
+  String get orderCancelled;
+
+  /// No description provided for @orderTrack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre'**
+  String get orderTrack;
+
+  /// No description provided for @orderSee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir'**
+  String get orderSee;
+
+  /// No description provided for @ordersLoadMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir plus'**
+  String get ordersLoadMore;
+
+  /// No description provided for @promotionEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune annonce à mettre en avant'**
+  String get promotionEmpty;
+
+  /// No description provided for @promotionEmptyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettez un article en vente : vous pourrez ensuite le faire remonter dans les listes.'**
+  String get promotionEmptyHint;
+
+  /// No description provided for @promotionBoost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre en avant'**
+  String get promotionBoost;
+
+  /// No description provided for @promotionActiveUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'En avant jusqu\'au {date}'**
+  String promotionActiveUntil(String date);
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions générales d\'utilisation'**
+  String get termsOfService;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get privacyPolicy;
+
+  /// No description provided for @legalNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mentions légales'**
+  String get legalNotice;
+
+  /// No description provided for @editProfileTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations du profil'**
+  String get editProfileTitle;
+
+  /// No description provided for @editProfilePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de profil'**
+  String get editProfilePhoto;
+
+  /// No description provided for @editProfileDisplayName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom affiché'**
+  String get editProfileDisplayName;
+
+  /// No description provided for @editProfileCity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ville'**
+  String get editProfileCity;
+
+  /// No description provided for @editProfileSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get editProfileSave;
+
+  /// No description provided for @editProfileSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil mis à jour.'**
+  String get editProfileSaved;
+
+  /// No description provided for @securityTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurité'**
+  String get securityTitle;
+
+  /// No description provided for @securityCurrentPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe actuel'**
+  String get securityCurrentPassword;
+
+  /// No description provided for @securityNewPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe'**
+  String get securityNewPassword;
+
+  /// No description provided for @securityConfirmPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le nouveau mot de passe'**
+  String get securityConfirmPassword;
+
+  /// No description provided for @securityChangePassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le mot de passe'**
+  String get securityChangePassword;
+
+  /// No description provided for @securityPasswordChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe changé.'**
+  String get securityPasswordChanged;
+
+  /// No description provided for @securityMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux saisies ne correspondent pas.'**
+  String get securityMismatch;
+
+  /// No description provided for @securityTooShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au moins 8 caractères.'**
+  String get securityTooShort;
+
+  /// No description provided for @securityWrongPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe actuel incorrect.'**
+  String get securityWrongPassword;
+
+  /// No description provided for @securitySocialAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous vous connectez avec {provider}'**
+  String securitySocialAccount(String provider);
+
+  /// No description provided for @securitySocialHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre mot de passe est géré par ce service. Il n\'y a rien à changer ici.'**
+  String get securitySocialHint;
+
+  /// No description provided for @emailSettingsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse e-mail'**
+  String get emailSettingsTitle;
+
+  /// No description provided for @emailVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse vérifiée'**
+  String get emailVerified;
+
+  /// No description provided for @emailNotVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse non vérifiée'**
+  String get emailNotVerified;
+
+  /// No description provided for @emailNotVerifiedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez votre adresse : c\'est par elle que passent les alertes de vente et de retrait.'**
+  String get emailNotVerifiedHint;
+
+  /// No description provided for @emailResendLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le lien de vérification'**
+  String get emailResendLink;
+
+  /// No description provided for @emailLinkSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien envoyé. Regardez votre boîte de réception.'**
+  String get emailLinkSent;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune notification pour l\'instant'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsEmptyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos ventes, vos achats et vos messages apparaîtront ici.'**
+  String get notificationsEmptyHint;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout marquer comme lu'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @timeAgoNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'à l\'instant'**
+  String get timeAgoNow;
+
+  /// No description provided for @receiptPurchaseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçu d\'achat'**
+  String get receiptPurchaseTitle;
+
+  /// No description provided for @receiptSaleTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récapitulatif de vente'**
+  String get receiptSaleTitle;
+
+  /// No description provided for @receiptTotalPaidLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total payé'**
+  String get receiptTotalPaidLabel;
+
+  /// No description provided for @receiptYouReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous recevez'**
+  String get receiptYouReceive;
+
+  /// No description provided for @receiptYouReceiveHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le prix de l\'article. Les frais de livraison et de protection sont à la charge de l\'acheteur.'**
+  String get receiptYouReceiveHint;
+
+  /// No description provided for @receiptDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails'**
+  String get receiptDetails;
+
+  /// No description provided for @receiptParties.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parties'**
+  String get receiptParties;
+
+  /// No description provided for @receiptDeliverySection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison'**
+  String get receiptDeliverySection;
+
+  /// No description provided for @receiptActions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions'**
+  String get receiptActions;
+
+  /// No description provided for @founderBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fondateur'**
+  String get founderBadge;
+
+  /// No description provided for @starBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Star'**
+  String get starBadge;
+
+  /// Veuillez sélectionner un mode de paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez sélectionner un mode de paiement'**
+  String get paymentMethodSelectPrompt;
+
+  /// Veuillez entrer votre numéro T-Money
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez entrer votre numéro T-Money'**
+  String get paymentMethodTmoneyPrompt;
+
+  /// Veuillez entrer votre numéro Flooz
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez entrer votre numéro Flooz'**
+  String get paymentMethodFloozPrompt;
+
+  /// Numéro de téléphone T-Money
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone T-Money'**
+  String get paymentMethodTmoneyLabel;
+
+  /// Numéro de téléphone Flooz
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone Flooz'**
+  String get paymentMethodFloozLabel;
+
+  /// Impossible de récupérer votre position
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de récupérer votre position'**
+  String get locationCurrentFailed;
+
+  /// Veuillez sélectionner une localisation
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez sélectionner une localisation'**
+  String get locationSelectPrompt;
+
+  /// Choisir une localisation
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une localisation'**
+  String get locationPickTitle;
+
+  /// Étiquette du colis
+  ///
+  /// In fr, this message translates to:
+  /// **'Étiquette du colis'**
+  String get parcelLabelTitle;
+
+  /// Copier le code
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier le code'**
+  String get parcelLabelCopyCode;
+
+  /// Code copié
+  ///
+  /// In fr, this message translates to:
+  /// **'Code copié'**
+  String get parcelLabelCodeCopied;
+
+  /// Confirmation après suppression d'une notification au swipe
+  ///
+  /// In fr, this message translates to:
+  /// **'Notification supprimée'**
+  String get notificationDeleted;
+
+  /// Entrée de menu du profil personnel pour ouvrir son profil public (avis, note)
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mon profil public'**
+  String get viewPublicProfile;
+
+  /// Mention affichée sur mobile où l'achat de boosts n'est pas disponible dans l'app
+  ///
+  /// In fr, this message translates to:
+  /// **'Les boosts s\'achètent sur la version web d\'Ablony (ablony.app).'**
+  String get boostBuyOnWeb;
+
+  /// Bouton pour télécharger/imprimer l'étiquette du colis en PDF
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger l\'étiquette'**
+  String get parcelLabelDownload;
+
+  /// Erreur lors de la génération du PDF de l'étiquette
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de générer l\'étiquette'**
+  String get parcelLabelError;
+
+  /// Nom et prénom
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom et prénom'**
+  String get addressFullName;
+
+  /// Libellé du champ téléphone de livraison
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get deliveryPhoneLabel;
+
+  /// Erreur : téléphone de livraison manquant
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez entrer un numéro de téléphone'**
+  String get deliveryPhoneRequired;
+
+  /// Erreur : téléphone de livraison invalide
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone invalide'**
+  String get deliveryPhoneInvalid;
+
+  /// Libellé de la tuile coordonnées de contact
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom et téléphone'**
+  String get deliveryContactLabel;
+
+  /// Placeholder de la tuile coordonnées de contact
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter vos coordonnées'**
+  String get deliveryContactPlaceholder;
+
+  /// Titre du formulaire de coordonnées de contact
+  ///
+  /// In fr, this message translates to:
+  /// **'Coordonnées de contact'**
+  String get deliveryContactTitle;
+
+  /// Titre de la bascule emails marketing dans les réglages
+  ///
+  /// In fr, this message translates to:
+  /// **'Emails marketing'**
+  String get marketingEmailToggleTitle;
+
+  /// Sous-titre de la bascule emails marketing
+  ///
+  /// In fr, this message translates to:
+  /// **'Offres, nouveautés et promotions'**
+  String get marketingEmailToggleSubtitle;
+
+  /// Modifier la localisation
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la localisation'**
+  String get addressEditLocation;
+
+  /// Livraison à domicile
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison à domicile'**
+  String get paymentHomeDelivery;
+
+  /// Payer la différence
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer la différence'**
+  String get paymentPayDifference;
+
+  /// Détail de la facture
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail de la facture'**
+  String get paymentInvoiceDetail;
+
+  /// Source de données manquante
+  ///
+  /// In fr, this message translates to:
+  /// **'Source de données manquante'**
+  String get dynamicMissingSource;
+
+  /// Aucun élément trouvé
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun élément trouvé'**
+  String get dynamicNoItems;
+
+  /// Recharger le portefeuille
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger le portefeuille'**
+  String get walletTopUpTitle;
+
+  /// Saisissez le montant à recharger (min. 200 FCFA) :
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le montant à recharger (min. 200 FCFA) :'**
+  String get walletTopUpPrompt;
+
+  /// Cet article a déjà été vendu
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet article a déjà été vendu'**
+  String get itemAlreadySold;
+
+  /// Offre envoyée avec succès !
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre envoyée avec succès !'**
+  String get offerSentSuccess;
+
+  /// Choisir un point relais
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un point relais'**
+  String get relayPointPickTitle;
+
+  /// Veuillez compléter le captcha
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez compléter le captcha'**
+  String get captchaIncomplete;
+
+  /// Rechercher dans les favoris…
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher dans les favoris…'**
+  String get favoritesSearchHint;
+
+  /// Avertissement anti-arnaque en tête de conversation
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne partagez jamais ici un code reçu par SMS, un mot de passe ou vos données bancaires. L\'équipe Ablony ne vous les demandera jamais.'**
+  String get chatSafetyWarning;
+
+  /// Précision sur l'absence de chiffrement de bout en bout
+  ///
+  /// In fr, this message translates to:
+  /// **'Les messages ne sont pas chiffrés de bout en bout.'**
+  String get chatNotEncrypted;
+
+  /// Parcours de paiement sur navigateur
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement en cours dans un autre onglet'**
+  String get paymentWaitingTitle;
+
+  /// Parcours de paiement sur navigateur
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminez le paiement dans l\'onglet qui vient de s\'ouvrir. Cette page se met à jour toute seule dès que le paiement est confirmé.'**
+  String get paymentWaitingBody;
+
+  /// Parcours de paiement sur navigateur
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminez le paiement dans l\'onglet qui vient de s\'ouvrir, puis revenez ici.'**
+  String get paymentWaitingBodyManual;
+
+  /// Parcours de paiement sur navigateur
+  ///
+  /// In fr, this message translates to:
+  /// **'Rouvrir la page de paiement'**
+  String get paymentReopen;
+
+  /// Parcours de paiement sur navigateur
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler le paiement'**
+  String get paymentCancel;
+
+  /// Parcours de paiement sur navigateur
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'ouvrir la page de paiement. Votre navigateur a peut-être bloqué la fenêtre — autorisez-la, puis réessayez.'**
+  String get paymentOpenFailed;
+
+  /// Bouton principal d'ouverture du paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir la page de paiement'**
+  String get paymentOpenPage;
+
+  /// Attente de confirmation de paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement en cours de vérification'**
+  String get paymentVerifyingTitle;
+
+  /// Attente de confirmation de paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'Si votre compte a été débité, le montant sera crédité automatiquement dès que la confirmation nous parvient. Vous n\'avez rien à refaire, et rien n\'est perdu.'**
+  String get paymentVerifyingBody;
+
+  /// Attente de confirmation de paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'La confirmation prend parfois quelques minutes, et jusqu\'à une heure quand l\'opérateur est lent.'**
+  String get paymentVerifyingDelay;
+
+  /// Attente de confirmation de paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence : {reference}'**
+  String paymentReference(String reference);
+
+  /// Attente de confirmation de paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'Conservez cette référence si vous nous écrivez.'**
+  String get paymentKeepReference;
+
+  /// Attente de confirmation de paiement
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get paymentClose;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistance Ablony'**
+  String get supportTitle;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez votre problème…'**
+  String get supportHint;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Joindre une capture'**
+  String get supportAttach;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous écrivez à l\'équipe Ablony'**
+  String get supportWelcomeTitle;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Expliquez ce qui s\'est passé et joignez une capture si vous avez été débité — c\'est ce qui permet de trancher le plus vite. Nous répondons sous 24 h ouvrées.'**
+  String get supportWelcomeEmpty;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous répondons sous 24 h ouvrées.'**
+  String get supportWelcomeDelay;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacter l\'assistance'**
+  String get supportOpen;
+
+  /// Assistance intégrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour, j\'ai été débité mais mon paiement apparaît toujours en attente.\n\nRéférence : {reference}\n\n(Joignez ici la capture du débit.)'**
+  String supportPaymentPrefill(String reference);
+
+  /// Explication affichée au choix du paiement par carte
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous saisirez votre carte sur la page sécurisée de notre prestataire de paiement. Ablony ne voit ni n\'enregistre vos données bancaires.'**
+  String get paymentCardRedirectNotice;
+
+  /// Formulaire carte (masqué pour le moment)
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom figurant sur la carte'**
+  String get paymentMethodCardName;
+
+  /// Formulaire carte (masqué pour le moment)
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de carte bancaire'**
+  String get paymentMethodCardNumber;
+
+  /// Formulaire carte (masqué pour le moment)
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de sécurité'**
+  String get paymentMethodCardCvv;
 }
 
 class _AppLocalizationsDelegate

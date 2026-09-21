@@ -1,3 +1,4 @@
+export 'product_status.dart';
 /// Barrel file pour exporter toutes les entités du domaine Product
 export 'category.dart';
 export 'subcategory.dart';

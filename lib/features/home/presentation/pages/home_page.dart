@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../auth/application/auth_providers.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/filter_chip_list.dart';
 import '../../../../shared/widgets/product_card.dart';
@@ -171,34 +173,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  /// Mapper l'état du produit avec traduction
-  String _getConditionLabel(ProductCondition condition) {
-    final l10n = AppLocalizations.of(context)!;
-
-    // Mapper l'enum vers la valeur string française (celle stockée en BDD)
-    String conditionValue;
-    switch (condition) {
-      case ProductCondition.newWithTags:
-        conditionValue = 'Neuf avec étiquette';
-        break;
-      case ProductCondition.excellent:
-        conditionValue = 'Excellent état';
-        break;
-      case ProductCondition.good:
-        conditionValue = 'Bon état';
-        break;
-      case ProductCondition.satisfactory:
-        conditionValue = 'Satisfaisant';
-        break;
-      case ProductCondition.worn:
-        conditionValue = 'Usé';
-        break;
-    }
-
-    // Utiliser CategoryTranslator qui a déjà toutes les traductions
-    return CategoryTranslator.translateAttributeValue(l10n, conditionValue);
-  }
-
   /// Barre de recherche simple qui redirige vers la page de recherche
   Widget _buildSearchBar(BuildContext context, AppLocalizations l10n) {
     return GestureDetector(
@@ -206,7 +180,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         color: Theme.of(context).scaffoldBackgroundColor,
-        child: Container(
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
           height: 48,
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
@@ -237,6 +214,11 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ],
           ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const _ClocheNotifications(),
+          ],
         ),
       ),
     );
@@ -284,6 +266,55 @@ class _HomePageState extends ConsumerState<HomePage> {
           },
         );
       }).toList(),
+    );
+  }
+}
+
+/// La cloche, avec le nombre de non lues.
+///
+/// Dans l'en-tête de l'accueil plutôt qu'en pastille sur un onglet : c'est là
+/// qu'on regarde en ouvrant l'application, et une notification manquée devient
+/// un colis jamais déposé.
+class _ClocheNotifications extends ConsumerWidget {
+  const _ClocheNotifications();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final utilisateur = ref.watch(authStateProvider).value;
+    if (utilisateur == null) return const SizedBox.shrink();
+
+    final nonLues = ref.watch(unreadNotificationsCountProvider(utilisateur.uid));
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_none),
+          onPressed: () => context.push('/notifications'),
+        ),
+        if (nonLues > 0)
+          Positioned(
+            right: 4,
+            top: 4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              constraints: const BoxConstraints(minWidth: 16),
+              child: Text(
+                nonLues > 99 ? '99+' : '$nonLues',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

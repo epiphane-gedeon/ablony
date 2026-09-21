@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/product.dart';
+import '../../domain/entities/product_status.dart';
 
 /// Modèle Firestore pour Product.
 ///
@@ -26,16 +27,36 @@ class ProductModel {
       boostExpiresAt: data['boostExpiresAt'] != null
           ? (data['boostExpiresAt'] as Timestamp).toDate()
           : null,
-      isSold: data['isSold'] as bool? ?? false,
+      status: _lireStatut(data),
+      moderationStatus: ModerationStatus.fromWire(
+        data['moderationStatus'] as String?,
+      ),
+      reviewDecision: data['reviewDecision'] as String?,
+      reviewReason: data['reviewReason'] as String?,
+      reviewNote: data['reviewNote'] as String?,
       soldAt: data['soldAt'] != null
           ? (data['soldAt'] as Timestamp).toDate()
           : null,
-      isReserved: data['isReserved'] as bool? ?? false,
-      isHidden: data['isHidden'] as bool? ?? false,
       viewsCount: data['viewsCount'] as int? ?? 0,
       favoritesCount: data['favoritesCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+    );
+  }
+
+  /// Lit le cycle de vie, quelle que soit la forme du document.
+  ///
+  /// Les deux formes coexistent le temps que la reprise passe et que la
+  /// nouvelle version soit adoptée : `status` s'il est là, les trois
+  /// booléens sinon. Sans ce repli, une annonce non encore reprise
+  /// apparaîtrait masquée.
+  static ProductStatus _lireStatut(Map<String, dynamic> data) {
+    final brut = data['status'] as String?;
+    if (brut != null) return ProductStatus.fromWire(brut);
+    return ProductStatus.fromLegacy(
+      isSold: data['isSold'] as bool? ?? false,
+      isReserved: data['isReserved'] as bool? ?? false,
+      isHidden: data['isHidden'] as bool? ?? false,
     );
   }
 
@@ -55,11 +76,20 @@ class ProductModel {
       'boostExpiresAt': product.boostExpiresAt != null
           ? Timestamp.fromDate(product.boostExpiresAt!)
           : null,
-      'isSold': product.isSold,
+      'status': product.status.wireValue,
       'soldAt':
           product.soldAt != null ? Timestamp.fromDate(product.soldAt!) : null,
+      // Les trois booléens restent écrits le temps que la nouvelle version
+      // soit adoptée : une version ancienne encore installée continue de
+      // fonctionner. À retirer deux à quatre semaines après la publication.
+      'isSold': product.isSold,
       'isReserved': product.isReserved,
       'isHidden': product.isHidden,
+      // `moderationStatus`, `isListable` et les champs `review*` ne sont
+      // **pas** écrits ici : ils appartiennent au serveur. Les écrire depuis
+      // le client effacerait `reviewDecision` au moment même où le vendeur
+      // corrige — et le déclencheur, ne voyant plus la décision, ne remettrait
+      // jamais l'annonce en file.
       'viewsCount': product.viewsCount,
       'favoritesCount': product.favoritesCount,
       'createdAt': Timestamp.fromDate(product.createdAt),
@@ -84,12 +114,16 @@ class ProductModel {
       boostExpiresAt: data['boostExpiresAt'] != null
           ? (data['boostExpiresAt'] as Timestamp).toDate()
           : null,
-      isSold: data['isSold'] as bool? ?? false,
+      status: _lireStatut(data),
+      moderationStatus: ModerationStatus.fromWire(
+        data['moderationStatus'] as String?,
+      ),
+      reviewDecision: data['reviewDecision'] as String?,
+      reviewReason: data['reviewReason'] as String?,
+      reviewNote: data['reviewNote'] as String?,
       soldAt: data['soldAt'] != null
           ? (data['soldAt'] as Timestamp).toDate()
           : null,
-      isReserved: data['isReserved'] as bool? ?? false,
-      isHidden: data['isHidden'] as bool? ?? false,
       viewsCount: data['viewsCount'] as int? ?? 0,
       favoritesCount: data['favoritesCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp).toDate(),

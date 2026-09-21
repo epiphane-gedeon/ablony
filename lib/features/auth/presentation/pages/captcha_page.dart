@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -105,7 +107,7 @@ class _CaptchaPageState extends ConsumerState<CaptchaPage> {
     if (_captchaToken == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Veuillez compléter le captcha'),
+          content: Text(AppLocalizations.of(context)!.captchaIncomplete),
           backgroundColor: Colors.red,
         ),
       );

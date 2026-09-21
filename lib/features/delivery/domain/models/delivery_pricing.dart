@@ -9,6 +9,10 @@ import 'delivery_choice.dart';
 abstract final class DeliveryPricing {
   static const int relayFeeXof = 1000;
   static const int homeFeeXof = 1500;
+  /// Repli pour le ramassage à domicile (le vendeur paie qu'on vienne chercher
+  /// le colis chez lui). Le vrai tarif vient de la sous-catégorie, sinon du
+  /// défaut Firestore, sinon d'ici.
+  static const int pickupFeeXof = 1500;
 
   /// Part du prix de l'article prélevée au titre de la protection acheteur.
   static const double protectionRate = 0.05;

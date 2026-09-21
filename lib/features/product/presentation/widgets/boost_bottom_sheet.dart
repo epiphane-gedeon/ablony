@@ -11,6 +11,7 @@ import '../../../payment/presentation/pages/payment_web_view_page.dart';
 import '../../domain/boost_config.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/product_provider.dart';
+import 'boost_pack_sheet.dart';
 
 /// Bottom sheet permettant à un vendeur de booster son propre produit
 /// (mise en avant payante de 48h, voir `BOOST_CONFIG` dans functions/index.js).
@@ -107,7 +108,8 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet> {
       if (paymentUrl != null) {
         final paymentCompleted = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
-            builder: (context) => PaymentWebViewPage(url: paymentUrl),
+            builder: (context) =>
+                PaymentWebViewPage(url: paymentUrl, reference: reference),
           ),
         );
 
@@ -133,7 +135,36 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet> {
     }
   }
 
-  Future<void> _onBoostSuccess() async {
+  /// Met le produit en avant en dépensant un boost de la réserve, sans paiement.
+  Future<void> _useCredit() async {
+    final l10n = AppLocalizations.of(context)!;
+    final user = ref.read(currentUserProvider).value;
+    if (user == null || user.boostCredits < 1) return;
+
+    setState(() => _isProcessing = true);
+    try {
+      await ref.read(paymentServiceProvider).applyBoost(
+            productId: widget.product.id,
+          );
+      // Le solde a changé côté serveur : on relit le profil pour que la
+      // réserve affichée (ici et sur la page promotion) soit à jour.
+      ref.invalidate(currentUserProvider);
+      final restant = user.boostCredits - 1;
+      await _onBoostSuccess(message: l10n.boostCreditApplied(restant));
+    } catch (e) {
+      final message = e.toString().replaceAll('Exception:', '').trim();
+      if (mounted) setState(() => _isProcessing = false);
+      _showError(message);
+    }
+  }
+
+  Future<void> _openPacks() async {
+    await BoostPackSheet.show(context);
+    // De retour de l'achat, la réserve a pu grandir : on rafraîchit.
+    ref.invalidate(currentUserProvider);
+  }
+
+  Future<void> _onBoostSuccess({String? message}) async {
     ref.invalidate(activeBoostedProductsProvider);
     ref.invalidate(productStreamByIdProvider(widget.product.id));
     ref.invalidate(sellerProductsProvider(widget.product.sellerId));
@@ -143,7 +174,10 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet> {
     setState(() => _isProcessing = false);
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.boostSuccess), backgroundColor: Colors.green),
+      SnackBar(
+        content: Text(message ?? l10n.boostSuccess),
+        backgroundColor: Colors.green,
+      ),
     );
   }
 
@@ -213,32 +247,117 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet> {
             ),
           ],
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          _buildActions(context, l10n, theme, isActivelyBoosted),
+        ],
+      ),
+    );
+  }
+
+  /// Trois voies pour booster, selon la réserve :
+  /// - un boost en réserve → on l'utilise (gratuit), et le paiement occasionnel
+  ///   reste offert en secondaire ;
+  /// - aucune réserve → boost occasionnel à 500 F en principal, et l'achat de
+  ///   boosts d'avance en secondaire.
+  Widget _buildActions(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    bool isActivelyBoosted,
+  ) {
+    final credits = ref.watch(currentUserProvider).value?.boostCredits ?? 0;
+    final aDesCredits = credits > 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Réserve de boosts, toujours affichée : c'est la nouveauté qui rend
+        // l'accumulation lisible.
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
             children: [
-              Text(
-                'Prix',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                '$kBoostPriceXOF FCFA',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+              Icon(Icons.inventory_2_outlined,
+                  size: 18, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.boostCreditsBalance(credits),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+        ),
+        const SizedBox(height: 16),
+        // Appliquer un crédit est possible partout (ce n'est pas un achat).
+        // Acheter, en revanche, n'est proposé que là où c'est autorisé
+        // (`boostsAchatDisponible`) ; ailleurs (mobile) on renvoie au web.
+        //
+        // Produit déjà activement boosté : ne pas proposer de le rebooster —
+        // cela dépenserait un crédit (ou un paiement) pour ne gagner que
+        // l'écart d'expiration.
+        if (isActivelyBoosted) ...[
+          if (boostsAchatDisponible)
+            TextButton(
+              onPressed: _isProcessing ? null : _openPacks,
+              child: Text(l10n.boostBuyPacks),
+            )
+          else
+            _noteWeb(theme, l10n),
+        ] else if (aDesCredits) ...[
           PrimaryButton(
-            text: l10n.boostPay,
+            text: l10n.boostUseCredit,
             isLoading: _isProcessing,
-            onPressed: _isProcessing ? null : _handlePay,
+            onPressed: _isProcessing ? null : _useCredit,
           ),
+          const SizedBox(height: 8),
+          if (boostsAchatDisponible)
+            TextButton(
+              onPressed: _isProcessing ? null : _handlePay,
+              child: Text(l10n.boostPayOccasional(kBoostPriceXOF)),
+            )
+          else
+            _noteWeb(theme, l10n),
+        ] else ...[
+          if (boostsAchatDisponible) ...[
+            PrimaryButton(
+              text: l10n.boostPayOccasional(kBoostPriceXOF),
+              isLoading: _isProcessing,
+              onPressed: _isProcessing ? null : _handlePay,
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _isProcessing ? null : _openPacks,
+              child: Text(l10n.boostBuyPacks),
+            ),
+          ] else
+            _noteWeb(theme, l10n),
         ],
-      ),
+      ],
+    );
+  }
+
+  /// Mention neutre là où l'achat n'est pas proposé dans l'app (mobile) : on
+  /// indique où acheter, sans lien de paiement direct.
+  Widget _noteWeb(ThemeData theme, AppLocalizations l10n) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.info_outline, size: 16, color: theme.hintColor),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            l10n.boostBuyOnWeb,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+          ),
+        ),
+      ],
     );
   }
 }

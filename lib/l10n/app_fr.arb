@@ -190,10 +190,6 @@
   "@homeTitle": {
     "description": "Titre de la page d'accueil"
   },
-  "homeWelcome": "Hello World! 🎉",
-  "@homeWelcome": {
-    "description": "Message de bienvenue sur la home"
-  },
   "homeSubtitle": "Bienvenue sur Ablony !",
   "@homeSubtitle": {
     "description": "Sous-titre de la home"
@@ -1029,7 +1025,7 @@
   "@searchMembersTab": {
     "description": "Members tab in search page"
   },
-  "searchArticlesPlaceholder": "Rechercher un article ou un membre...",
+  "searchArticlesPlaceholder": "Recherche",
   "@searchArticlesPlaceholder": {
     "description": "Search bar placeholder"
   },
@@ -1398,18 +1394,6 @@
   "@productNotFound": {
     "description": "productNotFound"
   },
-  "clickToTranslate": "Clique ici pour traduire",
-  "@clickToTranslate": {
-    "description": "clickToTranslate"
-  },
-  "activelyPublishes": "Publie activement",
-  "@activelyPublishes": {
-    "description": "activelyPublishes"
-  },
-  "sendsQuickly": "Envoie rapidement",
-  "@sendsQuickly": {
-    "description": "sendsQuickly"
-  },
   "markAsSold": "Indiquer comme vendu",
   "@markAsSold": {
     "description": "markAsSold"
@@ -1692,6 +1676,120 @@
   "boostInsufficientBalance": "Solde insuffisant. Choisis un autre moyen de paiement.",
   "@boostInsufficientBalance": {
     "description": "boostInsufficientBalance"
+  },
+  "boostCreditsBalance": "{count, plural, =0{Aucun boost en réserve} =1{1 boost en réserve} other{{count} boosts en réserve}}",
+  "@boostCreditsBalance": {
+    "description": "Solde de boosts accumulés",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boostUseCredit": "Utiliser un boost",
+  "@boostUseCredit": {
+    "description": "Bouton pour dépenser un crédit de boost"
+  },
+  "boostUseCreditSubtitle": "Puisé dans votre réserve, sans payer",
+  "@boostUseCreditSubtitle": {
+    "description": "Sous-titre du bouton utiliser un boost"
+  },
+  "boostPayOccasional": "Booster maintenant · {price} FCFA",
+  "@boostPayOccasional": {
+    "description": "Bouton boost occasionnel payant",
+    "placeholders": {
+      "price": {
+        "type": "int"
+      }
+    }
+  },
+  "boostBuyPacks": "Acheter des boosts",
+  "@boostBuyPacks": {
+    "description": "Ouvre l'achat de boosts en réserve"
+  },
+  "boostCreditApplied": "Boost appliqué ! Il vous reste {count, plural, =0{aucun boost} =1{1 boost} other{{count} boosts}}.",
+  "@boostCreditApplied": {
+    "description": "Confirmation après usage d'un crédit",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boostPackTitle": "Acheter des boosts",
+  "@boostPackTitle": {
+    "description": "Titre de la feuille d'achat de boosts"
+  },
+  "boostPackDescription": "Achetez des boosts d'avance et utilisez-les quand vous voulez, sur l'annonce de votre choix. Chaque boost met un article en avant pendant {hours}h.",
+  "@boostPackDescription": {
+    "description": "Explication de l'achat de boosts",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "boostPackQuantity": "Nombre de boosts",
+  "@boostPackQuantity": {
+    "description": "Libellé du sélecteur de quantité"
+  },
+  "boostPackTotal": "Total",
+  "@boostPackTotal": {
+    "description": "Total à payer pour le lot"
+  },
+  "boostPackBuy": "Acheter {count, plural, =1{1 boost} other{{count} boosts}} · {price} FCFA",
+  "@boostPackBuy": {
+    "description": "Bouton d'achat du lot",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "price": {
+        "type": "int"
+      }
+    }
+  },
+  "boostPackSuccess": "{count, plural, =1{1 boost ajouté} other{{count} boosts ajoutés}} à votre réserve !",
+  "@boostPackSuccess": {
+    "description": "Confirmation d'achat de lot",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promotionCreditsTitle": "Vos boosts en réserve",
+  "@promotionCreditsTitle": {
+    "description": "Titre de la carte réserve de boosts"
+  },
+  "promotionUnavailable": "Bientôt disponible",
+  "@promotionUnavailable": {
+    "description": "Mise en avant indisponible sur cette plateforme"
+  },
+  "promotionUnavailableHint": "La mise en avant arrive prochainement sur mobile. Elle est déjà disponible depuis le site Ablony.",
+  "@promotionUnavailableHint": {
+    "description": "Explication de l'indisponibilité"
+  },
+  "promotionCreditsHint": "Utilisez-les sur n'importe quelle annonce, quand vous voulez.",
+  "@promotionCreditsHint": {
+    "description": "Sous-titre de la carte réserve"
+  },
+  "locationSearchHint": "Rechercher un lieu, un quartier…",
+  "@locationSearchHint": {
+    "description": "Placeholder de la barre de recherche de lieu"
+  },
+  "locationSearchNoResult": "Aucun lieu trouvé pour « {query} »",
+  "@locationSearchNoResult": {
+    "description": "Recherche de lieu sans résultat",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "locationSearchFailed": "La recherche a échoué. Vérifiez votre connexion.",
+  "@locationSearchFailed": {
+    "description": "Erreur de recherche de lieu"
   },
   "shareProduct": "Partager",
   "@shareProduct": {
@@ -2143,5 +2241,545 @@
   "deliveryConfirmedSuccess": "Réception confirmée. Le vendeur a été payé.",
   "@deliveryConfirmedSuccess": {
     "description": "Snackbar after a successful delivery confirmation"
+  },
+  "walletStatement": "Relevé",
+  "walletStatementEmpty": "Aucun mouvement pour l'instant",
+  "walletStatementEmptyDetail": "Vos achats, vos ventes et vos rechargements apparaîtront ici.",
+  "walletStatementError": "Impossible de charger votre relevé.",
+  "walletEntryTopUp": "Rechargement",
+  "walletEntryPurchase": "Achat",
+  "walletEntryBoost": "Mise en avant",
+  "walletEntrySale": "Vente",
+  "walletEntryOnHold": "en attente",
+  "scanParcelStaff": "Scanner un colis",
+  "scanParcelBuyer": "Scanner mon colis",
+  "scanHintStaff": "Visez l'étiquette collée sur le colis.",
+  "scanHintBuyer": "Visez l'étiquette de votre colis pour confirmer que vous l'avez bien reçu.",
+  "scanTorch": "Lampe",
+  "scanFailed": "Le scan a échoué. Réessayez.",
+  "checkpointRecorded": "Étape enregistrée.",
+  "parcelStatusLabel": "État",
+  "parcelDestinationRelay": "Point relais",
+  "parcelDestinationHome": "Livraison à domicile",
+  "parcelRecordStep": "Enregistrer une étape",
+  "parcelNoStepLeft": "Ce colis a terminé son parcours.",
+  "parcelAwaitingDropoff": "En attente de dépôt",
+  "parcelDroppedOff": "Déposé",
+  "parcelInTransit": "En transit",
+  "parcelReadyForPickup": "À retirer en point relais",
+  "parcelOutForDelivery": "En cours de livraison",
+  "parcelDelivered": "Remis",
+  "parcelReturned": "Retourné",
+  "parcelLost": "Égaré",
+  "stepDroppedOff": "Dépôt",
+  "stepInTransit": "Départ",
+  "stepArrived": "Arrivé au relais",
+  "stepOutForDelivery": "En tournée",
+  "stepDelivered": "Remis",
+  "stepReturned": "Retour",
+  "stepLost": "Égaré",
+  "stuckParcelsTitle": "Colis bloqués",
+  "stuckParcelsEmpty": "Rien ne traîne. Tout avance.",
+  "stuckNeverDroppedOff": "Jamais déposé — délai dépassé",
+  "stuckInTransitTooLong": "En transit depuis trop longtemps",
+  "stuckWaitingAtRelay": "Attend en point relais",
+  "stuckBuyerScanned": "scanné par l'acheteur",
+  "staffTools": "Espace personnel Ablony",
+  "walletEntryRefund": "Remboursement",
+  "refundBuyer": "Rembourser l'acheteur",
+  "refundReasonHint": "Ce motif est envoyé à l'acheteur et au vendeur. Expliquez, ne résumez pas.",
+  "refundReasonLabel": "Motif",
+  "refundConfirm": "Rembourser",
+  "refundDone": "L'acheteur a été remboursé.",
+  "parcelNoTrackingYet": "Préparation en cours — le suivi détaillé s'affichera dès le premier scan",
+  "releaseSeller": "Verser au vendeur",
+  "releaseDone": "Le vendeur a été payé.",
+  "withdrawTitle": "Retirer de l'argent",
+  "withdrawAmount": "Montant à retirer",
+  "withdrawAll": "Tout retirer",
+  "withdrawMethod": "Moyen de réception",
+  "withdrawDestination": "Où envoyer l'argent",
+  "withdrawDestinationPhoneHint": "+228 90 00 00 00",
+  "withdrawDestinationBankHint": "Numéro de compte ou IBAN",
+  "withdrawAmountRequested": "Montant demandé",
+  "withdrawFee": "Frais de transfert",
+  "withdrawYouReceive": "Vous recevez",
+  "withdrawFeeExplained": "Ces frais couvrent le transfert vers votre compte mobile money. Retirer une grosse somme d'un coup coûte proportionnellement moins cher.",
+  "withdrawInsufficient": "Votre solde disponible ne couvre pas ce montant.",
+  "withdrawAlreadyPending": "Une demande est déjà en cours de traitement. Vous pouvez en faire une autre, mais elles seront versées séparément.",
+  "withdrawConfirm": "Demander le retrait",
+  "withdrawManualNotice": "Les versements sont effectués manuellement, sous 24 à 48 heures ouvrées.",
+  "withdrawActivateFirst": "Activez votre porte-monnaie pour pouvoir retirer",
+  "withdrawPending": "En cours de versement",
+  "withdrawPaid": "Versé",
+  "withdrawRejected": "Refusé",
+  "withdrawMinimum": "Minimum : {amount} FCFA",
+  "@withdrawMinimum": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawRequested": "Demande enregistrée. Vous recevrez {amount} FCFA.",
+  "@withdrawRequested": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "walletEntryWithdrawal": "Retrait",
+  "walletEntryWithdrawalRefund": "Retrait refusé",
+  "moderationCorrectionTitle": "Annonce à corriger",
+  "moderationRemovedTitle": "Annonce retirée",
+  "moderationCorrectionHint": "Corrigez-la et elle repart en ligne automatiquement.",
+  "moderationRemovedHint": "Cette annonce ne peut pas être remise en ligne.",
+  "moderationCorrectionAction": "Corriger l'annonce",
+  "moderationReasonBlurryPhotos": "Photos floues ou inexploitables",
+  "moderationReasonWrongCategory": "Mauvaise catégorie",
+  "moderationReasonMissingDescription": "Description insuffisante",
+  "moderationReasonWrongPrice": "Prix incohérent",
+  "moderationReasonCounterfeit": "Contrefaçon",
+  "moderationReasonProhibitedItem": "Article interdit à la vente",
+  "moderationReasonInappropriate": "Contenu inapproprié",
+  "moderationReasonFraud": "Tentative de fraude",
+  "moderationReasonOffPlatformSale": "Vente hors de la plateforme",
+  "moderationReasonOther": "Motif non précisé",
+  "disputeOpen": "J'ai un problème avec cette commande",
+  "disputeTitle": "Signaler un problème",
+  "disputeReason": "Que s'est-il passé ?",
+  "disputeNotReceived": "Je n'ai jamais reçu le colis",
+  "disputeNotAsDescribed": "L'article ne correspond pas à l'annonce",
+  "disputeDamaged": "L'article est arrivé abîmé",
+  "disputeBuyerNotConfirming": "L'acheteur ne confirme pas la réception",
+  "@disputeBuyerNotConfirming": {
+    "description": "Motif de litige côté vendeur"
+  },
+  "disputeBuyerNoValidReason": "L'acheteur réclame sans motif valable",
+  "@disputeBuyerNoValidReason": {
+    "description": "Motif de litige côté vendeur"
+  },
+  "disputeOther": "Autre",
+  "disputeDescription": "Décrivez le problème",
+  "disputeDescriptionHint": "Soyez précis : c'est ce qui permettra de trancher.",
+  "disputeDescriptionTooShort": "Encore {count} caractères",
+  "@disputeDescriptionTooShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputePhotos": "Ajoutez des photos (jusqu'à 4)",
+  "disputePhotosHint": "Une photo vaut mieux qu'une description.",
+  "disputeSubmit": "Envoyer le signalement",
+  "disputeSubmitted": "Votre signalement est enregistré. Réponse sous 48 heures.",
+  "disputeUnderReview": "Litige en cours d'examen",
+  "disputeUnderReviewHint": "L'administration examine votre dossier. Réponse sous 48 heures.",
+  "disputeResolvedRefunded": "Litige tranché : vous avez été remboursé",
+  "disputeResolvedReleased": "Litige tranché en faveur du vendeur",
+  "disputeOpenedByOther": "L'autre partie a ouvert un litige sur cette commande.",
+  "disputeSending": "Envoi en cours…",
+  "blockUser": "Bloquer",
+  "unblockUser": "Débloquer",
+  "blockConfirmTitle": "Bloquer {username} ?",
+  "@blockConfirmTitle": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "blockConfirmBody": "Vous ne pourrez plus vous écrire. Cette personne ne sera pas prévenue. Une vente en cours suit son cours normalement.",
+  "blockDone": "{username} a été bloqué.",
+  "@blockDone": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "blockAlsoReport": "Voulez-vous aussi le signaler à Ablony ?",
+  "blockedUsersTitle": "Personnes bloquées",
+  "blockedUsersEmpty": "Vous n'avez bloqué personne.",
+  "blockedUsersHint": "Bloquer quelqu'un ferme la messagerie entre vous, dans les deux sens. Personne n'en est prévenu.",
+  "blockedConversation": "Vous avez bloqué cette personne.",
+  "blockedByOther": "Vous ne pouvez plus écrire dans cette conversation.",
+  "unblockDone": "Déblocage effectué.",
+  "reportUser": "Signaler",
+  "later": "Plus tard",
+  "ordersTitle": "Ventes et achats",
+  "ordersPurchases": "Achats",
+  "ordersSales": "Ventes",
+  "ordersNoPurchases": "Vous n'avez encore rien acheté",
+  "ordersNoPurchasesHint": "Ce que vous achetez apparaît ici, avec l'avancement de la livraison.",
+  "ordersNoSales": "Vous n'avez encore rien vendu",
+  "ordersNoSalesHint": "Mettez un article en vente : dès qu'il trouve preneur, vous le suivez d'ici.",
+  "orderDropOffBy": "À déposer avant le {date}",
+  "@orderDropOffBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDropOffLate": "Délai dépassé — remboursement en cours",
+  "orderPrintLabel": "Imprimer l'étiquette",
+  "orderInTransit": "En cours d'acheminement",
+  "orderAwaitingPickup": "À retirer au point relais",
+  "orderSellerPreparing": "Le vendeur prépare votre colis",
+  "orderDeliveredWaiting": "Remis — paiement à venir",
+  "orderConfirmReception": "Confirmez la réception",
+  "orderPaid": "Payé : {amount} FCFA",
+  "@orderPaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderReceived": "Terminé",
+  "orderRefunded": "Remboursé : {amount} FCFA",
+  "@orderRefunded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelled": "Vente annulée",
+  "orderTrack": "Suivre",
+  "orderSee": "Voir",
+  "ordersLoadMore": "Voir plus",
+  "promotionEmpty": "Aucune annonce à mettre en avant",
+  "promotionEmptyHint": "Mettez un article en vente : vous pourrez ensuite le faire remonter dans les listes.",
+  "promotionBoost": "Mettre en avant",
+  "promotionActiveUntil": "En avant jusqu'au {date}",
+  "@promotionActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "termsOfService": "Conditions générales d'utilisation",
+  "privacyPolicy": "Politique de confidentialité",
+  "legalNotice": "Mentions légales",
+  "editProfileTitle": "Informations du profil",
+  "editProfilePhoto": "Photo de profil",
+  "editProfileDisplayName": "Nom affiché",
+  "editProfileCity": "Ville",
+  "editProfileSave": "Enregistrer",
+  "editProfileSaved": "Profil mis à jour.",
+  "securityTitle": "Sécurité",
+  "securityCurrentPassword": "Mot de passe actuel",
+  "securityNewPassword": "Nouveau mot de passe",
+  "securityConfirmPassword": "Confirmer le nouveau mot de passe",
+  "securityChangePassword": "Changer le mot de passe",
+  "securityPasswordChanged": "Mot de passe changé.",
+  "securityMismatch": "Les deux saisies ne correspondent pas.",
+  "securityTooShort": "Au moins 8 caractères.",
+  "securityWrongPassword": "Mot de passe actuel incorrect.",
+  "securitySocialAccount": "Vous vous connectez avec {provider}",
+  "@securitySocialAccount": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "securitySocialHint": "Votre mot de passe est géré par ce service. Il n'y a rien à changer ici.",
+  "emailSettingsTitle": "Adresse e-mail",
+  "emailVerified": "Adresse vérifiée",
+  "emailNotVerified": "Adresse non vérifiée",
+  "emailNotVerifiedHint": "Vérifiez votre adresse : c'est par elle que passent les alertes de vente et de retrait.",
+  "emailResendLink": "Renvoyer le lien de vérification",
+  "emailLinkSent": "Lien envoyé. Regardez votre boîte de réception.",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "Aucune notification pour l'instant",
+  "notificationsEmptyHint": "Vos ventes, vos achats et vos messages apparaîtront ici.",
+  "notificationsMarkAllRead": "Tout marquer comme lu",
+  "timeAgoNow": "à l'instant",
+  "receiptPurchaseTitle": "Reçu d'achat",
+  "receiptSaleTitle": "Récapitulatif de vente",
+  "receiptTotalPaidLabel": "Total payé",
+  "receiptYouReceive": "Vous recevez",
+  "receiptYouReceiveHint": "Le prix de l'article. Les frais de livraison et de protection sont à la charge de l'acheteur.",
+  "receiptDetails": "Détails",
+  "receiptParties": "Parties",
+  "receiptDeliverySection": "Livraison",
+  "receiptActions": "Actions",
+  "founderBadge": "Fondateur",
+  "starBadge": "Star",
+  "paymentMethodSelectPrompt": "Veuillez sélectionner un mode de paiement",
+  "@paymentMethodSelectPrompt": {
+    "description": "Veuillez sélectionner un mode de paiement"
+  },
+  "paymentMethodTmoneyPrompt": "Veuillez entrer votre numéro T-Money",
+  "@paymentMethodTmoneyPrompt": {
+    "description": "Veuillez entrer votre numéro T-Money"
+  },
+  "paymentMethodFloozPrompt": "Veuillez entrer votre numéro Flooz",
+  "@paymentMethodFloozPrompt": {
+    "description": "Veuillez entrer votre numéro Flooz"
+  },
+  "paymentMethodTmoneyLabel": "Numéro de téléphone T-Money",
+  "@paymentMethodTmoneyLabel": {
+    "description": "Numéro de téléphone T-Money"
+  },
+  "paymentMethodFloozLabel": "Numéro de téléphone Flooz",
+  "@paymentMethodFloozLabel": {
+    "description": "Numéro de téléphone Flooz"
+  },
+  "locationCurrentFailed": "Impossible de récupérer votre position",
+  "@locationCurrentFailed": {
+    "description": "Impossible de récupérer votre position"
+  },
+  "locationSelectPrompt": "Veuillez sélectionner une localisation",
+  "@locationSelectPrompt": {
+    "description": "Veuillez sélectionner une localisation"
+  },
+  "locationPickTitle": "Choisir une localisation",
+  "@locationPickTitle": {
+    "description": "Choisir une localisation"
+  },
+  "parcelLabelTitle": "Étiquette du colis",
+  "@parcelLabelTitle": {
+    "description": "Étiquette du colis"
+  },
+  "parcelLabelCopyCode": "Copier le code",
+  "@parcelLabelCopyCode": {
+    "description": "Copier le code"
+  },
+  "parcelLabelCodeCopied": "Code copié",
+  "@parcelLabelCodeCopied": {
+    "description": "Code copié"
+  },
+  "notificationDeleted": "Notification supprimée",
+  "@notificationDeleted": {
+    "description": "Confirmation après suppression d'une notification au swipe"
+  },
+  "viewPublicProfile": "Voir mon profil public",
+  "@viewPublicProfile": {
+    "description": "Entrée de menu du profil personnel pour ouvrir son profil public (avis, note)"
+  },
+  "boostBuyOnWeb": "Les boosts s'achètent sur la version web d'Ablony (ablony.app).",
+  "@boostBuyOnWeb": {
+    "description": "Mention affichée sur mobile où l'achat de boosts n'est pas disponible dans l'app"
+  },
+  "parcelLabelDownload": "Télécharger l'étiquette",
+  "@parcelLabelDownload": {
+    "description": "Bouton pour télécharger/imprimer l'étiquette du colis en PDF"
+  },
+  "parcelLabelError": "Impossible de générer l'étiquette",
+  "@parcelLabelError": {
+    "description": "Erreur lors de la génération du PDF de l'étiquette"
+  },
+  "addressFullName": "Nom et prénom",
+  "@addressFullName": {
+    "description": "Nom et prénom"
+  },
+  "deliveryPhoneLabel": "Téléphone",
+  "@deliveryPhoneLabel": {
+    "description": "Libellé du champ téléphone de livraison"
+  },
+  "deliveryPhoneRequired": "Veuillez entrer un numéro de téléphone",
+  "@deliveryPhoneRequired": {
+    "description": "Erreur : téléphone de livraison manquant"
+  },
+  "deliveryPhoneInvalid": "Numéro de téléphone invalide",
+  "@deliveryPhoneInvalid": {
+    "description": "Erreur : téléphone de livraison invalide"
+  },
+  "deliveryContactLabel": "Nom et téléphone",
+  "@deliveryContactLabel": {
+    "description": "Libellé de la tuile coordonnées de contact"
+  },
+  "deliveryContactPlaceholder": "Ajouter vos coordonnées",
+  "@deliveryContactPlaceholder": {
+    "description": "Placeholder de la tuile coordonnées de contact"
+  },
+  "deliveryContactTitle": "Coordonnées de contact",
+  "@deliveryContactTitle": {
+    "description": "Titre du formulaire de coordonnées de contact"
+  },
+  "marketingEmailToggleTitle": "Emails marketing",
+  "@marketingEmailToggleTitle": {
+    "description": "Titre de la bascule emails marketing dans les réglages"
+  },
+  "marketingEmailToggleSubtitle": "Offres, nouveautés et promotions",
+  "@marketingEmailToggleSubtitle": {
+    "description": "Sous-titre de la bascule emails marketing"
+  },
+  "addressEditLocation": "Modifier la localisation",
+  "@addressEditLocation": {
+    "description": "Modifier la localisation"
+  },
+  "paymentHomeDelivery": "Livraison à domicile",
+  "@paymentHomeDelivery": {
+    "description": "Livraison à domicile"
+  },
+  "paymentPayDifference": "Payer la différence",
+  "@paymentPayDifference": {
+    "description": "Payer la différence"
+  },
+  "paymentInvoiceDetail": "Détail de la facture",
+  "@paymentInvoiceDetail": {
+    "description": "Détail de la facture"
+  },
+  "dynamicMissingSource": "Source de données manquante",
+  "@dynamicMissingSource": {
+    "description": "Source de données manquante"
+  },
+  "dynamicNoItems": "Aucun élément trouvé",
+  "@dynamicNoItems": {
+    "description": "Aucun élément trouvé"
+  },
+  "walletTopUpTitle": "Recharger le portefeuille",
+  "@walletTopUpTitle": {
+    "description": "Recharger le portefeuille"
+  },
+  "walletTopUpPrompt": "Saisissez le montant à recharger (min. 200 FCFA) :",
+  "@walletTopUpPrompt": {
+    "description": "Saisissez le montant à recharger (min. 200 FCFA) :"
+  },
+  "itemAlreadySold": "Cet article a déjà été vendu",
+  "@itemAlreadySold": {
+    "description": "Cet article a déjà été vendu"
+  },
+  "offerSentSuccess": "Offre envoyée avec succès !",
+  "@offerSentSuccess": {
+    "description": "Offre envoyée avec succès !"
+  },
+  "relayPointPickTitle": "Choisir un point relais",
+  "@relayPointPickTitle": {
+    "description": "Choisir un point relais"
+  },
+  "captchaIncomplete": "Veuillez compléter le captcha",
+  "@captchaIncomplete": {
+    "description": "Veuillez compléter le captcha"
+  },
+  "favoritesSearchHint": "Rechercher dans les favoris…",
+  "@favoritesSearchHint": {
+    "description": "Rechercher dans les favoris…"
+  },
+  "chatSafetyWarning": "Ne partagez jamais ici un code reçu par SMS, un mot de passe ou vos données bancaires. L'équipe Ablony ne vous les demandera jamais.",
+  "@chatSafetyWarning": {
+    "description": "Avertissement anti-arnaque en tête de conversation"
+  },
+  "chatNotEncrypted": "Les messages ne sont pas chiffrés de bout en bout.",
+  "@chatNotEncrypted": {
+    "description": "Précision sur l'absence de chiffrement de bout en bout"
+  },
+  "paymentWaitingTitle": "Paiement en cours dans un autre onglet",
+  "@paymentWaitingTitle": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentWaitingBody": "Terminez le paiement dans l'onglet qui vient de s'ouvrir. Cette page se met à jour toute seule dès que le paiement est confirmé.",
+  "@paymentWaitingBody": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentWaitingBodyManual": "Terminez le paiement dans l'onglet qui vient de s'ouvrir, puis revenez ici.",
+  "@paymentWaitingBodyManual": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentReopen": "Rouvrir la page de paiement",
+  "@paymentReopen": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentCancel": "Annuler le paiement",
+  "@paymentCancel": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentOpenFailed": "Impossible d'ouvrir la page de paiement. Votre navigateur a peut-être bloqué la fenêtre — autorisez-la, puis réessayez.",
+  "@paymentOpenFailed": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentOpenPage": "Ouvrir la page de paiement",
+  "@paymentOpenPage": {
+    "description": "Bouton principal d'ouverture du paiement"
+  },
+  "paymentVerifyingTitle": "Paiement en cours de vérification",
+  "@paymentVerifyingTitle": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentVerifyingBody": "Si votre compte a été débité, le montant sera crédité automatiquement dès que la confirmation nous parvient. Vous n'avez rien à refaire, et rien n'est perdu.",
+  "@paymentVerifyingBody": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentVerifyingDelay": "La confirmation prend parfois quelques minutes, et jusqu'à une heure quand l'opérateur est lent.",
+  "@paymentVerifyingDelay": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentReference": "Référence : {reference}",
+  "@paymentReference": {
+    "description": "Attente de confirmation de paiement",
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentKeepReference": "Conservez cette référence si vous nous écrivez.",
+  "@paymentKeepReference": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentClose": "Fermer",
+  "@paymentClose": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "supportTitle": "Assistance Ablony",
+  "@supportTitle": {
+    "description": "Assistance intégrée"
+  },
+  "supportHint": "Décrivez votre problème…",
+  "@supportHint": {
+    "description": "Assistance intégrée"
+  },
+  "supportAttach": "Joindre une capture",
+  "@supportAttach": {
+    "description": "Assistance intégrée"
+  },
+  "supportWelcomeTitle": "Vous écrivez à l'équipe Ablony",
+  "@supportWelcomeTitle": {
+    "description": "Assistance intégrée"
+  },
+  "supportWelcomeEmpty": "Expliquez ce qui s'est passé et joignez une capture si vous avez été débité — c'est ce qui permet de trancher le plus vite. Nous répondons sous 24 h ouvrées.",
+  "@supportWelcomeEmpty": {
+    "description": "Assistance intégrée"
+  },
+  "supportWelcomeDelay": "Nous répondons sous 24 h ouvrées.",
+  "@supportWelcomeDelay": {
+    "description": "Assistance intégrée"
+  },
+  "supportOpen": "Contacter l'assistance",
+  "@supportOpen": {
+    "description": "Assistance intégrée"
+  },
+  "supportPaymentPrefill": "Bonjour, j'ai été débité mais mon paiement apparaît toujours en attente.\n\nRéférence : {reference}\n\n(Joignez ici la capture du débit.)",
+  "@supportPaymentPrefill": {
+    "description": "Assistance intégrée",
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCardRedirectNotice": "Vous saisirez votre carte sur la page sécurisée de notre prestataire de paiement. Ablony ne voit ni n'enregistre vos données bancaires.",
+  "@paymentCardRedirectNotice": {
+    "description": "Explication affichée au choix du paiement par carte"
+  },
+  "paymentMethodCardName": "Nom figurant sur la carte",
+  "@paymentMethodCardName": {
+    "description": "Formulaire carte (masqué pour le moment)"
+  },
+  "paymentMethodCardNumber": "Numéro de carte bancaire",
+  "@paymentMethodCardNumber": {
+    "description": "Formulaire carte (masqué pour le moment)"
+  },
+  "paymentMethodCardCvv": "Code de sécurité",
+  "@paymentMethodCardCvv": {
+    "description": "Formulaire carte (masqué pour le moment)"
   }
 }

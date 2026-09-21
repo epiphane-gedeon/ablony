@@ -1,6 +1,6 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/message_bubble.dart';
@@ -18,6 +18,9 @@ import '../../domain/models/message_type.dart';
 import '../../domain/models/offer_status.dart';
 import '../../domain/models/conversation.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/user_badges.dart';
+import '../../../block/data/block_repository.dart';
+import '../../../block/presentation/providers/block_provider.dart';
 import '../../../../core/responsive/responsive.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
@@ -32,7 +35,11 @@ class ChatPage extends ConsumerStatefulWidget {
 class _ChatPageState extends ConsumerState<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  File? _pendingImage;
+  // L'image choisie, et ses octets. On garde les deux : `XFile` part à
+  // l'envoi, les octets servent l'aperçu — `Image.file` ne fonctionne pas sur
+  // le web, et relire le fichier à chaque reconstruction serait du gâchis.
+  XFile? _pendingImage;
+  Uint8List? _pendingImageBytes;
   bool _isSending = false;
 
   @override
@@ -65,12 +72,20 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   /// pour laisser le temps d'ajouter un message avec.
   Future<void> _pickImage() async {
     final image = await pickImageFromSourceSheet(context);
-    if (image == null || !mounted) return;
-    setState(() => _pendingImage = image);
+    if (image == null) return;
+    final bytes = await image.readAsBytes();
+    if (!mounted) return;
+    setState(() {
+      _pendingImage = image;
+      _pendingImageBytes = bytes;
+    });
   }
 
   void _removePendingImage() {
-    setState(() => _pendingImage = null);
+    setState(() {
+      _pendingImage = null;
+      _pendingImageBytes = null;
+    });
   }
 
   Future<void> _sendMessage() async {
@@ -121,7 +136,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       }
 
       _messageController.clear();
-      setState(() => _pendingImage = null);
+      setState(() {
+        _pendingImage = null;
+        _pendingImageBytes = null;
+      });
 
       // Scroll vers le bas après l'envoi
       Future.delayed(const Duration(milliseconds: 100), () {
@@ -198,14 +216,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         productRepositoryProvider,
       ).getProductById(conversation.productId);
 
-      if (rawProduct == null) return;
-
       // 1. Vérifier si l'article est déjà vendu
       if (rawProduct.isSold) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cet article a déjà été vendu'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.itemAlreadySold),
               backgroundColor: Colors.red,
             ),
           );
@@ -255,14 +271,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         productRepositoryProvider,
       ).getProductById(conversation.productId);
 
-      if (product == null) return;
-
       // Vérifier si l'article est déjà vendu
       if (product.isSold) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cet article a déjà été vendu'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.itemAlreadySold),
               backgroundColor: Colors.red,
             ),
           );
@@ -469,9 +483,17 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   radius: 20,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  otherParticipant?.name ?? AppLocalizations.of(context)!.defaultUser,
-                  style: theme.textTheme.titleMedium,
+                Flexible(
+                  child: Text(
+                    otherParticipant?.name ??
+                        AppLocalizations.of(context)!.defaultUser,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                UserBadgesById(
+                  userId: conversation.getOtherParticipantId(currentUser.uid),
                 ),
               ],
             ),
@@ -492,8 +514,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               Expanded(
                 child: messagesAsync.when(
                   data: (messages) {
+                    // Conversation neuve : l'avertissement est seul à l'écran,
+                    // au moment précis où le premier contact s'établit — c'est
+                    // là que se joue l'arnaque au faux support.
                     if (messages.isEmpty) {
-                      return const SizedBox.shrink();
+                      return const SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: _AvertissementMessagerie(),
+                      );
                     }
 
                     // Scroll vers le bas quand de nouveaux messages arrivent
@@ -508,9 +536,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     return ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      itemCount: messages.length,
+                      // Un élément de plus : l'avertissement, posé en tête du
+                      // fil plutôt qu'en bandeau permanent. Il reste consultable
+                      // en remontant, sans occuper l'écran à chaque message.
+                      itemCount: messages.length + 1,
                       itemBuilder: (context, index) {
-                        final message = messages[index];
+                        if (index == 0) return const _AvertissementMessagerie();
+                        final message = messages[index - 1];
                         return _buildMessage(
                           message,
                           currentUser.uid,
@@ -525,7 +557,19 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       Center(child: Text('Erreur : $error')),
                 ),
               ),
-              _buildInputSection(theme),
+              // Si l'un des deux a bloqué l'autre, la conversation devient
+              // muette — pas invisible. L'historique peut servir de preuve
+              // dans un litige, et une commande en cours continue.
+              if (ref.watch(
+                isBlockedProvider(
+                  conversation.getOtherParticipantId(currentUser.uid),
+                ),
+              ))
+                _BandeauBlocage(
+                  autre: conversation.getOtherParticipantId(currentUser.uid),
+                )
+              else
+                _buildInputSection(theme),
             ],
           ),
         );
@@ -733,8 +777,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.file(
-                _pendingImage!,
+              child: Image.memory(
+                _pendingImageBytes!,
                 height: 72,
                 width: 72,
                 fit: BoxFit.cover,
@@ -753,6 +797,119 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   ),
                   child: const Icon(Icons.close, size: 14, color: Colors.white),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// La conversation muette.
+///
+/// À la place du champ de saisie, et non à la place de l'écran : masquer la
+/// conversation ferait disparaître une commande en cours sous les yeux de
+/// quelqu'un qui attend son colis.
+class _BandeauBlocage extends ConsumerWidget {
+  const _BandeauBlocage({required this.autre});
+
+  final String autre;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        border: Border(
+          top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
+        ),
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Icon(Icons.block, size: 18, color: theme.hintColor),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.blockedConversation,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await ref.read(blockRepositoryProvider).unblock(autre);
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.unblockDone)),
+                );
+              },
+              child: Text(l10n.unblockUser),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Ce qu'il ne faut jamais écrire dans une conversation.
+///
+/// Placé dans le fil et non dans un document qu'on lit rarement : c'est ici que
+/// se prend la mauvaise décision. L'escroquerie la plus courante sur une place
+/// de marché consiste à se faire passer pour le support et à réclamer un code
+/// reçu par SMS ; la personne le donne parce que rien, à l'écran, ne lui a dit
+/// que nous ne le demandons jamais.
+class _AvertissementMessagerie extends StatelessWidget {
+  const _AvertissementMessagerie();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.shield_outlined,
+              size: 18,
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.chatSafetyWarning,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.75),
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.chatNotEncrypted,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

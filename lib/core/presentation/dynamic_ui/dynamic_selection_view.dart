@@ -191,7 +191,7 @@ class DynamicSelectionViewState extends State<DynamicSelectionView> {
         widget.config['nextAction'] as String?; // 'navigate_recursive'
 
     if (_dataFuture == null) {
-      return const Center(child: Text('Source de données manquante'));
+      return Center(child: Text(AppLocalizations.of(context)!.dynamicMissingSource));
     }
 
     return Column(
@@ -230,7 +230,7 @@ class DynamicSelectionViewState extends State<DynamicSelectionView> {
               }).toList();
 
               if (items.isEmpty) {
-                return const Center(child: Text('Aucun élément trouvé'));
+                return Center(child: Text(AppLocalizations.of(context)!.dynamicNoItems));
               }
 
               // Check if we should show "Tous" option (configurable via showAllOption)

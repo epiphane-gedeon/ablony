@@ -233,6 +233,24 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Finalise une connexion par redirection Google en attente (web).
+  ///
+  /// À appeler au démarrage : si l'utilisateur revient de Google, le SDK a
+  /// besoin de cet appel pour terminer la connexion et déclencher
+  /// `authStateChanges`. Renvoie l'utilisateur Firebase si un retour était en
+  /// attente, sinon null. Sans effet hors web.
+  Future<firebase_auth.User?> completePendingRedirectSignIn() async {
+    if (!kIsWeb) return null;
+    try {
+      final result = await _firebaseAuth.getRedirectResult();
+      return result.user;
+    } catch (e) {
+      // Pas de redirection en attente, ou attestation impossible : on ne
+      // bloque pas le démarrage pour autant.
+      return null;
+    }
+  }
+
   // ============================================================
   // AUTHENTIFICATION SOCIALE - FACEBOOK
   // ============================================================
@@ -570,6 +588,12 @@ class AuthRepositoryImpl implements AuthRepository {
         // Créer le document utilisateur
         final userRef = _firestore.collection('users').doc(uid);
         final userData = UserModel.fromEntity(user).toFirestore();
+        // Le badge « fondateur » n'est plus posé ici. Il l'était, et c'était
+        // doublement fragile : fermer la fenêtre aurait exigé que chacun mette
+        // son application à jour — une version ancienne aurait continué d'en
+        // distribuer — et rien n'empêchait un client modifié de se l'attribuer.
+        // C'est désormais le déclencheur serveur `onUserCreated` qui décide,
+        // d'après un réglage que seule l'administration modifie.
         print('🔵 [completeUserProfile] UserData à sauvegarder: $userData');
         transaction.set(userRef, userData);
 
@@ -614,6 +638,7 @@ class AuthRepositoryImpl implements AuthRepository {
     String? city,
     bool? marketingEmailsEnabled,
     Wallet? wallet,
+    bool effacerPhoto = false,
   }) async {
     try {
       // Charger l'utilisateur actuel
@@ -632,6 +657,7 @@ class AuthRepositoryImpl implements AuthRepository {
         username: username,
         displayName: displayName,
         photoUrl: photoUrl,
+        effacerPhoto: effacerPhoto,
         phoneNumber: phoneNumber,
         city: city,
         marketingEmailsEnabled: marketingEmailsEnabled,
@@ -642,10 +668,14 @@ class AuthRepositoryImpl implements AuthRepository {
       // Mettre à jour dans Firestore avec transaction
       await _firestore.runTransaction((transaction) async {
         final userRef = _firestore.collection('users').doc(uid);
-        transaction.update(
-          userRef,
-          UserModel.fromEntity(updatedUser).toFirestore(),
-        );
+        final donnees = UserModel.fromEntity(updatedUser).toFirestore();
+        if (effacerPhoto) {
+          // `toFirestore` laisse de côté les champs nuls : sans cette ligne,
+          // l'ancienne adresse resterait en base et la photo reviendrait au
+          // rechargement suivant.
+          donnees['photoUrl'] = FieldValue.delete();
+        }
+        transaction.update(userRef, donnees);
 
         // Si le username a changé, mettre à jour la collection 'usernames'
         if (username != null && username != currentUser.username) {
@@ -940,8 +970,11 @@ class AuthRepositoryImpl implements AuthRepository {
       // On utilise donc une recherche par préfixe (commence par)
       final snapshot = await _firestore
           .collection('users')
-          .where('username', isGreaterThanOrEqualTo: queryLower)
-          .where('username', isLessThan: '${queryLower}z')
+          // On cherche sur `usernameLower` (copie minuscule) : chercher sur
+          // `username` (casse préservée) rendait « Amina » ou « Jean2 »
+          // introuvables. `` est la borne haute standard d'un préfixe.
+          .where('usernameLower', isGreaterThanOrEqualTo: queryLower)
+          .where('usernameLower', isLessThan: '$queryLower')
           .limit(10) // Limiter à 10 résultats pour les performances
           .get();
 

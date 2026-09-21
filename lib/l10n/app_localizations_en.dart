@@ -151,9 +151,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTitle => 'Ablony';
 
   @override
-  String get homeWelcome => 'Hello World! 🎉';
-
-  @override
   String get homeSubtitle => 'Welcome to Ablony!';
 
   @override
@@ -792,7 +789,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchMembersTab => 'Members';
 
   @override
-  String get searchArticlesPlaceholder => 'Search for an article or member...';
+  String get searchArticlesPlaceholder => 'Search';
 
   @override
   String get closeButton => 'Close';
@@ -1051,15 +1048,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNotFound => 'Product not found';
 
   @override
-  String get clickToTranslate => 'Click here to translate';
-
-  @override
-  String get activelyPublishes => 'Actively publishes';
-
-  @override
-  String get sendsQuickly => 'Sends quickly';
-
-  @override
   String get markAsSold => 'Mark as sold';
 
   @override
@@ -1267,6 +1255,105 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get boostInsufficientBalance =>
       'Insufficient balance. Choose another payment method.';
+
+  @override
+  String boostCreditsBalance(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count boosts in reserve',
+      one: '1 boost in reserve',
+      zero: 'No boosts in reserve',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boostUseCredit => 'Use a boost';
+
+  @override
+  String get boostUseCreditSubtitle => 'From your reserve, no payment';
+
+  @override
+  String boostPayOccasional(int price) {
+    return 'Boost now · $price FCFA';
+  }
+
+  @override
+  String get boostBuyPacks => 'Buy boosts';
+
+  @override
+  String boostCreditApplied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count boosts',
+      one: '1 boost',
+      zero: 'no boosts',
+    );
+    return 'Boost applied! You have $_temp0 left.';
+  }
+
+  @override
+  String get boostPackTitle => 'Buy boosts';
+
+  @override
+  String boostPackDescription(int hours) {
+    return 'Buy boosts ahead of time and use them whenever you want, on any listing. Each boost features an item for ${hours}h.';
+  }
+
+  @override
+  String get boostPackQuantity => 'Number of boosts';
+
+  @override
+  String get boostPackTotal => 'Total';
+
+  @override
+  String boostPackBuy(int count, int price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count boosts',
+      one: '1 boost',
+    );
+    return 'Buy $_temp0 · $price FCFA';
+  }
+
+  @override
+  String boostPackSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count boosts added',
+      one: '1 boost added',
+    );
+    return '$_temp0 to your reserve!';
+  }
+
+  @override
+  String get promotionCreditsTitle => 'Your boosts in reserve';
+
+  @override
+  String get promotionUnavailable => 'Coming soon';
+
+  @override
+  String get promotionUnavailableHint =>
+      'Listing promotion is coming to mobile soon. It is already available on the Ablony website.';
+
+  @override
+  String get promotionCreditsHint =>
+      'Use them on any listing, whenever you want.';
+
+  @override
+  String get locationSearchHint => 'Search for a place or neighbourhood…';
+
+  @override
+  String locationSearchNoResult(String query) {
+    return 'No place found for “$query”';
+  }
+
+  @override
+  String get locationSearchFailed => 'Search failed. Check your connection.';
 
   @override
   String get shareProduct => 'Share';
@@ -1590,4 +1677,837 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deliveryConfirmedSuccess =>
       'Receipt confirmed. The seller has been paid.';
+
+  @override
+  String get walletStatement => 'Statement';
+
+  @override
+  String get walletStatementEmpty => 'No activity yet';
+
+  @override
+  String get walletStatementEmptyDetail =>
+      'Your purchases, sales and top-ups will show up here.';
+
+  @override
+  String get walletStatementError => 'Could not load your statement.';
+
+  @override
+  String get walletEntryTopUp => 'Top-up';
+
+  @override
+  String get walletEntryPurchase => 'Purchase';
+
+  @override
+  String get walletEntryBoost => 'Boost';
+
+  @override
+  String get walletEntrySale => 'Sale';
+
+  @override
+  String get walletEntryOnHold => 'on hold';
+
+  @override
+  String get scanParcelStaff => 'Scan a parcel';
+
+  @override
+  String get scanParcelBuyer => 'Scan my parcel';
+
+  @override
+  String get scanHintStaff => 'Point at the label stuck on the parcel.';
+
+  @override
+  String get scanHintBuyer =>
+      'Point at your parcel\'s label to confirm you received it.';
+
+  @override
+  String get scanTorch => 'Torch';
+
+  @override
+  String get scanFailed => 'The scan failed. Try again.';
+
+  @override
+  String get checkpointRecorded => 'Step recorded.';
+
+  @override
+  String get parcelStatusLabel => 'Status';
+
+  @override
+  String get parcelDestinationRelay => 'Relay point';
+
+  @override
+  String get parcelDestinationHome => 'Home delivery';
+
+  @override
+  String get parcelRecordStep => 'Record a step';
+
+  @override
+  String get parcelNoStepLeft => 'This parcel has completed its journey.';
+
+  @override
+  String get parcelAwaitingDropoff => 'Awaiting drop-off';
+
+  @override
+  String get parcelDroppedOff => 'Dropped off';
+
+  @override
+  String get parcelInTransit => 'In transit';
+
+  @override
+  String get parcelReadyForPickup => 'Ready for pickup';
+
+  @override
+  String get parcelOutForDelivery => 'Out for delivery';
+
+  @override
+  String get parcelDelivered => 'Delivered';
+
+  @override
+  String get parcelReturned => 'Returned';
+
+  @override
+  String get parcelLost => 'Lost';
+
+  @override
+  String get stepDroppedOff => 'Drop-off';
+
+  @override
+  String get stepInTransit => 'Departure';
+
+  @override
+  String get stepArrived => 'Arrived at relay';
+
+  @override
+  String get stepOutForDelivery => 'Out for delivery';
+
+  @override
+  String get stepDelivered => 'Delivered';
+
+  @override
+  String get stepReturned => 'Return';
+
+  @override
+  String get stepLost => 'Lost';
+
+  @override
+  String get stuckParcelsTitle => 'Stuck parcels';
+
+  @override
+  String get stuckParcelsEmpty => 'Nothing pending. All moving.';
+
+  @override
+  String get stuckNeverDroppedOff => 'Never dropped off — deadline passed';
+
+  @override
+  String get stuckInTransitTooLong => 'In transit for too long';
+
+  @override
+  String get stuckWaitingAtRelay => 'Waiting at relay point';
+
+  @override
+  String get stuckBuyerScanned => 'scanned by buyer';
+
+  @override
+  String get staffTools => 'Ablony staff tools';
+
+  @override
+  String get walletEntryRefund => 'Refund';
+
+  @override
+  String get refundBuyer => 'Refund the buyer';
+
+  @override
+  String get refundReasonHint =>
+      'This reason is sent to both buyer and seller. Explain, don\'t summarise.';
+
+  @override
+  String get refundReasonLabel => 'Reason';
+
+  @override
+  String get refundConfirm => 'Refund';
+
+  @override
+  String get refundDone => 'The buyer has been refunded.';
+
+  @override
+  String get parcelNoTrackingYet =>
+      'Being prepared — detailed tracking appears at the first scan';
+
+  @override
+  String get releaseSeller => 'Pay the seller';
+
+  @override
+  String get releaseDone => 'The seller has been paid.';
+
+  @override
+  String get withdrawTitle => 'Withdraw money';
+
+  @override
+  String get withdrawAmount => 'Amount to withdraw';
+
+  @override
+  String get withdrawAll => 'Withdraw all';
+
+  @override
+  String get withdrawMethod => 'Payout method';
+
+  @override
+  String get withdrawDestination => 'Where to send the money';
+
+  @override
+  String get withdrawDestinationPhoneHint => '+228 90 00 00 00';
+
+  @override
+  String get withdrawDestinationBankHint => 'Account number or IBAN';
+
+  @override
+  String get withdrawAmountRequested => 'Requested amount';
+
+  @override
+  String get withdrawFee => 'Transfer fee';
+
+  @override
+  String get withdrawYouReceive => 'You receive';
+
+  @override
+  String get withdrawFeeExplained =>
+      'This fee covers the transfer to your mobile money account. Withdrawing a larger amount at once costs proportionally less.';
+
+  @override
+  String get withdrawInsufficient =>
+      'Your available balance does not cover this amount.';
+
+  @override
+  String get withdrawAlreadyPending =>
+      'A request is already being processed. You can make another, but they will be paid out separately.';
+
+  @override
+  String get withdrawConfirm => 'Request withdrawal';
+
+  @override
+  String get withdrawManualNotice =>
+      'Payouts are made manually, within 24 to 48 business hours.';
+
+  @override
+  String get withdrawActivateFirst => 'Activate your wallet to withdraw';
+
+  @override
+  String get withdrawPending => 'Being paid out';
+
+  @override
+  String get withdrawPaid => 'Paid';
+
+  @override
+  String get withdrawRejected => 'Declined';
+
+  @override
+  String withdrawMinimum(String amount) {
+    return 'Minimum: $amount FCFA';
+  }
+
+  @override
+  String withdrawRequested(String amount) {
+    return 'Request recorded. You will receive $amount FCFA.';
+  }
+
+  @override
+  String get walletEntryWithdrawal => 'Withdrawal';
+
+  @override
+  String get walletEntryWithdrawalRefund => 'Withdrawal declined';
+
+  @override
+  String get moderationCorrectionTitle => 'Listing needs fixing';
+
+  @override
+  String get moderationRemovedTitle => 'Listing removed';
+
+  @override
+  String get moderationCorrectionHint =>
+      'Fix it and it goes back online automatically.';
+
+  @override
+  String get moderationRemovedHint => 'This listing cannot be put back online.';
+
+  @override
+  String get moderationCorrectionAction => 'Fix the listing';
+
+  @override
+  String get moderationReasonBlurryPhotos => 'Blurry or unusable photos';
+
+  @override
+  String get moderationReasonWrongCategory => 'Wrong category';
+
+  @override
+  String get moderationReasonMissingDescription => 'Description too thin';
+
+  @override
+  String get moderationReasonWrongPrice => 'Inconsistent price';
+
+  @override
+  String get moderationReasonCounterfeit => 'Counterfeit';
+
+  @override
+  String get moderationReasonProhibitedItem => 'Item not allowed for sale';
+
+  @override
+  String get moderationReasonInappropriate => 'Inappropriate content';
+
+  @override
+  String get moderationReasonFraud => 'Attempted fraud';
+
+  @override
+  String get moderationReasonOffPlatformSale => 'Off-platform sale';
+
+  @override
+  String get moderationReasonOther => 'Reason not specified';
+
+  @override
+  String get disputeOpen => 'I have a problem with this order';
+
+  @override
+  String get disputeTitle => 'Report a problem';
+
+  @override
+  String get disputeReason => 'What happened?';
+
+  @override
+  String get disputeNotReceived => 'I never received the parcel';
+
+  @override
+  String get disputeNotAsDescribed => 'The item does not match the listing';
+
+  @override
+  String get disputeDamaged => 'The item arrived damaged';
+
+  @override
+  String get disputeBuyerNotConfirming => 'The buyer isn\'t confirming receipt';
+
+  @override
+  String get disputeBuyerNoValidReason =>
+      'The buyer is claiming without valid grounds';
+
+  @override
+  String get disputeOther => 'Other';
+
+  @override
+  String get disputeDescription => 'Describe the problem';
+
+  @override
+  String get disputeDescriptionHint => 'Be specific: this is what settles it.';
+
+  @override
+  String disputeDescriptionTooShort(int count) {
+    return '$count more characters';
+  }
+
+  @override
+  String get disputePhotos => 'Add photos (up to 4)';
+
+  @override
+  String get disputePhotosHint => 'A photo beats a description.';
+
+  @override
+  String get disputeSubmit => 'Send the report';
+
+  @override
+  String get disputeSubmitted =>
+      'Your report is recorded. Answer within 48 hours.';
+
+  @override
+  String get disputeUnderReview => 'Dispute under review';
+
+  @override
+  String get disputeUnderReviewHint =>
+      'We are reviewing your case. Answer within 48 hours.';
+
+  @override
+  String get disputeResolvedRefunded => 'Dispute settled: you were refunded';
+
+  @override
+  String get disputeResolvedReleased =>
+      'Dispute settled in the seller\'s favour';
+
+  @override
+  String get disputeOpenedByOther =>
+      'The other party opened a dispute on this order.';
+
+  @override
+  String get disputeSending => 'Sending…';
+
+  @override
+  String get blockUser => 'Block';
+
+  @override
+  String get unblockUser => 'Unblock';
+
+  @override
+  String blockConfirmTitle(String username) {
+    return 'Block $username?';
+  }
+
+  @override
+  String get blockConfirmBody =>
+      'Neither of you will be able to write to the other. This person is not notified. An ongoing sale carries on as normal.';
+
+  @override
+  String blockDone(String username) {
+    return '$username has been blocked.';
+  }
+
+  @override
+  String get blockAlsoReport => 'Do you also want to report them to Ablony?';
+
+  @override
+  String get blockedUsersTitle => 'Blocked people';
+
+  @override
+  String get blockedUsersEmpty => 'You have not blocked anyone.';
+
+  @override
+  String get blockedUsersHint =>
+      'Blocking someone closes messaging between you, both ways. Nobody is notified.';
+
+  @override
+  String get blockedConversation => 'You have blocked this person.';
+
+  @override
+  String get blockedByOther => 'You can no longer write in this conversation.';
+
+  @override
+  String get unblockDone => 'Unblocked.';
+
+  @override
+  String get reportUser => 'Report';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get ordersTitle => 'Sales and purchases';
+
+  @override
+  String get ordersPurchases => 'Purchases';
+
+  @override
+  String get ordersSales => 'Sales';
+
+  @override
+  String get ordersNoPurchases => 'You have not bought anything yet';
+
+  @override
+  String get ordersNoPurchasesHint =>
+      'What you buy shows up here, with delivery progress.';
+
+  @override
+  String get ordersNoSales => 'You have not sold anything yet';
+
+  @override
+  String get ordersNoSalesHint =>
+      'List an item: as soon as it sells, you track it from here.';
+
+  @override
+  String orderDropOffBy(String date) {
+    return 'Drop off before $date';
+  }
+
+  @override
+  String get orderDropOffLate => 'Deadline passed — refund under way';
+
+  @override
+  String get orderPrintLabel => 'Print the label';
+
+  @override
+  String get orderInTransit => 'On its way';
+
+  @override
+  String get orderAwaitingPickup => 'Ready at the relay point';
+
+  @override
+  String get orderSellerPreparing => 'The seller is preparing your parcel';
+
+  @override
+  String get orderDeliveredWaiting => 'Delivered — payment to come';
+
+  @override
+  String get orderConfirmReception => 'Confirm receipt';
+
+  @override
+  String orderPaid(String amount) {
+    return 'Paid: $amount FCFA';
+  }
+
+  @override
+  String get orderReceived => 'Done';
+
+  @override
+  String orderRefunded(String amount) {
+    return 'Refunded: $amount FCFA';
+  }
+
+  @override
+  String get orderCancelled => 'Sale cancelled';
+
+  @override
+  String get orderTrack => 'Track';
+
+  @override
+  String get orderSee => 'View';
+
+  @override
+  String get ordersLoadMore => 'See more';
+
+  @override
+  String get promotionEmpty => 'No listing to promote';
+
+  @override
+  String get promotionEmptyHint =>
+      'List an item: you can then push it up the listings.';
+
+  @override
+  String get promotionBoost => 'Promote';
+
+  @override
+  String promotionActiveUntil(String date) {
+    return 'Promoted until $date';
+  }
+
+  @override
+  String get termsOfService => 'Terms of service';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get legalNotice => 'Legal notice';
+
+  @override
+  String get editProfileTitle => 'Profile information';
+
+  @override
+  String get editProfilePhoto => 'Profile photo';
+
+  @override
+  String get editProfileDisplayName => 'Display name';
+
+  @override
+  String get editProfileCity => 'City';
+
+  @override
+  String get editProfileSave => 'Save';
+
+  @override
+  String get editProfileSaved => 'Profile updated.';
+
+  @override
+  String get securityTitle => 'Security';
+
+  @override
+  String get securityCurrentPassword => 'Current password';
+
+  @override
+  String get securityNewPassword => 'New password';
+
+  @override
+  String get securityConfirmPassword => 'Confirm new password';
+
+  @override
+  String get securityChangePassword => 'Change password';
+
+  @override
+  String get securityPasswordChanged => 'Password changed.';
+
+  @override
+  String get securityMismatch => 'The two entries do not match.';
+
+  @override
+  String get securityTooShort => 'At least 8 characters.';
+
+  @override
+  String get securityWrongPassword => 'Current password is incorrect.';
+
+  @override
+  String securitySocialAccount(String provider) {
+    return 'You sign in with $provider';
+  }
+
+  @override
+  String get securitySocialHint =>
+      'Your password is handled by that service. There is nothing to change here.';
+
+  @override
+  String get emailSettingsTitle => 'Email address';
+
+  @override
+  String get emailVerified => 'Address verified';
+
+  @override
+  String get emailNotVerified => 'Address not verified';
+
+  @override
+  String get emailNotVerifiedHint =>
+      'Verify your address: sale and withdrawal alerts go through it.';
+
+  @override
+  String get emailResendLink => 'Resend the verification link';
+
+  @override
+  String get emailLinkSent => 'Link sent. Check your inbox.';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsEmpty => 'Nothing yet';
+
+  @override
+  String get notificationsEmptyHint =>
+      'Your sales, purchases and messages will show up here.';
+
+  @override
+  String get notificationsMarkAllRead => 'Mark all as read';
+
+  @override
+  String get timeAgoNow => 'just now';
+
+  @override
+  String get receiptPurchaseTitle => 'Purchase receipt';
+
+  @override
+  String get receiptSaleTitle => 'Sale summary';
+
+  @override
+  String get receiptTotalPaidLabel => 'Total paid';
+
+  @override
+  String get receiptYouReceive => 'You receive';
+
+  @override
+  String get receiptYouReceiveHint =>
+      'The item price. Delivery and buyer-protection fees are paid by the buyer.';
+
+  @override
+  String get receiptDetails => 'Details';
+
+  @override
+  String get receiptParties => 'Parties';
+
+  @override
+  String get receiptDeliverySection => 'Delivery';
+
+  @override
+  String get receiptActions => 'Actions';
+
+  @override
+  String get founderBadge => 'Founder';
+
+  @override
+  String get starBadge => 'Star';
+
+  @override
+  String get paymentMethodSelectPrompt => 'Please select a payment method';
+
+  @override
+  String get paymentMethodTmoneyPrompt => 'Please enter your T-Money number';
+
+  @override
+  String get paymentMethodFloozPrompt => 'Please enter your Flooz number';
+
+  @override
+  String get paymentMethodTmoneyLabel => 'T-Money phone number';
+
+  @override
+  String get paymentMethodFloozLabel => 'Flooz phone number';
+
+  @override
+  String get locationCurrentFailed => 'Could not get your location';
+
+  @override
+  String get locationSelectPrompt => 'Please select a location';
+
+  @override
+  String get locationPickTitle => 'Choose a location';
+
+  @override
+  String get parcelLabelTitle => 'Parcel label';
+
+  @override
+  String get parcelLabelCopyCode => 'Copy code';
+
+  @override
+  String get parcelLabelCodeCopied => 'Code copied';
+
+  @override
+  String get notificationDeleted => 'Notification deleted';
+
+  @override
+  String get viewPublicProfile => 'View my public profile';
+
+  @override
+  String get boostBuyOnWeb =>
+      'Boosts are purchased on the Ablony website (ablony.app).';
+
+  @override
+  String get parcelLabelDownload => 'Download label';
+
+  @override
+  String get parcelLabelError => 'Could not generate the label';
+
+  @override
+  String get addressFullName => 'Full name';
+
+  @override
+  String get deliveryPhoneLabel => 'Phone';
+
+  @override
+  String get deliveryPhoneRequired => 'Please enter a phone number';
+
+  @override
+  String get deliveryPhoneInvalid => 'Invalid phone number';
+
+  @override
+  String get deliveryContactLabel => 'Name and phone';
+
+  @override
+  String get deliveryContactPlaceholder => 'Add your contact details';
+
+  @override
+  String get deliveryContactTitle => 'Contact details';
+
+  @override
+  String get marketingEmailToggleTitle => 'Marketing emails';
+
+  @override
+  String get marketingEmailToggleSubtitle => 'Offers, news and promotions';
+
+  @override
+  String get addressEditLocation => 'Change location';
+
+  @override
+  String get paymentHomeDelivery => 'Home delivery';
+
+  @override
+  String get paymentPayDifference => 'Pay the difference';
+
+  @override
+  String get paymentInvoiceDetail => 'Invoice details';
+
+  @override
+  String get dynamicMissingSource => 'Missing data source';
+
+  @override
+  String get dynamicNoItems => 'No items found';
+
+  @override
+  String get walletTopUpTitle => 'Top up wallet';
+
+  @override
+  String get walletTopUpPrompt => 'Enter the amount to top up (min. 200 FCFA):';
+
+  @override
+  String get itemAlreadySold => 'This item has already been sold';
+
+  @override
+  String get offerSentSuccess => 'Offer sent successfully!';
+
+  @override
+  String get relayPointPickTitle => 'Choose a pickup point';
+
+  @override
+  String get captchaIncomplete => 'Please complete the captcha';
+
+  @override
+  String get favoritesSearchHint => 'Search favourites…';
+
+  @override
+  String get chatSafetyWarning =>
+      'Never share an SMS code, a password or your bank details here. The Ablony team will never ask for them.';
+
+  @override
+  String get chatNotEncrypted => 'Messages are not end-to-end encrypted.';
+
+  @override
+  String get paymentWaitingTitle => 'Payment in progress in another tab';
+
+  @override
+  String get paymentWaitingBody =>
+      'Complete the payment in the tab that just opened. This page updates by itself as soon as the payment is confirmed.';
+
+  @override
+  String get paymentWaitingBodyManual =>
+      'Complete the payment in the tab that just opened, then come back here.';
+
+  @override
+  String get paymentReopen => 'Reopen the payment page';
+
+  @override
+  String get paymentCancel => 'Cancel payment';
+
+  @override
+  String get paymentOpenFailed =>
+      'Could not open the payment page. Your browser may have blocked the window — allow it, then try again.';
+
+  @override
+  String get paymentOpenPage => 'Open the payment page';
+
+  @override
+  String get paymentVerifyingTitle => 'Payment being verified';
+
+  @override
+  String get paymentVerifyingBody =>
+      'If your account was debited, the amount will be credited automatically as soon as we receive confirmation. There is nothing more to do, and nothing is lost.';
+
+  @override
+  String get paymentVerifyingDelay =>
+      'Confirmation sometimes takes a few minutes, and up to an hour when the operator is slow.';
+
+  @override
+  String paymentReference(String reference) {
+    return 'Reference: $reference';
+  }
+
+  @override
+  String get paymentKeepReference => 'Keep this reference if you contact us.';
+
+  @override
+  String get paymentClose => 'Close';
+
+  @override
+  String get supportTitle => 'Ablony Support';
+
+  @override
+  String get supportHint => 'Describe your problem…';
+
+  @override
+  String get supportAttach => 'Attach a screenshot';
+
+  @override
+  String get supportWelcomeTitle => 'You are writing to the Ablony team';
+
+  @override
+  String get supportWelcomeEmpty =>
+      'Explain what happened and attach a screenshot if you were debited — that is what settles things fastest. We reply within 24 working hours.';
+
+  @override
+  String get supportWelcomeDelay => 'We reply within 24 working hours.';
+
+  @override
+  String get supportOpen => 'Contact support';
+
+  @override
+  String supportPaymentPrefill(String reference) {
+    return 'Hello, I was debited but my payment still shows as pending.\n\nReference: $reference\n\n(Attach the debit screenshot here.)';
+  }
+
+  @override
+  String get paymentCardRedirectNotice =>
+      'You will enter your card on our payment provider\'s secure page. Ablony never sees or stores your card details.';
+
+  @override
+  String get paymentMethodCardName => 'Name on card';
+
+  @override
+  String get paymentMethodCardNumber => 'Card number';
+
+  @override
+  String get paymentMethodCardCvv => 'Security code';
 }

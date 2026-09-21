@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../services/analytics_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/auth/presentation/pages/pages.dart';
 import '../../features/auth/application/providers.dart';
@@ -16,8 +17,18 @@ import '../../features/messages/presentation/pages/chat_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/public_profile_page.dart';
 import '../../features/profile/presentation/pages/user_listings_page.dart';
+import '../../features/block/presentation/pages/blocked_users_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/orders/presentation/pages/orders_page.dart';
+import '../../features/product/presentation/pages/promotion_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
+import '../../features/profile/presentation/pages/email_settings_page.dart';
+import '../../features/support/presentation/pages/support_page.dart';
+import '../../features/profile/presentation/pages/security_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
+import '../../features/wallet/presentation/pages/wallet_statement_page.dart';
+import '../../features/wallet/presentation/pages/withdraw_page.dart';
 import '../../features/product_fav/presentation/pages/favorites_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
 import '../../features/address/presentation/pages/add_address_page.dart';
@@ -25,10 +36,13 @@ import '../../features/payment_method/presentation/pages/payment_method_page.dar
 import '../../features/relay_point/presentation/pages/select_relay_point_page.dart';
 import '../../features/follow/presentation/pages/followers_page.dart';
 import '../../features/follow/presentation/pages/following_page.dart';
+import '../../features/dispute/presentation/pages/open_dispute_page.dart';
 import '../../features/receipt/presentation/pages/receipt_page.dart';
 import '../../features/reviews/presentation/pages/rate_seller_page.dart';
 import '../../features/delivery/data/parcel_repository.dart';
 import '../../features/delivery/presentation/pages/parcel_label_page.dart';
+import '../../features/delivery/presentation/pages/scan_parcel_page.dart';
+import '../../features/delivery/presentation/pages/stuck_parcels_page.dart';
 import '../../features/product/presentation/pages/product_detail_page.dart';
 import '../../features/product/domain/entities/product.dart';
 import '../../core/layout/main_layout.dart';
@@ -105,6 +119,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     /// Clé de navigation racine, réutilisée par les handlers de notifications
     /// push (FCM) pour naviguer/afficher un SnackBar hors de l'arbre de widgets.
     navigatorKey: rootNavigatorKey,
+
+    /// Logge chaque écran visité dans Analytics, sans un appel par page :
+    /// l'observateur suit les transitions de route tout seul.
+    observers: [ref.read(analyticsServiceProvider).observer],
 
     /// Le [refreshListenable] est la clé pour une redirection réactive.
     /// Il écoute notre [RouterNotifier] et ré-évalue la redirection
@@ -457,6 +475,21 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'wallet',
                     name: 'wallet',
                     builder: (context, state) => const WalletPage(),
+                    routes: [
+                      // Sous-route : relevé du porte-monnaie
+                      GoRoute(
+                        path: 'statement',
+                        name: 'wallet_statement',
+                        builder: (context, state) =>
+                            const WalletStatementPage(),
+                      ),
+                      // Sous-route : demande de retrait
+                      GoRoute(
+                        path: 'withdraw',
+                        name: 'withdraw',
+                        builder: (context, state) => const WithdrawPage(),
+                      ),
+                    ],
                   ),
                   // Sous-route : Favoris
                   GoRoute(
@@ -470,11 +503,64 @@ final routerProvider = Provider<GoRouter>((ref) {
                     name: 'my-listings',
                     builder: (context, state) => const UserListingsPage(),
                   ),
+                  // Sous-route : Ventes et achats
+                  GoRoute(
+                    path: 'orders',
+                    name: 'orders',
+                    builder: (context, state) => OrdersPage(
+                      // `?tab=sales` arrive directement sur les ventes :
+                      // c'est de là que vient un vendeur alerté d'un colis.
+                      ongletVentes:
+                          state.uri.queryParameters['tab'] == 'sales',
+                    ),
+                  ),
+                  // Sous-route : Mise en avant
+                  GoRoute(
+                    path: 'promotion',
+                    name: 'promotion',
+                    builder: (context, state) => const PromotionPage(),
+                  ),
+                  // L'assistance, accessible depuis le profil comme depuis
+                  // un paiement resté en attente.
+                  GoRoute(
+                    path: 'support',
+                    name: 'support',
+                    builder: (context, state) => SupportPage(
+                      messageInitial: state.extra is String
+                          ? state.extra as String
+                          : null,
+                    ),
+                  ),
                   // Sous-route : Paramètres
                   GoRoute(
                     path: 'settings',
                     name: 'settings',
                     builder: (context, state) => const SettingsPage(),
+                    routes: [
+                      // Les personnes bloquées, sous les réglages : c'est là
+                      // qu'on va les chercher, et c'est une des entrées
+                      // mortes qui prend enfin vie.
+                      GoRoute(
+                        path: 'bloques',
+                        name: 'blocked_users',
+                        builder: (context, state) => const BlockedUsersPage(),
+                      ),
+                      GoRoute(
+                        path: 'profil',
+                        name: 'edit_profile',
+                        builder: (context, state) => const EditProfilePage(),
+                      ),
+                      GoRoute(
+                        path: 'securite',
+                        name: 'security',
+                        builder: (context, state) => const SecurityPage(),
+                      ),
+                      GoRoute(
+                        path: 'email',
+                        name: 'email_settings',
+                        builder: (context, state) => const EmailSettingsPage(),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -516,6 +602,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           String query = '';
           String? categoryId;
           String? categoryName;
+          String? brand;
+          String? size;
+          String? condition;
 
           if (state.extra is String) {
             query = state.extra as String;
@@ -524,12 +613,18 @@ final routerProvider = Provider<GoRouter>((ref) {
             query = params['query'] ?? '';
             categoryId = params['categoryId'];
             categoryName = params['categoryName'];
+            brand = params['brand'];
+            size = params['size'];
+            condition = params['condition'];
           }
 
           return SearchResultsPage(
             query: query,
             categoryId: categoryId,
             categoryName: categoryName,
+            initialBrand: brand,
+            initialSize: size,
+            initialCondition: condition,
           );
         },
       ),
@@ -543,8 +638,35 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'product-detail',
         builder: (context, state) {
           final productId = state.pathParameters['id']!;
-          return ProductDetailPage(productId: productId);
+          // `?corriger=1` ouvre le formulaire de modification par-dessus la
+          // fiche : c'est là qu'aboutit un appui sur « Annonce à corriger ».
+          return ProductDetailPage(
+            productId: productId,
+            ouvrirCorrection: state.uri.queryParameters['corriger'] == '1',
+          );
         },
+      ),
+
+      /// Signaler un problème sur une commande
+      ///
+      /// Sous le reçu : c'est là que le problème se pose, et c'est là qu'on
+      /// doit trouver le recours.
+      GoRoute(
+        path: '/receipt/:receiptId/probleme',
+        name: 'open_dispute',
+        builder: (context, state) => OpenDisputePage(
+          transactionRef: state.pathParameters['receiptId']!,
+          // Le rôle décide des motifs affichés ; passé en query pour survivre à
+          // un rechargement web (le litige vendeur n'existe que via ce drapeau).
+          isSeller: state.uri.queryParameters['role'] == 'seller',
+        ),
+      ),
+
+      /// La boîte de réception
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (context, state) => const NotificationsPage(),
       ),
 
       // ============================================================
@@ -562,6 +684,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             return PaymentPage(
               product: extra['product'] as Product?,
               amount: extra['amount'] as double?,
+              pickupParcelCode: extra['pickupParcelCode'] as String?,
             );
           }
           return const Scaffold(
@@ -649,6 +772,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       /// survivre à un rafraîchissement de la page web et à un retour depuis
       /// une notification. L'ancienne route passait l'identifiant par `extra`
       /// et se serait vidée dans les deux cas.
+      // Scan d'une étiquette. Un seul écran pour tout le monde : c'est le
+      // rôle de celui qui scanne qui décide de ce qui se passe ensuite, et
+      // c'est le serveur qui le vérifie.
+      GoRoute(
+        path: '/delivery/scan',
+        name: 'scan_parcel',
+        builder: (context, state) => const ScanParcelPage(),
+      ),
+      // La file des colis bloqués. L'écran ne s'affiche que pour le personnel,
+      // mais c'est la Cloud Function qui refuse : un lien partagé ne donne
+      // rien à qui n'a pas le rôle.
+      GoRoute(
+        path: '/delivery/stuck',
+        name: 'stuck_parcels',
+        builder: (context, state) => const StuckParcelsPage(),
+      ),
       GoRoute(
         path: '/delivery/label/:parcelCode',
         name: 'parcel_label',

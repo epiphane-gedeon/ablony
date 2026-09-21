@@ -45,6 +45,23 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   late AnimationController _topRowController;
   late AnimationController _bottomRowController;
 
+  // Les dix aperçus. Ligne du haut puis ligne du bas pour le défilement ;
+  // remplis en grille sur grand écran.
+  static const List<String> _imagesHaut = [
+    'assets/images/1.jpg',
+    'assets/images/2.jpg',
+    'assets/images/3.jpg',
+    'assets/images/4.jpg',
+    'assets/images/5.jpg',
+  ];
+  static const List<String> _imagesBas = [
+    'assets/images/6.jpg',
+    'assets/images/7.jpg',
+    'assets/images/8.jpg',
+    'assets/images/9.jpg',
+    'assets/images/10.jpg',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -80,8 +97,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
 
       // SafeArea évite que le contenu ne passe sous la barre de statut
       body: SafeArea(
-        // Column pour disposer les éléments verticalement avec tailles adaptables
-        child: Column(
+        // Sur un grand écran, une colonne pleine largeur étire boutons et
+        // texte de façon disgracieuse. On borne la largeur et on centre.
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: ContentWidth.standard),
+            child: Column(
           children: [
             // ================================================================
             // 1. HEADER - Sélecteur de langue et bouton ignorer
@@ -94,8 +115,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             // ================================================================
             // 2. LIGNES D'IMAGES DÉFILANTES - Aperçu des produits
             // ================================================================
-            // Deux lignes qui défilent automatiquement dans des directions opposées
-            _buildScrollingProductRows(),
+            // Sur grand écran, une grille fixe — plus posée, plus lisible.
+            // Sur mobile, le défilement animé, taillé pour un format étroit.
+            context.screenSize.isAtLeast(ScreenSize.expanded)
+                ? _buildProductGrid()
+                : _buildScrollingProductRows(),
 
             // Espacement relatif (4% de la hauteur de l'écran)
             SizedBox(height: screenHeight * 0.04),
@@ -125,6 +149,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             // Espacement final relatif (3% de la hauteur de l'écran)
             SizedBox(height: screenHeight * 0.03),
           ],
+            ),
+          ),
         ),
       ),
     );
@@ -183,6 +209,72 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     );
   }
 
+  /// La grille fixe des aperçus, pour les grands écrans.
+  ///
+  /// Pas de boucle animée ici : sur un écran large, le défilement perpétuel
+  /// fatigue plus qu'il n'attire, et une grille posée se lit d'un coup d'œil.
+  /// Les dix images sur deux rangées de cinq, en cartes verticales.
+  Widget _buildProductGrid() {
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+    const colonnes = 5;
+    const espacement = 12.0;
+    const ratio = 0.62; // cartes verticales, comme dans le défilement
+
+    // La largeur d'une cellule sert au décodage : décoder à la taille native
+    // (photos jusqu'à 4000×6000) saturerait la mémoire, comme pour le
+    // défilement. On borne donc chaque image à la taille où elle s'affiche.
+    final largeurUtile =
+        (context.layoutWidth(ContentWidth.standard) - 48).clamp(0, 900);
+    final largeurCarte =
+        (largeurUtile - espacement * (colonnes - 1)) / colonnes;
+    final cacheWidth = (largeurCarte * dpr).round();
+    final cacheHeight = (largeurCarte / ratio * dpr).round();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GridView.count(
+        crossAxisCount: colonnes,
+        childAspectRatio: ratio,
+        crossAxisSpacing: espacement,
+        mainAxisSpacing: espacement,
+        // Non défilable et dimensionnée par son contenu : elle s'insère dans
+        // la colonne de l'onboarding sans voler le défilement de la page.
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          for (final image in [..._imagesHaut, ..._imagesBas])
+            _buildGridCard(image, cacheWidth, cacheHeight),
+        ],
+      ),
+    );
+  }
+
+  /// Une cellule de la grille : l'image, en coins arrondis, décodée à la
+  /// bonne taille.
+  Widget _buildGridCard(String imagePath, int cacheWidth, int cacheHeight) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          cacheWidth: cacheWidth,
+          cacheHeight: cacheHeight,
+          errorBuilder: (context, error, stackTrace) => Center(
+            child: Icon(
+              Icons.image_outlined,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Construit les deux lignes d'images qui défilent.
   ///
   /// Ligne 1 (haut) : Défile vers la GAUCHE
@@ -201,14 +293,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         _buildScrollingRow(
           controller: _topRowController,
           reverse: false, // false = défile vers la gauche
-          // Liste des images pour la première ligne (1 à 5)
-          images: [
-            'assets/images/1.jpg',
-            'assets/images/2.jpg',
-            'assets/images/3.jpg',
-            'assets/images/4.jpg',
-            'assets/images/5.jpg',
-          ],
+          images: _imagesHaut,
         ),
 
         // Espacement entre les deux lignes
@@ -220,14 +305,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         _buildScrollingRow(
           controller: _bottomRowController,
           reverse: true, // true = défile vers la droite
-          // Liste des images pour la deuxième ligne (6 à 10)
-          images: [
-            'assets/images/6.jpg',
-            'assets/images/7.jpg',
-            'assets/images/8.jpg',
-            'assets/images/9.jpg',
-            'assets/images/10.jpg',
-          ],
+          images: _imagesBas,
         ),
       ],
     );

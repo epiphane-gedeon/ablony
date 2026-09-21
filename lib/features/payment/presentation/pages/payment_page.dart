@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/choice_card_widget.dart';
+import '../../../../shared/widgets/input.dart';
 import '../../../../shared/widgets/selection_tile.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../product/domain/entities/product.dart';
 import '../../../delivery/domain/models/delivery_choice.dart';
 import '../../../delivery/domain/models/delivery_pricing.dart';
+import '../../../delivery/presentation/providers/delivery_fee_provider.dart';
 import '../../../relay_point/domain/models/relay_point.dart';
 import '../../../../core/services/payment_service.dart';
 import 'payment_web_view_page.dart';
 import '../../../../core/responsive/responsive.dart';
+import '../../../../core/services/analytics_service.dart';
 
 /// Page de paiement pour finaliser un achat ou effectuer une recharge de portefeuille
 class PaymentPage extends ConsumerStatefulWidget {
@@ -20,7 +25,20 @@ class PaymentPage extends ConsumerStatefulWidget {
   final double?
   amount; // Utilisé pour la recharge de portefeuille si le produit est nul
 
-  const PaymentPage({super.key, this.product, this.amount});
+  /// Ramassage à domicile : si renseigné, la page facture le ramassage du colis
+  /// [pickupParcelCode] (le vendeur paie pour qu'on vienne le chercher chez
+  /// lui). [product] reste fourni — il donne le titre et la sous-catégorie qui
+  /// fixe le tarif. Le montant est alors le frais de ramassage, pas un achat.
+  final String? pickupParcelCode;
+
+  bool get isPickup => pickupParcelCode != null;
+
+  const PaymentPage({
+    super.key,
+    this.product,
+    this.amount,
+    this.pickupParcelCode,
+  });
 
   @override
   ConsumerState<PaymentPage> createState() => _PaymentPageState();
@@ -39,29 +57,60 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   String? _selectedPaymentMethod;
   String? _paymentPhoneNumber;
 
+  // Coordonnées de contact pour un retrait en point relais (le domicile, lui,
+  // les porte déjà via l'adresse). Exigées pour la traçabilité : pouvoir
+  // joindre l'acheteur quel que soit le mode.
+  String? _relayContactName;
+  String? _relayContactPhone;
+
   bool _isProcessing = false;
   bool _isMixedPayment = false;
   double _walletContribution = 0.0;
   double _externalAmount = 0.0;
 
+  // Frais d'acheminement lus depuis Firestore (sous-catégorie ou défaut), pour
+  // coller au montant que le serveur facture. Initialisés au repli code le
+  // temps du chargement, puis mis à jour par le provider (voir build).
+  int _relayFee = DeliveryPricing.relayFeeXof;
+  int _homeFee = DeliveryPricing.homeFeeXof;
+  int _pickupFee = DeliveryPricing.pickupFeeXof;
+
   // Calcul des frais. Affichés ici, imposés par le serveur : il recalcule le
   // total et refuse un écart. Un client qui fixe ses propres frais n'en paie
   // aucun.
-  double get _protectionFees => widget.product != null
-      ? widget.product!.price * DeliveryPricing.protectionRate
+  // Le XOF n'a pas de décimales : on arrondit les frais pour que l'aperçu, le
+  // total et le montant envoyé tombent sur des entiers (le serveur, lui,
+  // impose et arrondit le total de toute façon).
+  // En mode ramassage, il n'y a ni prix d'article, ni frais de protection, ni
+  // frais de port : le seul montant est le frais de ramassage.
+  double get _protectionFees => (widget.product != null && !widget.isPickup)
+      ? (widget.product!.price * DeliveryPricing.protectionRate).roundToDouble()
       : 0.0;
-  double get _shippingCost => widget.product != null
-      ? DeliveryPricing.shippingFeeFor(_deliveryMethod).toDouble()
+  double get _shippingCost => (widget.product != null && !widget.isPickup)
+      ? (_deliveryMethod == DeliveryMethod.home ? _homeFee : _relayFee)
+          .toDouble()
       : 0.0;
-  double get _totalAmount => widget.product != null
-      ? widget.product!.price + _protectionFees + _shippingCost
-      : (widget.amount ?? 0.0);
+  double get _totalAmount => widget.isPickup
+      ? _pickupFee.toDouble()
+      : widget.product != null
+          ? widget.product!.price + _protectionFees + _shippingCost
+          : (widget.amount ?? 0.0);
 
   /// Le choix de livraison, tel qu'il accompagnera le paiement.
+  ///
+  /// Le contact (nom + téléphone) vient de l'adresse en mode domicile, et de la
+  /// tuile dédiée en mode relais — mais il part toujours vers le serveur, dans
+  /// les deux cas.
   DeliveryChoice get _deliveryChoice => DeliveryChoice(
     method: _deliveryMethod,
     relayPoint: _selectedRelayPoint,
     address: _selectedAddress,
+    contactName: _deliveryMethod == DeliveryMethod.home
+        ? _selectedAddress?.fullName
+        : _relayContactName,
+    contactPhone: _deliveryMethod == DeliveryMethod.home
+        ? _selectedAddress?.phone
+        : _relayContactPhone,
   );
 
   // Helper pour formater le nom de la méthode de paiement
@@ -88,20 +137,45 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       return;
     }
 
-    if (widget.product != null && widget.product!.isSold) {
+    // Un ramassage concerne justement un article DÉJÀ vendu : on ne refuse
+    // pas sur `isSold` dans ce cas.
+    if (!widget.isPickup && widget.product != null && widget.product!.isSold) {
       _showErrorSnackBar('Cet article a déjà été vendu');
       return;
     }
 
+    // Ramassage : seule l'adresse (nom + téléphone + localisation du vendeur)
+    // est exigée. Le formulaire d'adresse impose déjà nom et téléphone.
+    if (widget.isPickup) {
+      if (_selectedAddress == null) {
+        _showErrorSnackBar('Veuillez renseigner l\'adresse de ramassage');
+        return;
+      }
+    } else
     // L'adresse n'est exigée que pour une remise à domicile. La version
     // précédente la réclamait aussi pour un retrait en point relais, où elle
     // ne sert à rien : on bloquait un achat sur une information inutile.
     if (widget.product != null && !_deliveryChoice.isComplete) {
-      _showErrorSnackBar(
-        _deliveryMethod == DeliveryMethod.relay
+      final choice = _deliveryChoice;
+      final contactManquant =
+          (choice.contactName?.trim().isEmpty ?? true) ||
+          (choice.contactPhone?.trim().isEmpty ?? true);
+      String message;
+      if (_deliveryMethod == DeliveryMethod.relay) {
+        message = _selectedRelayPoint == null
             ? 'Veuillez sélectionner un point relais'
-            : 'Veuillez renseigner une adresse de livraison',
-      );
+            : 'Veuillez renseigner vos nom et téléphone';
+      } else {
+        message = _selectedAddress == null
+            ? 'Veuillez renseigner une adresse de livraison'
+            : 'Veuillez renseigner vos nom et téléphone';
+      }
+      // Le domicile porte le contact via l'adresse ; s'il manque quand même,
+      // c'est l'adresse qu'il faut (re)saisir.
+      if (contactManquant && _deliveryMethod == DeliveryMethod.home) {
+        message = 'Veuillez renseigner une adresse de livraison';
+      }
+      _showErrorSnackBar(message);
       return;
     }
 
@@ -123,17 +197,35 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
         phone: phone,
         name: user.displayName,
         email: user.email,
-        description: widget.product != null
-            ? 'Achat : ${widget.product!.title}'
-            : 'Recharge portefeuille Ablony',
-        type: widget.product != null ? 'purchase' : 'recharge',
+        description: widget.isPickup
+            ? 'Ramassage : ${widget.product?.title ?? ''}'
+            : widget.product != null
+                ? 'Achat : ${widget.product!.title}'
+                : 'Recharge portefeuille Ablony',
+        type: widget.isPickup
+            ? 'pickup'
+            : widget.product != null
+                ? 'purchase'
+                : 'recharge',
         productId: widget.product?.id,
         sellerId: widget.product?.sellerId,
-        productPrice: widget.product != null
+        productPrice: (widget.product != null && !widget.isPickup)
             ? widget.product!.price.toDouble()
             : null,
         walletDeduction: _isMixedPayment ? _walletContribution : null,
-        delivery: widget.product != null ? _deliveryChoice : null,
+        // Achat : le choix de livraison. Ramassage : l'adresse + le contact du
+        // vendeur (même structure, réutilisée). Recharge : rien.
+        delivery: widget.isPickup
+            ? DeliveryChoice(
+                method: DeliveryMethod.home,
+                address: _selectedAddress,
+                contactName: _selectedAddress?.fullName,
+                contactPhone: _selectedAddress?.phone,
+              )
+            : widget.product != null
+                ? _deliveryChoice
+                : null,
+        parcelCode: widget.pickupParcelCode,
       );
 
       debugPrint('[Payment] responseData reçu: $responseData');
@@ -160,7 +252,8 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
         // Ouverture de la page de paiement (Hosted Checkout) dans la WebView in-app
         final paymentCompleted = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
-            builder: (context) => PaymentWebViewPage(url: paymentUrl),
+            builder: (context) =>
+                PaymentWebViewPage(url: paymentUrl, reference: reference),
           ),
         );
 
@@ -206,7 +299,19 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     // Invalider le provider pour forcer le rafraîchissement immédiat du solde utilisateur dans l'application
     ref.invalidate(currentUserProvider);
 
-    final isPurchase = widget.product != null;
+    // Un ramassage n'est pas un achat : product est fourni, mais il ne faut ni
+    // logguer une conversion ni parler d'« article vendu ».
+    final isPurchase = widget.product != null && !widget.isPickup;
+
+    // Un achat finalisé : suivi de la conversion (pas les recharges de
+    // porte-monnaie, qui ne sont pas des ventes).
+    if (isPurchase && transactionRef != null) {
+      ref.read(analyticsServiceProvider).logPurchase(
+            transactionRef: transactionRef,
+            amount: widget.product!.price,
+          );
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -215,19 +320,32 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
           children: [
             const Icon(Icons.check_circle, color: Colors.green),
             const SizedBox(width: 8),
-            Text(isPurchase ? 'Achat réussi' : 'Paiement réussi'),
+            Text(widget.isPickup
+                ? 'Ramassage confirmé'
+                : isPurchase
+                    ? 'Achat réussi'
+                    : 'Paiement réussi'),
           ],
         ),
         content: Text(
-          isPurchase
-              ? 'Votre achat a été finalisé avec succès. L\'article est maintenant marqué comme vendu.'
-              : 'Votre compte a été rechargé avec succès. Le solde de votre portefeuille a été mis à jour.',
+          widget.isPickup
+              ? 'Votre demande de ramassage est enregistrée. Un agent viendra récupérer le colis à l\'adresse indiquée.'
+              : isPurchase
+                  ? 'Votre achat a été finalisé avec succès. L\'article est maintenant marqué comme vendu.'
+                  : 'Votre compte a été rechargé avec succès. Le solde de votre portefeuille a été mis à jour.',
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Fermer le dialogue
-              if (isPurchase) {
+              if (widget.isPickup) {
+                // Retour à la page d'où venait le vendeur (étiquette du colis).
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/profile');
+                }
+              } else if (isPurchase) {
                 // La notation du vendeur est proposée depuis le reçu,
                 // après la confirmation de réception — pas ici : à ce stade
                 // le colis n'est même pas encore déposé.
@@ -241,36 +359,6 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
               }
             },
             child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showUSSDPushSentDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.phone_android, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Validation sur mobile'),
-          ],
-        ),
-        content: const Text(
-          'Une demande de validation a été envoyée sur votre mobile.\n\n'
-          'Veuillez saisir votre code PIN secret sur votre téléphone pour valider l\'opération.\n\n'
-          'Une fois confirmée, votre solde de portefeuille sera mis à jour.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.go('/profile/wallet');
-            },
-            child: const Text('Retourner au portefeuille'),
           ),
         ],
       ),
@@ -291,9 +379,32 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
 
     final isRecharge = widget.product == null;
 
+    // Frais d'acheminement de la sous-catégorie du produit : dès qu'ils
+    // arrivent, on met à jour l'affichage (et donc le total envoyé), pour
+    // coller au montant que le serveur facturera.
+    if (widget.product != null) {
+      ref.listen(deliveryFeesProvider(widget.product!.subcategoryId), (_, next) {
+        final f = next.value;
+        if (f != null &&
+            (f.relayXof != _relayFee ||
+                f.homeXof != _homeFee ||
+                f.pickupXof != _pickupFee)) {
+          setState(() {
+            _relayFee = f.relayXof;
+            _homeFee = f.homeXof;
+            _pickupFee = f.pickupXof;
+          });
+        }
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(isRecharge ? 'Recharger le portefeuille' : 'Paiement'),
+        title: Text(widget.isPickup
+            ? 'Ramassage à domicile'
+            : isRecharge
+                ? 'Recharger le portefeuille'
+                : 'Paiement'),
         centerTitle: true,
       ),
       body: ContentContainer(
@@ -438,6 +549,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   ),
                   const SizedBox(height: 8),
 
+                  // En mode ramassage, pas d'options de livraison : on ne
+                  // collecte que l'adresse où venir chercher le colis.
+                  if (!widget.isPickup) ...[
                   // Section Options de livraison
                   _buildSection(
                     context,
@@ -447,7 +561,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                         ChoiceCardWidget(
                           title: 'Retrait en point relais',
                           subTitle:
-                              '${DeliveryPricing.relayFeeXof} FCFA — à récupérer avec une pièce d\'identité',
+                              '$_relayFee FCFA — à récupérer avec une pièce d\'identité',
                           icon: Icons.location_on_outlined,
                           isSelected: _deliveryMethod == DeliveryMethod.relay,
                           showSelectionCircle: true,
@@ -459,9 +573,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                         ),
                         SizedBox(height: screenWidth * 0.03),
                         ChoiceCardWidget(
-                          title: 'Livraison à domicile',
+                          title: AppLocalizations.of(context)!.paymentHomeDelivery,
                           subTitle:
-                              '${DeliveryPricing.homeFeeXof} FCFA — remise à votre adresse',
+                              '$_homeFee FCFA — remise à votre adresse',
                           icon: Icons.home_outlined,
                           isSelected: _deliveryMethod == DeliveryMethod.home,
                           showSelectionCircle: true,
@@ -481,7 +595,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   // adresse. Demander les deux — ce que faisait l'écran —
                   // bloquait un retrait en point relais sur une adresse qui
                   // ne sert à personne.
-                  if (_deliveryMethod == DeliveryMethod.relay)
+                  if (_deliveryMethod == DeliveryMethod.relay) ...[
                     SelectionTile(
                       label: 'Point relais',
                       value: _selectedRelayPoint?.name,
@@ -497,8 +611,22 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                           setState(() => _selectedRelayPoint = result);
                         }
                       },
-                    )
-                  else
+                    ),
+                    SizedBox(height: screenWidth * 0.06),
+                    // Contact acheteur — exigé même en relais, pour pouvoir le
+                    // joindre (traçabilité). Le domicile, lui, l'a via l'adresse.
+                    SelectionTile(
+                      label: AppLocalizations.of(context)!.deliveryContactLabel,
+                      value: (_relayContactName != null &&
+                              _relayContactPhone != null)
+                          ? '$_relayContactName · $_relayContactPhone'
+                          : null,
+                      placeholder: AppLocalizations.of(context)!
+                          .deliveryContactPlaceholder,
+                      isRequired: true,
+                      onTap: _showContactForm,
+                    ),
+                  ] else
                     SelectionTile(
                       label: 'Adresse de livraison',
                       value: _selectedAddress?.summary,
@@ -512,6 +640,24 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                       },
                     ),
                   SizedBox(height: screenWidth * 0.06),
+                  ] else ...[
+                    // Adresse de ramassage : nom + téléphone + localisation du
+                    // vendeur. On réutilise le même formulaire que l'adresse de
+                    // livraison (nom + tél obligatoires).
+                    SelectionTile(
+                      label: 'Adresse de ramassage',
+                      value: _selectedAddress?.summary,
+                      placeholder: 'Où venir chercher le colis',
+                      isRequired: true,
+                      onTap: () async {
+                        final result = await context.push('/address/add');
+                        if (result is DeliveryAddress) {
+                          setState(() => _selectedAddress = result);
+                        }
+                      },
+                    ),
+                    SizedBox(height: screenWidth * 0.06),
+                  ],
                 ],
 
                 // Section Mode de Paiement (Toujours affichée)
@@ -563,7 +709,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.of(context).pop(true),
-                                  child: const Text('Payer la différence'),
+                                  child: Text(AppLocalizations.of(context)!.paymentPayDifference),
                                 ),
                               ],
                             ),
@@ -619,9 +765,28 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                 // Section Détails du Prix (Toujours affichée)
                 _buildSection(
                   context,
-                  title: 'Détail de la facture',
+                  title: AppLocalizations.of(context)!.paymentInvoiceDetail,
                   child: Column(
-                    children: !isRecharge
+                    children: widget.isPickup
+                        ? [
+                            _buildPriceRow(
+                              'Ramassage à domicile',
+                              '${_totalAmount.toStringAsFixed(0)} FCFA',
+                            ),
+                            if (_isMixedPayment) ...[
+                              SizedBox(height: screenWidth * 0.03),
+                              _buildPriceRow(
+                                'Déduit du porte-monnaie',
+                                '-${_walletContribution.toStringAsFixed(0)} FCFA',
+                              ),
+                              SizedBox(height: screenWidth * 0.03),
+                              _buildPriceRow(
+                                'Reste à payer',
+                                '${_externalAmount.toStringAsFixed(0)} FCFA',
+                              ),
+                            ],
+                          ]
+                        : !isRecharge
                         ? [
                             _buildPriceRow(
                               'Commande',
@@ -659,7 +824,11 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                           ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                // Marge basse généreuse : le bouton « Valider le paiement » est
+                // fixé par-dessus le contenu (Positioned). Sans cet espace, la
+                // dernière ligne du détail (« Frais de port ») passait sous le
+                // bouton et restait coupée.
+                const SizedBox(height: 160),
               ],
             ),
 
@@ -752,6 +921,88 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
         ),
       ),
     );
+  }
+
+  /// Saisie du nom + téléphone de contact (mode relais). Ouvre une feuille
+  /// avec deux champs, pré-remplis si déjà renseignés.
+  Future<void> _showContactForm() async {
+    final l10n = AppLocalizations.of(context)!;
+    final formKey = GlobalKey<FormState>();
+    final nameCtrl = TextEditingController(text: _relayContactName ?? '');
+    final phoneCtrl = TextEditingController(text: _relayContactPhone ?? '');
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        final bottomInset = MediaQuery.of(sheetContext).viewInsets.bottom;
+        return Padding(
+          padding: EdgeInsets.fromLTRB(16, 20, 16, bottomInset + 20),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.deliveryContactTitle,
+                  style: Theme.of(sheetContext)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                Input(
+                  controller: nameCtrl,
+                  label: l10n.addressFullName,
+                  placeholder: 'John Doe',
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Veuillez entrer votre nom complet';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                Input(
+                  controller: phoneCtrl,
+                  type: InputType.phone,
+                  label: l10n.deliveryPhoneLabel,
+                  placeholder: '90 00 00 00',
+                  validator: (value) {
+                    final v = value?.trim() ?? '';
+                    if (v.isEmpty) return l10n.deliveryPhoneRequired;
+                    final digits = v.replaceAll(RegExp(r'[^0-9]'), '');
+                    if (digits.length < 8) return l10n.deliveryPhoneInvalid;
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                PrimaryButton(
+                  text: l10n.validate,
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      Navigator.pop(sheetContext);
+                      setState(() {
+                        _relayContactName = nameCtrl.text.trim();
+                        _relayContactPhone = phoneCtrl.text.trim();
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    nameCtrl.dispose();
+    phoneCtrl.dispose();
   }
 
   Widget _buildSection(

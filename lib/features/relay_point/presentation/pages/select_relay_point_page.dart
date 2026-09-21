@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -50,7 +52,7 @@ class _SelectRelayPointPageState extends ConsumerState<SelectRelayPointPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Choisir un point relay'),
+        title: Text(AppLocalizations.of(context)!.relayPointPickTitle),
         centerTitle: true,
       ),
       body: Column(

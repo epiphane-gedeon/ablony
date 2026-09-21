@@ -1,0 +1,12 @@
+{
+  "name": "ablony-firestore-rules-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "cd ../.. && firebase emulators:exec --only firestore --project ablony-rules-test --config tools/firestore_rules_test/firebase.json \"$(command -v node) tools/firestore_rules_test/annonce.test.mjs && $(command -v node) tools/firestore_rules_test/blocage.test.mjs && $(command -v node) tools/firestore_rules_test/releve.test.mjs && $(command -v node) tools/firestore_rules_test/signalement.test.mjs && $(command -v node) tools/firestore_rules_test/wallet.test.mjs && $(command -v node) tools/firestore_rules_test/boosts.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "firebase": "^12.0.0"
+  }
+}

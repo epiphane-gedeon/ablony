@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/entities.dart';
 import '../../../wallet/domain/models/wallet.dart';
+import '../../domain/entities/user_role.dart';
 
 /// Modèle de données pour l'utilisateur avec sérialisation Firestore.
 ///
@@ -63,6 +64,10 @@ class UserModel extends User {
     super.reviewsCount,
     super.followersCount,
     super.followingCount,
+    super.role,
+    super.isFounder,
+    super.isStar,
+    super.boostCredits,
     super.wallet,
   });
 
@@ -109,6 +114,9 @@ class UserModel extends User {
       reviewsCount: user.reviewsCount,
       followersCount: user.followersCount,
       followingCount: user.followingCount,
+      role: user.role,
+      isFounder: user.isFounder,
+      isStar: user.isStar,
       wallet: user.wallet,
     );
   }
@@ -238,6 +246,12 @@ class UserModel extends User {
         followersCount: data['followersCount'] as int? ?? 0,
         followingCount: data['followingCount'] as int? ?? 0,
 
+        // RÔLE — absent chez l'immense majorité des comptes : `member`.
+        role: UserRole.fromWire(data['role'] as String?),
+        isFounder: data['isFounder'] as bool? ?? false,
+        isStar: data['isStar'] as bool? ?? false,
+        boostCredits: (data['boostCredits'] as num?)?.toInt() ?? 0,
+
         // PORTEFEUILLE (optionnel)
         wallet: data['wallet'] != null
             ? Wallet.fromFirestore(data['wallet'] as Map<String, dynamic>)
@@ -297,6 +311,10 @@ class UserModel extends User {
       reviewsCount: json['reviewsCount'] as int? ?? 0,
       followersCount: json['followersCount'] as int? ?? 0,
       followingCount: json['followingCount'] as int? ?? 0,
+      role: UserRole.fromWire(json['role'] as String?),
+      isFounder: json['isFounder'] as bool? ?? false,
+      isStar: json['isStar'] as bool? ?? false,
+      boostCredits: (json['boostCredits'] as num?)?.toInt() ?? 0,
       wallet: json['wallet'] != null
           ? Wallet.fromFirestore(json['wallet'] as Map<String, dynamic>)
           : null,
@@ -342,6 +360,10 @@ class UserModel extends User {
       'uid': uid,
       'email': email,
       'username': username,
+      // Copie en minuscules, pour une recherche insensible à la casse : le
+      // champ `username` garde la casse d'affichage, mais on cherche sur
+      // celui-ci (sinon « Amina » est introuvable en tapant « amina »).
+      'usernameLower': username.toLowerCase(),
       'authProvider': authProvider.toFirestore(),
       'country': country.toFirestore(),
       'acceptedTerms': acceptedTerms,

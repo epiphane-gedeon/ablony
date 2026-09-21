@@ -27,8 +27,8 @@ class MakeOfferBottomSheet extends ConsumerStatefulWidget {
   static Future<void> show(BuildContext context, Product product) {
     if (product.isSold) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cet article a déjà été vendu'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.itemAlreadySold),
           backgroundColor: Colors.red,
         ),
       );
@@ -143,7 +143,7 @@ class _MakeOfferBottomSheetState extends ConsumerState<MakeOfferBottomSheet> {
       // Vérifier si l'article est déjà vendu en direct depuis Firestore
       final liveProduct = await ref.read(productRepositoryProvider).getProductById(widget.product.id);
       if (liveProduct.isSold) {
-        throw Exception('Cet article a déjà été vendu');
+        throw Exception(AppLocalizations.of(context)!.itemAlreadySold);
       }
 
       // Récupérer les données complètes de l'utilisateur actuel (buyer)
@@ -208,7 +208,7 @@ class _MakeOfferBottomSheetState extends ConsumerState<MakeOfferBottomSheet> {
         context.push('/chat/$conversationId');
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Offre envoyée avec succès !')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.offerSentSuccess)),
         );
       }
     } catch (e) {

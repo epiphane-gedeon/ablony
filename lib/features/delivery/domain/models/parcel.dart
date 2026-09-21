@@ -83,6 +83,33 @@ enum ParcelStatus {
     ParcelStatus.returned => Icons.undo_outlined,
     ParcelStatus.lost => Icons.error_outline,
   };
+
+  /// Rang dans le parcours normal, pour situer une étape sur la frise. Le
+  /// dernier maillon (point relais / livraison) partage le même rang : un colis
+  /// suit l'un OU l'autre selon le mode choisi.
+  int get sequenceIndex => switch (this) {
+    ParcelStatus.awaitingDropoff => 0,
+    ParcelStatus.droppedOff => 1,
+    ParcelStatus.inTransit => 2,
+    ParcelStatus.readyForPickup => 3,
+    ParcelStatus.outForDelivery => 3,
+    ParcelStatus.delivered => 4,
+    // Hors parcours normal : traités à part par l'UI.
+    ParcelStatus.returned => 5,
+    ParcelStatus.lost => 5,
+  };
+
+  /// Clé telle qu'écrite dans `stepsAt` sur le document (= valeur « wire »).
+  String get wire => switch (this) {
+    ParcelStatus.awaitingDropoff => 'awaiting_dropoff',
+    ParcelStatus.droppedOff => 'dropped_off',
+    ParcelStatus.inTransit => 'in_transit',
+    ParcelStatus.readyForPickup => 'ready_for_pickup',
+    ParcelStatus.outForDelivery => 'out_for_delivery',
+    ParcelStatus.delivered => 'delivered',
+    ParcelStatus.returned => 'returned',
+    ParcelStatus.lost => 'lost',
+  };
 }
 
 /// Un colis, de son étiquette à sa remise.
@@ -113,8 +140,15 @@ class Parcel extends Equatable {
   final DateTime? droppedOffAt;
   final DateTime? deliveredAt;
   final String? relayPointId;
-  final DeliveryAddress? destinationAddress;
   final DateTime createdAt;
+
+  /// `true` si le vendeur a payé pour qu'on vienne récupérer le colis chez lui
+  /// (ramassage à domicile) au lieu de le déposer en point relais.
+  final bool pickupRequested;
+
+  /// Horodatage de chaque étape franchie, pour la frise de suivi. Alimenté par
+  /// les scans des agents (`recordParcelCheckpoint`).
+  final Map<ParcelStatus, DateTime> stepsAt;
 
   const Parcel({
     required this.code,
@@ -130,12 +164,12 @@ class Parcel extends Equatable {
     this.droppedOffAt,
     this.deliveredAt,
     this.relayPointId,
-    this.destinationAddress,
+    this.stepsAt = const {},
+    this.pickupRequested = false,
   });
 
   factory Parcel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
-    final address = data['destinationAddress'] as Map<String, dynamic>?;
     return Parcel(
       code: data['code'] as String? ?? doc.id,
       transactionRef: data['transactionRef'] as String? ?? '',
@@ -150,10 +184,21 @@ class Parcel extends Equatable {
       droppedOffAt: (data['droppedOffAt'] as Timestamp?)?.toDate(),
       deliveredAt: (data['deliveredAt'] as Timestamp?)?.toDate(),
       relayPointId: data['relayPointId'] as String?,
-      destinationAddress:
-          address == null ? null : DeliveryAddress.fromJson(address),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      stepsAt: _lireStepsAt(data['stepsAt']),
+      pickupRequested: data['pickupRequested'] as bool? ?? false,
     );
+  }
+
+  static Map<ParcelStatus, DateTime> _lireStepsAt(Object? raw) {
+    if (raw is! Map) return const {};
+    final out = <ParcelStatus, DateTime>{};
+    raw.forEach((key, value) {
+      if (value is Timestamp) {
+        out[ParcelStatus.fromWire(key as String?)] = value.toDate();
+      }
+    });
+    return out;
   }
 
   /// Jours restants au vendeur pour déposer le colis.
@@ -167,5 +212,6 @@ class Parcel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [code, status, droppedOffAt, deliveredAt];
+  List<Object?> get props =>
+      [code, status, droppedOffAt, deliveredAt, pickupRequested];
 }

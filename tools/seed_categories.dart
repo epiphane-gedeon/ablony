@@ -16,6 +16,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+
+/// Échappe une chaîne destinée à un littéral JavaScript entre apostrophes.
+///
+/// Sans cela, un nom comme « Jeux d'éveil » referme la chaîne au milieu et le
+/// script généré ne compile pas.
+String _js(String valeur) =>
+    valeur.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
+
 void main(List<String> arguments) async {
   print(r'🚀 Ablony - Génération du script d''import Firestore' + '\n');
 
@@ -122,7 +130,7 @@ String _generateFirebaseScript(
     final jsonData = _formatJsonForJs(data);
     lines.add('  await db.collection(\'config\').doc(\'categories\')');
     lines.add('    .collection(\'items\').doc(\'$id\').set($jsonData);');
-    lines.add('  console.log(\'   ✅ Catégorie: ${category['name']}\');');
+    lines.add('  console.log(\'   ✅ Catégorie: ${_js(category['name'] as String)}\');');
   }
   lines.add('');
 
@@ -135,7 +143,7 @@ String _generateFirebaseScript(
     final jsonData = _formatJsonForJs(data);
     lines.add('  await db.collection(\'config\').doc(\'subcategories\')');
     lines.add('    .collection(\'items\').doc(\'$id\').set($jsonData);');
-    lines.add('  console.log(\'   ✅ Sous-catégorie: ${subcategory['name']}\');');
+    lines.add('  console.log(\'   ✅ Sous-catégorie: ${_js(subcategory['name'] as String)}\');');
   }
   lines.add('');
 
@@ -148,7 +156,7 @@ String _generateFirebaseScript(
     final jsonData = _formatJsonForJs(data);
     lines.add('  await db.collection(\'config\').doc(\'attributes\')');
     lines.add('    .collection(\'items\').doc(\'$id\').set($jsonData);');
-    lines.add('  console.log(\'   ✅ Attribut: ${attribute['name']}\');');
+    lines.add('  console.log(\'   ✅ Attribut: ${_js(attribute['name'] as String)}\');');
   }
   lines.add('');
 

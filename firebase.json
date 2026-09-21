@@ -6,20 +6,35 @@
     "storage": {
         "rules": "storage.rules"
     },
-    "hosting": {
-        "public": "build/web",
-        "ignore": [
-            "firebase.json",
-            "**/.*",
-            "!**/.well-known/**"
-        ],
-        "rewrites": [
-            {
-                "source": "**",
-                "destination": "/index.html"
-            }
-        ]
-    },
+    "hosting": [
+        {
+            "public": "build/web",
+            "ignore": [
+                "firebase.json",
+                "**/.*",
+                "!**/.well-known/**"
+            ],
+            "rewrites": [
+                {
+                    "source": "**",
+                    "destination": "/index.html"
+                }
+            ],
+            "headers": [
+                {
+                    "comment": "Ces fichiers gardent le même nom à chaque build : sans revalidation, le navigateur sert l'ancienne version pendant une heure, et le service worker plus longtemps encore. `no-cache` n'interdit pas de les stocker — il impose de vérifier auprès du serveur, ce qui reste rapide grâce à l'ETag.",
+                    "source": "/@(index.html|main.dart.js|flutter_service_worker.js|flutter_bootstrap.js|version.json)",
+                    "headers": [
+                        {
+                            "key": "Cache-Control",
+                            "value": "no-cache"
+                        }
+                    ]
+                }
+            ],
+            "target": "app"
+        }
+    ],
     "flutter": {
         "platforms": {
             "android": {

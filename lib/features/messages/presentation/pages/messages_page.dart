@@ -9,6 +9,7 @@ import '../../../notifications/presentation/providers/notification_provider.dart
 import '../../../notifications/domain/models/app_notification.dart';
 import '../../application/providers/message_providers.dart';
 import '../../domain/models/conversation.dart';
+import '../../../../shared/widgets/user_badges.dart';
 import '../../domain/models/message_type.dart';
 import '../../domain/models/last_message.dart';
 import '../../../../core/responsive/responsive.dart';
@@ -306,12 +307,26 @@ class MessagesPage extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: Text(
-                otherParticipant?.name ?? l10n.defaultUser,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: hasUnread ? FontWeight.bold : FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      otherParticipant?.name ?? l10n.defaultUser,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight:
+                            hasUnread ? FontWeight.bold : FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // Version compacte : la liste est serrée, on montre l'étoile
+                  // et un « F » plutôt que le mot entier.
+                  UserBadgesById(
+                    userId: conversation.getOtherParticipantId(currentUserId),
+                    compact: true,
+                  ),
+                ],
               ),
             ),
             if (conversation.lastMessage != null)

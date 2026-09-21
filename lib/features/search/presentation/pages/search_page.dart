@@ -8,7 +8,6 @@ import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/category_translator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../product/presentation/providers/category_provider.dart';
-import '../../../product/presentation/providers/product_provider.dart';
 
 /// Page de recherche et navigation dans les catégories. principales et offre
 /// un raccourci vers la fonctionnalité de saisie texte.

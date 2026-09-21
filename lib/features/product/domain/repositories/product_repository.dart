@@ -1,4 +1,5 @@
 import '../entities/entities.dart';
+import '../entities/search_page.dart';
 
 /// Interface du repository pour les produits.
 ///
@@ -54,7 +55,11 @@ abstract class ProductRepository {
   /// Recherche des produits par titre
   ///
   /// [query] : Terme de recherche
-  Future<List<Product>> searchProducts(String query);
+  /// Recherche paginée.
+  ///
+  /// [startAfter] est le curseur rapporté par la page précédente. Sans
+  /// pagination, chaque recherche téléchargeait le catalogue entier.
+  Future<SearchPage> searchProducts(String query, {String? startAfter});
 
   /// Récupère toutes les catégories
   Future<List<Category>> getAllCategories();

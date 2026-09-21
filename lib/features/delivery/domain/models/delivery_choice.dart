@@ -23,6 +23,10 @@ enum DeliveryMethod {
 /// cours doit continuer d'aller au bon endroit.
 class DeliveryAddress extends Equatable {
   final String fullName;
+
+  /// Téléphone du destinataire, pour le joindre à la livraison. Rangé côté
+  /// serveur dans le sous-document privé du colis (invisible du vendeur).
+  final String phone;
   final String street;
   final String? city;
   final String? country;
@@ -31,6 +35,7 @@ class DeliveryAddress extends Equatable {
 
   const DeliveryAddress({
     required this.fullName,
+    required this.phone,
     required this.street,
     this.city,
     this.country,
@@ -40,10 +45,12 @@ class DeliveryAddress extends Equatable {
 
   factory DeliveryAddress.fromLocation({
     required String fullName,
+    required String phone,
     required LocationData location,
   }) {
     return DeliveryAddress(
       fullName: fullName,
+      phone: phone,
       street: location.street?.isNotEmpty == true
           ? location.street!
           : location.formattedAddress,
@@ -61,6 +68,7 @@ class DeliveryAddress extends Equatable {
 
   Map<String, dynamic> toJson() => {
     'fullName': fullName,
+    'phone': phone,
     'street': street,
     if (city != null) 'city': city,
     if (country != null) 'country': country,
@@ -71,6 +79,7 @@ class DeliveryAddress extends Equatable {
   factory DeliveryAddress.fromJson(Map<String, dynamic> json) {
     return DeliveryAddress(
       fullName: json['fullName'] as String? ?? '',
+      phone: json['phone'] as String? ?? '',
       street: json['street'] as String? ?? '',
       city: json['city'] as String?,
       country: json['country'] as String?,
@@ -80,7 +89,8 @@ class DeliveryAddress extends Equatable {
   }
 
   @override
-  List<Object?> get props => [fullName, street, city, country, latitude, longitude];
+  List<Object?> get props =>
+      [fullName, phone, street, city, country, latitude, longitude];
 }
 
 /// Le choix de livraison, tel qu'il part vers le serveur.
@@ -98,23 +108,41 @@ class DeliveryChoice extends Equatable {
   /// Renseignée pour [DeliveryMethod.home] uniquement.
   final DeliveryAddress? address;
 
-  const DeliveryChoice({required this.method, this.relayPoint, this.address});
+  /// Coordonnées de contact de l'acheteur, exigées pour LES DEUX modes
+  /// (traçabilité : pouvoir le joindre, qu'il retire en relais ou soit livré).
+  /// Rangées côté serveur dans le sous-document privé du colis.
+  final String? contactName;
+  final String? contactPhone;
 
-  const DeliveryChoice.relay(RelayPoint point)
+  const DeliveryChoice({
+    required this.method,
+    this.relayPoint,
+    this.address,
+    this.contactName,
+    this.contactPhone,
+  });
+
+  const DeliveryChoice.relay(RelayPoint point, {this.contactName, this.contactPhone})
     : method = DeliveryMethod.relay,
       relayPoint = point,
       address = null;
 
-  const DeliveryChoice.home(DeliveryAddress destination)
+  const DeliveryChoice.home(DeliveryAddress destination, {this.contactName, this.contactPhone})
     : method = DeliveryMethod.home,
       relayPoint = null,
       address = destination;
 
   /// `true` quand le choix est complet et peut accompagner un paiement.
-  bool get isComplete => switch (method) {
-    DeliveryMethod.relay => relayPoint != null,
-    DeliveryMethod.home => address != null,
-  };
+  /// Le contact (nom + téléphone) est requis dans tous les cas.
+  bool get isComplete {
+    final hasContact = (contactName?.trim().isNotEmpty ?? false) &&
+        (contactPhone?.trim().isNotEmpty ?? false);
+    if (!hasContact) return false;
+    return switch (method) {
+      DeliveryMethod.relay => relayPoint != null,
+      DeliveryMethod.home => address != null,
+    };
+  }
 
   /// Où le colis doit arriver, en une ligne.
   String get destinationSummary => switch (method) {
@@ -126,8 +154,13 @@ class DeliveryChoice extends Equatable {
     'method': method.wireValue,
     if (relayPoint != null) 'relayPointId': relayPoint!.id,
     if (address != null) 'address': address!.toJson(),
+    if (contactName != null && contactName!.trim().isNotEmpty)
+      'contactName': contactName!.trim(),
+    if (contactPhone != null && contactPhone!.trim().isNotEmpty)
+      'contactPhone': contactPhone!.trim(),
   };
 
   @override
-  List<Object?> get props => [method, relayPoint?.id, address];
+  List<Object?> get props =>
+      [method, relayPoint?.id, address, contactName, contactPhone];
 }

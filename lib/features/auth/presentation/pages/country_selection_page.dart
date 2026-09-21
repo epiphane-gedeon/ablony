@@ -6,6 +6,8 @@ import '../../domain/entities/entities.dart';
 import '../../application/providers.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/responsive/responsive.dart';
+import '../../../../core/services/analytics_service.dart';
+import '../../../../core/config/feature_flags.dart';
 
 /// Page de sélection du pays lors de l'inscription.
 ///
@@ -59,6 +61,20 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
   /// `completeRegistration()` qui sauvegarde les données dans Firestore.
   /// Cette variable permet d'afficher un loader pendant cette opération.
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tant que le choix du pays est suspendu, cette page reste l'étape qui
+    // finalise l'inscription — mais elle retient le Togo d'elle-même, sans
+    // rien demander. Faire l'inverse (finaliser depuis les trois écrans qui
+    // mènent ici) aurait dupliqué trois fois la création du compte.
+    if (!FeatureFlags.choixPaysActif) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _handleCountrySelection(FeatureFlags.paysParDefaut);
+      });
+    }
+  }
 
   /// Pays actuellement sélectionné (null si aucun pays sélectionné).
   ///
@@ -126,27 +142,39 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
 
         if (!mounted) return;
 
-        // Inscription réussie → Navigation vers la page d'accueil
+        // Inscription réussie → on la logge, puis navigation vers l'accueil.
+        ref.read(analyticsServiceProvider).logSignUp(
+              user.authProvider.name,
+            );
+
         // Le redirect du router détectera que le profil est complet
         context.go('/home');
       } else if (mounted) {
-        // Erreur inattendue
+        // completeRegistration a renvoyé null sans lever d'exception : c'est
+        // que le state d'inscription est incomplet. La raison précise est
+        // dans le state — l'afficher plutôt qu'un message opaque, sinon on ne
+        // sait pas quel champ manque.
         setState(() => _isLoading = false);
         final l10n = AppLocalizations.of(context)!;
-        _showError(l10n.countryErrorGeneric);
+        final raison = ref.read(registrationProvider).errorMessage;
+        _showError(raison ?? l10n.countryErrorGeneric);
       }
     } catch (e) {
       // Gestion des erreurs
       if (mounted) {
         setState(() => _isLoading = false);
 
-        // Afficher un message d'erreur approprié
         final l10n = AppLocalizations.of(context)!;
-        String errorMessage = l10n.countryErrorGeneric;
+        String errorMessage;
         if (e.toString().contains('username')) {
           errorMessage = l10n.countryErrorUsername;
         } else if (e.toString().contains('network')) {
           errorMessage = l10n.countryErrorNetwork;
+        } else {
+          // Une cause imprévue : la montrer telle quelle. Un message opaque
+          // sur un écran d'inscription bloque l'utilisateur sans recours, et
+          // nous prive du seul indice pour corriger.
+          errorMessage = '${l10n.countryErrorGeneric}\n\n$e';
         }
         _showError(errorMessage);
       }
@@ -162,6 +190,7 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 8),
       ),
     );
   }
@@ -177,6 +206,15 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
     final screenWidth = context.layoutWidth();
 
     final l10n = AppLocalizations.of(context)!;
+
+    // Choix suspendu : on ne montre pas une liste que l'on s'apprête à remplir
+    // toute seule. Un simple écran d'attente, le temps de créer le compte.
+    if (!FeatureFlags.choixPaysActif) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(

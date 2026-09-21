@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/services/analytics_service.dart';
+import '../../../../shared/widgets/user_badges.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
 import '../../../../shared/widgets/link.dart';
@@ -12,6 +14,7 @@ import '../../../auth/domain/entities/user.dart';
 import '../../../product_fav/presentation/providers/product_fav_provider.dart';
 import '../../../product_fav/presentation/widgets/fav_toggle.dart';
 import '../../domain/entities/entities.dart';
+import '../../domain/boost_config.dart';
 import '../../../messages/application/providers/message_providers.dart';
 import '../../../messages/domain/models/participant_details.dart';
 import '../../../messages/domain/models/product_details.dart';
@@ -31,7 +34,17 @@ import '../widgets/boost_bottom_sheet.dart';
 class ProductDetailPage extends ConsumerStatefulWidget {
   final String productId;
 
-  const ProductDetailPage({super.key, required this.productId});
+  /// Ouvre le formulaire de modification dès l'affichage.
+  ///
+  /// Le vendeur qui vient d'une notification « Annonce à corriger » n'a pas à
+  /// chercher le menu : ce qu'on lui demande, c'est de retoucher.
+  final bool ouvrirCorrection;
+
+  const ProductDetailPage({
+    super.key,
+    required this.productId,
+    this.ouvrirCorrection = false,
+  });
 
   @override
   ConsumerState<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -55,12 +68,174 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
       []; // Liste des produits similaires (même sous-catégorie)
   bool _isLoadingTabData =
       true; // Indicateur de chargement des produits des onglets
+  bool _correctionOuverte = false; // Le formulaire n'est ouvert qu'une fois
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // On n'utilise plus TabBarView (scroll interne à hauteur fixe, qui bloquait
+    // le scroll de la page) : on affiche la grille de l'onglet courant, non
+    // scrollable, dans le CustomScrollView. Il faut donc rebâtir au changement.
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
     _loadProduct();
+  }
+
+  /// Les annonces déjà comptées dans cette session : on ne gonfle pas le
+  /// compteur quand l'utilisateur revient plusieurs fois sur la même fiche.
+  static final Set<String> _vuesComptees = {};
+
+  /// Enregistre une vue : un événement Analytics (pour nous) et le compteur
+  /// affiché au vendeur (dans Firestore).
+  ///
+  /// Deux garde-fous : jamais pour le vendeur qui regarde sa propre annonce,
+  /// et une seule fois par session et par annonce.
+  void _suivreVue(Product product) {
+    final utilisateur = ref.read(authStateProvider).value;
+    final estLeVendeur = utilisateur?.uid == product.sellerId;
+
+    // L'événement d'analyse : sans lien avec le compteur, il alimente
+    // l'entonnoir vue → achat. On l'envoie même pour le vendeur ? Non : on
+    // veut mesurer l'intérêt des acheteurs, pas les auto-consultations.
+    if (!estLeVendeur) {
+      ref.read(analyticsServiceProvider).logViewItem(
+            productId: product.id,
+            category: product.categoryId,
+            price: product.price,
+          );
+    }
+
+    // Le compteur affiché : une fois par session, jamais pour le vendeur.
+    if (estLeVendeur || _vuesComptees.contains(product.id)) return;
+    _vuesComptees.add(product.id);
+    // Best-effort : une vue non comptée n'est pas une erreur à remonter.
+    ref
+        .read(productRepositoryProvider)
+        .incrementViewsCount(product.id)
+        .catchError((_) {});
+  }
+
+  /// Ouvre le formulaire de modification quand on arrive d'une notification
+  /// « Annonce à corriger ».
+  ///
+  /// Trois conditions, et aucune n'est superflue : le drapeau vient bien de
+  /// la notification, l'annonce attend vraiment une retouche, et c'est le
+  /// vendeur qui regarde. Sans la dernière, un lien partagé ouvrirait le
+  /// formulaire chez n'importe qui.
+  void _ouvrirCorrectionSiDemandee(Product product) {
+    if (_correctionOuverte) return;
+    if (!widget.ouvrirCorrection || !product.attendCorrection) return;
+    final utilisateur = ref.read(authStateProvider).value;
+    if (utilisateur == null || utilisateur.uid != product.sellerId) return;
+
+    _correctionOuverte = true;
+    // Après la frame : le Scaffold n'existe pas encore au moment où le
+    // chargement se termine.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) SellBottomSheet.show(context, initialProduct: product);
+    });
+  }
+
+  /// Le motif de la modération, dans la langue du vendeur.
+  String _motifLisible(AppLocalizations l10n, String? motif) {
+    switch (motif) {
+      case 'blurry_photos':
+        return l10n.moderationReasonBlurryPhotos;
+      case 'wrong_category':
+        return l10n.moderationReasonWrongCategory;
+      case 'missing_description':
+        return l10n.moderationReasonMissingDescription;
+      case 'wrong_price':
+        return l10n.moderationReasonWrongPrice;
+      case 'counterfeit':
+        return l10n.moderationReasonCounterfeit;
+      case 'prohibited_item':
+        return l10n.moderationReasonProhibitedItem;
+      case 'inappropriate':
+        return l10n.moderationReasonInappropriate;
+      case 'fraud':
+        return l10n.moderationReasonFraud;
+      case 'off_platform_sale':
+        return l10n.moderationReasonOffPlatformSale;
+      default:
+        return l10n.moderationReasonOther;
+    }
+  }
+
+  /// Ce que la modération a décidé, dit au vendeur sur sa propre fiche.
+  ///
+  /// La notification peut avoir été balayée, ou être arrivée quand le
+  /// téléphone était éteint. Ce bandeau, lui, est toujours là : c'est ce qui
+  /// rend la décision rattrapable.
+  Widget _bandeauModeration(Product product) {
+    final l10n = AppLocalizations.of(context)!;
+    final corrigeable = product.attendCorrection;
+    final couleur = corrigeable ? Colors.orange : Colors.red;
+
+    return Container(
+      width: double.infinity,
+      color: couleur.shade50,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                corrigeable ? Icons.edit_note : Icons.block,
+                color: couleur.shade700,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  corrigeable
+                      ? l10n.moderationCorrectionTitle
+                      : l10n.moderationRemovedTitle,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: couleur.shade900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _motifLisible(l10n, product.reviewReason),
+            style: TextStyle(color: couleur.shade900),
+          ),
+          if ((product.reviewNote ?? '').isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              product.reviewNote!,
+              style: TextStyle(color: couleur.shade900, height: 1.3),
+            ),
+          ],
+          const SizedBox(height: 6),
+          Text(
+            corrigeable
+                ? l10n.moderationCorrectionHint
+                : l10n.moderationRemovedHint,
+            style: TextStyle(fontSize: 13, color: couleur.shade800),
+          ),
+          if (corrigeable) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () =>
+                    SellBottomSheet.show(context, initialProduct: product),
+                icon: const Icon(Icons.edit, size: 18),
+                label: Text(l10n.moderationCorrectionAction),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   /// Charge les données du produit depuis Firestore
@@ -88,6 +263,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
         // Charger les produits du vendeur et similaires
         _loadTabData(product);
+
+        _ouvrirCorrectionSiDemandee(product);
+
+        _suivreVue(product);
       }
     } catch (e) {
       if (mounted) {
@@ -255,6 +434,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             children: [
               CustomScrollView(
                 slivers: [
+                  // En tête de page, avant même les photos : c'est la seule
+                  // chose qui compte quand une annonce a été retirée.
+                  if (isSeller &&
+                      product.moderationStatus == ModerationStatus.rejected)
+                    SliverToBoxAdapter(child: _bandeauModeration(product)),
                   // Carousel d'images
                   SliverToBoxAdapter(
                     child: SizedBox(
@@ -399,7 +583,23 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                           .value ??
                                       product.primaryBrandValue.toString(),
                                   onTap: () {
-                                    // TODO: Rediriger vers la page de la marque
+                                    // « Voir tout ce qu'il y a de cette
+                                    // marque » : on ouvre la recherche avec
+                                    // le filtre déjà posé, plutôt qu'une page
+                                    // de marque à part qui ferait doublon avec
+                                    // les filtres existants.
+                                    final marque =
+                                        product.primaryBrandValue?.toString();
+                                    if (marque == null || marque.isEmpty) {
+                                      return;
+                                    }
+                                    context.pushNamed(
+                                      'search-results',
+                                      extra: <String, dynamic>{
+                                        'query': '',
+                                        'brand': marque,
+                                      },
+                                    );
                                   },
                                   underline: true,
                                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -490,16 +690,27 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           if (_isDescriptionExpanded) ...[
                             const Divider(height: 32),
 
-                            // Catégorie finale (sous-catégorie)
+                            // Catégorie finale (sous-catégorie) → recherche
+                            // filtrée sur cette sous-catégorie.
                             _buildDetailRow(
                               theme,
                               AppLocalizations.of(context)!.productCategory,
                               _subcategoryName ?? product.subcategoryId,
                               showArrow: true,
+                              onTap: () => context.pushNamed(
+                                'search-results',
+                                extra: <String, dynamic>{
+                                  'query': '',
+                                  'categoryId': product.subcategoryId,
+                                  'categoryName':
+                                      _subcategoryName ?? product.subcategoryId,
+                                },
+                              ),
                             ),
                             const Divider(height: 1),
 
-                            // Taille
+                            // Taille → recherche filtrée sur cette taille (seul
+                            // le cas renseigné est cliquable).
                             _buildDetailRow(
                               theme,
                               AppLocalizations.of(context)!.productSize,
@@ -517,11 +728,21 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                           context,
                                         )!.notSpecified
                                   : AppLocalizations.of(context)!.notSpecified,
-                              showArrow: true,
+                              showArrow: product.primarySizeValue != null,
+                              onTap: product.primarySizeValue != null
+                                  ? () => context.pushNamed(
+                                      'search-results',
+                                      extra: <String, dynamic>{
+                                        'query': '',
+                                        'size':
+                                            '${product.primarySizeAttributeId}:${product.primarySizeValue}',
+                                      },
+                                    )
+                                  : null,
                             ),
                             const Divider(height: 1),
 
-                            // État
+                            // État → recherche filtrée sur cet état.
                             _buildDetailRow(
                               theme,
                               AppLocalizations.of(context)!.productCondition,
@@ -535,6 +756,13 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                       .value ??
                                   product.condition.label,
                               showArrow: true,
+                              onTap: () => context.pushNamed(
+                                'search-results',
+                                extra: <String, dynamic>{
+                                  'query': '',
+                                  'condition': product.condition.index.toString(),
+                                },
+                              ),
                             ),
                             const Divider(height: 1),
 
@@ -568,22 +796,6 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                             const SizedBox(height: 16),
                           ],
 
-                          // Bouton traduire
-                          if (!isSeller) ...[
-                            OutlinedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.language, size: 20),
-                              label: Text(
-                                AppLocalizations.of(context)!.clickToTranslate,
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                          ],
 
                           // Section Profil du vendeur (cachée si c'est le vendeur lui-même)
                           if (!isSeller) ...[
@@ -631,15 +843,25 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                _seller!.username,
-                                                style: theme
-                                                    .textTheme
-                                                    .titleMedium
-                                                    ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                              Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: Text(
+                                                      _seller!.username,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: theme
+                                                          .textTheme
+                                                          .titleMedium
+                                                          ?.copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
                                                     ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  UserBadges(user: _seller!),
+                                                ],
                                               ),
                                               StarRatingDisplay(
                                                 rating: _seller!.rating,
@@ -727,34 +949,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                                     ],
                                   )
                                 : const SizedBox.shrink(),
-                            const SizedBox(height: 12),
-
-                            // Badges
-                            Wrap(
-                              spacing: 8,
-                              children: [
-                                Chip(
-                                  avatar: const Icon(Icons.flash_on, size: 16),
-                                  label: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.activelyPublishes,
-                                  ),
-                                  backgroundColor: theme.colorScheme.primary
-                                      .withOpacity(0.1),
-                                  side: BorderSide.none,
-                                ),
-                                Chip(
-                                  avatar: const Icon(Icons.send, size: 16),
-                                  label: Text(
-                                    AppLocalizations.of(context)!.sendsQuickly,
-                                  ),
-                                  backgroundColor: theme.colorScheme.primary
-                                      .withOpacity(0.1),
-                                  side: BorderSide.none,
-                                ),
-                              ],
-                            ),
+                            // Les pastilles « Publie activement » et « Envoie
+                            // rapidement » s'affichaient sur le profil de tout
+                            // vendeur, sans rien mesurer : deux promesses que
+                            // rien ne garantissait. Retirées — une distinction
+                            // que tout le monde porte n'en est pas une.
                             const SizedBox(height: 24),
                           ],
 
@@ -830,20 +1029,22 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                     ),
                   ),
 
-                  // Contenu des onglets
+                  // Contenu de l'onglet courant, rendu comme une grille non
+                  // scrollable : il fait partie du défilement de la page, donc
+                  // remonter depuis la grille remonte jusqu'aux infos produit
+                  // sans avoir à décaler le doigt.
                   SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 600,
-                      child: _isLoadingTabData
-                          ? const Center(child: CircularProgressIndicator())
-                          : TabBarView(
-                              controller: _tabController,
-                              children: [
-                                _buildProductGrid(theme, _sellerProducts),
-                                _buildProductGrid(theme, _similarProducts),
-                              ],
-                            ),
-                    ),
+                    child: _isLoadingTabData
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 48),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        : _buildProductGrid(
+                            theme,
+                            _tabController.index == 0
+                                ? _sellerProducts
+                                : _similarProducts,
+                          ),
                   ),
 
                   const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -1045,15 +1246,17 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                             : Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  PrimaryButton(
-                                    text: AppLocalizations.of(
-                                      context,
-                                    )!.boostProduct,
-                                    onPressed: () {
-                                      BoostBottomSheet.show(context, product);
-                                    },
-                                  ),
-                                  const SizedBox(height: 8),
+                                  if (boostsDisponibles) ...[
+                                    PrimaryButton(
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.boostProduct,
+                                      onPressed: () {
+                                        BoostBottomSheet.show(context, product);
+                                      },
+                                    ),
+                                    const SizedBox(height: 8),
+                                  ],
                                   SecondaryButton(
                                     text: AppLocalizations.of(
                                       context,
@@ -1245,34 +1448,44 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     String label,
     String value, {
     bool showArrow = false,
+    VoidCallback? onTap,
   }) {
-    return Padding(
+    final contenu = Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: theme.textTheme.bodyLarge),
-          Row(
-            children: [
-              Text(
-                value,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.textTheme.bodySmall?.color,
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
                 ),
-              ),
-              if (showArrow) ...[
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.chevron_right,
-                  color: theme.textTheme.bodySmall?.color,
-                  size: 20,
-                ),
+                if (showArrow) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right,
+                    color: theme.textTheme.bodySmall?.color,
+                    size: 20,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ],
       ),
     );
+    if (onTap == null) return contenu;
+    return InkWell(onTap: onTap, child: contenu);
   }
 
   /// Formate le temps écoulé depuis la création du produit
@@ -1319,17 +1532,23 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
       padding: const EdgeInsets.all(16),
       child: products.isEmpty
           // Affiche un message si aucun produit n'est disponible
-          ? Center(
-              child: Text(
-                AppLocalizations.of(context)!.noProductsAvailable,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.textTheme.bodySmall?.color,
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.noProductsAvailable,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
                 ),
               ),
             )
-          // Affiche la grille de produits
+          // La grille ne défile pas d'elle-même : elle prend sa hauteur de
+          // contenu et suit le défilement de la page (plus de scroll imbriqué).
           : ResponsiveProductGrid<Product>(
               padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemsBuilder: (_) => products,
               itemBuilder: (context, product) {
                 return ProductCard(

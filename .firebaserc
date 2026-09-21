@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "ablony-a5db9"
-  }
+  },
+  "targets": {
+    "ablony-a5db9": {
+      "hosting": {
+        "app": [
+          "ablony-a5db9"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

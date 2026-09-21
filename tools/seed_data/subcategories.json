@@ -1,555 +1,3781 @@
 [
-    {
-        "id": "haut_femme",
-        "name": "Haut",
-        "parentId": "femme",
-        "children": [
-            "chemise_femme",
-            "tshirt_femme",
-            "debardeur_femme",
-            "pull_femme",
-            "veste_femme"
-        ],
-        "attributes": [],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "bas_femme",
-        "name": "Bas",
-        "parentId": "femme",
-        "children": [
-            "pantalon_femme",
-            "jupe_femme",
-            "short_femme",
-            "robe_femme"
-        ],
-        "attributes": [],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "chaussures_femme",
-        "name": "Chaussures",
-        "parentId": "femme",
-        "children": [
-            "baskets_femme",
-            "sandales_femme",
-            "talons_femme"
-        ],
-        "attributes": [],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "accessoires_femme",
-        "name": "Accessoires",
-        "parentId": "femme",
-        "children": [
-            "sac_femme",
-            "bijoux_femme",
-            "casquette_femme",
-            "ceinture_femme"
-        ],
-        "attributes": [],
-        "order": 4,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "chemise_femme",
-        "name": "Chemise",
-        "parentId": "haut_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "tshirt_femme",
-        "name": "T-shirt",
-        "parentId": "haut_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "debardeur_femme",
-        "name": "Débardeur",
-        "parentId": "haut_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "pull_femme",
-        "name": "Pull",
-        "parentId": "haut_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 4,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "veste_femme",
-        "name": "Veste",
-        "parentId": "haut_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 5,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "pantalon_femme",
-        "name": "Pantalon",
-        "parentId": "bas_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_bas",
-            "color",
-            "material"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "jupe_femme",
-        "name": "Jupe",
-        "parentId": "bas_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_bas",
-            "color",
-            "material",
-            "dress_length"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "short_femme",
-        "name": "Short",
-        "parentId": "bas_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_bas",
-            "color",
-            "material"
-        ],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "robe_femme",
-        "name": "Robe",
-        "parentId": "bas_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material",
-            "dress_length"
-        ],
-        "order": 4,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "baskets_femme",
-        "name": "Baskets",
-        "parentId": "chaussures_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_chaussures",
-            "color"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "sandales_femme",
-        "name": "Sandales",
-        "parentId": "chaussures_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_chaussures",
-            "color"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "talons_femme",
-        "name": "Talons",
-        "parentId": "chaussures_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_chaussures",
-            "color"
-        ],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "sac_femme",
-        "name": "Sac",
-        "parentId": "accessoires_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color",
-            "material",
-            "bag_type"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "bijoux_femme",
-        "name": "Bijoux",
-        "parentId": "accessoires_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color",
-            "jewelry_type"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "casquette_femme",
-        "name": "Casquette",
-        "parentId": "accessoires_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color"
-        ],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "ceinture_femme",
-        "name": "Ceinture",
-        "parentId": "accessoires_femme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color",
-            "material"
-        ],
-        "order": 4,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "haut_homme",
-        "name": "Haut",
-        "parentId": "homme",
-        "children": [
-            "chemise_homme",
-            "tshirt_homme",
-            "pull_homme",
-            "veste_homme"
-        ],
-        "attributes": [],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "bas_homme",
-        "name": "Bas",
-        "parentId": "homme",
-        "children": [
-            "pantalon_homme",
-            "short_homme"
-        ],
-        "attributes": [],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "chaussures_homme",
-        "name": "Chaussures",
-        "parentId": "homme",
-        "children": [
-            "baskets_homme",
-            "sandales_homme"
-        ],
-        "attributes": [],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "accessoires_homme",
-        "name": "Accessoires",
-        "parentId": "homme",
-        "children": [
-            "sac_homme",
-            "montre_homme",
-            "casquette_homme",
-            "ceinture_homme"
-        ],
-        "attributes": [],
-        "order": 4,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "chemise_homme",
-        "name": "Chemise",
-        "parentId": "haut_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "tshirt_homme",
-        "name": "T-shirt",
-        "parentId": "haut_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "pull_homme",
-        "name": "Pull",
-        "parentId": "haut_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "veste_homme",
-        "name": "Veste",
-        "parentId": "haut_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_haut",
-            "color",
-            "material"
-        ],
-        "order": 4,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "pantalon_homme",
-        "name": "Pantalon",
-        "parentId": "bas_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_bas",
-            "color",
-            "material"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "short_homme",
-        "name": "Short",
-        "parentId": "bas_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_bas",
-            "color",
-            "material"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "baskets_homme",
-        "name": "Baskets",
-        "parentId": "chaussures_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_chaussures",
-            "color"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "sandales_homme",
-        "name": "Sandales",
-        "parentId": "chaussures_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "size_chaussures",
-            "color"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "sac_homme",
-        "name": "Sac",
-        "parentId": "accessoires_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color",
-            "material",
-            "bag_type"
-        ],
-        "order": 1,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "montre_homme",
-        "name": "Montre",
-        "parentId": "accessoires_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color",
-            "watch_movement"
-        ],
-        "order": 2,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "casquette_homme",
-        "name": "Casquette",
-        "parentId": "accessoires_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color"
-        ],
-        "order": 3,
-        "iconUrl": null,
-        "isActive": true
-    },
-    {
-        "id": "ceinture_homme",
-        "name": "Ceinture",
-        "parentId": "accessoires_homme",
-        "children": [],
-        "attributes": [
-            "condition",
-            "brand",
-            "color",
-            "material"
-        ],
-        "order": 4,
-        "iconUrl": null,
-        "isActive": true
-    }
+  {
+    "id": "hauts_femme",
+    "name": "Hauts",
+    "parentId": "femme",
+    "children": [
+      "chemisier_femme",
+      "tshirt_femme",
+      "debardeur_femme",
+      "top_femme",
+      "pull_femme",
+      "sweat_femme"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chemisier_femme",
+    "name": "Chemise & chemisier",
+    "parentId": "hauts_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tshirt_femme",
+    "name": "T-shirt",
+    "parentId": "hauts_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "debardeur_femme",
+    "name": "Débardeur",
+    "parentId": "hauts_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "top_femme",
+    "name": "Top & blouse",
+    "parentId": "hauts_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pull_femme",
+    "name": "Pull & gilet",
+    "parentId": "hauts_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sweat_femme",
+    "name": "Sweat & hoodie",
+    "parentId": "hauts_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "robes_femme",
+    "name": "Robes",
+    "parentId": "femme",
+    "children": [
+      "robe_jour_femme",
+      "robe_soiree_femme",
+      "robe_ceremonie_femme",
+      "combinaison_femme"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "robe_jour_femme",
+    "name": "Robe de jour",
+    "parentId": "robes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material",
+      "dress_length"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "robe_soiree_femme",
+    "name": "Robe de soirée",
+    "parentId": "robes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material",
+      "dress_length"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "robe_ceremonie_femme",
+    "name": "Robe de cérémonie",
+    "parentId": "robes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material",
+      "dress_length"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "combinaison_femme",
+    "name": "Combinaison",
+    "parentId": "robes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material",
+      "dress_length"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bas_femme",
+    "name": "Bas",
+    "parentId": "femme",
+    "children": [
+      "pantalon_femme",
+      "jean_femme",
+      "jupe_femme",
+      "short_femme",
+      "legging_femme"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pantalon_femme",
+    "name": "Pantalon",
+    "parentId": "bas_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "jean_femme",
+    "name": "Jean",
+    "parentId": "bas_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "jupe_femme",
+    "name": "Jupe",
+    "parentId": "bas_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "short_femme",
+    "name": "Short",
+    "parentId": "bas_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "legging_femme",
+    "name": "Legging",
+    "parentId": "bas_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "vestes_femme",
+    "name": "Vestes & manteaux",
+    "parentId": "femme",
+    "children": [
+      "veste_femme",
+      "blazer_femme",
+      "manteau_femme",
+      "impermeable_femme"
+    ],
+    "attributes": [],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "veste_femme",
+    "name": "Veste",
+    "parentId": "vestes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "blazer_femme",
+    "name": "Blazer",
+    "parentId": "vestes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "manteau_femme",
+    "name": "Manteau",
+    "parentId": "vestes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "impermeable_femme",
+    "name": "Imperméable",
+    "parentId": "vestes_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "traditionnel_femme",
+    "name": "Tenues traditionnelles",
+    "parentId": "femme",
+    "children": [
+      "kaba_femme",
+      "bazin_femme",
+      "boubou_femme",
+      "ensemble_wax_femme",
+      "tissu_pagne_femme"
+    ],
+    "attributes": [],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "kaba_femme",
+    "name": "Kaba & complet pagne",
+    "parentId": "traditionnel_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bazin_femme",
+    "name": "Bazin",
+    "parentId": "traditionnel_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "boubou_femme",
+    "name": "Boubou",
+    "parentId": "traditionnel_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ensemble_wax_femme",
+    "name": "Ensemble wax",
+    "parentId": "traditionnel_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tissu_pagne_femme",
+    "name": "Pagne & tissu au mètre",
+    "parentId": "traditionnel_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chaussures_femme",
+    "name": "Chaussures",
+    "parentId": "femme",
+    "children": [
+      "baskets_femme",
+      "sandales_femme",
+      "talons_femme",
+      "ballerines_femme",
+      "mules_femme",
+      "bottes_femme"
+    ],
+    "attributes": [],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "baskets_femme",
+    "name": "Baskets",
+    "parentId": "chaussures_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sandales_femme",
+    "name": "Sandales",
+    "parentId": "chaussures_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "talons_femme",
+    "name": "Talons",
+    "parentId": "chaussures_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ballerines_femme",
+    "name": "Ballerines",
+    "parentId": "chaussures_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "mules_femme",
+    "name": "Mules & claquettes",
+    "parentId": "chaussures_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bottes_femme",
+    "name": "Bottes",
+    "parentId": "chaussures_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sacs_femme",
+    "name": "Sacs",
+    "parentId": "femme",
+    "children": [
+      "sac_main_femme",
+      "sac_dos_femme",
+      "pochette_femme",
+      "sac_voyage_femme"
+    ],
+    "attributes": [],
+    "order": 7,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sac_main_femme",
+    "name": "Sac à main",
+    "parentId": "sacs_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "bag_type"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sac_dos_femme",
+    "name": "Sac à dos",
+    "parentId": "sacs_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "bag_type"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pochette_femme",
+    "name": "Pochette",
+    "parentId": "sacs_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "bag_type"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sac_voyage_femme",
+    "name": "Sac de voyage",
+    "parentId": "sacs_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "bag_type"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "accessoires_femme",
+    "name": "Accessoires",
+    "parentId": "femme",
+    "children": [
+      "bijoux_femme",
+      "montre_femme",
+      "ceinture_femme",
+      "foulard_femme",
+      "lunettes_femme",
+      "chapeau_femme"
+    ],
+    "attributes": [],
+    "order": 8,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bijoux_femme",
+    "name": "Bijoux",
+    "parentId": "accessoires_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "jewelry_type"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "montre_femme",
+    "name": "Montre",
+    "parentId": "accessoires_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "watch_movement"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ceinture_femme",
+    "name": "Ceinture",
+    "parentId": "accessoires_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "foulard_femme",
+    "name": "Foulard & écharpe",
+    "parentId": "accessoires_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "lunettes_femme",
+    "name": "Lunettes",
+    "parentId": "accessoires_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chapeau_femme",
+    "name": "Chapeau & bonnet",
+    "parentId": "accessoires_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "lingerie_femme",
+    "name": "Lingerie & nuit",
+    "parentId": "femme",
+    "children": [
+      "soutien_femme",
+      "culotte_femme",
+      "pyjama_femme"
+    ],
+    "attributes": [],
+    "order": 9,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "soutien_femme",
+    "name": "Soutien-gorge",
+    "parentId": "lingerie_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "culotte_femme",
+    "name": "Culotte",
+    "parentId": "lingerie_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pyjama_femme",
+    "name": "Pyjama & nuisette",
+    "parentId": "lingerie_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sport_femme",
+    "name": "Sport",
+    "parentId": "femme",
+    "children": [
+      "tenue_sport_femme",
+      "basket_sport_femme"
+    ],
+    "attributes": [],
+    "order": 10,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tenue_sport_femme",
+    "name": "Tenue de sport",
+    "parentId": "sport_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "basket_sport_femme",
+    "name": "Chaussures de sport",
+    "parentId": "sport_femme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "hauts_homme",
+    "name": "Hauts",
+    "parentId": "homme",
+    "children": [
+      "chemise_homme",
+      "tshirt_homme",
+      "polo_homme",
+      "pull_homme",
+      "sweat_homme"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chemise_homme",
+    "name": "Chemise",
+    "parentId": "hauts_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tshirt_homme",
+    "name": "T-shirt",
+    "parentId": "hauts_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "polo_homme",
+    "name": "Polo",
+    "parentId": "hauts_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pull_homme",
+    "name": "Pull & gilet",
+    "parentId": "hauts_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sweat_homme",
+    "name": "Sweat & hoodie",
+    "parentId": "hauts_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bas_homme",
+    "name": "Bas",
+    "parentId": "homme",
+    "children": [
+      "pantalon_homme",
+      "jean_homme",
+      "short_homme",
+      "jogging_homme"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pantalon_homme",
+    "name": "Pantalon",
+    "parentId": "bas_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "jean_homme",
+    "name": "Jean",
+    "parentId": "bas_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "short_homme",
+    "name": "Short",
+    "parentId": "bas_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "jogging_homme",
+    "name": "Jogging",
+    "parentId": "bas_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_bas",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "vestes_homme",
+    "name": "Vestes & manteaux",
+    "parentId": "homme",
+    "children": [
+      "veste_homme",
+      "blazer_homme",
+      "manteau_homme"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "veste_homme",
+    "name": "Veste",
+    "parentId": "vestes_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "blazer_homme",
+    "name": "Blazer & costume",
+    "parentId": "vestes_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "manteau_homme",
+    "name": "Manteau",
+    "parentId": "vestes_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "traditionnel_homme",
+    "name": "Tenues traditionnelles",
+    "parentId": "homme",
+    "children": [
+      "boubou_homme",
+      "bazin_homme",
+      "agbada_homme",
+      "chemise_wax_homme",
+      "tissu_pagne_homme"
+    ],
+    "attributes": [],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "boubou_homme",
+    "name": "Boubou",
+    "parentId": "traditionnel_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bazin_homme",
+    "name": "Bazin",
+    "parentId": "traditionnel_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "agbada_homme",
+    "name": "Agbada",
+    "parentId": "traditionnel_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chemise_wax_homme",
+    "name": "Chemise wax",
+    "parentId": "traditionnel_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tissu_pagne_homme",
+    "name": "Pagne & tissu au mètre",
+    "parentId": "traditionnel_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "size_haut",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chaussures_homme",
+    "name": "Chaussures",
+    "parentId": "homme",
+    "children": [
+      "baskets_homme",
+      "sandales_homme",
+      "mocassins_homme",
+      "ville_homme",
+      "bottes_homme"
+    ],
+    "attributes": [],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "baskets_homme",
+    "name": "Baskets",
+    "parentId": "chaussures_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sandales_homme",
+    "name": "Sandales & claquettes",
+    "parentId": "chaussures_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "mocassins_homme",
+    "name": "Mocassins",
+    "parentId": "chaussures_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ville_homme",
+    "name": "Chaussures de ville",
+    "parentId": "chaussures_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bottes_homme",
+    "name": "Bottes",
+    "parentId": "chaussures_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "accessoires_homme",
+    "name": "Accessoires",
+    "parentId": "homme",
+    "children": [
+      "montre_homme",
+      "ceinture_homme",
+      "casquette_homme",
+      "lunettes_homme",
+      "portefeuille_homme",
+      "sac_homme"
+    ],
+    "attributes": [],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "montre_homme",
+    "name": "Montre",
+    "parentId": "accessoires_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "watch_movement"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ceinture_homme",
+    "name": "Ceinture",
+    "parentId": "accessoires_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "casquette_homme",
+    "name": "Casquette & chapeau",
+    "parentId": "accessoires_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "lunettes_homme",
+    "name": "Lunettes",
+    "parentId": "accessoires_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "portefeuille_homme",
+    "name": "Portefeuille",
+    "parentId": "accessoires_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sac_homme",
+    "name": "Sac",
+    "parentId": "accessoires_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material",
+      "bag_type"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sport_homme",
+    "name": "Sport",
+    "parentId": "homme",
+    "children": [
+      "tenue_sport_homme",
+      "maillot_homme",
+      "basket_sport_homme"
+    ],
+    "attributes": [],
+    "order": 7,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tenue_sport_homme",
+    "name": "Tenue de sport",
+    "parentId": "sport_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "maillot_homme",
+    "name": "Maillot de foot",
+    "parentId": "sport_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "basket_sport_homme",
+    "name": "Chaussures de sport",
+    "parentId": "sport_homme",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bebe",
+    "name": "Bébé (0-2 ans)",
+    "parentId": "enfants",
+    "children": [
+      "body_bebe",
+      "ensemble_bebe",
+      "manteau_bebe",
+      "chaussons_bebe"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "body_bebe",
+    "name": "Body & pyjama",
+    "parentId": "bebe",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ensemble_bebe",
+    "name": "Ensemble",
+    "parentId": "bebe",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "manteau_bebe",
+    "name": "Manteau & veste",
+    "parentId": "bebe",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chaussons_bebe",
+    "name": "Chaussons",
+    "parentId": "bebe",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures_enfant",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "fille",
+    "name": "Fille (2-16 ans)",
+    "parentId": "enfants",
+    "children": [
+      "haut_fille",
+      "robe_fille",
+      "bas_fille",
+      "veste_fille",
+      "traditionnel_fille",
+      "chaussures_fille"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "haut_fille",
+    "name": "Hauts",
+    "parentId": "fille",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "robe_fille",
+    "name": "Robes",
+    "parentId": "fille",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bas_fille",
+    "name": "Bas",
+    "parentId": "fille",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "veste_fille",
+    "name": "Vestes & manteaux",
+    "parentId": "fille",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "traditionnel_fille",
+    "name": "Tenue traditionnelle",
+    "parentId": "fille",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chaussures_fille",
+    "name": "Chaussures",
+    "parentId": "fille",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures_enfant",
+      "color",
+      "material"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "garcon",
+    "name": "Garçon (2-16 ans)",
+    "parentId": "enfants",
+    "children": [
+      "haut_garcon",
+      "bas_garcon",
+      "veste_garcon",
+      "traditionnel_garcon",
+      "chaussures_garcon"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "haut_garcon",
+    "name": "Hauts",
+    "parentId": "garcon",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bas_garcon",
+    "name": "Bas",
+    "parentId": "garcon",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "veste_garcon",
+    "name": "Vestes & manteaux",
+    "parentId": "garcon",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "traditionnel_garcon",
+    "name": "Tenue traditionnelle",
+    "parentId": "garcon",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chaussures_garcon",
+    "name": "Chaussures",
+    "parentId": "garcon",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_chaussures_enfant",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ecole",
+    "name": "École",
+    "parentId": "enfants",
+    "children": [
+      "uniforme_ecole",
+      "cartable_ecole",
+      "fournitures_ecole"
+    ],
+    "attributes": [],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "uniforme_ecole",
+    "name": "Uniforme scolaire",
+    "parentId": "ecole",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "size_enfant",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "cartable_ecole",
+    "name": "Cartable & sac",
+    "parentId": "ecole",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "fournitures_ecole",
+    "name": "Fournitures",
+    "parentId": "ecole",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "puericulture",
+    "name": "Puériculture",
+    "parentId": "enfants",
+    "children": [
+      "poussette",
+      "siege_auto",
+      "lit_bebe",
+      "porte_bebe",
+      "repas_bebe",
+      "baignoire_bebe"
+    ],
+    "attributes": [],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "poussette",
+    "name": "Poussette",
+    "parentId": "puericulture",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "siege_auto",
+    "name": "Siège auto",
+    "parentId": "puericulture",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "lit_bebe",
+    "name": "Lit & couffin",
+    "parentId": "puericulture",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "porte_bebe",
+    "name": "Porte-bébé",
+    "parentId": "puericulture",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "repas_bebe",
+    "name": "Repas & biberons",
+    "parentId": "puericulture",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "baignoire_bebe",
+    "name": "Bain & toilette",
+    "parentId": "puericulture",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "jouets",
+    "name": "Jouets",
+    "parentId": "enfants",
+    "children": [
+      "eveil_jouet",
+      "poupee_jouet",
+      "voiture_jouet",
+      "societe_jouet",
+      "construction_jouet",
+      "exterieur_jouet"
+    ],
+    "attributes": [],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "eveil_jouet",
+    "name": "Jeux d'éveil",
+    "parentId": "jouets",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "poupee_jouet",
+    "name": "Poupées & peluches",
+    "parentId": "jouets",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "voiture_jouet",
+    "name": "Voitures & circuits",
+    "parentId": "jouets",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "societe_jouet",
+    "name": "Jeux de société",
+    "parentId": "jouets",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "construction_jouet",
+    "name": "Jeux de construction",
+    "parentId": "jouets",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "exterieur_jouet",
+    "name": "Jeux d'extérieur",
+    "parentId": "jouets",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "telephonie",
+    "name": "Téléphones & tablettes",
+    "parentId": "electronique",
+    "children": [
+      "smartphone",
+      "telephone_simple",
+      "tablette",
+      "accessoire_telephone"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "smartphone",
+    "name": "Smartphone",
+    "parentId": "telephonie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "storage",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "telephone_simple",
+    "name": "Téléphone simple",
+    "parentId": "telephonie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "storage",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tablette",
+    "name": "Tablette",
+    "parentId": "telephonie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "storage",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "accessoire_telephone",
+    "name": "Coques & protections",
+    "parentId": "telephonie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "informatique",
+    "name": "Informatique",
+    "parentId": "electronique",
+    "children": [
+      "ordinateur_portable",
+      "ordinateur_bureau",
+      "imprimante",
+      "peripherique",
+      "stockage"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ordinateur_portable",
+    "name": "Ordinateur portable",
+    "parentId": "informatique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "storage",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ordinateur_bureau",
+    "name": "Ordinateur de bureau",
+    "parentId": "informatique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "storage",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "imprimante",
+    "name": "Imprimante",
+    "parentId": "informatique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "peripherique",
+    "name": "Clavier, souris & écran",
+    "parentId": "informatique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "stockage",
+    "name": "Clé USB & disque dur",
+    "parentId": "informatique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "storage",
+      "color"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "audio",
+    "name": "Audio",
+    "parentId": "electronique",
+    "children": [
+      "ecouteurs",
+      "casque_audio",
+      "enceinte",
+      "radio",
+      "sono"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ecouteurs",
+    "name": "Écouteurs",
+    "parentId": "audio",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "casque_audio",
+    "name": "Casque",
+    "parentId": "audio",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "enceinte",
+    "name": "Enceinte & baffle",
+    "parentId": "audio",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "radio",
+    "name": "Radio",
+    "parentId": "audio",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sono",
+    "name": "Sono & micro",
+    "parentId": "audio",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "image",
+    "name": "TV, photo & vidéo",
+    "parentId": "electronique",
+    "children": [
+      "televiseur",
+      "decodeur",
+      "videoprojecteur",
+      "appareil_photo",
+      "camera"
+    ],
+    "attributes": [],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "televiseur",
+    "name": "Téléviseur",
+    "parentId": "image",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "decodeur",
+    "name": "Décodeur & antenne",
+    "parentId": "image",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "videoprojecteur",
+    "name": "Vidéoprojecteur",
+    "parentId": "image",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "appareil_photo",
+    "name": "Appareil photo",
+    "parentId": "image",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "camera",
+    "name": "Caméra",
+    "parentId": "image",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "jeux_video",
+    "name": "Jeux vidéo",
+    "parentId": "electronique",
+    "children": [
+      "console",
+      "jeu_video",
+      "manette"
+    ],
+    "attributes": [],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "console",
+    "name": "Console",
+    "parentId": "jeux_video",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "jeu_video",
+    "name": "Jeu",
+    "parentId": "jeux_video",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "manette",
+    "name": "Manette & accessoires",
+    "parentId": "jeux_video",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "energie",
+    "name": "Énergie & charge",
+    "parentId": "electronique",
+    "children": [
+      "chargeur",
+      "batterie_externe",
+      "panneau_solaire",
+      "lampe_solaire",
+      "onduleur",
+      "groupe_electrogene"
+    ],
+    "attributes": [],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "chargeur",
+    "name": "Chargeur & câble",
+    "parentId": "energie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "batterie_externe",
+    "name": "Batterie externe",
+    "parentId": "energie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "panneau_solaire",
+    "name": "Panneau solaire",
+    "parentId": "energie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "lampe_solaire",
+    "name": "Lampe solaire",
+    "parentId": "energie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "onduleur",
+    "name": "Onduleur & stabilisateur",
+    "parentId": "energie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "groupe_electrogene",
+    "name": "Groupe électrogène",
+    "parentId": "energie",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "livres_scolaires",
+    "name": "Livres scolaires",
+    "parentId": "livres",
+    "children": [
+      "manuel_scolaire",
+      "cahier_exercices",
+      "annales",
+      "dictionnaire"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "manuel_scolaire",
+    "name": "Manuel scolaire",
+    "parentId": "livres_scolaires",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "school_level"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "cahier_exercices",
+    "name": "Cahier d'exercices",
+    "parentId": "livres_scolaires",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "school_level"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "annales",
+    "name": "Annales & préparation examens",
+    "parentId": "livres_scolaires",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "school_level"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "dictionnaire",
+    "name": "Dictionnaire",
+    "parentId": "livres_scolaires",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "litterature",
+    "name": "Littérature",
+    "parentId": "livres",
+    "children": [
+      "roman",
+      "litterature_africaine",
+      "poesie_theatre",
+      "essai"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "roman",
+    "name": "Roman",
+    "parentId": "litterature",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "litterature_africaine",
+    "name": "Littérature africaine",
+    "parentId": "litterature",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "poesie_theatre",
+    "name": "Poésie & théâtre",
+    "parentId": "litterature",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "essai",
+    "name": "Essai",
+    "parentId": "litterature",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pratique",
+    "name": "Pratique & savoir",
+    "parentId": "livres",
+    "children": [
+      "developpement_personnel",
+      "cuisine_livre",
+      "sante_livre",
+      "informatique_livre",
+      "business_livre"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "developpement_personnel",
+    "name": "Développement personnel",
+    "parentId": "pratique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "cuisine_livre",
+    "name": "Cuisine",
+    "parentId": "pratique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sante_livre",
+    "name": "Santé & bien-être",
+    "parentId": "pratique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "informatique_livre",
+    "name": "Informatique & langues",
+    "parentId": "pratique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "business_livre",
+    "name": "Business & entrepreneuriat",
+    "parentId": "pratique",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "religion",
+    "name": "Religion & spiritualité",
+    "parentId": "livres",
+    "children": [
+      "bible",
+      "coran",
+      "spiritualite"
+    ],
+    "attributes": [],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bible",
+    "name": "Bible & étude biblique",
+    "parentId": "religion",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "coran",
+    "name": "Coran & islam",
+    "parentId": "religion",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "spiritualite",
+    "name": "Spiritualité",
+    "parentId": "religion",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bd_jeunesse",
+    "name": "BD & jeunesse",
+    "parentId": "livres",
+    "children": [
+      "bd",
+      "manga",
+      "livre_enfant"
+    ],
+    "attributes": [],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bd",
+    "name": "Bande dessinée",
+    "parentId": "bd_jeunesse",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "manga",
+    "name": "Manga",
+    "parentId": "bd_jeunesse",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "livre_enfant",
+    "name": "Livre pour enfants",
+    "parentId": "bd_jeunesse",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language",
+      "book_format"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "medias",
+    "name": "Musique & films",
+    "parentId": "livres",
+    "children": [
+      "cd",
+      "dvd",
+      "magazine"
+    ],
+    "attributes": [],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "cd",
+    "name": "CD",
+    "parentId": "medias",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "dvd",
+    "name": "DVD & films",
+    "parentId": "medias",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "magazine",
+    "name": "Revues & magazines",
+    "parentId": "medias",
+    "children": [],
+    "attributes": [
+      "condition",
+      "book_language"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "cuisine",
+    "name": "Cuisine",
+    "parentId": "maison",
+    "children": [
+      "ustensile",
+      "marmite",
+      "petit_electromenager",
+      "rangement_cuisine"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ustensile",
+    "name": "Ustensiles & vaisselle",
+    "parentId": "cuisine",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "marmite",
+    "name": "Marmites & casseroles",
+    "parentId": "cuisine",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "petit_electromenager",
+    "name": "Petit électroménager",
+    "parentId": "cuisine",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "rangement_cuisine",
+    "name": "Rangement",
+    "parentId": "cuisine",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "electromenager",
+    "name": "Électroménager",
+    "parentId": "maison",
+    "children": [
+      "refrigerateur",
+      "machine_laver",
+      "ventilateur",
+      "fer_repasser",
+      "micro_onde"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "refrigerateur",
+    "name": "Réfrigérateur & congélateur",
+    "parentId": "electromenager",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "machine_laver",
+    "name": "Machine à laver",
+    "parentId": "electromenager",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ventilateur",
+    "name": "Ventilateur & climatiseur",
+    "parentId": "electromenager",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "fer_repasser",
+    "name": "Fer à repasser",
+    "parentId": "electromenager",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "micro_onde",
+    "name": "Micro-ondes & four",
+    "parentId": "electromenager",
+    "children": [],
+    "attributes": [
+      "condition",
+      "tech_brand",
+      "color"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "linge_maison",
+    "name": "Linge de maison",
+    "parentId": "maison",
+    "children": [
+      "draps",
+      "serviettes",
+      "rideaux",
+      "nappe"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "draps",
+    "name": "Draps & couvertures",
+    "parentId": "linge_maison",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "serviettes",
+    "name": "Serviettes",
+    "parentId": "linge_maison",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "rideaux",
+    "name": "Rideaux",
+    "parentId": "linge_maison",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "nappe",
+    "name": "Nappes",
+    "parentId": "linge_maison",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "decoration",
+    "name": "Décoration",
+    "parentId": "maison",
+    "children": [
+      "tableau",
+      "luminaire",
+      "tapis",
+      "objet_deco",
+      "artisanat"
+    ],
+    "attributes": [],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tableau",
+    "name": "Tableaux & cadres",
+    "parentId": "decoration",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "luminaire",
+    "name": "Luminaires",
+    "parentId": "decoration",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "tapis",
+    "name": "Tapis",
+    "parentId": "decoration",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "objet_deco",
+    "name": "Objets déco",
+    "parentId": "decoration",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "artisanat",
+    "name": "Artisanat local",
+    "parentId": "decoration",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "meubles",
+    "name": "Meubles",
+    "parentId": "maison",
+    "children": [
+      "canape",
+      "table",
+      "lit",
+      "armoire",
+      "bureau_meuble"
+    ],
+    "attributes": [],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "canape",
+    "name": "Canapé & fauteuil",
+    "parentId": "meubles",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "table",
+    "name": "Table & chaises",
+    "parentId": "meubles",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "lit",
+    "name": "Lit & matelas",
+    "parentId": "meubles",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "armoire",
+    "name": "Armoire & rangement",
+    "parentId": "meubles",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "bureau_meuble",
+    "name": "Bureau",
+    "parentId": "meubles",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color",
+      "material"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "cheveux",
+    "name": "Cheveux",
+    "parentId": "beaute",
+    "children": [
+      "meches",
+      "perruque",
+      "soin_cheveux",
+      "accessoire_cheveux"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "meches",
+    "name": "Mèches & tissages",
+    "parentId": "cheveux",
+    "children": [],
+    "attributes": [
+      "condition",
+      "hair_type",
+      "hair_length",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "perruque",
+    "name": "Perruques",
+    "parentId": "cheveux",
+    "children": [],
+    "attributes": [
+      "condition",
+      "hair_type",
+      "hair_length",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "soin_cheveux",
+    "name": "Soins capillaires",
+    "parentId": "cheveux",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "accessoire_cheveux",
+    "name": "Accessoires cheveux",
+    "parentId": "cheveux",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "maquillage",
+    "name": "Maquillage",
+    "parentId": "beaute",
+    "children": [
+      "teint",
+      "levres",
+      "yeux",
+      "ongles",
+      "pinceaux"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "teint",
+    "name": "Fond de teint & poudre",
+    "parentId": "maquillage",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "levres",
+    "name": "Rouge à lèvres",
+    "parentId": "maquillage",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "yeux",
+    "name": "Yeux & sourcils",
+    "parentId": "maquillage",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ongles",
+    "name": "Ongles & vernis",
+    "parentId": "maquillage",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "pinceaux",
+    "name": "Pinceaux & accessoires",
+    "parentId": "maquillage",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "parfums",
+    "name": "Parfums",
+    "parentId": "beaute",
+    "children": [
+      "parfum_femme",
+      "parfum_homme",
+      "encens"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "parfum_femme",
+    "name": "Parfum femme",
+    "parentId": "parfums",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "parfum_homme",
+    "name": "Parfum homme",
+    "parentId": "parfums",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "encens",
+    "name": "Encens & brumes",
+    "parentId": "parfums",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "soins_corps",
+    "name": "Soins",
+    "parentId": "beaute",
+    "children": [
+      "soin_visage",
+      "soin_corps",
+      "savon",
+      "huile"
+    ],
+    "attributes": [],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "soin_visage",
+    "name": "Visage",
+    "parentId": "soins_corps",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "soin_corps",
+    "name": "Corps",
+    "parentId": "soins_corps",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "savon",
+    "name": "Savons & gommages",
+    "parentId": "soins_corps",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "huile",
+    "name": "Huiles & beurres naturels",
+    "parentId": "soins_corps",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "equipement_sport",
+    "name": "Équipement",
+    "parentId": "sport_loisirs",
+    "children": [
+      "ballon",
+      "musculation",
+      "velo",
+      "raquette"
+    ],
+    "attributes": [],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "ballon",
+    "name": "Ballons",
+    "parentId": "equipement_sport",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "musculation",
+    "name": "Musculation & fitness",
+    "parentId": "equipement_sport",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "velo",
+    "name": "Vélo & trottinette",
+    "parentId": "equipement_sport",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "raquette",
+    "name": "Raquettes",
+    "parentId": "equipement_sport",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "plein_air",
+    "name": "Plein air",
+    "parentId": "sport_loisirs",
+    "children": [
+      "camping",
+      "peche",
+      "plage"
+    ],
+    "attributes": [],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "camping",
+    "name": "Camping",
+    "parentId": "plein_air",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "peche",
+    "name": "Pêche",
+    "parentId": "plein_air",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "plage",
+    "name": "Plage & piscine",
+    "parentId": "plein_air",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "instruments",
+    "name": "Musique",
+    "parentId": "sport_loisirs",
+    "children": [
+      "guitare",
+      "clavier_musique",
+      "percussion",
+      "instrument_autre"
+    ],
+    "attributes": [],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "guitare",
+    "name": "Guitare",
+    "parentId": "instruments",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 1,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "clavier_musique",
+    "name": "Clavier & piano",
+    "parentId": "instruments",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "percussion",
+    "name": "Djembé & percussions",
+    "parentId": "instruments",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "instrument_autre",
+    "name": "Autres instruments",
+    "parentId": "instruments",
+    "children": [],
+    "attributes": [
+      "condition",
+      "brand",
+      "color"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  }
 ]

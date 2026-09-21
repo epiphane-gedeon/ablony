@@ -4,6 +4,7 @@ import '../../../../core/exceptions/exceptions.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../models/product_model.dart';
+import '../../domain/entities/search_page.dart';
 
 /// Implémentation Firestore du ProductRepository.
 ///
@@ -99,7 +100,25 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<void> deleteProduct(String productId) async {
     try {
-      await _firestore.collection('products').doc(productId).delete();
+      final doc = await _firestore.collection('products').doc(productId).get();
+      if (!doc.exists) throw ProductNotFoundException(productId: productId);
+
+      final statut = ProductStatus.fromWire(doc.data()?['status'] as String?);
+      if (statut == ProductStatus.sold) {
+        throw ProductSoldCannotBeDeletedException();
+      }
+
+      // On archive, on n'efface pas. L'annonce peut être en favori, citée
+      // dans une conversation, ou **signalée** — et un vendeur qui efface son
+      // annonce effacerait la pièce à conviction. Elle disparaît de partout
+      // où le vendeur la voyait ; le document reste.
+      await _firestore.collection('products').doc(productId).update({
+        'status': ProductStatus.archived.wireValue,
+        'isHidden': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on AppException {
+      rethrow;
     } on FirebaseException catch (e, stackTrace) {
       throw handleFirebaseException(e, stackTrace: stackTrace);
     } catch (e, stackTrace) {
@@ -146,9 +165,10 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       var query = _firestore
           .collection('products')
-          .where('isSold', isEqualTo: false)
-          .where('isReserved', isEqualTo: false)
-          .where('isHidden', isEqualTo: false)
+          // Un seul champ, calculé par le serveur : il vaut vrai si
+          // l'annonce est active, non rejetée, et son vendeur non
+          // suspendu. Voir docs/produit/19-modele-annonce.md.
+          .where('isListable', isEqualTo: true)
           .orderBy('createdAt', descending: true)
           .limit(limit);
 
@@ -244,9 +264,10 @@ class ProductRepositoryImpl implements ProductRepository {
       Query query = _firestore
           .collection('products')
           .where('categoryId', isEqualTo: categoryId)
-          .where('isSold', isEqualTo: false)
-          .where('isReserved', isEqualTo: false)
-          .where('isHidden', isEqualTo: false);
+          // Un seul champ, calculé par le serveur : il vaut vrai si
+          // l'annonce est active, non rejetée, et son vendeur non
+          // suspendu. Voir docs/produit/19-modele-annonce.md.
+          .where('isListable', isEqualTo: true);
 
       // Ajouter le filtre de sous-catégorie si fourni
       if (subcategoryId != null) {
@@ -274,100 +295,65 @@ class ProductRepositoryImpl implements ProductRepository {
     }
   }
 
+  /// Vingt résultats par page. Un écran en montre six ; charger davantage
+  /// fait payer des lectures pour ce que personne ne fait défiler.
+  static const int _tailleDePage = 20;
+
   @override
-  Future<List<Product>> searchProducts(String query) async {
+  Future<SearchPage> searchProducts(String query, {String? startAfter}) async {
     try {
-      final queryLower = query.toLowerCase();
+      // Firestore limite `arrayContainsAny` à 30 valeurs, et au-delà de
+      // quelques mots la requête ne discrimine plus rien.
+      final mots = _motsDeRecherche(query).take(10).toList();
 
-      // Récupérer toutes les catégories et sous-catégories pour la recherche
-      // IMPORTANT : Les catégories sont dans config/categories/items et config/subcategories/items
-      final categoriesSnapshot = await _firestore
-          .collection('config')
-          .doc('categories')
-          .collection('items')
-          .get();
-      final subcategoriesSnapshot = await _firestore
-          .collection('config')
-          .doc('subcategories')
-          .collection('items')
-          .get();
+      // Requête vide (navigation par catégorie, clic sur une marque, ou simple
+      // parcours) : on liste TOUTES les annonces en ligne, de la plus récente.
+      // Les filtres de l'écran affinent ensuite. Auparavant on renvoyait vide,
+      // et tout filtre posé sur rien ne donnait rien.
+      Query<Map<String, dynamic>> requete = mots.isEmpty
+          ? _firestore
+              .collection('products')
+              .where('isListable', isEqualTo: true)
+              .orderBy('createdAt', descending: true)
+              .limit(_tailleDePage)
+          : _firestore
+              .collection('products')
+              .where('searchTokens', arrayContainsAny: mots)
+              .where('isListable', isEqualTo: true)
+              .orderBy('createdAt', descending: true)
+              .limit(_tailleDePage);
 
-      // Créer des maps pour rechercher par nom
-      final Map<String, String> categoryIdsByName = {};
-      final Map<String, String> subcategoryIdsByName = {};
-
-      for (var doc in categoriesSnapshot.docs) {
-        final name = (doc.data()['name'] ?? '').toString().toLowerCase();
-        categoryIdsByName[name] = doc.id;
+      if (startAfter != null) {
+        final dernier = await _firestore
+            .collection('products')
+            .doc(startAfter)
+            .get();
+        if (dernier.exists) requete = requete.startAfterDocument(dernier);
       }
 
-      for (var doc in subcategoriesSnapshot.docs) {
-        final name = (doc.data()['name'] ?? '').toString().toLowerCase();
-        subcategoryIdsByName[name] = doc.id;
-      }
-
-      // Trouver les IDs de catégories/sous-catégories qui correspondent à la recherche
-      final Set<String> matchingCategoryIds = {};
-      final Set<String> matchingSubcategoryIds = {};
-
-      categoryIdsByName.forEach((name, id) {
-        if (name.contains(queryLower)) {
-          matchingCategoryIds.add(id);
-        }
-      });
-
-      subcategoryIdsByName.forEach((name, id) {
-        if (name.contains(queryLower)) {
-          matchingSubcategoryIds.add(id);
-        }
-      });
-
-      // Récupérer tous les produits non vendus, non réservés et non masqués
-      final snapshot = await _firestore
-          .collection('products')
-          .where('isSold', isEqualTo: false)
-          .where('isReserved', isEqualTo: false)
-          .where('isHidden', isEqualTo: false)
-          .get();
-
-      // Filtrer côté client pour chercher dans titre, description, marque, catégorie et sous-catégorie
-      final results = snapshot.docs
+      final snapshot = await requete.get();
+      final produits = snapshot.docs
           .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
-          .where((product) {
-            // Recherche dans le titre
-            if (product.title.toLowerCase().contains(queryLower)) {
-              return true;
-            }
-
-            // Recherche dans la description
-            if (product.description?.toLowerCase().contains(queryLower) ??
-                false) {
-              return true;
-            }
-
-            // Recherche dans la marque
-            final brand =
-                product.attributes['brand'] ?? product.attributes['marque'];
-            if (brand != null &&
-                brand.toString().toLowerCase().contains(queryLower)) {
-              return true;
-            }
-
-            // Recherche par catégorie
-            if (matchingCategoryIds.contains(product.categoryId)) {
-              return true;
-            }
-
-            // Recherche par sous-catégorie
-            if (matchingSubcategoryIds.contains(product.subcategoryId)) {
-              return true;
-            }
-
-            return false;
-          })
           .toList();
 
-      return results;
+      // Reclassement en mémoire, sur la page seulement : `arrayContainsAny`
+      // remonte les annonces portant **au moins un** des mots, donc « robe
+      // wax » ramène les robes et les articles en wax. Compter les mots
+      // correspondants remet les plus pertinentes devant, pour un coût nul.
+      if (mots.length > 1) {
+        produits.sort((a, b) {
+          final scoreA = _pertinence(a, mots);
+          final scoreB = _pertinence(b, mots);
+          if (scoreA != scoreB) return scoreB.compareTo(scoreA);
+          return b.createdAt.compareTo(a.createdAt);
+        });
+      }
+
+      return SearchPage(
+        products: produits,
+        nextCursor:
+            snapshot.docs.length < _tailleDePage ? null : snapshot.docs.last.id,
+      );
     } on FirebaseException catch (e, stackTrace) {
       throw handleFirebaseException(e, stackTrace: stackTrace);
     } catch (e, stackTrace) {
@@ -377,6 +363,69 @@ class ProductRepositoryImpl implements ProductRepository {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  /// Correspondance des lettres accentuées vers leur forme simple.
+  ///
+  /// Le serveur normalise en NFD et retire les signes diacritiques, ce que la
+  /// bibliothèque standard de Dart ne sait pas faire. Cette table couvre le
+  /// supplément latin-1 en entier : une lettre oubliée ici découperait le mot
+  /// en morceaux, là où le serveur l'aurait gardé entier — et « señor » ne
+  /// trouverait jamais « Señor ».
+  static const Map<String, String> _sansAccent = {
+    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae',
+    'ç': 'c',
+    'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+    'ñ': 'n',
+    'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ø': 'o', 'œ': 'oe',
+    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+    'ý': 'y', 'ÿ': 'y',
+    'ß': 'ss',
+  };
+
+  /// Mots trop courants pour discriminer quoi que ce soit.
+  ///
+  /// Doit rester identique à `MOTS_VIDES` côté serveur : un mot filtré d'un
+  /// côté et pas de l'autre, et la requête cherche ce que l'index n'a pas
+  /// enregistré.
+  static const Set<String> _motsVides = {
+    'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'ou',
+    'pour', 'sans', 'avec', 'dans', 'sur', 'par', 'aux', 'au', 'en',
+    'ce', 'cet', 'cette', 'mon', 'ma', 'mes', 'son', 'sa', 'ses',
+  };
+
+  /// Découpe une requête comme le serveur découpe les annonces.
+  ///
+  /// Deux formes par mot, et la seconde compte : « H&M » découpé donne « h »
+  /// et « m », écartés pour leur longueur — la marque devenait introuvable.
+  /// La forme compacte, « hm », la rattrape, comme « t-shirt » → « tshirt ».
+  ///
+  /// Les deux découpages doivent rester identiques : si l'un supprime les
+  /// accents et pas l'autre, « vêtement » ne trouve jamais « Vêtement ».
+  static List<String> _motsDeRecherche(String query) {
+    final tampon = StringBuffer();
+    for (final lettre in query.toLowerCase().split('')) {
+      tampon.write(_sansAccent[lettre] ?? lettre);
+    }
+
+    final sortie = <String>{};
+    for (final mot in tampon.toString().split(RegExp(r'\s+'))) {
+      for (final part in mot.split(RegExp('[^a-z0-9]+'))) {
+        if (part.length >= 2 && !_motsVides.contains(part)) sortie.add(part);
+      }
+      final compact = mot.replaceAll(RegExp('[^a-z0-9]+'), '');
+      if (compact.length >= 2 && !_motsVides.contains(compact)) {
+        sortie.add(compact);
+      }
+    }
+    return sortie.toList();
+  }
+
+  /// Combien de mots de la requête l'annonce porte-t-elle ?
+  static int _pertinence(Product produit, List<String> mots) {
+    final titre = _motsDeRecherche(produit.title).toSet();
+    return mots.where(titre.contains).length;
   }
 
   @override
@@ -535,6 +584,10 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> markAsSold(String productId) async {
     try {
       await _firestore.collection('products').doc(productId).update({
+        // `status` autant que le booléen hérité : depuis que toutes les
+        // annonces portent `status`, ne basculer que `isSold` ne change rien
+        // — l'annonce resterait visible dans les listes.
+        'status': 'sold',
         'isSold': true,
         'soldAt': FieldValue.serverTimestamp(),
         // On lève une éventuelle réservation : le produit est de toute
@@ -635,9 +688,10 @@ class ProductRepositoryImpl implements ProductRepository {
       final snapshot = await _firestore
           .collection('products')
           .where('isBoosted', isEqualTo: true)
-          .where('isSold', isEqualTo: false)
-          .where('isReserved', isEqualTo: false)
-          .where('isHidden', isEqualTo: false)
+          // Un seul champ, calculé par le serveur : il vaut vrai si
+          // l'annonce est active, non rejetée, et son vendeur non
+          // suspendu. Voir docs/produit/19-modele-annonce.md.
+          .where('isListable', isEqualTo: true)
           .where('boostExpiresAt', isGreaterThan: Timestamp.now())
           .orderBy('boostExpiresAt', descending: true)
           .limit(limit)

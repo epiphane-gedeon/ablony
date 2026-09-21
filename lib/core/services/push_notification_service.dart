@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/notifications/application/notification_router.dart';
 import '../navigation/navigator_key.dart';
 
 /// Gère l'enregistrement du device pour les notifications push (FCM) et
@@ -105,21 +106,22 @@ class PushNotificationService {
     });
   }
 
+  /// Où mène un appui sur une notification système.
+  ///
+  /// La table de routage est partagée avec la boîte de réception
+  /// (`notification_router.dart`) : deux tables parallèles finiraient par
+  /// diverger, et un push mènerait ailleurs que la ligne qui lui correspond —
+  /// sans que rien ne le signale.
   void _handleTap(RemoteMessage message) {
     final context = rootNavigatorKey.currentContext;
     if (context == null) return;
-    final router = GoRouter.of(context);
 
-    switch (message.data['type']) {
-      case 'purchase_confirmed':
-        final receiptId = message.data['receiptId'];
-        if (receiptId != null) router.push('/receipt/$receiptId');
-        break;
-      case 'purchase_received':
-      case 'new_product_from_followed':
-        final productId = message.data['productId'];
-        if (productId != null) router.push('/product/$productId');
-        break;
-    }
+    final destination = destinationOf(
+      message.data['type'] as String? ?? '',
+      Map<String, dynamic>.from(message.data),
+    );
+    // Un type inconnu, écrit par une version plus récente du serveur, n'ouvre
+    // rien plutôt que de planter.
+    if (destination != null) GoRouter.of(context).push(destination);
   }
 }

@@ -14,6 +14,7 @@ import '../../../../shared/widgets/product_card.dart';
 import '../../../product/domain/entities/entities.dart';
 import '../../../product/presentation/providers/category_provider.dart';
 import '../../../product/presentation/providers/product_provider.dart';
+import '../../../../core/services/analytics_service.dart';
 
 /// Page des résultats de recherche
 ///
@@ -23,11 +24,24 @@ class SearchResultsPage extends ConsumerStatefulWidget {
   final String? categoryId;
   final String? categoryName;
 
+  /// Pré-sélections, quand on arrive depuis une fiche produit (« voir tout ce
+  /// qui est de cette marque / taille / état »).
+  final String? initialBrand;
+
+  /// Taille pré-sélectionnée, au format `attributeId:valueIndex`.
+  final String? initialSize;
+
+  /// État pré-sélectionné, au format `condition.index` (chaîne).
+  final String? initialCondition;
+
   const SearchResultsPage({
     super.key,
     required this.query,
     this.categoryId,
     this.categoryName,
+    this.initialBrand,
+    this.initialSize,
+    this.initialCondition,
   });
 
   @override
@@ -37,6 +51,12 @@ class SearchResultsPage extends ConsumerStatefulWidget {
 class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   List<Product> _results = [];
   bool _isLoading = true;
+
+  // Pagination : la recherche téléchargeait autrefois tout le catalogue à
+  // chaque requête. Elle rapporte désormais vingt résultats et un curseur.
+  final ScrollController _scrollController = ScrollController();
+  String? _nextCursor;
+  bool _isLoadingMore = false;
 
   // État des filtres
   List<String> _selectedBrands = [];
@@ -50,6 +70,18 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   String? _selectedCategoryId; // ID de catégorie ou sous-catégorie
   String? _selectedCategoryName; // Nom pour affichage
 
+  // setState de la feuille "Filtrer" quand elle est ouverte, pour que les
+  // lignes (Taille, Marque, Tri…) reflètent aussitôt un filtre appliqué depuis
+  // l'intérieur du sheet. null quand la feuille est fermée.
+  void Function(void Function())? _filterSheetRebuild;
+
+  /// Applique un changement de filtre : met à jour la page ET, si la feuille
+  /// "Filtrer" est ouverte, la reconstruit pour rafraîchir la valeur affichée.
+  void _applyFilterChange(VoidCallback fn) {
+    setState(fn);
+    _filterSheetRebuild?.call(() {});
+  }
+
   // Cache pour vérifier les catégories intermédiaires
   final Map<String, String> _subcategoryParentCache = {};
 
@@ -58,7 +90,41 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
     super.initState();
     _selectedCategoryId = widget.categoryId;
     _selectedCategoryName = widget.categoryName;
+    if (widget.initialBrand != null && widget.initialBrand!.isNotEmpty) {
+      _selectedBrands = [widget.initialBrand!];
+    }
+    if (widget.initialSize != null && widget.initialSize!.isNotEmpty) {
+      _selectedSizes = [widget.initialSize!];
+    }
+    if (widget.initialCondition != null &&
+        widget.initialCondition!.isNotEmpty) {
+      _selectedConditions = [widget.initialCondition!];
+    }
+    _scrollController.addListener(_onScroll);
     _performSearch();
+    // Le terme cherché nourrit « ce que les gens cherchent » dans Analytics —
+    // logué à l'arrivée sur les résultats, pas à chaque frappe de suggestion.
+    if (widget.query.trim().isNotEmpty) {
+      ref.read(analyticsServiceProvider).logSearch(widget.query.trim());
+    }
+    // Une seule fois, et non à chaque recherche : cette méthode parcourt tout
+    // l'arbre des catégories, une requête par branche.
+    _loadSubcategoriesCache();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    // 400 pixels d'avance : la page suivante arrive avant qu'on touche le bas.
+    if (position.pixels >= position.maxScrollExtent - 400) {
+      _loadMore();
+    }
   }
 
   /// Effectue la recherche
@@ -69,20 +135,73 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
 
     try {
       final repository = ref.read(productRepositoryProvider);
-      final products = await repository.searchProducts(widget.query);
+      final page = await repository.searchProducts(widget.query);
 
+      if (!mounted) return;
       setState(() {
-        _results = products;
+        _results = page.products;
+        _nextCursor = page.nextCursor;
         _isLoading = false;
       });
-
-      // Précharger les sous-catégories pour le filtrage
-      _loadSubcategoriesCache();
+      _autoChargerSiFiltreMaigre();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _results = [];
+        _nextCursor = null;
         _isLoading = false;
       });
+    }
+  }
+
+  /// Les filtres s'appliquent sur les résultats **déjà chargés**. Si un filtre
+  /// est actif et qu'il ne reste presque rien à l'écran alors qu'il y a
+  /// d'autres pages, on continue de charger : sinon l'écran a trop peu de
+  /// contenu pour déclencher le défilement, et l'utilisateur reste bloqué sur
+  /// « aucun résultat » alors que des correspondances existent plus loin.
+  /// (Solution d'attente ; la vraie recherche à facettes viendra avec le moteur
+  /// dédié.)
+  void _autoChargerSiFiltreMaigre() {
+    final filtreActif = _selectedBrands.isNotEmpty ||
+        _selectedColors.isNotEmpty ||
+        _selectedSizes.isNotEmpty ||
+        _selectedConditions.isNotEmpty ||
+        _selectedMaterials.isNotEmpty ||
+        _selectedCategoryId != null ||
+        _minPrice != null ||
+        _maxPrice != null;
+    if (!filtreActif) return;
+    if (_filteredResults.length >= 12) return;
+    if (_results.length >= 300) return; // garde-fou anti-parcours intégral
+    if (_nextCursor == null || _isLoading || _isLoadingMore) return;
+    _loadMore();
+  }
+
+  /// Charge la page suivante.
+  ///
+  /// Les gardes ne sont pas de la prudence excessive : le défilement déclenche
+  /// l'écouteur à chaque image, et sans elles on lancerait vingt requêtes
+  /// identiques en une seconde.
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || _isLoading || _nextCursor == null) return;
+
+    setState(() => _isLoadingMore = true);
+    try {
+      final page = await ref
+          .read(productRepositoryProvider)
+          .searchProducts(widget.query, startAfter: _nextCursor);
+
+      if (!mounted) return;
+      setState(() {
+        _results = [..._results, ...page.products];
+        _nextCursor = page.nextCursor;
+        _isLoadingMore = false;
+      });
+      _autoChargerSiFiltreMaigre();
+    } catch (e) {
+      if (!mounted) return;
+      // On garde le curseur : un échec réseau ne doit pas clore la liste.
+      setState(() => _isLoadingMore = false);
     }
   }
 
@@ -341,7 +460,10 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         _clearFilters();
         Navigator.pop(context);
       },
-      content: Column(
+      content: StatefulBuilder(
+        builder: (context, setSheetState) {
+          _filterSheetRebuild = setSheetState;
+          return Column(
         children: [
           // Section Classer par
           Container(
@@ -556,8 +678,10 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
             ),
           ),
         ],
+      );
+        },
       ),
-    );
+    ).whenComplete(() => _filterSheetRebuild = null);
   }
 
   /// Recherche récursive du nom de catégorie par ID
@@ -662,7 +786,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
     if (result != null) {
       if (result['reset'] == true) {
         // "Tous" at first level = reset filter
-        setState(() {
+        _applyFilterChange(() {
           _selectedCategoryId = null;
           _selectedCategoryName = null;
         });
@@ -670,7 +794,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         final selectedIds = result['selectedIds'] as List<dynamic>;
         if (selectedIds.isEmpty) {
           // Empty selection = reset filter
-          setState(() {
+          _applyFilterChange(() {
             _selectedCategoryId = null;
             _selectedCategoryName = null;
           });
@@ -700,7 +824,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
             }
           }
 
-          setState(() {
+          _applyFilterChange(() {
             _selectedCategoryId = selectedId;
             _selectedCategoryName = selectedName ?? l10n.filterCategory;
           });
@@ -744,6 +868,13 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+
+    // Après chaque rendu (donc après un changement de filtre), on vérifie s'il
+    // faut charger plus pour que le filtre trouve des correspondances. Les
+    // gardes de la méthode empêchent toute boucle.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _autoChargerSiFiltreMaigre();
+    });
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -918,6 +1049,11 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                         // Grille de produits
                         Expanded(
                           child: ResponsiveProductGrid<Product>(
+                            controller: _scrollController,
+                            // La roue en bas de liste n'est montrée que si une
+                            // page suivante existe : sinon elle laisse croire
+                            // que la liste continue.
+                            showTrailingLoader: _isLoadingMore,
                             padding: EdgeInsets.symmetric(
                               horizontal: context.pagePadding,
                             ),
@@ -998,7 +1134,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         },
         onResult: (result) {
           if (result != null && result['selectedIds'] != null) {
-            setState(() {
+            _applyFilterChange(() {
               _selectedBrands = List<String>.from(result['selectedIds']);
             });
             Navigator.pop(context);
@@ -1065,7 +1201,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         },
         onResult: (result) {
           if (result != null && result['selectedIds'] != null) {
-            setState(() {
+            _applyFilterChange(() {
               _selectedColors = List<String>.from(result['selectedIds']);
             });
             Navigator.pop(context);
@@ -1152,7 +1288,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         },
         onResult: (result) {
           if (result != null && result['selectedIds'] != null) {
-            setState(() {
+            _applyFilterChange(() {
               _selectedSizes = List<String>.from(result['selectedIds']);
             });
             Navigator.pop(context);
@@ -1219,7 +1355,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         },
         onResult: (result) {
           if (result != null && result['selectedIds'] != null) {
-            setState(() {
+            _applyFilterChange(() {
               _selectedMaterials = List<String>.from(result['selectedIds']);
             });
             Navigator.pop(context);
@@ -1263,7 +1399,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
             },
             onResult: (result) {
               if (result != null && result['selectedIds'] != null) {
-                setState(() {
+                _applyFilterChange(() {
                   _selectedConditions = List<String>.from(result['selectedIds']);
                 });
                 Navigator.pop(context);
@@ -1319,7 +1455,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
           actions: [
             TextButton(
               onPressed: () {
-                setState(() {
+                _applyFilterChange(() {
                   _minPrice = null;
                   _maxPrice = null;
                 });
@@ -1342,7 +1478,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                   min = max;
                   max = tmp;
                 }
-                setState(() {
+                _applyFilterChange(() {
                   _minPrice = min;
                   _maxPrice = max;
                 });
@@ -1380,7 +1516,7 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
         dataSources: {'sortOptions': (_) async => sortOptions},
         onResult: (result) {
           if (result != null && result['id'] != null) {
-            setState(() {
+            _applyFilterChange(() {
               _sortBy = result['id'] as String;
             });
             Navigator.pop(context);

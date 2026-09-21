@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+
+import '../../../product/domain/boost_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
+import '../../../reviews/presentation/providers/review_provider.dart';
+import '../../../reviews/presentation/widgets/star_rating.dart';
 
 import '../../../auth/application/auth_providers.dart';
 import '../../../../core/responsive/responsive.dart';
@@ -45,7 +51,7 @@ class UserListingsPage extends ConsumerWidget {
             body: TabBarView(
               children: [
                 _buildAnnoncesTab(context, ref, user.uid),
-                _buildEvaluationsTab(context),
+                _buildEvaluationsTab(context, ref, user),
                 _buildAProposTab(context, user),
               ],
             ),
@@ -119,7 +125,7 @@ class UserListingsPage extends ConsumerWidget {
                     left: 8,
                     child: _buildStatusBadge(context, product),
                   ),
-                if (!product.isSold)
+                if (!product.isSold && boostsDisponibles)
                   Positioned(
                     bottom: 40,
                     right: 4,
@@ -183,29 +189,124 @@ class UserListingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildEvaluationsTab(BuildContext context) {
+  Widget _buildEvaluationsTab(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic user,
+  ) {
     final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.noReviewsYet,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Text(
-              AppLocalizations.of(context)!.noReviewsSubtitle,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+    final l10n = AppLocalizations.of(context)!;
+    final reviewsCount = (user.reviewsCount as int?) ?? 0;
+
+    // Aucun avis reçu : message clair, pas de note à montrer.
+    if (reviewsCount == 0) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              l10n.noReviewsYet,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Text(
+                l10n.noReviewsSubtitle,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final rating = (user.rating as num?)?.toDouble() ?? 0.0;
+    final reviewsAsync = ref.watch(sellerReviewsProvider(user.uid as String));
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // La moyenne, en grand : la note se voit d'un coup d'œil.
+        Column(
+          children: [
+            Text(
+              rating.toStringAsFixed(1),
+              style: theme.textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            StarRatingDisplay(
+              rating: rating,
+              reviewsCount: reviewsCount,
+              size: 32,
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        const Divider(),
+        // Le détail des avis, en dessous.
+        reviewsAsync.when(
+          data: (reviews) => Column(
+            children: [
+              for (final r in reviews) _reviewItem(context, theme, r),
+            ],
           ),
+          loading: () => const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(l10n.errorGenericMsg(e.toString())),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _reviewItem(BuildContext context, ThemeData theme, dynamic review) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ...List.generate(
+                5,
+                (i) => Icon(
+                  i < (review.rating as int) ? Icons.star : Icons.star_border,
+                  size: 16,
+                  color: Colors.orange,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                DateFormat('d MMM y').format(review.createdAt as DateTime),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            review.productTitle as String,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+          if ((review.comment as String?)?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 6),
+            Text(review.comment as String, style: theme.textTheme.bodyMedium),
+          ],
         ],
       ),
     );

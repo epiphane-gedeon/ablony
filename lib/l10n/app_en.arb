@@ -190,10 +190,6 @@
   "@homeTitle": {
     "description": "Home page title"
   },
-  "homeWelcome": "Hello World! 🎉",
-  "@homeWelcome": {
-    "description": "Welcome message on home"
-  },
   "homeSubtitle": "Welcome to Ablony!",
   "@homeSubtitle": {
     "description": "Home subtitle"
@@ -1029,7 +1025,7 @@
   "@searchMembersTab": {
     "description": "Members tab in search page"
   },
-  "searchArticlesPlaceholder": "Search for an article or member...",
+  "searchArticlesPlaceholder": "Search",
   "@searchArticlesPlaceholder": {
     "description": "Search bar placeholder"
   },
@@ -1307,18 +1303,6 @@
   "productNotFound": "Product not found",
   "@productNotFound": {
     "description": "productNotFound"
-  },
-  "clickToTranslate": "Click here to translate",
-  "@clickToTranslate": {
-    "description": "clickToTranslate"
-  },
-  "activelyPublishes": "Actively publishes",
-  "@activelyPublishes": {
-    "description": "activelyPublishes"
-  },
-  "sendsQuickly": "Sends quickly",
-  "@sendsQuickly": {
-    "description": "sendsQuickly"
   },
   "markAsSold": "Mark as sold",
   "@markAsSold": {
@@ -1630,6 +1614,120 @@
   "boostInsufficientBalance": "Insufficient balance. Choose another payment method.",
   "@boostInsufficientBalance": {
     "description": "boostInsufficientBalance"
+  },
+  "boostCreditsBalance": "{count, plural, =0{No boosts in reserve} =1{1 boost in reserve} other{{count} boosts in reserve}}",
+  "@boostCreditsBalance": {
+    "description": "Accumulated boost balance",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boostUseCredit": "Use a boost",
+  "@boostUseCredit": {
+    "description": "Button to spend a boost credit"
+  },
+  "boostUseCreditSubtitle": "From your reserve, no payment",
+  "@boostUseCreditSubtitle": {
+    "description": "Subtitle of use-a-boost button"
+  },
+  "boostPayOccasional": "Boost now · {price} FCFA",
+  "@boostPayOccasional": {
+    "description": "One-off paid boost button",
+    "placeholders": {
+      "price": {
+        "type": "int"
+      }
+    }
+  },
+  "boostBuyPacks": "Buy boosts",
+  "@boostBuyPacks": {
+    "description": "Opens boost purchase"
+  },
+  "boostCreditApplied": "Boost applied! You have {count, plural, =0{no boosts} =1{1 boost} other{{count} boosts}} left.",
+  "@boostCreditApplied": {
+    "description": "Confirmation after using a credit",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boostPackTitle": "Buy boosts",
+  "@boostPackTitle": {
+    "description": "Title of the buy-boosts sheet"
+  },
+  "boostPackDescription": "Buy boosts ahead of time and use them whenever you want, on any listing. Each boost features an item for {hours}h.",
+  "@boostPackDescription": {
+    "description": "Explanation of buying boosts",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "boostPackQuantity": "Number of boosts",
+  "@boostPackQuantity": {
+    "description": "Quantity selector label"
+  },
+  "boostPackTotal": "Total",
+  "@boostPackTotal": {
+    "description": "Total to pay for the pack"
+  },
+  "boostPackBuy": "Buy {count, plural, =1{1 boost} other{{count} boosts}} · {price} FCFA",
+  "@boostPackBuy": {
+    "description": "Pack purchase button",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "price": {
+        "type": "int"
+      }
+    }
+  },
+  "boostPackSuccess": "{count, plural, =1{1 boost added} other{{count} boosts added}} to your reserve!",
+  "@boostPackSuccess": {
+    "description": "Pack purchase confirmation",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promotionCreditsTitle": "Your boosts in reserve",
+  "@promotionCreditsTitle": {
+    "description": "Boost reserve card title"
+  },
+  "promotionUnavailable": "Coming soon",
+  "@promotionUnavailable": {
+    "description": "Promotion unavailable on this platform"
+  },
+  "promotionUnavailableHint": "Listing promotion is coming to mobile soon. It is already available on the Ablony website.",
+  "@promotionUnavailableHint": {
+    "description": "Explanation of unavailability"
+  },
+  "promotionCreditsHint": "Use them on any listing, whenever you want.",
+  "@promotionCreditsHint": {
+    "description": "Boost reserve card subtitle"
+  },
+  "locationSearchHint": "Search for a place or neighbourhood…",
+  "@locationSearchHint": {
+    "description": "Place search field placeholder"
+  },
+  "locationSearchNoResult": "No place found for “{query}”",
+  "@locationSearchNoResult": {
+    "description": "Place search with no result",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "locationSearchFailed": "Search failed. Check your connection.",
+  "@locationSearchFailed": {
+    "description": "Place search error"
   },
   "shareProduct": "Share",
   "@shareProduct": {
@@ -2119,5 +2217,545 @@
   "confirmDeliveryTitle": "Confirm receipt",
   "confirmDeliveryQuestion": "Did your parcel arrive? Payment goes to the seller right away, and this cannot be undone.",
   "confirmDeliveryConfirm": "Yes, I got it",
-  "deliveryConfirmedSuccess": "Receipt confirmed. The seller has been paid."
+  "deliveryConfirmedSuccess": "Receipt confirmed. The seller has been paid.",
+  "walletStatement": "Statement",
+  "walletStatementEmpty": "No activity yet",
+  "walletStatementEmptyDetail": "Your purchases, sales and top-ups will show up here.",
+  "walletStatementError": "Could not load your statement.",
+  "walletEntryTopUp": "Top-up",
+  "walletEntryPurchase": "Purchase",
+  "walletEntryBoost": "Boost",
+  "walletEntrySale": "Sale",
+  "walletEntryOnHold": "on hold",
+  "scanParcelStaff": "Scan a parcel",
+  "scanParcelBuyer": "Scan my parcel",
+  "scanHintStaff": "Point at the label stuck on the parcel.",
+  "scanHintBuyer": "Point at your parcel's label to confirm you received it.",
+  "scanTorch": "Torch",
+  "scanFailed": "The scan failed. Try again.",
+  "checkpointRecorded": "Step recorded.",
+  "parcelStatusLabel": "Status",
+  "parcelDestinationRelay": "Relay point",
+  "parcelDestinationHome": "Home delivery",
+  "parcelRecordStep": "Record a step",
+  "parcelNoStepLeft": "This parcel has completed its journey.",
+  "parcelAwaitingDropoff": "Awaiting drop-off",
+  "parcelDroppedOff": "Dropped off",
+  "parcelInTransit": "In transit",
+  "parcelReadyForPickup": "Ready for pickup",
+  "parcelOutForDelivery": "Out for delivery",
+  "parcelDelivered": "Delivered",
+  "parcelReturned": "Returned",
+  "parcelLost": "Lost",
+  "stepDroppedOff": "Drop-off",
+  "stepInTransit": "Departure",
+  "stepArrived": "Arrived at relay",
+  "stepOutForDelivery": "Out for delivery",
+  "stepDelivered": "Delivered",
+  "stepReturned": "Return",
+  "stepLost": "Lost",
+  "stuckParcelsTitle": "Stuck parcels",
+  "stuckParcelsEmpty": "Nothing pending. All moving.",
+  "stuckNeverDroppedOff": "Never dropped off — deadline passed",
+  "stuckInTransitTooLong": "In transit for too long",
+  "stuckWaitingAtRelay": "Waiting at relay point",
+  "stuckBuyerScanned": "scanned by buyer",
+  "staffTools": "Ablony staff tools",
+  "walletEntryRefund": "Refund",
+  "refundBuyer": "Refund the buyer",
+  "refundReasonHint": "This reason is sent to both buyer and seller. Explain, don't summarise.",
+  "refundReasonLabel": "Reason",
+  "refundConfirm": "Refund",
+  "refundDone": "The buyer has been refunded.",
+  "parcelNoTrackingYet": "Being prepared — detailed tracking appears at the first scan",
+  "releaseSeller": "Pay the seller",
+  "releaseDone": "The seller has been paid.",
+  "withdrawTitle": "Withdraw money",
+  "withdrawAmount": "Amount to withdraw",
+  "withdrawAll": "Withdraw all",
+  "withdrawMethod": "Payout method",
+  "withdrawDestination": "Where to send the money",
+  "withdrawDestinationPhoneHint": "+228 90 00 00 00",
+  "withdrawDestinationBankHint": "Account number or IBAN",
+  "withdrawAmountRequested": "Requested amount",
+  "withdrawFee": "Transfer fee",
+  "withdrawYouReceive": "You receive",
+  "withdrawFeeExplained": "This fee covers the transfer to your mobile money account. Withdrawing a larger amount at once costs proportionally less.",
+  "withdrawInsufficient": "Your available balance does not cover this amount.",
+  "withdrawAlreadyPending": "A request is already being processed. You can make another, but they will be paid out separately.",
+  "withdrawConfirm": "Request withdrawal",
+  "withdrawManualNotice": "Payouts are made manually, within 24 to 48 business hours.",
+  "withdrawActivateFirst": "Activate your wallet to withdraw",
+  "withdrawPending": "Being paid out",
+  "withdrawPaid": "Paid",
+  "withdrawRejected": "Declined",
+  "withdrawMinimum": "Minimum: {amount} FCFA",
+  "@withdrawMinimum": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawRequested": "Request recorded. You will receive {amount} FCFA.",
+  "@withdrawRequested": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "walletEntryWithdrawal": "Withdrawal",
+  "walletEntryWithdrawalRefund": "Withdrawal declined",
+  "moderationCorrectionTitle": "Listing needs fixing",
+  "moderationRemovedTitle": "Listing removed",
+  "moderationCorrectionHint": "Fix it and it goes back online automatically.",
+  "moderationRemovedHint": "This listing cannot be put back online.",
+  "moderationCorrectionAction": "Fix the listing",
+  "moderationReasonBlurryPhotos": "Blurry or unusable photos",
+  "moderationReasonWrongCategory": "Wrong category",
+  "moderationReasonMissingDescription": "Description too thin",
+  "moderationReasonWrongPrice": "Inconsistent price",
+  "moderationReasonCounterfeit": "Counterfeit",
+  "moderationReasonProhibitedItem": "Item not allowed for sale",
+  "moderationReasonInappropriate": "Inappropriate content",
+  "moderationReasonFraud": "Attempted fraud",
+  "moderationReasonOffPlatformSale": "Off-platform sale",
+  "moderationReasonOther": "Reason not specified",
+  "disputeOpen": "I have a problem with this order",
+  "disputeTitle": "Report a problem",
+  "disputeReason": "What happened?",
+  "disputeNotReceived": "I never received the parcel",
+  "disputeNotAsDescribed": "The item does not match the listing",
+  "disputeDamaged": "The item arrived damaged",
+  "disputeBuyerNotConfirming": "The buyer isn't confirming receipt",
+  "@disputeBuyerNotConfirming": {
+    "description": "Seller-side dispute reason"
+  },
+  "disputeBuyerNoValidReason": "The buyer is claiming without valid grounds",
+  "@disputeBuyerNoValidReason": {
+    "description": "Seller-side dispute reason"
+  },
+  "disputeOther": "Other",
+  "disputeDescription": "Describe the problem",
+  "disputeDescriptionHint": "Be specific: this is what settles it.",
+  "disputeDescriptionTooShort": "{count} more characters",
+  "@disputeDescriptionTooShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputePhotos": "Add photos (up to 4)",
+  "disputePhotosHint": "A photo beats a description.",
+  "disputeSubmit": "Send the report",
+  "disputeSubmitted": "Your report is recorded. Answer within 48 hours.",
+  "disputeUnderReview": "Dispute under review",
+  "disputeUnderReviewHint": "We are reviewing your case. Answer within 48 hours.",
+  "disputeResolvedRefunded": "Dispute settled: you were refunded",
+  "disputeResolvedReleased": "Dispute settled in the seller's favour",
+  "disputeOpenedByOther": "The other party opened a dispute on this order.",
+  "disputeSending": "Sending…",
+  "blockUser": "Block",
+  "unblockUser": "Unblock",
+  "blockConfirmTitle": "Block {username}?",
+  "@blockConfirmTitle": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "blockConfirmBody": "Neither of you will be able to write to the other. This person is not notified. An ongoing sale carries on as normal.",
+  "blockDone": "{username} has been blocked.",
+  "@blockDone": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "blockAlsoReport": "Do you also want to report them to Ablony?",
+  "blockedUsersTitle": "Blocked people",
+  "blockedUsersEmpty": "You have not blocked anyone.",
+  "blockedUsersHint": "Blocking someone closes messaging between you, both ways. Nobody is notified.",
+  "blockedConversation": "You have blocked this person.",
+  "blockedByOther": "You can no longer write in this conversation.",
+  "unblockDone": "Unblocked.",
+  "reportUser": "Report",
+  "later": "Later",
+  "ordersTitle": "Sales and purchases",
+  "ordersPurchases": "Purchases",
+  "ordersSales": "Sales",
+  "ordersNoPurchases": "You have not bought anything yet",
+  "ordersNoPurchasesHint": "What you buy shows up here, with delivery progress.",
+  "ordersNoSales": "You have not sold anything yet",
+  "ordersNoSalesHint": "List an item: as soon as it sells, you track it from here.",
+  "orderDropOffBy": "Drop off before {date}",
+  "@orderDropOffBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDropOffLate": "Deadline passed — refund under way",
+  "orderPrintLabel": "Print the label",
+  "orderInTransit": "On its way",
+  "orderAwaitingPickup": "Ready at the relay point",
+  "orderSellerPreparing": "The seller is preparing your parcel",
+  "orderDeliveredWaiting": "Delivered — payment to come",
+  "orderConfirmReception": "Confirm receipt",
+  "orderPaid": "Paid: {amount} FCFA",
+  "@orderPaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderReceived": "Done",
+  "orderRefunded": "Refunded: {amount} FCFA",
+  "@orderRefunded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelled": "Sale cancelled",
+  "orderTrack": "Track",
+  "orderSee": "View",
+  "ordersLoadMore": "See more",
+  "promotionEmpty": "No listing to promote",
+  "promotionEmptyHint": "List an item: you can then push it up the listings.",
+  "promotionBoost": "Promote",
+  "promotionActiveUntil": "Promoted until {date}",
+  "@promotionActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "termsOfService": "Terms of service",
+  "privacyPolicy": "Privacy policy",
+  "legalNotice": "Legal notice",
+  "editProfileTitle": "Profile information",
+  "editProfilePhoto": "Profile photo",
+  "editProfileDisplayName": "Display name",
+  "editProfileCity": "City",
+  "editProfileSave": "Save",
+  "editProfileSaved": "Profile updated.",
+  "securityTitle": "Security",
+  "securityCurrentPassword": "Current password",
+  "securityNewPassword": "New password",
+  "securityConfirmPassword": "Confirm new password",
+  "securityChangePassword": "Change password",
+  "securityPasswordChanged": "Password changed.",
+  "securityMismatch": "The two entries do not match.",
+  "securityTooShort": "At least 8 characters.",
+  "securityWrongPassword": "Current password is incorrect.",
+  "securitySocialAccount": "You sign in with {provider}",
+  "@securitySocialAccount": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "securitySocialHint": "Your password is handled by that service. There is nothing to change here.",
+  "emailSettingsTitle": "Email address",
+  "emailVerified": "Address verified",
+  "emailNotVerified": "Address not verified",
+  "emailNotVerifiedHint": "Verify your address: sale and withdrawal alerts go through it.",
+  "emailResendLink": "Resend the verification link",
+  "emailLinkSent": "Link sent. Check your inbox.",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "Nothing yet",
+  "notificationsEmptyHint": "Your sales, purchases and messages will show up here.",
+  "notificationsMarkAllRead": "Mark all as read",
+  "timeAgoNow": "just now",
+  "receiptPurchaseTitle": "Purchase receipt",
+  "receiptSaleTitle": "Sale summary",
+  "receiptTotalPaidLabel": "Total paid",
+  "receiptYouReceive": "You receive",
+  "receiptYouReceiveHint": "The item price. Delivery and buyer-protection fees are paid by the buyer.",
+  "receiptDetails": "Details",
+  "receiptParties": "Parties",
+  "receiptDeliverySection": "Delivery",
+  "receiptActions": "Actions",
+  "founderBadge": "Founder",
+  "starBadge": "Star",
+  "paymentMethodSelectPrompt": "Please select a payment method",
+  "@paymentMethodSelectPrompt": {
+    "description": "Veuillez sélectionner un mode de paiement"
+  },
+  "paymentMethodTmoneyPrompt": "Please enter your T-Money number",
+  "@paymentMethodTmoneyPrompt": {
+    "description": "Veuillez entrer votre numéro T-Money"
+  },
+  "paymentMethodFloozPrompt": "Please enter your Flooz number",
+  "@paymentMethodFloozPrompt": {
+    "description": "Veuillez entrer votre numéro Flooz"
+  },
+  "paymentMethodTmoneyLabel": "T-Money phone number",
+  "@paymentMethodTmoneyLabel": {
+    "description": "Numéro de téléphone T-Money"
+  },
+  "paymentMethodFloozLabel": "Flooz phone number",
+  "@paymentMethodFloozLabel": {
+    "description": "Numéro de téléphone Flooz"
+  },
+  "locationCurrentFailed": "Could not get your location",
+  "@locationCurrentFailed": {
+    "description": "Impossible de récupérer votre position"
+  },
+  "locationSelectPrompt": "Please select a location",
+  "@locationSelectPrompt": {
+    "description": "Veuillez sélectionner une localisation"
+  },
+  "locationPickTitle": "Choose a location",
+  "@locationPickTitle": {
+    "description": "Choisir une localisation"
+  },
+  "parcelLabelTitle": "Parcel label",
+  "@parcelLabelTitle": {
+    "description": "Étiquette du colis"
+  },
+  "parcelLabelCopyCode": "Copy code",
+  "@parcelLabelCopyCode": {
+    "description": "Copier le code"
+  },
+  "notificationDeleted": "Notification deleted",
+  "@notificationDeleted": {
+    "description": "Confirmation après suppression d'une notification au swipe"
+  },
+  "viewPublicProfile": "View my public profile",
+  "@viewPublicProfile": {
+    "description": "Own-profile menu entry to open the public profile (reviews, rating)"
+  },
+  "boostBuyOnWeb": "Boosts are purchased on the Ablony website (ablony.app).",
+  "@boostBuyOnWeb": {
+    "description": "Shown on mobile where buying boosts in-app is unavailable"
+  },
+  "parcelLabelDownload": "Download label",
+  "@parcelLabelDownload": {
+    "description": "Button to download/print the parcel label as PDF"
+  },
+  "parcelLabelError": "Could not generate the label",
+  "@parcelLabelError": {
+    "description": "Error while generating the parcel label PDF"
+  },
+  "parcelLabelCodeCopied": "Code copied",
+  "@parcelLabelCodeCopied": {
+    "description": "Code copié"
+  },
+  "deliveryPhoneLabel": "Phone",
+  "@deliveryPhoneLabel": {
+    "description": "Delivery phone field label"
+  },
+  "deliveryPhoneRequired": "Please enter a phone number",
+  "@deliveryPhoneRequired": {
+    "description": "Error: delivery phone missing"
+  },
+  "deliveryPhoneInvalid": "Invalid phone number",
+  "@deliveryPhoneInvalid": {
+    "description": "Error: delivery phone invalid"
+  },
+  "deliveryContactLabel": "Name and phone",
+  "@deliveryContactLabel": {
+    "description": "Contact details tile label"
+  },
+  "deliveryContactPlaceholder": "Add your contact details",
+  "@deliveryContactPlaceholder": {
+    "description": "Contact details tile placeholder"
+  },
+  "deliveryContactTitle": "Contact details",
+  "@deliveryContactTitle": {
+    "description": "Contact details form title"
+  },
+  "marketingEmailToggleTitle": "Marketing emails",
+  "@marketingEmailToggleTitle": {
+    "description": "Marketing emails toggle title in settings"
+  },
+  "marketingEmailToggleSubtitle": "Offers, news and promotions",
+  "@marketingEmailToggleSubtitle": {
+    "description": "Marketing emails toggle subtitle"
+  },
+  "addressFullName": "Full name",
+  "@addressFullName": {
+    "description": "Nom et prénom"
+  },
+  "addressEditLocation": "Change location",
+  "@addressEditLocation": {
+    "description": "Modifier la localisation"
+  },
+  "paymentHomeDelivery": "Home delivery",
+  "@paymentHomeDelivery": {
+    "description": "Livraison à domicile"
+  },
+  "paymentPayDifference": "Pay the difference",
+  "@paymentPayDifference": {
+    "description": "Payer la différence"
+  },
+  "paymentInvoiceDetail": "Invoice details",
+  "@paymentInvoiceDetail": {
+    "description": "Détail de la facture"
+  },
+  "dynamicMissingSource": "Missing data source",
+  "@dynamicMissingSource": {
+    "description": "Source de données manquante"
+  },
+  "dynamicNoItems": "No items found",
+  "@dynamicNoItems": {
+    "description": "Aucun élément trouvé"
+  },
+  "walletTopUpTitle": "Top up wallet",
+  "@walletTopUpTitle": {
+    "description": "Recharger le portefeuille"
+  },
+  "walletTopUpPrompt": "Enter the amount to top up (min. 200 FCFA):",
+  "@walletTopUpPrompt": {
+    "description": "Saisissez le montant à recharger (min. 200 FCFA) :"
+  },
+  "itemAlreadySold": "This item has already been sold",
+  "@itemAlreadySold": {
+    "description": "Cet article a déjà été vendu"
+  },
+  "offerSentSuccess": "Offer sent successfully!",
+  "@offerSentSuccess": {
+    "description": "Offre envoyée avec succès !"
+  },
+  "relayPointPickTitle": "Choose a pickup point",
+  "@relayPointPickTitle": {
+    "description": "Choisir un point relais"
+  },
+  "captchaIncomplete": "Please complete the captcha",
+  "@captchaIncomplete": {
+    "description": "Veuillez compléter le captcha"
+  },
+  "favoritesSearchHint": "Search favourites…",
+  "@favoritesSearchHint": {
+    "description": "Rechercher dans les favoris…"
+  },
+  "chatSafetyWarning": "Never share an SMS code, a password or your bank details here. The Ablony team will never ask for them.",
+  "@chatSafetyWarning": {
+    "description": "Avertissement anti-arnaque en tête de conversation"
+  },
+  "chatNotEncrypted": "Messages are not end-to-end encrypted.",
+  "@chatNotEncrypted": {
+    "description": "Précision sur l'absence de chiffrement de bout en bout"
+  },
+  "paymentWaitingTitle": "Payment in progress in another tab",
+  "@paymentWaitingTitle": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentWaitingBody": "Complete the payment in the tab that just opened. This page updates by itself as soon as the payment is confirmed.",
+  "@paymentWaitingBody": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentWaitingBodyManual": "Complete the payment in the tab that just opened, then come back here.",
+  "@paymentWaitingBodyManual": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentReopen": "Reopen the payment page",
+  "@paymentReopen": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentCancel": "Cancel payment",
+  "@paymentCancel": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentOpenFailed": "Could not open the payment page. Your browser may have blocked the window — allow it, then try again.",
+  "@paymentOpenFailed": {
+    "description": "Parcours de paiement sur navigateur"
+  },
+  "paymentOpenPage": "Open the payment page",
+  "@paymentOpenPage": {
+    "description": "Bouton principal d'ouverture du paiement"
+  },
+  "paymentVerifyingTitle": "Payment being verified",
+  "@paymentVerifyingTitle": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentVerifyingBody": "If your account was debited, the amount will be credited automatically as soon as we receive confirmation. There is nothing more to do, and nothing is lost.",
+  "@paymentVerifyingBody": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentVerifyingDelay": "Confirmation sometimes takes a few minutes, and up to an hour when the operator is slow.",
+  "@paymentVerifyingDelay": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentReference": "Reference: {reference}",
+  "@paymentReference": {
+    "description": "Attente de confirmation de paiement",
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentKeepReference": "Keep this reference if you contact us.",
+  "@paymentKeepReference": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "paymentClose": "Close",
+  "@paymentClose": {
+    "description": "Attente de confirmation de paiement"
+  },
+  "supportTitle": "Ablony Support",
+  "@supportTitle": {
+    "description": "Assistance intégrée"
+  },
+  "supportHint": "Describe your problem…",
+  "@supportHint": {
+    "description": "Assistance intégrée"
+  },
+  "supportAttach": "Attach a screenshot",
+  "@supportAttach": {
+    "description": "Assistance intégrée"
+  },
+  "supportWelcomeTitle": "You are writing to the Ablony team",
+  "@supportWelcomeTitle": {
+    "description": "Assistance intégrée"
+  },
+  "supportWelcomeEmpty": "Explain what happened and attach a screenshot if you were debited — that is what settles things fastest. We reply within 24 working hours.",
+  "@supportWelcomeEmpty": {
+    "description": "Assistance intégrée"
+  },
+  "supportWelcomeDelay": "We reply within 24 working hours.",
+  "@supportWelcomeDelay": {
+    "description": "Assistance intégrée"
+  },
+  "supportOpen": "Contact support",
+  "@supportOpen": {
+    "description": "Assistance intégrée"
+  },
+  "supportPaymentPrefill": "Hello, I was debited but my payment still shows as pending.\n\nReference: {reference}\n\n(Attach the debit screenshot here.)",
+  "@supportPaymentPrefill": {
+    "description": "Assistance intégrée",
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCardRedirectNotice": "You will enter your card on our payment provider's secure page. Ablony never sees or stores your card details.",
+  "@paymentCardRedirectNotice": {
+    "description": "Explication affichée au choix du paiement par carte"
+  },
+  "paymentMethodCardName": "Name on card",
+  "@paymentMethodCardName": {
+    "description": "Formulaire carte (masqué pour le moment)"
+  },
+  "paymentMethodCardNumber": "Card number",
+  "@paymentMethodCardNumber": {
+    "description": "Formulaire carte (masqué pour le moment)"
+  },
+  "paymentMethodCardCvv": "Security code",
+  "@paymentMethodCardCvv": {
+    "description": "Formulaire carte (masqué pour le moment)"
+  }
 }

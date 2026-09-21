@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,27 +37,12 @@ class SettingsPage extends ConsumerWidget {
             _buildSettingsTile(
               context: context,
               title: l10n.profileInfo,
-              onTap: () {},
-            ),
-            _buildSettingsTile(
-              context: context,
-              title: l10n.accountSettings,
-              onTap: () {},
-            ),
-            _buildSettingsTile(
-              context: context,
-              title: l10n.payments,
-              onTap: () {},
-            ),
-            _buildSettingsTile(
-              context: context,
-              title: l10n.shipping,
-              onTap: () {},
+              onTap: () => context.pushNamed('edit_profile'),
             ),
             _buildSettingsTile(
               context: context,
               title: l10n.security,
-              onTap: () {},
+              onTap: () => context.pushNamed('security'),
             ),
 
             const SizedBox(height: 32),
@@ -67,14 +53,14 @@ class SettingsPage extends ConsumerWidget {
             _buildSectionHeader(context, l10n.notifications),
             _buildSettingsTile(
               context: context,
-              title: l10n.mobile,
-              onTap: () {},
-            ),
-            _buildSettingsTile(
-              context: context,
               title: l10n.email,
-              onTap: () {},
+              onTap: () => context.pushNamed('email_settings'),
             ),
+            // Consentement marketing modifiable à tout moment (RGPD : se
+            // désinscrire doit être aussi simple que s'inscrire). Ne concerne
+            // QUE le promotionnel — les emails de sécurité/vérification partent
+            // quoi qu'il arrive.
+            const _MarketingEmailToggle(),
 
             const SizedBox(height: 32),
 
@@ -105,8 +91,8 @@ class SettingsPage extends ConsumerWidget {
             ),
             _buildSettingsTile(
               context: context,
-              title: l10n.privacySettings,
-              onTap: () {},
+              title: l10n.blockedUsersTitle,
+              onTap: () => context.pushNamed('blocked_users'),
             ),
 
             const SizedBox(height: 48),
@@ -134,12 +120,25 @@ class SettingsPage extends ConsumerWidget {
             // ============================================================
             // FOOTER : VERSION
             // ============================================================
+            // La version est lue sur le paquet installé, et non écrite ici :
+            // la constante en dur affichait « v26.12.0 » alors que le binaire
+            // était en 1.0.0. Une version fausse rend tout rapport de bogue
+            // inexploitable — on ne sait plus de quelle build on parle.
             Center(
-              child: Text(
-                l10n.appVersion('v26.12.0'),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
-                ),
+              child: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final info = snapshot.data;
+                  // Tant que la lecture n'a pas abouti, on n'affiche rien
+                  // plutôt qu'un numéro provisoire qui serait faux.
+                  if (info == null) return const SizedBox(height: 16);
+                  return Text(
+                    l10n.appVersion('v${info.version} (${info.buildNumber})'),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 32),
@@ -257,21 +256,27 @@ class SettingsPage extends ConsumerWidget {
   void _showLogoutConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.logout),
-        content: Text(AppLocalizations.of(context)!.logoutConfirm),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(AppLocalizations.of(dialogContext)!.logout),
+        content: Text(AppLocalizations.of(dialogContext)!.logoutConfirm),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(AppLocalizations.of(dialogContext)!.cancel),
           ),
           TextButton(
-            onPressed: () {
-              ref.read(authRepositoryProvider).signOut();
-              context.go('/onboarding');
+            onPressed: () async {
+              // On ferme la confirmation tout de suite (sinon elle reste
+              // affichée pendant la déconnexion réseau et on a l'impression
+              // que le bouton n'a rien fait → double tap).
+              Navigator.pop(dialogContext);
+              await ref.read(authRepositoryProvider).signOut();
+              // La redirection du routeur suit l'état auth ; on force aussi
+              // explicitement pour ne pas dépendre du timing du stream.
+              if (context.mounted) context.go('/onboarding');
             },
             child: Text(
-              AppLocalizations.of(context)!.logout,
+              AppLocalizations.of(dialogContext)!.logout,
               style: const TextStyle(color: Colors.red),
             ),
           ),
@@ -363,5 +368,84 @@ class SettingsPage extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+/// Bascule « Emails marketing » : lit la valeur sur le profil courant et la met
+/// à jour dans Firestore. Optimiste (bascule tout de suite, revient en arrière
+/// si l'écriture échoue) pour ne pas donner l'impression que rien ne se passe.
+class _MarketingEmailToggle extends ConsumerStatefulWidget {
+  const _MarketingEmailToggle();
+
+  @override
+  ConsumerState<_MarketingEmailToggle> createState() =>
+      _MarketingEmailToggleState();
+}
+
+class _MarketingEmailToggleState extends ConsumerState<_MarketingEmailToggle> {
+  bool? _optimistic;
+  bool _saving = false;
+
+  Future<void> _onChanged(bool value, String uid) async {
+    setState(() {
+      _optimistic = value;
+      _saving = true;
+    });
+    try {
+      await ref.read(authRepositoryProvider).updateUserProfile(
+            uid: uid,
+            marketingEmailsEnabled: value,
+          );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _optimistic = null); // Revient à la vérité serveur.
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorGenericMsg(e.toString()))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final user = ref.watch(currentUserProvider).value;
+    if (user == null) return const SizedBox.shrink();
+
+    final serverValue = user.marketingEmailsEnabled;
+    if (_optimistic != null && _optimistic == serverValue) {
+      _optimistic = null;
+    }
+    final value = _optimistic ?? serverValue;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: theme.dividerColor.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      child: SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        title: Text(
+          l10n.marketingEmailToggleTitle,
+          style: theme.textTheme.bodyLarge,
+        ),
+        subtitle: Text(
+          l10n.marketingEmailToggleSubtitle,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
+          ),
+        ),
+        value: value,
+        onChanged: _saving ? null : (v) => _onChanged(v, user.uid),
+      ),
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'auth_provider.dart';
+import 'user_role.dart';
 import 'country.dart';
 import '../../../wallet/domain/models/wallet.dart';
 
@@ -256,6 +257,46 @@ class User extends Equatable {
   final int followingCount;
 
   // ============================================================
+  // RÔLE
+  // ============================================================
+
+  /// Ce que la personne est autorisée à faire chez Ablony.
+  ///
+  /// Lu depuis Firestore et **jamais modifiable par son titulaire** — les
+  /// règles de sécurité le figent. Sans cette barrière, n'importe qui se
+  /// déclarerait `agent`, scannerait ses propres colis comme remis et se
+  /// ferait payer sans avoir rien envoyé.
+  ///
+  /// Le champ ne fait qu'afficher ou masquer des écrans : les Cloud Functions
+  /// relisent le rôle en base avant d'agir. Un client trafiqué ne gagne donc
+  /// rien à mentir ici.
+  final UserRole role;
+
+  /// Membre du personnel — agent de livraison ou administration.
+  bool get isStaff => role == UserRole.agent || role == UserRole.admin;
+
+  // ============================================================
+  // BADGES
+  // ============================================================
+
+  /// Membre fondateur : parmi les premiers arrivés. Posé côté serveur
+  /// uniquement (reprise, ou inscription pendant la fenêtre de lancement).
+  final bool isFounder;
+
+  /// Membre star : distinction attribuée **à la main** par l'administration.
+  /// Jamais automatique, jamais modifiable depuis l'application.
+  final bool isStar;
+
+  // ============================================================
+  // BOOSTS
+  // ============================================================
+
+  /// Solde de boosts : des mises en avant achetées d'avance, à dépenser quand
+  /// on veut. Posé côté serveur uniquement (achat, ou plus tard l'abonnement
+  /// premium) et gelé par les règles — un client ne se crédite pas de boosts.
+  final int boostCredits;
+
+  // ============================================================
   // PORTEFEUILLE
   // ============================================================
 
@@ -298,6 +339,10 @@ class User extends Equatable {
     this.reviewsCount = 0,
     this.followersCount = 0,
     this.followingCount = 0,
+    this.role = UserRole.member,
+    this.isFounder = false,
+    this.isStar = false,
+    this.boostCredits = 0,
     this.wallet,
   });
 
@@ -323,6 +368,12 @@ class User extends Equatable {
     String? username,
     String? displayName,
     String? photoUrl,
+    /// Retire la photo de profil.
+    ///
+    /// `photoUrl: null` ne peut pas vouloir dire « efface » : dans un
+    /// `copyWith`, l'absence de valeur signifie « ne change rien ». Sans ce
+    /// drapeau, une photo posée une fois ne pouvait plus jamais être enlevée.
+    bool effacerPhoto = false,
     String? phoneNumber,
     AuthProvider? authProvider,
     String? providerId,
@@ -341,6 +392,9 @@ class User extends Equatable {
     int? reviewsCount,
     int? followersCount,
     int? followingCount,
+    bool? isFounder,
+    bool? isStar,
+    int? boostCredits,
     Wallet? wallet,
   }) {
     return User(
@@ -348,7 +402,7 @@ class User extends Equatable {
       email: email ?? this.email,
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
-      photoUrl: photoUrl ?? this.photoUrl,
+      photoUrl: effacerPhoto ? null : (photoUrl ?? this.photoUrl),
       phoneNumber: phoneNumber ?? this.phoneNumber,
       authProvider: authProvider ?? this.authProvider,
       providerId: providerId ?? this.providerId,
@@ -368,6 +422,9 @@ class User extends Equatable {
       reviewsCount: reviewsCount ?? this.reviewsCount,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
+      isFounder: isFounder ?? this.isFounder,
+      isStar: isStar ?? this.isStar,
+      boostCredits: boostCredits ?? this.boostCredits,
       wallet: wallet ?? this.wallet,
     );
   }
@@ -378,11 +435,35 @@ class User extends Equatable {
 
   /// Liste des propriétés utilisées pour la comparaison d'égalité
   ///
-  /// Deux instances de User sont considérées égales si elles ont le même UID.
-  /// Les autres propriétés ne sont pas prises en compte pour l'égalité car
-  /// l'UID est l'identifiant unique et immuable.
+  /// L'identité tient à l'UID, mais l'égalité ne peut pas s'y réduire : ces
+  /// objets circulent dans des flux Riverpod, qui ne propagent que ce qui est
+  /// *différent*. Avec `[uid]` seul, un porte-monnaie crédité ou un rôle
+  /// accordé produisaient un objet « égal » au précédent, et l'écran ne se
+  /// reconstruisait pas — d'où les `ref.invalidate(currentUserProvider)`
+  /// disséminés après chaque écriture.
+  ///
+  /// Ne figurent ici que les champs qui bougent pendant une session. Le reste
+  /// ne change qu'au prix d'une reconnexion.
   @override
-  List<Object?> get props => [uid];
+  List<Object?> get props => [
+    uid,
+    username,
+    displayName,
+    photoUrl,
+    phoneNumber,
+    city,
+    role,
+    wallet,
+    isVerified,
+    isActive,
+    marketingEmailsEnabled,
+    productsCount,
+    salesCount,
+    rating,
+    reviewsCount,
+    followersCount,
+    followingCount,
+  ];
 
   /// Retourne une représentation textuelle de l'utilisateur
   ///

@@ -83,6 +83,15 @@ class _UsernamePageState extends ConsumerState<UsernamePage> {
     super.initState();
     _usernameController = TextEditingController();
 
+    // Après une connexion Google par redirection, la page a été rechargée et
+    // l'état d'inscription est vide : on le repeuple depuis le compte connecté
+    // avant de charger la suggestion, qui en dépend.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(registrationProvider.notifier).hydrateFromCurrentUser();
+      }
+    });
+
     // Charger la suggestion au démarrage
     _loadSuggestion();
   }

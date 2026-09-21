@@ -1,13 +1,32 @@
+import 'product_status.dart';
+
 /// État/condition du produit
 enum ProductCondition {
   newWithTags('Neuf avec étiquette'),
   excellent('Excellent état'),
   good('Bon état'),
   satisfactory('Satisfaisant'),
-  worn('Usé');
+  worn('Usé'),
+  // Ajoutés en fin de liste, et non insérés à leur place « logique » : des
+  // annonces d'avant stockent encore l'état sous forme d'indice, que tout
+  // déplacement décalerait.
+  newWithoutTags('Neuf sans étiquette'),
+  forParts('Pour pièces');
 
   final String label;
   const ProductCondition(this.label);
+
+  /// Retrouve l'état à partir de son libellé tel qu'il est enregistré.
+  ///
+  /// C'est le chemin normal depuis que les attributs sont stockés en clair :
+  /// `'Bon état'` plutôt que `2`. Les libellés doivent rester identiques à ceux
+  /// de `tools/seed_data/attributes.json`, seule source des valeurs proposées.
+  static ProductCondition? parLibelle(String libelle) {
+    for (final etat in ProductCondition.values) {
+      if (etat.label == libelle) return etat;
+    }
+    return null;
+  }
 }
 
 /// Entité représentant un produit mis en vente.
@@ -65,21 +84,68 @@ class Product {
   /// Date d'expiration du boost (si boosté)
   final DateTime? boostExpiresAt;
 
-  /// Indique si le produit est vendu
-  final bool isSold;
+  /// Où en est l'annonce dans son cycle de vie.
+  ///
+  /// Un seul champ là où trois booléens coexistaient : `isSold`,
+  /// `isReserved` et `isHidden` permettaient huit combinaisons, dont « vendu
+  /// et réservé » et « masqué et vendu », que rien n'empêchait d'écrire.
+  final ProductStatus status;
 
-  /// Date de vente (si vendu)
+  /// Ce que la modération a décidé.
+  ///
+  /// Orthogonal à [status] : une annonce peut être vendue **et** approuvée.
+  final ModerationStatus moderationStatus;
+
+  /// Le degré de la décision de modération : `correction` ou `violation`.
+  ///
+  /// Nul tant que personne n'a tranché. C'est ce champ qui décide si le
+  /// vendeur peut encore agir : une photo floue se corrige, une contrefaçon
+  /// se retire. Les règles Firestore appliquent exactement cette distinction.
+  final String? reviewDecision;
+
+  /// Le motif retenu, en clair côté serveur : `blurry_photos`,
+  /// `wrong_category`, `counterfeit`… Traduit à l'affichage.
+  final String? reviewReason;
+
+  /// Le mot du modérateur, écrit pour le vendeur.
+  final String? reviewNote;
+
+  /// Date de vente (si vendue)
   final DateTime? soldAt;
 
-  /// Indique si le produit est réservé — temporairement indisponible à
-  /// l'achat (le vendeur discute avec un acheteur potentiel) sans être
-  /// vendu pour autant, contrairement à [isSold] qui est définitif.
-  final bool isReserved;
+  // ── Compatibilité ───────────────────────────────────────────────────────
+  // Les trois booléens survivent en accesseurs le temps que les appels du
+  // code soient repris un à un. Ils se déduisent de [status] : impossible
+  // qu'ils divergent.
 
-  /// Indique si l'annonce est masquée par le vendeur — retirée des listes
-  /// publiques (accueil, recherche, profil public) à sa demande, sans être
-  /// supprimée ni vendue. Le vendeur peut la republier à tout moment.
-  final bool isHidden;
+  /// Vendu — définitif.
+  bool get isSold => status == ProductStatus.sold;
+
+  /// Réservé : temporairement indisponible, le vendeur discutant avec un
+  /// acheteur potentiel, sans être vendu pour autant.
+  bool get isReserved => status == ProductStatus.reserved;
+
+  /// Retiré des listes publiques à la demande du vendeur, ou archivé.
+  bool get isHidden =>
+      status == ProductStatus.hidden || status == ProductStatus.archived;
+
+  /// Visible dans les listes de vente.
+  ///
+  /// Reflète le champ `isListable` que le serveur calcule et que toutes les
+  /// requêtes interrogent. Recalculé ici pour l'affichage local — la suspension
+  /// du vendeur n'y entre pas, elle ne concerne pas l'écran d'un acheteur qui
+  /// regarde déjà la fiche.
+  bool get isListable =>
+      status == ProductStatus.active &&
+      moderationStatus != ModerationStatus.rejected;
+
+  /// L'annonce attend une retouche du vendeur.
+  ///
+  /// C'est le seul cas où un rejet laisse la main : le vendeur corrige, et le
+  /// serveur la remet en file tout seul.
+  bool get attendCorrection =>
+      moderationStatus == ModerationStatus.rejected &&
+      reviewDecision == 'correction';
 
   /// Nombre de vues
   final int viewsCount;
@@ -106,10 +172,12 @@ class Product {
     this.attributes = const {},
     this.isBoosted = false,
     this.boostExpiresAt,
-    this.isSold = false,
+    this.status = ProductStatus.active,
+    this.moderationStatus = ModerationStatus.pending,
+    this.reviewDecision,
+    this.reviewReason,
+    this.reviewNote,
     this.soldAt,
-    this.isReserved = false,
-    this.isHidden = false,
     this.viewsCount = 0,
     this.favoritesCount = 0,
     required this.createdAt,
@@ -130,10 +198,12 @@ class Product {
     Map<String, dynamic>? attributes,
     bool? isBoosted,
     DateTime? boostExpiresAt,
-    bool? isSold,
+    ProductStatus? status,
+    ModerationStatus? moderationStatus,
+    String? reviewDecision,
+    String? reviewReason,
+    String? reviewNote,
     DateTime? soldAt,
-    bool? isReserved,
-    bool? isHidden,
     int? viewsCount,
     int? favoritesCount,
     DateTime? createdAt,
@@ -152,10 +222,12 @@ class Product {
       attributes: attributes ?? this.attributes,
       isBoosted: isBoosted ?? this.isBoosted,
       boostExpiresAt: boostExpiresAt ?? this.boostExpiresAt,
-      isSold: isSold ?? this.isSold,
+      status: status ?? this.status,
+      moderationStatus: moderationStatus ?? this.moderationStatus,
+      reviewDecision: reviewDecision ?? this.reviewDecision,
+      reviewReason: reviewReason ?? this.reviewReason,
+      reviewNote: reviewNote ?? this.reviewNote,
       soldAt: soldAt ?? this.soldAt,
-      isReserved: isReserved ?? this.isReserved,
-      isHidden: isHidden ?? this.isHidden,
       viewsCount: viewsCount ?? this.viewsCount,
       favoritesCount: favoritesCount ?? this.favoritesCount,
       createdAt: createdAt ?? this.createdAt,

@@ -2,7 +2,18 @@
   {
     "id": "femme",
     "name": "Femme",
-    "children": ["haut_femme", "bas_femme", "chaussures_femme", "accessoires_femme"],
+    "children": [
+      "hauts_femme",
+      "robes_femme",
+      "bas_femme",
+      "vestes_femme",
+      "traditionnel_femme",
+      "chaussures_femme",
+      "sacs_femme",
+      "accessoires_femme",
+      "lingerie_femme",
+      "sport_femme"
+    ],
     "order": 1,
     "iconUrl": null,
     "isActive": true
@@ -10,8 +21,100 @@
   {
     "id": "homme",
     "name": "Homme",
-    "children": ["haut_homme", "bas_homme", "chaussures_homme", "accessoires_homme"],
+    "children": [
+      "hauts_homme",
+      "bas_homme",
+      "vestes_homme",
+      "traditionnel_homme",
+      "chaussures_homme",
+      "accessoires_homme",
+      "sport_homme"
+    ],
     "order": 2,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "enfants",
+    "name": "Enfants",
+    "children": [
+      "bebe",
+      "fille",
+      "garcon",
+      "ecole",
+      "puericulture",
+      "jouets"
+    ],
+    "order": 3,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "electronique",
+    "name": "Électronique",
+    "children": [
+      "telephonie",
+      "informatique",
+      "audio",
+      "image",
+      "jeux_video",
+      "energie"
+    ],
+    "order": 4,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "livres",
+    "name": "Livres & médias",
+    "children": [
+      "livres_scolaires",
+      "litterature",
+      "pratique",
+      "religion",
+      "bd_jeunesse",
+      "medias"
+    ],
+    "order": 5,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "maison",
+    "name": "Maison",
+    "children": [
+      "cuisine",
+      "electromenager",
+      "linge_maison",
+      "decoration",
+      "meubles"
+    ],
+    "order": 6,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "beaute",
+    "name": "Beauté & soins",
+    "children": [
+      "cheveux",
+      "maquillage",
+      "parfums",
+      "soins_corps"
+    ],
+    "order": 7,
+    "iconUrl": null,
+    "isActive": true
+  },
+  {
+    "id": "sport_loisirs",
+    "name": "Sport & loisirs",
+    "children": [
+      "equipement_sport",
+      "plein_air",
+      "instruments"
+    ],
+    "order": 8,
     "iconUrl": null,
     "isActive": true
   }

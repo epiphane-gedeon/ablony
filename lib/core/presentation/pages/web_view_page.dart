@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
@@ -25,7 +27,17 @@ class WebViewPage extends StatefulWidget {
   final String url;
   final String title;
 
-  const WebViewPage({super.key, required this.url, required this.title});
+  /// Sélecteurs CSS à masquer une fois la page chargée (ex. le header/footer
+  /// du site externe) pour n'afficher que le contenu utile dans la WebView.
+  /// Sans effet sur l'ouverture dans le navigateur système (web/desktop).
+  final List<String> hideSelectors;
+
+  const WebViewPage({
+    super.key,
+    required this.url,
+    required this.title,
+    this.hideSelectors = const [],
+  });
 
   /// Point d'entrée unique — à appeler partout où l'app doit afficher une
   /// page web externe.
@@ -33,6 +45,7 @@ class WebViewPage extends StatefulWidget {
     BuildContext context, {
     required String url,
     required String title,
+    List<String> hideSelectors = const [],
   }) async {
     final canEmbed =
         !kIsWeb &&
@@ -41,7 +54,13 @@ class WebViewPage extends StatefulWidget {
 
     if (canEmbed) {
       await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => WebViewPage(url: url, title: title)),
+        MaterialPageRoute(
+          builder: (_) => WebViewPage(
+            url: url,
+            title: title,
+            hideSelectors: hideSelectors,
+          ),
+        ),
       );
       return;
     }
@@ -69,7 +88,10 @@ class _WebViewPageState extends State<WebViewPage> {
             _isLoading = true;
             _hasError = false;
           }),
-          onPageFinished: (_) => setState(() => _isLoading = false),
+          onPageFinished: (_) {
+            setState(() => _isLoading = false);
+            _hideElements();
+          },
           onWebResourceError: (_) => setState(() {
             _isLoading = false;
             _hasError = true;
@@ -77,6 +99,23 @@ class _WebViewPageState extends State<WebViewPage> {
         ),
       )
       ..loadRequest(Uri.parse(widget.url));
+  }
+
+  /// Injecte du CSS masquant [WebViewPage.hideSelectors] (ex. header/footer
+  /// du site externe) pour n'afficher que le contenu utile de la page.
+  void _hideElements() {
+    if (widget.hideSelectors.isEmpty) return;
+
+    final css = widget.hideSelectors
+        .map((selector) => '$selector{display:none!important;}')
+        .join();
+    _controller.runJavaScript('''
+      (function() {
+        var style = document.createElement('style');
+        style.textContent = ${jsonEncode(css)};
+        document.head.appendChild(style);
+      })();
+    ''');
   }
 
   @override

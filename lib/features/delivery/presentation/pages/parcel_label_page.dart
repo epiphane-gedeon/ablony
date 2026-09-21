@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../product/presentation/providers/product_provider.dart';
 import '../../domain/models/parcel.dart';
 
 /// L'étiquette que le vendeur imprime et colle sur son colis.
@@ -22,6 +29,111 @@ class ParcelLabelPage extends StatelessWidget {
 
   const ParcelLabelPage({super.key, required this.parcel});
 
+  /// Génère l'étiquette en PDF et ouvre la feuille de partage/impression.
+  ///
+  /// Le QR est dessiné par le paquet `pdf` lui-même (`pw.BarcodeWidget`), pas
+  /// rasterisé depuis l'écran : l'impression reste nette à toute taille. Le
+  /// code figure aussi en clair, comme à l'écran, pour le cas où le QR ne se
+  /// lit pas.
+  /// Force toutes les couleurs d'un SVG au bleu de la marque, pour un logo
+  /// monochrome affiché en bleu quel que soit son remplissage d'origine.
+  /// `fill="none"` est préservé (sinon on remplirait les vides).
+  String _svgEnBleu(String svg) {
+    const bleu = '#2385AE';
+    return svg
+        .replaceAllMapped(
+          RegExp(r'fill="(?!none)[^"]*"'),
+          (_) => 'fill="$bleu"',
+        )
+        .replaceAllMapped(
+          RegExp(r'stroke="(?!none)[^"]*"'),
+          (_) => 'stroke="$bleu"',
+        )
+        .replaceAll('currentColor', bleu)
+        .replaceAll(RegExp(r'fill:\s*(?!none)#?[0-9a-zA-Z(),.%\s]+'), 'fill:$bleu');
+  }
+
+  Future<void> _downloadLabel(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      // Logo : un SVG (recoloré en bleu) de préférence, net à l'impression ;
+      // repli sur le PNG s'il n'y a pas de SVG.
+      pw.Widget? logo;
+      try {
+        final svg = await rootBundle.loadString('assets/icons/logo_full.svg');
+        // Le logo est blanc (fait pour le splash sombre) : on le recolore en
+        // bleu pour qu'il ressorte sur le fond blanc de l'étiquette.
+        logo = pw.SvgImage(svg: _svgEnBleu(svg), height: 64);
+      } catch (_) {
+        try {
+          final data = await rootBundle.load('assets/images/logo.png');
+          logo = pw.Image(pw.MemoryImage(data.buffer.asUint8List()), height: 60);
+        } catch (_) {
+          // L'étiquette reste valide sans logo.
+        }
+      }
+
+      final doc = pw.Document();
+      doc.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (context) {
+            // Volontairement minimal : le logo, le QR et le code, rien d'autre.
+            // Pas de nom de produit ni de date de dépôt — l'étiquette continue
+            // de servir après le dépôt (scans agents à chaque étape).
+            return pw.Center(
+              child: pw.Container(
+                padding: const pw.EdgeInsets.all(32),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.black, width: 2),
+                  borderRadius: pw.BorderRadius.circular(12),
+                ),
+                child: pw.Column(
+                  mainAxisSize: pw.MainAxisSize.min,
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    if (logo != null) ...[
+                      logo,
+                      pw.SizedBox(height: 28),
+                    ],
+                    pw.BarcodeWidget(
+                      barcode: pw.Barcode.qrCode(),
+                      data: parcel.code,
+                      width: 240,
+                      height: 240,
+                    ),
+                    pw.SizedBox(height: 20),
+                    pw.Text(
+                      parcel.code,
+                      style: pw.TextStyle(
+                        fontSize: 26,
+                        fontWeight: pw.FontWeight.bold,
+                        letterSpacing: 3,
+                        font: pw.Font.courierBold(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      final bytes = await doc.save();
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: 'etiquette-${parcel.code}.pdf',
+      );
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.parcelLabelError)),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -31,7 +143,7 @@ class ParcelLabelPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Étiquette du colis'),
+        title: Text(AppLocalizations.of(context)!.parcelLabelTitle),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -102,15 +214,25 @@ class ParcelLabelPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
+          // Télécharger l'étiquette en PDF, pour l'imprimer et la coller sur le
+          // carton. Le vrai geste attendu du vendeur : le QR + le code, prêts à
+          // l'impression, sur une page A4 propre.
+          FilledButton.icon(
+            icon: const Icon(Icons.download_outlined),
+            label: Text(AppLocalizations.of(context)!.parcelLabelDownload),
+            onPressed: () => _downloadLabel(context),
+          ),
+          const SizedBox(height: 4),
+
           Center(
             child: TextButton.icon(
               icon: const Icon(Icons.copy_outlined, size: 18),
-              label: const Text('Copier le code'),
+              label: Text(AppLocalizations.of(context)!.parcelLabelCopyCode),
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: parcel.code));
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Code copié')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.parcelLabelCodeCopied)),
                   );
                 }
               },
@@ -118,7 +240,25 @@ class ParcelLabelPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          if (parcel.status.needsSellerAction)
+          // Alternative payante : se faire récupérer le colis à domicile plutôt
+          // que de le déposer en relais. Uniquement tant que le vendeur a encore
+          // le colis à charge et qu'un ramassage n'a pas déjà été demandé.
+          if (parcel.status.needsSellerAction) ...[
+            if (parcel.pickupRequested)
+              _Consigne(
+                icon: Icons.local_shipping_outlined,
+                titre: 'Ramassage demandé',
+                texte:
+                    'Un agent viendra récupérer le colis à l\'adresse que vous '
+                    'avez indiquée. Gardez l\'étiquette collée sur le carton.',
+                couleur: Colors.green,
+              )
+            else
+              _BoutonRamassage(parcel: parcel),
+            const SizedBox(height: 16),
+          ],
+
+          if (parcel.status.needsSellerAction && !parcel.pickupRequested)
             _Consigne(
               icon: Icons.schedule_outlined,
               titre: parcel.daysLeftToDropOff > 0
@@ -132,6 +272,61 @@ class ParcelLabelPage extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Bouton « Faites-vous récupérer le colis à domicile (payant) ». Charge le
+/// produit (pour son titre et sa sous-catégorie, qui fixe le tarif) puis ouvre
+/// la page de paiement en mode ramassage.
+class _BoutonRamassage extends ConsumerStatefulWidget {
+  final Parcel parcel;
+  const _BoutonRamassage({required this.parcel});
+
+  @override
+  ConsumerState<_BoutonRamassage> createState() => _BoutonRamassageState();
+}
+
+class _BoutonRamassageState extends ConsumerState<_BoutonRamassage> {
+  bool _chargement = false;
+
+  Future<void> _lancer() async {
+    setState(() => _chargement = true);
+    try {
+      final produit = await ref
+          .read(productRepositoryProvider)
+          .getProductById(widget.parcel.productId);
+      if (!mounted) return;
+      context.push('/payment', extra: {
+        'product': produit,
+        'pickupParcelCode': widget.parcel.code,
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Impossible de charger l\'article : $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _chargement = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      icon: _chargement
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.local_shipping_outlined),
+      label: const Text('Faites-vous récupérer le colis à domicile (payant)'),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 52),
+      ),
+      onPressed: _chargement ? null : _lancer,
     );
   }
 }

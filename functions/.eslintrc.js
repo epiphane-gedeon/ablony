@@ -4,7 +4,10 @@ module.exports = {
     node: true,
   },
   parserOptions: {
-    "ecmaVersion": 2018,
+    // Le code utilise `?.` et `??`, arrivés en ES2020 : avec 2018, ESLint
+    // n'arrivait même pas à analyser `index.js` et ne signalait donc plus
+    // rien. Les fonctions tournent sur Node 22, qui comprend tout cela.
+    "ecmaVersion": 2022,
   },
   extends: [
     "eslint:recommended",

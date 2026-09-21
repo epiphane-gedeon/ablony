@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "2762433205-5rmj3622gsqddqm649g2n7sig2c3d66b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ablony.app",
+            "certificate_hash": "5fb0b220e55aac4d26af1768c40a4d949612b4d5"
+          }
+        },
+        {
           "client_id": "2762433205-qd3fesoffe98hk9oto62151mgdg235f1.apps.googleusercontent.com",
           "client_type": 3
         }

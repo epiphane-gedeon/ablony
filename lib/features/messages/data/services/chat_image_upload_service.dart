@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// Upload les photos envoyées dans une conversation vers Firebase Storage.
 /// Structure de stockage : `chat_images/{conversationId}/{senderId}/{timestamp}.jpg`
@@ -14,8 +13,14 @@ class ChatImageUploadService {
   ChatImageUploadService({FirebaseStorage? storage})
     : _storage = storage ?? FirebaseStorage.instance;
 
+  /// Dépose l'image et renvoie son URL de téléchargement.
+  ///
+  /// L'envoi passe par `putData` et non `putFile` : `putFile` s'appuie sur
+  /// `dart:io`, indisponible sur le web, où l'envoi d'image échouait donc
+  /// systématiquement. Lire les octets marche partout — c'est déjà ce que fait
+  /// l'envoi des photos d'annonce.
   Future<String> uploadChatImage({
-    required File image,
+    required XFile image,
     required String conversationId,
     required String senderId,
   }) async {
@@ -28,7 +33,7 @@ class ChatImageUploadService {
       customMetadata: {'uploadedBy': senderId, 'conversationId': conversationId},
     );
 
-    final snapshot = await ref.putFile(image, metadata);
+    final snapshot = await ref.putData(await image.readAsBytes(), metadata);
     return snapshot.ref.getDownloadURL();
   }
 }

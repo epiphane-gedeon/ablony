@@ -50,6 +50,7 @@ tools/service-account.json
 
 # Node modules in tools directory
 tools/node_modules/
+tools/firestore_rules_test/node_modules/
 tools/package-lock.json
 
 # Generated Firebase import script
@@ -61,3 +62,8 @@ functions/.env
 */.env
 
 .claude
+
+# Journaux laissés par les émulateurs Firebase
+firestore-debug.log
+firebase-debug.log
+ui-debug.log

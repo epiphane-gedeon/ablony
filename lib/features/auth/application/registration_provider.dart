@@ -263,6 +263,51 @@ class RegistrationNotifier extends Notifier<RegistrationState> {
   ///   context.go('/auth/username'); // Naviguer vers username page
   /// }
   /// ```
+  /// Reconstruit l'état d'inscription depuis le compte déjà connecté.
+  ///
+  /// Le web se connecte par redirection : la page se recharge au retour de
+  /// Google, et l'état en mémoire est perdu. Le compte Firebase, lui, survit
+  /// au rechargement — on repart donc de lui. Sans lui, `completeRegistration`
+  /// verrait un état vide et refuserait au choix du pays.
+  ///
+  /// Idempotent : si l'état porte déjà un uid, on n'écrase rien.
+  void hydrateFromCurrentUser() {
+    if (state.uid != null) return;
+    final u = _authRepository.currentUser;
+    if (u == null) return;
+
+    AuthProvider fournisseur = AuthProvider.google;
+    String? providerId;
+    if (u.providerData.isNotEmpty) {
+      final p = u.providerData.first;
+      providerId = p.uid;
+      switch (p.providerId) {
+        case 'google.com':
+          fournisseur = AuthProvider.google;
+          break;
+        case 'facebook.com':
+          fournisseur = AuthProvider.facebook;
+          break;
+        case 'apple.com':
+          fournisseur = AuthProvider.apple;
+          break;
+        case 'password':
+          fournisseur = AuthProvider.email;
+          break;
+      }
+    }
+
+    state = RegistrationState(
+      uid: u.uid,
+      email: u.email,
+      displayName: u.displayName,
+      photoUrl: u.photoURL,
+      authProvider: fournisseur,
+      providerId: providerId,
+      status: RegistrationStatus.providerId,
+    );
+  }
+
   Future<bool> signInWithGoogle() async {
     // Indiquer qu'une opération est en cours
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -560,6 +605,10 @@ class RegistrationNotifier extends Notifier<RegistrationState> {
   /// }
   /// ```
   Future<User?> completeRegistration() async {
+    // Filet : si un rechargement a vidé l'état (redirection web), le
+    // reconstruire depuis le compte connecté avant de vérifier.
+    hydrateFromCurrentUser();
+
     // Vérifier que toutes les données sont présentes
     if (!state.isComplete) {
       state = state.copyWith(

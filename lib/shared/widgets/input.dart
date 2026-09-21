@@ -126,7 +126,17 @@ class Input extends StatefulWidget {
   final bool enableSuggestions;
 
   /// Nombre maximum de lignes (1 = une ligne, null = illimité).
+  ///
+  /// Dès que le champ accepte plus d'une ligne, la touche Entrée y insère un
+  /// saut de ligne au lieu de valider (voir [_estMultiligne]).
   final int? maxLines;
+
+  /// Nombre de lignes affichées quand le champ est vide.
+  ///
+  /// Sans cela, un champ de description s'ouvre sur une seule ligne et ne
+  /// grandit qu'à mesure qu'on écrit : rien n'indique qu'on attend un
+  /// paragraphe. Avec `minLines: 4`, la place est visible d'emblée.
+  final int? minLines;
 
   /// Nombre maximum de caractères.
   final int? maxLength;
@@ -184,6 +194,7 @@ class Input extends StatefulWidget {
     this.autocorrect = true,
     this.enableSuggestions = true,
     this.maxLines = 1,
+    this.minLines,
     this.maxLength,
     this.showCounter = false,
     this.inputFormatters,
@@ -211,8 +222,15 @@ class _InputState extends State<Input> {
     _obscureText = widget.type == InputType.password || widget.obscureText;
   }
 
-  /// Détermine le type de clavier selon le type du champ
+  /// Détermine le type de clavier selon le type du champ.
+  ///
+  /// Un champ à plusieurs lignes impose `multiline`, quel que soit son type :
+  /// c'est ce qui fait apparaître la touche retour à la ligne sur le clavier
+  /// mobile. Sans cela, un champ déclaré `maxLines: 5` mais de type `text`
+  /// affiche « OK » à la place — et la description tient sur une seule ligne.
   TextInputType _getKeyboardType() {
+    if (_estMultiligne) return TextInputType.multiline;
+
     switch (widget.type) {
       case InputType.email:
         return TextInputType.emailAddress;
@@ -230,10 +248,37 @@ class _InputState extends State<Input> {
     }
   }
 
-  /// Détermine le nombre de lignes selon le type
+  /// Détermine le nombre de lignes maximum.
+  ///
+  /// `maxLines` vaut 1 par défaut, ce qui écrasait [InputType.multiline] :
+  /// déclarer un champ multiligne ne donnait quand même qu'une ligne. Quand le
+  /// type dit « multiligne » et que `maxLines` est resté à sa valeur par
+  /// défaut, c'est le type qui l'emporte et le champ grandit sans limite.
   int? _getMaxLines() {
-    if (widget.maxLines != null) return widget.maxLines;
-    return widget.type == InputType.multiline ? null : 1;
+    // Un texte masqué doit tenir sur une ligne : Flutter l'exige.
+    if (_obscureText) return 1;
+    if (widget.type == InputType.multiline && widget.maxLines == 1) return null;
+    return widget.maxLines;
+  }
+
+  /// Le champ accepte-t-il plusieurs lignes ?
+  bool get _estMultiligne =>
+      !_obscureText && (_getMaxLinesBrut() == null || _getMaxLinesBrut()! > 1);
+
+  /// Le nombre de lignes voulu, sans la garde sur le texte masqué — utilisé
+  /// par [_estMultiligne], qui serait sinon récursif.
+  int? _getMaxLinesBrut() {
+    if (widget.type == InputType.multiline && widget.maxLines == 1) return null;
+    return widget.maxLines;
+  }
+
+  /// L'action de la touche de validation du clavier.
+  ///
+  /// Sur un champ multiligne, c'est `newline` : Entrée va à la ligne au lieu de
+  /// fermer le clavier. Un appelant reste libre d'imposer autre chose.
+  TextInputAction? _getTextInputAction() {
+    if (widget.textInputAction != null) return widget.textInputAction;
+    return _estMultiligne ? TextInputAction.newline : null;
   }
 
   /// Retourne le validateur automatique selon le type du champ
@@ -318,12 +363,17 @@ class _InputState extends State<Input> {
           enabled: widget.enabled,
           obscureText: _obscureText,
           keyboardType: _getKeyboardType(),
-          textInputAction: widget.textInputAction,
+          textInputAction: _getTextInputAction(),
           autofocus: widget.autofocus,
           autocorrect: widget.autocorrect,
           enableSuggestions: widget.enableSuggestions,
           maxLines: _getMaxLines(),
+          minLines: _obscureText ? null : widget.minLines,
           maxLength: widget.showCounter ? widget.maxLength : null,
+          // Le texte part du haut du cadre : centré verticalement, un
+          // paragraphe de quatre lignes flotterait au milieu du champ.
+          textAlignVertical:
+              _estMultiligne ? TextAlignVertical.top : null,
           inputFormatters: widget.inputFormatters,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: defaultTextColor,

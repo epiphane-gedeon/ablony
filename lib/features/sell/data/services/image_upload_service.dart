@@ -13,6 +13,49 @@ class ImageUploadService {
   ImageUploadService({FirebaseStorage? storage})
     : _storage = storage ?? FirebaseStorage.instance;
 
+  /// Dépose la photo de profil et retourne son URL.
+  ///
+  /// Toujours `users/{uid}/profile.jpg` — c'est exactement ce que les règles
+  /// de stockage autorisent, et un nom fixe fait que l'ancienne photo est
+  /// remplacée plutôt qu'accumulée.
+  ///
+  /// Conséquence à connaître : l'URL de téléchargement change à chaque dépôt
+  /// (le jeton d'accès est régénéré), donc aucun cache ne sert une image
+  /// périmée.
+  ///
+  /// Le dépôt passe par `putData` et non `putFile` : `putFile` s'appuie sur
+  /// `dart:io`, absent du web. C'est déjà ce que fait [uploadProductImages].
+  Future<String> uploadProfileImage({
+    required String uid,
+    required XFile file,
+  }) async {
+    final ref = _storage.ref('users/$uid/profile.jpg');
+    await ref.putData(
+      await file.readAsBytes(),
+      SettableMetadata(contentType: 'image/jpeg'),
+    );
+    return ref.getDownloadURL();
+  }
+
+  /// Supprime la photo de profil stockée.
+  ///
+  /// Retirer l'adresse du document utilisateur suffirait à ne plus l'afficher,
+  /// mais le fichier resterait sur le stockage — et son URL de téléchargement
+  /// continuerait de fonctionner pour qui l'aurait notée. Quelqu'un qui retire
+  /// sa photo veut qu'elle disparaisse, pas qu'elle devienne discrète.
+  ///
+  /// L'absence de fichier n'est pas une erreur : on peut retirer une photo
+  /// jamais déposée (compte créé via Google, dont l'avatar vient du
+  /// fournisseur et non de notre stockage).
+  Future<void> deleteProfileImage(String uid) async {
+    try {
+      await _storage.ref('users/$uid/profile.jpg').delete();
+    } on FirebaseException catch (e) {
+      if (e.code == 'object-not-found') return;
+      rethrow;
+    }
+  }
+
   /// Upload les images d'un produit et retourne les URLs de téléchargement.
   ///
   /// **Paramètres :**

@@ -72,6 +72,13 @@ abstract class AuthRepository {
   /// ```
   Future<User?> signInWithGoogle();
 
+  /// Finalise une connexion Google par redirection en attente (web).
+  ///
+  /// Le web redirige la page vers Google plutôt que d'ouvrir une popup ; au
+  /// retour, cet appel termine la connexion. Renvoie l'utilisateur si un
+  /// retour était en attente, sinon null. Sans effet hors web.
+  Future<firebase_auth.User?> completePendingRedirectSignIn();
+
   /// Connecte l'utilisateur avec son compte Facebook.
   ///
   /// Cette méthode déclenche le flow d'authentification Facebook :
@@ -315,6 +322,11 @@ abstract class AuthRepository {
     String? city,
     bool? marketingEmailsEnabled,
     Wallet? wallet,
+    /// Retire la photo de profil au lieu de la remplacer.
+    ///
+    /// Distinguer « aucune nouvelle photo » de « plus de photo du tout » :
+    /// `photoUrl: null` veut dire le premier, ce drapeau dit le second.
+    bool effacerPhoto = false,
   });
 
   /// Récupère les données d'un utilisateur depuis Firestore.

@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../auth/application/auth_providers.dart';
+import '../../../../core/config/app_urls.dart';
+import '../../../../core/presentation/pages/web_view_page.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/responsive/responsive.dart';
+import '../../../../shared/widgets/user_badges.dart';
+import '../../../product/domain/boost_config.dart';
 
 /// Page de profil utilisateur
 class ProfilePage extends ConsumerWidget {
@@ -69,11 +73,21 @@ class ProfilePage extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  user.username,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        user.username,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    UserBadges(user: user),
+                                  ],
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -95,6 +109,16 @@ class ProfilePage extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // Liste des options
+                // Profil public : réservé aux membres star. Un membre ordinaire
+                // n'y a pas accès depuis son menu.
+                if (user.isStar)
+                  _buildMenuTile(
+                    context: context,
+                    icon: Icons.person_outline,
+                    title: AppLocalizations.of(context)!.viewPublicProfile,
+                    onTap: () => context.push('/profile/${user.uid}'),
+                  ),
+
                 _buildMenuTile(
                   context: context,
                   icon: Icons.favorite_border,
@@ -102,12 +126,17 @@ class ProfilePage extends ConsumerWidget {
                   onTap: () => context.push('/profile/favorites'),
                 ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.email_outlined,
-                  title: AppLocalizations.of(context)!.inviteFriends,
-                  onTap: () {},
-                ),
+
+                // Réservé au personnel. Masquer l'entrée n'est qu'un
+                // confort : ce sont les Cloud Functions qui refusent, après
+                // avoir relu le rôle en base.
+                if (user.isStaff)
+                  _buildMenuTile(
+                    context: context,
+                    icon: Icons.local_shipping_outlined,
+                    title: AppLocalizations.of(context)!.staffTools,
+                    onTap: () => context.push('/delivery/stuck'),
+                  ),
 
                 _buildMenuTile(
                   context: context,
@@ -123,45 +152,22 @@ class ProfilePage extends ConsumerWidget {
                   context: context,
                   icon: Icons.receipt_long_outlined,
                   title: AppLocalizations.of(context)!.salesAndPurchases,
-                  onTap: () {},
+                  onTap: () => context.pushNamed('orders'),
                 ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.rocket_launch_outlined,
-                  title: AppLocalizations.of(context)!.promotionTools,
-                  onTap: () {},
-                ),
+                // Masqué sur mobile tant que la facturation du magasin n'est
+                // pas branchée (cf. `boostsDisponibles`).
+                if (boostsDisponibles)
+                  _buildMenuTile(
+                    context: context,
+                    icon: Icons.rocket_launch_outlined,
+                    title: AppLocalizations.of(context)!.promotionTools,
+                    onTap: () => context.pushNamed('promotion'),
+                  ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.tune_outlined,
-                  title: AppLocalizations.of(context)!.personalization,
-                  onTap: () {},
-                ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.discount_outlined,
-                  title: AppLocalizations.of(context)!.bundleDiscount,
-                  trailing: AppLocalizations.of(context)!.deactivatedStr,
-                  onTap: () {},
-                ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.beach_access_outlined,
-                  title: AppLocalizations.of(context)!.vacationMode,
-                  onTap: () {},
-                ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.favorite_outline,
-                  title: AppLocalizations.of(context)!.donations,
-                  trailing: AppLocalizations.of(context)!.deactivatedStr,
-                  onTap: () {},
-                ),
 
                 const Divider(height: 32),
 
@@ -169,14 +175,23 @@ class ProfilePage extends ConsumerWidget {
                   context: context,
                   icon: Icons.help_outline,
                   title: AppLocalizations.of(context)!.ablonyGuide,
-                  onTap: () {},
+                  onTap: () => WebViewPage.open(
+                    context,
+                    url: AppUrls.helpCenter,
+                    title: AppLocalizations.of(context)!.ablonyGuide,
+                    hideSelectors: AppUrls.legalPageHideSelectors,
+                  ),
                 ),
 
+                // L'assistance est désormais interne : on écrit dans
+                // l'application, avec pièce jointe, et la conversation reste
+                // consultable. Le guide en ligne garde son entrée juste
+                // au-dessus.
                 _buildMenuTile(
                   context: context,
                   icon: Icons.support_agent_outlined,
-                  title: AppLocalizations.of(context)!.helpCenter,
-                  onTap: () {},
+                  title: AppLocalizations.of(context)!.supportOpen,
+                  onTap: () => context.pushNamed('support'),
                 ),
 
                 _buildMenuTile(
@@ -186,33 +201,26 @@ class ProfilePage extends ConsumerWidget {
                   onTap: () => context.push('/profile/settings'),
                 ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.cookie_outlined,
-                  title: AppLocalizations.of(context)!.cookieSettings,
-                  onTap: () {},
-                ),
 
                 _buildMenuTile(
                   context: context,
                   icon: Icons.info_outline,
                   title: AppLocalizations.of(context)!.aboutUs,
-                  onTap: () {},
+                  onTap: () => WebViewPage.open(
+                    context,
+                    url: AppUrls.about,
+                    title: AppLocalizations.of(context)!.aboutUs,
+                    hideSelectors: AppUrls.legalPageHideSelectors,
+                  ),
                 ),
 
                 _buildMenuTile(
                   context: context,
                   icon: Icons.description_outlined,
                   title: AppLocalizations.of(context)!.legalInfo,
-                  onTap: () {},
+                  onTap: () => _ouvrirPagesLegales(context),
                 ),
 
-                _buildMenuTile(
-                  context: context,
-                  icon: Icons.verified_outlined,
-                  title: AppLocalizations.of(context)!.ourPlatform,
-                  onTap: () {},
-                ),
 
                 const SizedBox(height: 32),
 
@@ -292,4 +300,63 @@ class ProfilePage extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Les trois pages légales, derrière une seule entrée.
+///
+/// Trois lignes de menu pour trois pages qu'on ouvre une fois dans sa vie
+/// alourdiraient le profil ; une entrée qui n'en montre qu'une en cacherait
+/// deux que la loi impose d'exposer.
+Future<void> _ouvrirPagesLegales(BuildContext context) async {
+  final l10n = AppLocalizations.of(context)!;
+
+  await showModalBottomSheet<void>(
+    context: context,
+    builder: (feuille) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.gavel_outlined),
+            title: Text(l10n.termsOfService),
+            onTap: () {
+              Navigator.pop(feuille);
+              WebViewPage.open(
+                context,
+                url: AppUrls.termsOfService,
+                title: l10n.termsOfService,
+                hideSelectors: AppUrls.legalPageHideSelectors,
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.lock_outline),
+            title: Text(l10n.privacyPolicy),
+            onTap: () {
+              Navigator.pop(feuille);
+              WebViewPage.open(
+                context,
+                url: AppUrls.privacyPolicy,
+                title: l10n.privacyPolicy,
+                hideSelectors: AppUrls.legalPageHideSelectors,
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.business_outlined),
+            title: Text(l10n.legalNotice),
+            onTap: () {
+              Navigator.pop(feuille);
+              WebViewPage.open(
+                context,
+                url: AppUrls.legalNotice,
+                title: l10n.legalNotice,
+                hideSelectors: AppUrls.legalPageHideSelectors,
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  );
 }

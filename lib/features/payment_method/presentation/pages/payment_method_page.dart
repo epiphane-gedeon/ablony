@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/custom_checkbox.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../features/auth/application/auth_providers.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
-import '../../../../shared/widgets/custom_checkbox.dart';
 import '../../../../shared/widgets/input.dart';
 import '../../../../core/responsive/responsive.dart';
 
@@ -18,20 +20,33 @@ class PaymentMethodPage extends ConsumerStatefulWidget {
 }
 
 class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
-  String _selectedMethod = ''; // 'tmoney', 'flooz', 'card', 'wallet'
-  final _formKey = GlobalKey<FormState>();
+  /// Le paiement par carte est-il proposé ?
+  ///
+  /// Masqué tant qu'il n'est pas branché pour de bon. Proposer un moyen de
+  /// paiement qu'on ne traite pas encore, c'est offrir un chemin qui n'aboutit
+  /// pas — la personne le choisit, saisit sa carte, et rien n'en sort.
+  ///
+  /// Le formulaire capturait nom, numéro, expiration et cryptogramme sans que
+  /// rien ne soit lu ; il nous ferait en outre entrer dans le périmètre
+  /// PCI-DSS le jour où il serait réellement branché. Tout le code reste en
+  /// place : cette constante à `true` fait réapparaître l'option et son
+  /// formulaire.
+  static const bool carteBancaireActive = false;
 
-  // Contrôleurs pour le formulaire de carte
+  final _formKey = GlobalKey<FormState>();
   final _cardHolderController = TextEditingController();
   final _cardNumberController = TextEditingController();
   final _expiryController = TextEditingController();
   final _cvvController = TextEditingController();
+  bool _saveCard = false;
+  String _selectedMethod = ''; // 'tmoney', 'flooz', 'card', 'wallet'
+
+  // Contrôleurs pour le formulaire de carte
 
   // Contrôleurs pour les numéros de téléphone mobile money
   final _tmoneyPhoneController = TextEditingController();
   final _floozPhoneController = TextEditingController();
 
-  bool _saveCard = false;
   bool _isLoading = false;
 
   @override
@@ -48,8 +63,8 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
   Future<void> _confirmPaymentMethod() async {
     if (_selectedMethod.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner un mode de paiement'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.paymentMethodSelectPrompt),
         ),
       );
       return;
@@ -64,21 +79,24 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
     }
 
     // Validation selon le mode de paiement sélectionné
-    if (_selectedMethod == 'card' && !_formKey.currentState!.validate()) {
-      return;
-    }
 
     if (_selectedMethod == 'tmoney' && _tmoneyPhoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez entrer votre numéro T-Money')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.paymentMethodTmoneyPrompt)),
       );
       return;
     }
 
     if (_selectedMethod == 'flooz' && _floozPhoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez entrer votre numéro Flooz')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.paymentMethodFloozPrompt)),
       );
+      return;
+    }
+
+    if (carteBancaireActive &&
+        _selectedMethod == 'card' &&
+        !_formKey.currentState!.validate()) {
       return;
     }
 
@@ -164,7 +182,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
                   method: 'tmoney',
                   expandedContent: Input(
                     controller: _tmoneyPhoneController,
-                    label: 'Numéro de téléphone T-Money',
+                    label: AppLocalizations.of(context)!.paymentMethodTmoneyLabel,
                     placeholder: 'Ex: 90 00 00 00',
                     type: InputType.phone,
                     prefixIcon: const Icon(Icons.phone),
@@ -186,7 +204,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
                   method: 'flooz',
                   expandedContent: Input(
                     controller: _floozPhoneController,
-                    label: 'Numéro de téléphone Flooz',
+                    label: AppLocalizations.of(context)!.paymentMethodFloozLabel,
                     placeholder: 'Ex: 96 00 00 00',
                     type: InputType.phone,
                     prefixIcon: const Icon(Icons.phone),
@@ -198,16 +216,17 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
-
-                // Carte bancaire
-                _buildPaymentCard(
-                  title: 'Carte bancaire',
-                  subtitle: 'Payer par carte bancaire',
-                  icon: Icons.credit_card,
-                  method: 'card',
-                  expandedContent: _buildCardForm(),
-                ),
+                // La carte n'apparaît pas tant qu'elle n'est pas traitée.
+                if (carteBancaireActive) ...[
+                  const SizedBox(height: 16),
+                  _buildPaymentCard(
+                    title: 'Carte bancaire',
+                    subtitle: 'Payer par carte bancaire',
+                    icon: Icons.credit_card,
+                    method: 'card',
+                    expandedContent: _buildCardForm(),
+                  ),
+                ],
               ],
             ),
           ),
@@ -344,7 +363,71 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
     );
   }
 
+  /// Ce qu'on affiche quand on choisit la carte.
+  ///
+  /// Il y avait ici un vrai formulaire — nom, numéro, expiration, CVV — et une
+  /// case proposant d'« enregistrer la carte pour la prochaine fois ». Rien de
+  /// tout cela n'était lu : les contrôleurs n'étaient jamais consultés, la
+  /// carte n'était ni transmise ni conservée, et l'écran « Paramètres >
+  /// Paiements » promis par la case n'existe pas.
+  ///
+  /// Trois raisons de l'avoir retiré plutôt que de le brancher :
+  ///
+  /// 1. **C'était faux.** On annonçait conserver une carte qu'on ne lisait pas.
+  /// 2. **La personne saisissait deux fois.** Ici, puis de nouveau sur la page
+  ///    du prestataire, seule à recevoir réellement les données.
+  /// 3. **Saisir un numéro de carte et un cryptogramme dans notre propre
+  ///    interface nous ferait entrer dans le périmètre PCI-DSS**, avec les
+  ///    obligations qui vont avec — pour un champ qui ne servait à rien. En
+  ///    redirigeant vers le prestataire, ces données ne touchent jamais Ablony.
   Widget _buildCardForm() {
+    if (carteBancaireActive) return _formulaireCarteComplet();
+
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _buildCardLogo('assets/icons/mastercard.png'),
+            const SizedBox(width: 8),
+            _buildCardLogo('assets/icons/visa.png'),
+            const SizedBox(width: 8),
+            _buildCardLogo('assets/icons/discover.png'),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.lock_outline,
+                  size: 18, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.paymentCardRedirectNotice,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.75),
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _formulaireCarteComplet() {
     return Form(
       key: _formKey,
       child: Column(
@@ -365,7 +448,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
           // Nom figurant sur la carte
           Input(
             controller: _cardHolderController,
-            label: 'Nom figurant sur la carte',
+            label: AppLocalizations.of(context)!.paymentMethodCardName,
             placeholder: 'John Doe',
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -379,7 +462,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
           // Numéro de carte bancaire
           Input(
             controller: _cardNumberController,
-            label: 'Numéro de carte bancaire',
+            label: AppLocalizations.of(context)!.paymentMethodCardNumber,
             placeholder: 'Par ex : 1234 1234 1234 1234',
             type: InputType.number,
             suffixIcon: const Icon(Icons.credit_card),
@@ -416,7 +499,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
               Expanded(
                 child: Input(
                   controller: _cvvController,
-                  label: 'Code de sécurité',
+                  label: AppLocalizations.of(context)!.paymentMethodCardCvv,
                   placeholder: 'Par ex : 123',
                   type: InputType.number,
                   suffixIcon: const Icon(Icons.info_outline),

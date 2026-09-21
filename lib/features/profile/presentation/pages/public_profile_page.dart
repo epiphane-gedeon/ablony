@@ -12,6 +12,10 @@ import '../../../reviews/presentation/widgets/star_rating.dart';
 import '../../../../shared/widgets/product_card.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/user_badges.dart';
+import '../../../block/data/block_repository.dart';
+import '../../../reports/presentation/widgets/report_user_dialog.dart';
+import '../../../block/presentation/providers/block_provider.dart';
 
 /// Page de profil public d'un autre utilisateur.
 ///
@@ -43,6 +47,10 @@ class PublicProfilePage extends ConsumerWidget {
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => context.pop(),
               ),
+              actions: [
+                if (!isOwnProfile)
+                  _MenuBlocage(uid: userId, username: user.username),
+              ],
               bottom: TabBar(
                 tabs: [
                   Tab(text: AppLocalizations.of(context)!.listings),
@@ -114,11 +122,20 @@ class PublicProfilePage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      user.username,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user.username,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        UserBadges(user: user),
+                      ],
                     ),
                     const SizedBox(height: 2),
                     StarRatingDisplay(rating: user.rating, reviewsCount: user.reviewsCount),
@@ -270,6 +287,31 @@ class PublicProfilePage extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Qui a laissé l'avis, avec ses badges.
+                Consumer(
+                  builder: (context, ref, _) {
+                    final auteur =
+                        ref.watch(userByIdProvider(review.buyerId)).value;
+                    if (auteur == null) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              auteur.username,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          UserBadges(user: auteur, compact: true),
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 Row(
                   children: List.generate(
                     5,
@@ -421,6 +463,116 @@ class _FollowCountsRow extends StatelessWidget {
           onTap: () => context.push('/profile/${user.uid}/following'),
           child: Text(l10n.followingCountLabel(user.followingCount), style: textStyle),
         ),
+      ],
+    );
+  }
+}
+
+/// « Bloquer » et « Signaler », côte à côte.
+///
+/// Les deux gestes ne font pas la même chose : bloquer règle mon problème,
+/// signaler porte le problème à Ablony. Les proposer ensemble évite qu'on
+/// prenne l'un pour l'autre.
+class _MenuBlocage extends ConsumerWidget {
+  const _MenuBlocage({required this.uid, required this.username});
+
+  final String uid;
+  final String username;
+
+  Future<void> _bloquer(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirme = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.blockConfirmTitle(username)),
+        // Ce qui se passe vraiment, en une phrase — y compris ce qui **ne**
+        // s'arrête pas : quelqu'un qui croit perdre sa commande en bloquant
+        // ne bloque pas, et subit.
+        content: Text(l10n.blockConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.blockUser),
+          ),
+        ],
+      ),
+    );
+    if (confirme != true || !context.mounted) return;
+
+    await ref.read(blockRepositoryProvider).block(uid);
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.blockDone(username))),
+    );
+
+    // Dans la foulée : celui qui bloque a souvent une raison qu'Ablony
+    // gagnerait à connaître.
+    final signaler = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(l10n.blockAlsoReport),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.later),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.reportUser),
+          ),
+        ],
+      ),
+    );
+    if (signaler == true && context.mounted) {
+      await ReportUserDialog.show(
+        context,
+        reportedUserId: uid,
+        username: username,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final bloque = ref.watch(isBlockedProvider(uid));
+
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      onSelected: (valeur) async {
+        switch (valeur) {
+          case 'bloquer':
+            await _bloquer(context, ref);
+            break;
+          case 'debloquer':
+            await ref.read(blockRepositoryProvider).unblock(uid);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.unblockDone)),
+              );
+            }
+            break;
+          case 'signaler':
+            await ReportUserDialog.show(
+              context,
+              reportedUserId: uid,
+              username: username,
+            );
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: bloque ? 'debloquer' : 'bloquer',
+          child: Text(bloque ? l10n.unblockUser : l10n.blockUser),
+        ),
+        PopupMenuItem(value: 'signaler', child: Text(l10n.reportUser)),
       ],
     );
   }

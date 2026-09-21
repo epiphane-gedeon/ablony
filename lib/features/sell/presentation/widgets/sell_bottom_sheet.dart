@@ -21,6 +21,7 @@ import '../../application/sell_draft_provider.dart';
 import '../widgets/image_picker_grid.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/link.dart';
+import '../../../../core/services/analytics_service.dart';
 
 /// Bottom sheet plein écran pour créer une annonce.
 ///
@@ -279,7 +280,11 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
                       controller: _descriptionController,
                       label: l10n.productDescription,
                       placeholder: l10n.productDescriptionHint,
-                      maxLines: 5,
+                      // La place est visible dès l'ouverture, et le champ
+                      // continue de grandir jusqu'à dix lignes — décrire un
+                      // article demande plus qu'une phrase.
+                      minLines: 4,
+                      maxLines: 10,
                     ),
                   ),
 
@@ -573,15 +578,14 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
     AppLocalizations l10n,
     String translatedName,
   ) {
-    // Transformer les valeurs en objets utilisables par le sélecteur, en utilisant l'index comme ID
-    final items = attr.values.asMap().entries.map((entry) {
-      final translatedValue = CategoryTranslator.translateAttributeValue(
-        l10n,
-        entry.value,
-      );
+    // L'identifiant d'un choix est la valeur elle-même, en français, telle
+    // qu'elle figure dans `attributes.json`. On affiche la traduction, mais on
+    // enregistre la valeur canonique : c'est elle qui a un sens durable, alors
+    // qu'un rang ne veut plus rien dire dès qu'on touche à la liste.
+    final items = attr.values.map((valeur) {
       return {
-        'id': entry.key.toString(), // Utiliser l'index comme ID
-        'name': translatedValue, // Afficher la valeur traduite
+        'id': valeur,
+        'name': CategoryTranslator.translateAttributeValue(l10n, valeur),
       };
     }).toList();
 
@@ -600,9 +604,8 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
             onResult: (item) {
               if (item != null) {
                 setState(() {
-                  // Stocker l'index (sous forme d'entier) dans la BDD
-                  final index = int.tryParse(item['id'] as String);
-                  _attributeValues[attr.id] = index ?? item['id'];
+                  // La valeur en clair, pas son rang.
+                  _attributeValues[attr.id] = item['id'];
                 });
                 Navigator.of(context).pop();
               }
@@ -932,14 +935,20 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       // ÉTAPE 3 : CRÉER L'OBJET PRODUCT
       // ============================================================
 
-      // Parser le prix (convertir String → double)
-      final price = double.tryParse(_priceController.text) ?? 0.0;
+      // Parser le prix (String → double), arrondi à l'entier : le FCFA n'a pas
+      // de centimes. Filet côté client ; les règles Firestore refusent de
+      // toute façon un prix à décimale.
+      final price = (double.tryParse(_priceController.text) ?? 0.0)
+          .roundToDouble();
 
       // Récupérer l'état depuis les attributs dynamiques
       final conditionValue = _attributeValues['condition'];
       ProductCondition condition = ProductCondition.good;
 
-      if (conditionValue is int) {
+      if (conditionValue is String) {
+        condition = ProductCondition.parLibelle(conditionValue) ?? condition;
+      } else if (conditionValue is int) {
+        // Annonce reprise après coup : l'état y est encore un rang.
         if (conditionValue >= 0 &&
             conditionValue < ProductCondition.values.length) {
           condition = ProductCondition.values[conditionValue];
@@ -984,6 +993,11 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
         await productRepository.updateProduct(product);
       } else {
         await productRepository.createProduct(product);
+        // Une annonce mise en vente : suivi de la création.
+        ref.read(analyticsServiceProvider).logListingCreated(
+              category: product.categoryId,
+              price: product.price,
+            );
       }
 
       // ============================================================

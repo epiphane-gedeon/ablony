@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,6 +22,7 @@ class AddAddressPage extends ConsumerStatefulWidget {
 class _AddAddressPageState extends ConsumerState<AddAddressPage> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   LocationData? _selectedLocation;
   bool _isLoading = false;
@@ -27,6 +30,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
   @override
   void dispose() {
     _fullNameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -51,7 +55,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
 
     if (_selectedLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner une localisation')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.locationSelectPrompt)),
       );
       return;
     }
@@ -65,6 +69,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
       // inexploitable, et de toute façon jamais transmis.
       final address = DeliveryAddress.fromLocation(
         fullName: _fullNameController.text.trim(),
+        phone: _phoneController.text.trim(),
         location: _selectedLocation!,
       );
 
@@ -123,11 +128,32 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
               // Nom et prénom
               Input(
                 controller: _fullNameController,
-                label: 'Nom et prénom',
+                label: AppLocalizations.of(context)!.addressFullName,
                 placeholder: 'John Doe',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer votre nom complet';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Téléphone — pour joindre l'acheteur à la livraison (obligatoire).
+              Input(
+                controller: _phoneController,
+                type: InputType.phone,
+                label: AppLocalizations.of(context)!.deliveryPhoneLabel,
+                placeholder: '90 00 00 00',
+                validator: (value) {
+                  final v = value?.trim() ?? '';
+                  if (v.isEmpty) {
+                    return AppLocalizations.of(context)!.deliveryPhoneRequired;
+                  }
+                  // Au moins 8 chiffres (Togo/Bénin = 8 chiffres).
+                  final digits = v.replaceAll(RegExp(r'[^0-9]'), '');
+                  if (digits.length < 8) {
+                    return AppLocalizations.of(context)!.deliveryPhoneInvalid;
                   }
                   return null;
                 },
@@ -183,7 +209,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
                         OutlinedButton.icon(
                           onPressed: _selectLocation,
                           icon: const Icon(Icons.edit_location_alt, size: 18),
-                          label: const Text('Modifier la localisation'),
+                          label: Text(AppLocalizations.of(context)!.addressEditLocation),
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 40),
                             shape: RoundedRectangleBorder(

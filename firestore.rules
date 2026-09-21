@@ -17,12 +17,75 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
+    /// Les soldes ne bougent pas depuis le client.
+    ///
+    /// Les montants d'un porte-monnaie ne sont écrits que par les Cloud
+    /// Functions, via l'Admin SDK, qui contourne ces règles. Le client, lui,
+    /// écrit bien le document — c'est ainsi qu'il renseigne son identité à
+    /// l'activation — mais il doit alors recopier les montants tels qu'ils
+    /// sont. Sans cette vérification, n'importe qui se crédite ce qu'il veut
+    /// avec son propre jeton et demande un retrait : les Functions calculent
+    /// les soldes correctement, mais la porte reste ouverte à côté.
+    ///
+    /// Un porte-monnaie absent vaut zéro des deux côtés : c'est le cas de la
+    /// toute première activation, où le client envoie 0 et 0.
+    function soldesInchanges(avant, apres) {
+      return apres.get('availableAmount', 0) == avant.get('availableAmount', 0)
+        && apres.get('pendingAmount', 0) == avant.get('pendingAmount', 0);
+    }
+
+    /// Le personnel d'Ablony, qui répond à l'assistance.
+    ///
+    /// Le rôle est relu en base à chaque fois, et non pris dans le jeton : il
+    /// se retire, et un jeton déjà émis continuerait sinon d'ouvrir les portes
+    /// jusqu'à son expiration.
+    function estPersonnel() {
+      return isAuthenticated()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'member') in ['agent', 'admin'];
+    }
+
     /// Vérifie si l'utilisateur a un profil complet
     function hasCompleteProfile() {
-      return isAuthenticated() 
+      return isAuthenticated()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username != null
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.country != null;
+    }
+
+    /// Intégrité d'une mise à jour de message.
+    ///
+    /// Le prix d'une vente négociée est relu côté serveur (initiatePayment)
+    /// depuis l'offre acceptée. Cette confiance n'est fondée que si ces règles
+    /// garantissent qu'une offre `accepted` engage vraiment le vendeur :
+    ///  - passer à `accepted` est réservé au DESTINATAIRE de l'offre (jamais
+    ///    l'émetteur) et seulement depuis `pending` — sinon un acheteur
+    ///    s'auto-accepterait une offre dérisoire et fixerait son prix ;
+    ///  - `offer.amount` et `offer.productId` ne changent jamais après coup ;
+    ///  - `senderId` et `type` sont figés.
+    /// Le passage à `rejected` reste ouvert à tout participant : rejeter les
+    /// offres en attente (y compris les siennes, cf. _rejectPendingOffers) fait
+    /// partie du flux normal. Marquer `read` reste libre aussi.
+    function majMessageIntegre() {
+      return request.resource.data.senderId == resource.data.senderId
+        && request.resource.data.type == resource.data.type
+        && (
+          !('offer' in resource.data)
+            ? true
+            : (
+              request.resource.data.offer.amount == resource.data.offer.amount
+              && request.resource.data.offer.productId == resource.data.offer.productId
+              && (
+                request.resource.data.offer.status == resource.data.offer.status
+                || request.resource.data.offer.status == 'rejected'
+                || (
+                  request.resource.data.offer.status == 'accepted'
+                  && resource.data.offer.status == 'pending'
+                  && request.auth.uid != resource.data.senderId
+                )
+              )
+            )
+        );
     }
     
     // ============================================================
@@ -54,6 +117,21 @@ service cloud.firestore {
           && request.resource.data.email == resource.data.email
           && request.resource.data.authProvider == resource.data.authProvider
           && request.resource.data.createdAt == resource.data.createdAt
+          // Le rôle ne se donne pas soi-même. Sans cette ligne, n'importe qui
+          // se déclare `agent`, scanne ses propres colis comme remis et se
+          // fait payer sans avoir rien envoyé — ce qui vide le séquestre de
+          // son sens. Il se change depuis la console Firebase, ou par une
+          // Cloud Function réservée à l'administration.
+          && request.resource.data.get('role', 'member') == resource.data.get('role', 'member')
+          // Les badges se posent côté serveur uniquement : « fondateur » par la
+          // reprise ou à l'inscription, « star » à la main par l'administration.
+          // Un client ne peut ni se les donner, ni les retirer.
+          && request.resource.data.get('isFounder', false) == resource.data.get('isFounder', false)
+          && request.resource.data.get('isStar', false) == resource.data.get('isStar', false)
+          // Le solde de boosts se pose côté serveur (achat d'un lot, premium) et
+          // se dépense côté serveur (applyBoost). Un client ne se crédite pas
+          // de boosts en écrivant son propre document.
+          && request.resource.data.get('boostCredits', 0) == resource.data.get('boostCredits', 0)
           // Validation du wallet si présent
           && (!request.resource.data.keys().hasAny(['wallet'])
             || (request.resource.data.wallet is map
@@ -68,6 +146,12 @@ service cloud.firestore {
               && (!resource.data.keys().hasAny(['wallet'])
                 || !resource.data.wallet.isActivated
                 || request.resource.data.wallet.isActivated == true)
+              // Les soldes restent tels qu'ils sont : seules les Cloud
+              // Functions les déplacent.
+              && soldesInchanges(
+                resource.data.get('wallet', {}),
+                request.resource.data.wallet
+              )
             ))
         ) || (
           isAuthenticated()
@@ -116,6 +200,84 @@ service cloud.firestore {
     }
 
     // ============================================================
+    // COLLECTION : withdrawals
+    // ============================================================
+    // Les demandes de retrait. Le versement se fait à la main : ce que ces
+    // documents apportent, c'est la retenue de la somme dès la demande, la
+    // trace de qui a demandé quoi, et le retour de l'argent en cas de refus.
+    //
+    // Le document porte le numéro de destination **en clair**. C'est celui du
+    // demandeur, qui peut donc le voir ; l'administration y accède par les
+    // Cloud Functions, jamais depuis un client.
+    match /withdrawals/{withdrawalId} {
+      allow read: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+
+      // Rien ne s'écrit d'ici : un client capable de poser « paid »
+      // s'offrirait un virement.
+      allow create, update, delete: if false;
+    }
+
+    // ============================================================
+    // COLLECTION : transactions
+    // ============================================================
+    // Le relevé du porte-monnaie : un document par opération — achat, mise en
+    // avant, rechargement — écrit exclusivement par les Cloud Functions, qui
+    // s'en servent aussi pour l'idempotence (un rappel rejoué trouve le
+    // document en « completed » et ne crédite pas deux fois).
+    //
+    // Lecture réservée à celui qui a payé, et non aux deux parties : le
+    // document porte le choix de livraison de l'acheteur, adresse comprise.
+    // Le vendeur ne livre jamais — c'est nous qui acheminons — et n'a donc
+    // aucune raison de connaître le domicile de son acheteur. Ses ventes, il
+    // les lit dans `receipts`.
+    // ============================================================
+    // ASSISTANCE
+    // ============================================================
+    //
+    // Un fil par membre, séparé des conversations entre membres. Celles-ci
+    // sont adossées à une annonce : y greffer l'assistance aurait demandé
+    // d'inventer un produit fictif, et mélangé deux choses qui n'ont ni les
+    // mêmes destinataires ni les mêmes règles.
+    //
+    // L'identifiant du document **est** celui du membre : un fil par personne,
+    // retrouvable sans requête, et impossible à confondre.
+    match /support/{userId} {
+      allow read: if isOwner(userId) || estPersonnel();
+
+      // Le membre ouvre son propre fil ; il ne peut pas en ouvrir un pour
+      // quelqu'un d'autre.
+      allow create: if isOwner(userId) || estPersonnel();
+      allow update: if isOwner(userId) || estPersonnel();
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isOwner(userId) || estPersonnel();
+
+        // On n'écrit qu'en son propre nom : le champ `senderId` doit être
+        // celui de qui écrit. Sans cela, un membre pourrait fabriquer une
+        // réponse signée « Ablony » dans son propre fil et s'en servir comme
+        // preuve.
+        allow create: if (isOwner(userId) || estPersonnel())
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() <= 4000;
+
+        // Un message envoyé ne se réécrit pas : c'est ce qui en fait une
+        // trace utilisable en cas de litige.
+        allow update, delete: if false;
+      }
+    }
+
+    match /transactions/{transactionRef} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Rien ne s'écrit d'ici : un client capable de poser « completed »
+      // s'offrirait ce qu'il veut.
+      allow create, update, delete: if false;
+    }
+
+    // ============================================================
     // COLLECTION : receipts
     // ============================================================
     // Reçus d'achat, entièrement générés par les Cloud Functions (Admin SDK).
@@ -123,6 +285,27 @@ service cloud.firestore {
     match /receipts/{receiptId} {
       allow read: if isAuthenticated()
         && (resource.data.buyerId == request.auth.uid || resource.data.sellerId == request.auth.uid);
+
+      allow create, update, delete: if false;
+    }
+
+    // ============================================================
+    // COLLECTION : disputes
+    // ============================================================
+    // Un litige par vente : l'identifiant du document **est** la référence de
+    // transaction. L'unicité est ainsi garantie par Firestore, sans
+    // vérification à relire — et « un seul litige ouvert par vente » cesse
+    // d'être une règle applicative qu'on peut oublier d'appliquer.
+    //
+    // Les deux parties suivent leur dossier. Elles n'écrivent rien : ouvrir un
+    // litige passe par `openDispute`, qui vérifie que la vente est encore
+    // dénouable, et le trancher par `resolveDispute`, réservé à
+    // l'administration. Un client capable d'écrire « status: refunded »
+    // s'offrirait un remboursement.
+    match /disputes/{transactionRef} {
+      allow read: if isAuthenticated()
+        && (resource.data.buyerId == request.auth.uid
+            || resource.data.sellerId == request.auth.uid);
 
       allow create, update, delete: if false;
     }
@@ -146,6 +329,16 @@ service cloud.firestore {
             || resource.data.sellerId == request.auth.uid);
 
       allow create, update, delete: if false;
+
+      // L'adresse de livraison vit ici, et non sur le colis : une règle
+      // Firestore autorise ou refuse un document entier, jamais un champ.
+      // Posée sur le colis, elle serait lisible par le vendeur — qui n'a pas
+      // à savoir où habite son acheteur, puisqu'il ne livre pas. Nos agents
+      // l'obtiennent par une Cloud Function, qui vérifie leur rôle.
+      match /private/{document} {
+        allow read: if isAuthenticated() && resource.data.buyerId == request.auth.uid;
+        allow create, update, delete: if false;
+      }
     }
 
     // ============================================================
@@ -187,12 +380,25 @@ service cloud.firestore {
     match /reports/{reportId} {
       allow read: if false;
 
-      // Création : uniquement l'auteur du signalement, jamais sur son propre article
+      // Création : uniquement l'auteur du signalement, jamais sur son propre
+      // article.
+      //
+      // `status` est **facultatif**, et c'est délibéré. Deux versions de
+      // l'application coexistent toujours : celle qu'on vient de publier et
+      // celle qui reste installée pendant des semaines. Exiger ici un champ
+      // que l'ancienne n'écrit pas ne durcit rien — cela empêche simplement
+      // de signaler. C'est le déclencheur `onReportCreated` qui le pose, donc
+      // pour les deux versions à la fois.
+      //
+      // S'il est fourni, en revanche, il ne peut valoir que 'open' : naître
+      // « reviewed », ce serait déposer un signalement déjà clos, qui
+      // n'apparaîtrait jamais dans la file.
       allow create: if isAuthenticated()
-        && request.resource.data.keys().hasAll(['productId', 'sellerId', 'reporterId', 'reason', 'createdAt'])
+        && request.resource.data.keys().hasAll(['sellerId', 'reporterId', 'reason', 'createdAt'])
         && request.resource.data.reporterId == request.auth.uid
         && request.resource.data.sellerId != request.auth.uid
-        && request.resource.data.reason is string;
+        && request.resource.data.reason is string
+        && request.resource.data.get('status', 'open') == 'open';
 
       // Mise à jour / suppression : jamais (signalement immuable)
       allow update, delete: if false;
@@ -307,6 +513,10 @@ service cloud.firestore {
         && request.resource.data.title.size() <= 100
         && request.resource.data.price is number
         && request.resource.data.price > 0
+        // FCFA (XOF), seule devise : pas de centimes. On refuse tout prix à
+        // décimale. Le test porte sur la VALEUR (2000.0 passe, 2000.5 non), pas
+        // sur le type — pour ne pas casser le client qui écrit un double entier.
+        && request.resource.data.price % 1 == 0
         && request.resource.data.imageUrls is list
         && request.resource.data.imageUrls.size() >= 1
         && request.resource.data.imageUrls.size() <= 6;
@@ -320,8 +530,28 @@ service cloud.firestore {
           isOwner(resource.data.sellerId)
           && request.resource.data.sellerId == resource.data.sellerId
           && request.resource.data.createdAt == resource.data.createdAt
+          // FCFA sans centimes : un prix modifié doit rester entier (2000.0 ok,
+          // 2000.5 non). Contrôle sur la valeur, pas le type.
+          && request.resource.data.price is number
+          && request.resource.data.price % 1 == 0
           && request.resource.data.get('isBoosted', false) == resource.data.get('isBoosted', false)
           && request.resource.data.get('boostExpiresAt', null) == resource.data.get('boostExpiresAt', null)
+          // Une annonce vendue ne se modifie plus : elle est liée à un reçu,
+          // une transaction et un colis.
+          && resource.data.get('status', 'active') != 'sold'
+          // Une annonce retirée pour manquement ne se remet pas en ligne d'un
+          // geste du vendeur — sinon la décision serait cosmétique. Mais une
+          // annonce renvoyée pour correction doit pouvoir être corrigée :
+          // c'est exactement ce qu'on lui demande. Le serveur la remet en file
+          // tout seul dès qu'elle change (voir onProductWritten).
+          && (resource.data.get('moderationStatus', 'pending') != 'rejected'
+              || resource.data.get('reviewDecision', '') == 'correction')
+          // Et le vendeur ne touche ni à l'avis de la modération, ni au
+          // champ de visibilité que le serveur calcule.
+          && request.resource.data.get('moderationStatus', 'pending')
+               == resource.data.get('moderationStatus', 'pending')
+          && request.resource.data.get('isListable', false)
+               == resource.data.get('isListable', false)
         ) || (
           isAuthenticated()
           && request.resource.data.diff(resource.data).changedKeys().hasOnly(['favoritesCount'])
@@ -332,16 +562,84 @@ service cloud.firestore {
             request.resource.data.favoritesCount == resource.data.favoritesCount + 1
             || request.resource.data.favoritesCount == resource.data.favoritesCount - 1
           )
+        // 3) tout utilisateur authentifié peut incrémenter le compteur de vues
+        //    de 1, et rien d'autre. C'est un chiffre de vanité montré au
+        //    vendeur : approximatif et gonflable par principe (rien n'empêche
+        //    de rouvrir la fiche), mais l'application ne le compte qu'une fois
+        //    par session et jamais pour le vendeur lui-même. On borne à +1
+        //    pour qu'un client modifié ne puisse pas écrire n'importe quoi.
+        ) || (
+          isAuthenticated()
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['viewsCount'])
+          && resource.data.get('viewsCount', 0) is int
+          && request.resource.data.viewsCount is int
+          && request.resource.data.viewsCount == resource.data.get('viewsCount', 0) + 1
         );
       
-      // Suppression : Uniquement le vendeur
-      allow delete: if isOwner(resource.data.sellerId);
+      // Personne n'efface une annonce, pas même son auteur.
+      //
+      // Vendue, elle est liée à un reçu, une transaction et un colis : un
+      // reçu d'acheteur qui pointe dans le vide est pire qu'un document de
+      // trop. Non vendue, elle peut être en favori, citée dans une
+      // conversation, ou **signalée** — et un vendeur de contrefaçons qui
+      // efface son annonce efface la pièce à conviction.
+      //
+      // Le vendeur voit toujours « Supprimer » : l'annonce passe en
+      // `archived`, par une mise à jour, donc soumise aux conditions
+      // ci-dessus — et une annonce vendue y est refusée.
+      allow delete: if false;
     }
     
     // ============================================================
     // COLLECTION : conversations
     // ============================================================
     // Gère les conversations entre acheteurs et vendeurs
+    // ============================================================
+    // COLLECTION : blocks
+    // ============================================================
+    // Le blocage entre membres. Une collection à plat, à identifiant
+    // composite `{bloqueur}_{bloque}` : le doublon devient impossible, et un
+    // blocage se teste par une lecture directe — sans quoi il serait
+    // inapplicable ici, les règles ne pouvant pas faire de requête.
+    //
+    // Unilatéral et silencieux : on bloque sans se justifier, et la personne
+    // bloquée n'est pas prévenue. La prévenir invite la représaille, ce qu'on
+    // cherche précisément à éviter.
+    match /blocks/{blockId} {
+      // Chacun ne voit que ses propres blocages : savoir qui vous a bloqué
+      // n'apporte rien et invite, là encore, la représaille.
+      allow read: if isAuthenticated()
+        && resource.data.blockerId == request.auth.uid;
+
+      allow create: if isAuthenticated()
+        && request.resource.data.blockerId == request.auth.uid
+        && request.resource.data.blockedId != request.auth.uid
+        && blockId == request.auth.uid + '_' + request.resource.data.blockedId;
+
+      allow delete: if isAuthenticated()
+        && resource.data.blockerId == request.auth.uid;
+
+      allow update: if false;
+    }
+
+    // L'autre personne d'une conversation à deux.
+    function autreParticipant(conversationId, moi) {
+      return get(/databases/$(database)/documents/conversations/$(conversationId))
+        .data.participants[0] == moi
+        ? get(/databases/$(database)/documents/conversations/$(conversationId))
+            .data.participants[1]
+        : get(/databases/$(database)/documents/conversations/$(conversationId))
+            .data.participants[0];
+    }
+
+    // Deux lectures supplémentaires par message envoyé. À ce volume c'est
+    // négligeable, et c'est la seule façon d'empêcher un client modifié de
+    // contourner le blocage.
+    function blocageEntre(a, b) {
+      return exists(/databases/$(database)/documents/blocks/$(a + '_' + b))
+        || exists(/databases/$(database)/documents/blocks/$(b + '_' + a));
+    }
+
     match /conversations/{conversationId} {
       // Lecture : Uniquement les participants de la conversation
       allow read: if isAuthenticated() 
@@ -365,15 +663,35 @@ service cloud.firestore {
         allow read: if isAuthenticated() 
           && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
         
-        // Création : Uniquement les participants peuvent envoyer des messages
-        allow create: if isAuthenticated() 
+        // Création : Uniquement les participants peuvent envoyer des messages,
+        // et aucun des deux si l'un a bloqué l'autre. Vérifié ici et pas
+        // seulement dans l'interface : masquer un champ de saisie n'arrête pas
+        // un client modifié.
+        //
+        // Le blocage coupe dans les deux sens. Sinon le bloqueur aurait un
+        // avantage asymétrique étrange — écrire sans pouvoir être répondu.
+        allow create: if isAuthenticated()
           && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants
           && request.resource.data.senderId == request.auth.uid
-          && request.resource.data.keys().hasAll(['senderId', 'type', 'timestamp', 'read']);
+          && request.resource.data.keys().hasAll(['senderId', 'type', 'timestamp', 'read'])
+          // Un montant d'offre est un prix en FCFA : entier positif, sans
+          // centimes (2000.0 ok, 2000.5 non). Le prix négocié sert ensuite de
+          // base au paiement — un demi-franc y rentrerait sinon.
+          && (!('offer' in request.resource.data)
+              || (request.resource.data.offer.amount is number
+                  && request.resource.data.offer.amount > 0
+                  && request.resource.data.offer.amount % 1 == 0))
+          && !blocageEntre(
+               request.auth.uid,
+               autreParticipant(conversationId, request.auth.uid));
         
-        // Mise à jour : Pour marquer comme lu ou modifier le statut d'une offre
-        allow update: if isAuthenticated() 
-          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        // Mise à jour : Pour marquer comme lu ou changer le statut d'une offre.
+        // L'intégrité (pas d'auto-acceptation, montant figé) est déléguée à
+        // majMessageIntegre() : le contrôle du prix négocié côté serveur en
+        // dépend directement.
+        allow update: if isAuthenticated()
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants
+          && majMessageIntegre();
         
         // Suppression : Aucune suppression de messages
         allow delete: if false;

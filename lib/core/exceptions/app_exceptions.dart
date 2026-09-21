@@ -209,6 +209,25 @@ class ProductNotFoundException extends ProductException {
        );
 }
 
+/// Une annonce vendue ne se supprime pas.
+///
+/// Elle est liée à un reçu, une transaction et un colis : l'effacer laisserait
+/// l'acheteur devant un reçu qui pointe dans le vide, pour un article qu'il a
+/// payé. Elle n'apparaît déjà plus dans les listes de vente — il n'y a donc
+/// rien à gagner à la retirer, et tout à perdre.
+class ProductSoldCannotBeDeletedException extends ProductException {
+  ProductSoldCannotBeDeletedException({
+    Exception? originalException,
+    StackTrace? stackTrace,
+  }) : super(
+         message: 'Une annonce vendue ne peut pas être supprimée : '
+             'elle est liée à la commande de votre acheteur.',
+         code: 'PRODUCT_SOLD_CANNOT_DELETE',
+         originalException: originalException,
+         stackTrace: stackTrace,
+       );
+}
+
 /// Accès refusé au produit
 class ProductAccessDeniedException extends ProductException {
   ProductAccessDeniedException({

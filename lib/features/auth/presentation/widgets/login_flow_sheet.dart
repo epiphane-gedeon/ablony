@@ -58,6 +58,11 @@ class LoginFlowSheet extends ConsumerStatefulWidget {
 }
 
 class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
+  /// Facebook est masqué en attendant la configuration native Android/iOS et
+  /// la revue « Live » de l'app Meta. Le code de connexion reste en place :
+  /// repasser ceci à `true` rallume le bouton, rien d'autre à toucher.
+  static const bool _facebookDisponible = false;
+
   /// Indique si une opération d'authentification est en cours.
   bool _isLoading = false;
 
@@ -139,12 +144,12 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
                   // ============================================================
                   _buildGoogleButton(context),
 
-                  SizedBox(height: screenHeight * 0.01),
-
-                  // ============================================================
-                  // BOUTON FACEBOOK (Bordure)
-                  // ============================================================
-                  _buildFacebookButton(context),
+                  // Facebook masqué tant que la config native et la revue
+                  // Meta ne sont pas prêtes — voir _facebookDisponible.
+                  if (_facebookDisponible) ...[
+                    SizedBox(height: screenHeight * 0.01),
+                    _buildFacebookButton(context),
+                  ],
 
                   SizedBox(height: screenHeight * 0.015),
 
@@ -153,12 +158,6 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
                   // ============================================================
                   _buildEmailLink(context),
 
-                  SizedBox(height: screenHeight * 0.015),
-
-                  // ============================================================
-                  // LIEN ENTREPRISE
-                  // ============================================================
-                  _buildBusinessLink(context),
                 ],
               ),
             ),
@@ -379,24 +378,4 @@ class _LoginFlowSheetState extends ConsumerState<LoginFlowSheet> {
     );
   }
 
-  /// Construit le lien pour les entreprises.
-  Widget _buildBusinessLink(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(l10n.loginBusiness, style: Theme.of(context).textTheme.bodySmall),
-        Link(
-          text: l10n.loginBusinessMore,
-          onTap: () {
-            // TODO: Navigation vers la page entreprise
-          },
-          underline: true,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary),
-        ),
-      ],
-    );
-  }
 }

@@ -9,6 +9,7 @@ import '../../../../shared/widgets/selection_tile.dart';
 import '../../../product/presentation/providers/product_provider.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/entities.dart';
+import '../../../../shared/widgets/user_badges.dart';
 
 /// Page de recherche avec onglets Articles/Membres
 ///
@@ -28,6 +29,19 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+
+  /// Les catégories, chargées une seule fois.
+  ///
+  /// Elles étaient relues à chaque frappe : deux collections entières par
+  /// lettre tapée, pour des données qui ne changent jamais pendant une
+  /// session.
+  List<String>? _nomsDeCategories;
+
+  /// La dernière requête lancée, pour écarter les réponses périmées.
+  ///
+  /// Sans elle, une réponse lente pour « rob » peut arriver après celle pour
+  /// « robe » et écraser les bonnes suggestions par les anciennes.
+  String _requeteEnCours = '';
 
   // Suggestions pour l'onglet Articles
   List<String> _suggestions = [];
@@ -96,42 +110,45 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
     });
   }
 
+  /// Charge les noms de catégories, une fois par session.
+  Future<List<String>> _chargerNomsDeCategories() async {
+    if (_nomsDeCategories != null) return _nomsDeCategories!;
+
+    final repository = ref.read(productRepositoryProvider);
+    final categories = await repository.getAllCategories();
+    final sousCategories = await repository.getAllSubcategories();
+
+    _nomsDeCategories = [
+      ...categories.map((c) => c.name),
+      ...sousCategories.map((c) => c.name),
+    ];
+    return _nomsDeCategories!;
+  }
+
   /// Effectue la recherche et met à jour les suggestions
   Future<void> _performSearch(String query) async {
     if (query.isEmpty) return;
+    _requeteEnCours = query;
 
     try {
+      final noms = await _chargerNomsDeCategories();
       final queryLower = query.toLowerCase();
 
-      // Récupérer les catégories et sous-catégories depuis Firestore
-      final categoriesSnapshot = await ref
-          .read(productRepositoryProvider)
-          .getAllCategories();
-      final subcategoriesSnapshot = await ref
-          .read(productRepositoryProvider)
-          .getAllSubcategories();
+      final suggestions = noms
+          .where((nom) => nom.toLowerCase().contains(queryLower))
+          .toSet()
+          .toList();
 
-      final Set<String> uniqueSuggestions = {};
-
-      // Ajouter les catégories qui matchent
-      for (final category in categoriesSnapshot) {
-        if (category.name.toLowerCase().contains(queryLower)) {
-          uniqueSuggestions.add(category.name);
-        }
-      }
-
-      // Ajouter les sous-catégories qui matchent
-      for (final subcategory in subcategoriesSnapshot) {
-        if (subcategory.name.toLowerCase().contains(queryLower)) {
-          uniqueSuggestions.add(subcategory.name);
-        }
-      }
+      // La requête a changé pendant l'attente : ces suggestions sont
+      // périmées, et les afficher ferait clignoter la liste sur du vieux.
+      if (!mounted || _requeteEnCours != query) return;
 
       setState(() {
-        _suggestions = uniqueSuggestions.toList();
+        _suggestions = suggestions;
         _isSearching = false;
       });
     } catch (e) {
+      if (!mounted || _requeteEnCours != query) return;
       setState(() {
         _suggestions = [];
         _isSearching = false;
@@ -402,7 +419,19 @@ class _SearchingPageState extends ConsumerState<SearchingPage>
                   )
                 : null,
           ),
-          title: Text(user.username, style: theme.textTheme.bodyLarge),
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  user.username,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyLarge,
+                ),
+              ),
+              const SizedBox(width: 6),
+              UserBadges(user: user, compact: true),
+            ],
+          ),
           trailing: Icon(
             Icons.chevron_right,
             color: theme.colorScheme.onSurface.withOpacity(0.4),

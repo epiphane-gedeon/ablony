@@ -51,6 +51,7 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
         context,
         url: AppUrls.termsOfService,
         title: l10n.termsTitle,
+        hideSelectors: AppUrls.legalPageHideSelectors,
       );
     };
   late final TapGestureRecognizer _privacyRecognizer = TapGestureRecognizer()
@@ -60,6 +61,7 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
         context,
         url: AppUrls.privacyPolicy,
         title: l10n.privacyTitle,
+        hideSelectors: AppUrls.legalPageHideSelectors,
       );
     };
 
@@ -84,7 +86,6 @@ class _EmailSignUpScreenState extends ConsumerState<EmailSignUpScreen> {
   /// 3. Appelle startEmailSignUp du RegistrationNotifier
   /// 4. Redirige vers /auth/country si succès
   Future<void> _submit() async {
-    final l10n = AppLocalizations.of(context)!;
 
     // Vérifier l'acceptation des CGU
     setState(() {

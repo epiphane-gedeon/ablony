@@ -88,6 +88,45 @@ service firebase.storage {
     }
 
     // ============================================================
+    // PIÈCES JOINTES D'ASSISTANCE
+    // ============================================================
+    // Structure : support/{userId}/{fichier}
+    //
+    // Une capture de débit vaut mieux qu'une description : c'est elle qui
+    // permet de trancher vite quand quelqu'un dit avoir payé sans contrepartie.
+    match /support/{userId}/{fileName} {
+      // Lecture réservée à l'intéressé ; l'équipe passe par l'Admin SDK, qui
+      // ne dépend pas de ces règles.
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isImage() && isValidSize();
+      allow delete: if false;
+    }
+
+    // ============================================================
+    // PHOTOS DE LITIGE
+    // ============================================================
+    // Une description seule ne permet de trancher ni dans un sens ni dans
+    // l'autre : ces photos sont la matière de la décision.
+    //
+    // L'identifiant de qui dépose est **dans le chemin**, comme pour les
+    // images de discussion. L'alternative — relire la transaction Firestore
+    // depuis ces règles — coûterait une lecture à chaque accès et lierait le
+    // dépôt d'une photo à la disponibilité d'une autre collection. Ce qui
+    // protège réellement, c'est `openDispute` : une photo déposée par qui
+    // n'est pas partie à la vente n'entre dans aucun dossier.
+    match /disputes/{transactionRef}/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+
+      allow write: if isOwner(userId)
+        && isImage()
+        && isValidSize();
+
+      // Jamais de suppression : une pièce du dossier ne s'efface pas une fois
+      // le litige ouvert, surtout par celui qu'elle accuse.
+      allow delete: if false;
+    }
+
+    // ============================================================
     // RÈGLE PAR DÉFAUT : TOUT REFUSER
     // ============================================================
     match /{allPaths=**} {

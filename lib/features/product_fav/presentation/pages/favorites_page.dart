@@ -52,8 +52,8 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Rechercher dans les favoris...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.favoritesSearchHint,
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {
