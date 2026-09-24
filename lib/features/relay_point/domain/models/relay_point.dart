@@ -14,6 +14,10 @@ class RelayPoint extends Equatable {
   final String hours;
   final String? phone;
 
+  /// Un point désactivé ne doit plus être proposé au dépôt (le serveur le
+  /// refuse aussi). Absent des anciens documents → considéré actif.
+  final bool isActive;
+
   const RelayPoint({
     required this.id,
     required this.name,
@@ -23,6 +27,7 @@ class RelayPoint extends Equatable {
     required this.longitude,
     required this.hours,
     this.phone,
+    this.isActive = true,
   });
 
   factory RelayPoint.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -36,9 +41,11 @@ class RelayPoint extends Equatable {
       longitude: (data['longitude'] as num).toDouble(),
       hours: data['hours'] as String,
       phone: data['phone'] as String?,
+      isActive: data['isActive'] as bool? ?? true,
     );
   }
 
   @override
-  List<Object?> get props => [id, name, address, city, latitude, longitude, hours, phone];
+  List<Object?> get props =>
+      [id, name, address, city, latitude, longitude, hours, phone, isActive];
 }

@@ -14,7 +14,10 @@ import '../../../delivery/domain/models/delivery_choice.dart';
 import '../../../delivery/domain/models/delivery_pricing.dart';
 import '../../../delivery/presentation/providers/delivery_fee_provider.dart';
 import '../../../relay_point/domain/models/relay_point.dart';
+import '../../../relay_point/presentation/providers/relay_point_provider.dart';
 import '../../../../core/services/payment_service.dart';
+import '../../../../core/config/app_mode.dart';
+import '../../../../core/config/cities.dart';
 import 'payment_web_view_page.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/services/analytics_service.dart';
@@ -86,10 +89,19 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   double get _protectionFees => (widget.product != null && !widget.isPickup)
       ? (widget.product!.price * DeliveryPricing.protectionRate).roundToDouble()
       : 0.0;
-  double get _shippingCost => (widget.product != null && !widget.isPickup)
-      ? (_deliveryMethod == DeliveryMethod.home ? _homeFee : _relayFee)
-          .toDouble()
-      : 0.0;
+  double get _shippingCost {
+    if (widget.product == null || widget.isPickup) return 0.0;
+    switch (_deliveryMethod) {
+      case DeliveryMethod.home:
+        return _homeFee.toDouble();
+      case DeliveryMethod.relay:
+        return _relayFee.toDouble();
+      // Auto-expédition : le transport se règle entre acheteur et vendeur, hors
+      // Ablony → aucun frais de livraison ici.
+      case DeliveryMethod.selfShip:
+        return 0.0;
+    }
+  }
   double get _totalAmount => widget.isPickup
       ? _pickupFee.toDouble()
       : widget.product != null
@@ -398,6 +410,69 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       });
     }
 
+    // Points relais réellement proposables. Leur nombre décide de l'UI :
+    // 0 → pas de retrait relais (domicile seul), 1 → point imposé (pas de
+    // sélecteur), ≥2 → sélecteur. On réagit aussi à l'arrivée asynchrone de la
+    // liste pour auto-sélectionner ou basculer sur domicile.
+    final relaisActifs = widget.product != null && !widget.isPickup
+        ? (ref.watch(activeRelayPointsProvider).value ?? const <RelayPoint>[])
+        : const <RelayPoint>[];
+    if (widget.product != null && !widget.isPickup) {
+      ref.listen(activeRelayPointsProvider, (_, next) {
+        final relays = next.value;
+        if (relays == null) return;
+        setState(() {
+          if (relays.isEmpty) {
+            if (_deliveryMethod == DeliveryMethod.relay) {
+              _deliveryMethod = DeliveryMethod.home;
+            }
+            _selectedRelayPoint = null;
+          } else if (relays.length == 1) {
+            // Un seul point : on l'impose tant qu'on est en mode relais.
+            if (_deliveryMethod == DeliveryMethod.relay) {
+              _selectedRelayPoint = relays.first;
+            }
+          }
+        });
+      });
+    }
+
+    // Mode de l'app + villes : décident des options de livraison proposées.
+    // En mode « def » rien ne change. En mode « beg » : la livraison Ablony
+    // (relais/domicile) n'est proposée que si acheteur ET vendeur sont dans une
+    // ville couverte (Lomé) ; sinon seule l'auto-expédition reste. Et l'auto-
+    // expédition est offerte comme choix supplémentaire tant qu'on est en beg.
+    final appMode = ref.watch(currentAppModeProvider);
+    final bool livraisonAchat = widget.product != null && !widget.isPickup;
+    final buyerCityKey = ref.watch(currentUserProvider).value?.cityKey;
+    final sellerCityKey = livraisonAchat
+        ? ref.watch(userByIdProvider(widget.product!.sellerId)).value?.cityKey
+        : null;
+    final bool bothLome =
+        isCoveredCity(buyerCityKey) && isCoveredCity(sellerCityKey);
+    final bool ablonyDeliveryAllowed =
+        !livraisonAchat || appMode == AppMode.def || bothLome;
+    final bool selfShipOffered = livraisonAchat && appMode == AppMode.beg;
+    // En beg hors zone couverte : l'auto-expédition est le SEUL choix.
+    final bool selfShipOnly = selfShipOffered && !bothLome;
+
+    // Corrige le mode de livraison courant selon ce qui est autorisé, une fois
+    // que mode/villes sont chargés. Post-frame + gardé → idempotent, pas de
+    // boucle.
+    if (livraisonAchat) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (selfShipOnly && _deliveryMethod != DeliveryMethod.selfShip) {
+          setState(() => _deliveryMethod = DeliveryMethod.selfShip);
+        } else if (!selfShipOffered &&
+            _deliveryMethod == DeliveryMethod.selfShip) {
+          setState(() => _deliveryMethod = relaisActifs.isNotEmpty
+              ? DeliveryMethod.relay
+              : DeliveryMethod.home);
+        }
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isPickup
@@ -558,34 +633,67 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                     title: 'Options de livraison',
                     child: Column(
                       children: [
-                        ChoiceCardWidget(
-                          title: 'Retrait en point relais',
-                          subTitle:
-                              '$_relayFee FCFA — à récupérer avec une pièce d\'identité',
-                          icon: Icons.location_on_outlined,
-                          isSelected: _deliveryMethod == DeliveryMethod.relay,
-                          showSelectionCircle: true,
-                          onTap: () {
-                            setState(() {
-                              _deliveryMethod = DeliveryMethod.relay;
-                            });
-                          },
-                        ),
-                        SizedBox(height: screenWidth * 0.03),
-                        ChoiceCardWidget(
-                          title: AppLocalizations.of(context)!.paymentHomeDelivery,
-                          subTitle:
-                              '$_homeFee FCFA — remise à votre adresse',
-                          icon: Icons.home_outlined,
-                          isSelected: _deliveryMethod == DeliveryMethod.home,
-                          showSelectionCircle: true,
-                          onTap: () {
-                            setState(() {
-                              _deliveryMethod = DeliveryMethod.home;
-                              _selectedRelayPoint = null;
-                            });
-                          },
-                        ),
+                        // Livraison Ablony (relais/domicile) : masquée en mode
+                        // beg quand acheteur/vendeur ne sont pas tous deux à Lomé.
+                        if (ablonyDeliveryAllowed) ...[
+                          // Le retrait en relais n'a de sens que s'il existe au
+                          // moins un point actif.
+                          if (relaisActifs.isNotEmpty) ...[
+                            ChoiceCardWidget(
+                              title: 'Retrait en point relais',
+                              subTitle:
+                                  '$_relayFee FCFA — à récupérer avec une pièce d\'identité',
+                              icon: Icons.location_on_outlined,
+                              isSelected:
+                                  _deliveryMethod == DeliveryMethod.relay,
+                              showSelectionCircle: true,
+                              onTap: () {
+                                setState(() {
+                                  _deliveryMethod = DeliveryMethod.relay;
+                                  if (relaisActifs.length == 1) {
+                                    _selectedRelayPoint = relaisActifs.first;
+                                  }
+                                });
+                              },
+                            ),
+                            SizedBox(height: screenWidth * 0.03),
+                          ],
+                          ChoiceCardWidget(
+                            title:
+                                AppLocalizations.of(context)!.paymentHomeDelivery,
+                            subTitle: '$_homeFee FCFA — remise à votre adresse',
+                            icon: Icons.home_outlined,
+                            isSelected: _deliveryMethod == DeliveryMethod.home,
+                            showSelectionCircle: true,
+                            onTap: () {
+                              setState(() {
+                                _deliveryMethod = DeliveryMethod.home;
+                                _selectedRelayPoint = null;
+                              });
+                            },
+                          ),
+                        ],
+                        // Auto-expédition (« le vendeur m'envoie ») : proposée en
+                        // mode beg. Aucun frais Ablony, coordination dans le chat.
+                        if (selfShipOffered) ...[
+                          if (ablonyDeliveryAllowed)
+                            SizedBox(height: screenWidth * 0.03),
+                          ChoiceCardWidget(
+                            title: 'Le vendeur m\'envoie le colis',
+                            subTitle:
+                                'Sans frais Ablony — à convenir avec le vendeur',
+                            icon: Icons.local_shipping_outlined,
+                            isSelected:
+                                _deliveryMethod == DeliveryMethod.selfShip,
+                            showSelectionCircle: true,
+                            onTap: () {
+                              setState(() {
+                                _deliveryMethod = DeliveryMethod.selfShip;
+                                _selectedRelayPoint = null;
+                              });
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -596,22 +704,36 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   // bloquait un retrait en point relais sur une adresse qui
                   // ne sert à personne.
                   if (_deliveryMethod == DeliveryMethod.relay) ...[
-                    SelectionTile(
-                      label: 'Point relais',
-                      value: _selectedRelayPoint?.name,
-                      placeholder: 'Choisir un point relais',
-                      isRequired: true,
-                      onTap: () async {
-                        final result = await context.push(
-                          '/relay-point/select',
-                        );
-                        if (result != null && result is RelayPoint) {
-                          // L'objet entier, et non son nom : c'est
-                          // l'identifiant que le serveur attend.
-                          setState(() => _selectedRelayPoint = result);
-                        }
-                      },
-                    ),
+                    // ≥2 points : on laisse choisir. 1 seul : il est imposé, on
+                    // l'affiche en clair plutôt qu'un sélecteur à un seul choix.
+                    if (relaisActifs.length >= 2)
+                      SelectionTile(
+                        label: 'Point relais',
+                        value: _selectedRelayPoint?.name,
+                        placeholder: 'Choisir un point relais',
+                        isRequired: true,
+                        onTap: () async {
+                          final result = await context.push(
+                            '/relay-point/select',
+                          );
+                          if (result != null && result is RelayPoint) {
+                            // L'objet entier, et non son nom : c'est
+                            // l'identifiant que le serveur attend.
+                            setState(() => _selectedRelayPoint = result);
+                          }
+                        },
+                      )
+                    else if (relaisActifs.length == 1)
+                      _RelaisImpose(
+                        point: _selectedRelayPoint ?? relaisActifs.first,
+                      )
+                    else
+                      // Liste pas encore chargée (0 est transitoire : le listen
+                      // bascule alors sur domicile).
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                     SizedBox(height: screenWidth * 0.06),
                     // Contact acheteur — exigé même en relais, pour pouvoir le
                     // joindre (traçabilité). Le domicile, lui, l'a via l'adresse.
@@ -626,7 +748,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                       isRequired: true,
                       onTap: _showContactForm,
                     ),
-                  ] else
+                  ] else if (_deliveryMethod == DeliveryMethod.home)
                     SelectionTile(
                       label: 'Adresse de livraison',
                       value: _selectedAddress?.summary,
@@ -638,6 +760,32 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                           setState(() => _selectedAddress = result);
                         }
                       },
+                    )
+                  else
+                    // Auto-expédition : rien à saisir. Acheteur et vendeur
+                    // conviennent du transport dans le chat après le paiement.
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.info_outline,
+                              size: 20, color: theme.colorScheme.primary),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Le vendeur t\'enverra le colis lui-même. Vous '
+                              'conviendrez du transport dans la discussion, après '
+                              'le paiement. Aucun frais de livraison Ablony.',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   SizedBox(height: screenWidth * 0.06),
                   ] else ...[
@@ -801,7 +949,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                             SizedBox(height: screenWidth * 0.03),
                             _buildPriceRow(
                               'Frais de port',
-                              '${_shippingCost.toStringAsFixed(0)} FCFA',
+                              _deliveryMethod == DeliveryMethod.selfShip
+                                  ? 'Envoi par le vendeur'
+                                  : '${_shippingCost.toStringAsFixed(0)} FCFA',
                             ),
                             if (_isMixedPayment) ...[
                               SizedBox(height: screenWidth * 0.03),
@@ -1047,6 +1197,56 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
+    );
+  }
+}
+
+/// Affichage en lecture seule du point relais imposé quand il n'y en a qu'un :
+/// choisir parmi un seul élément est une friction inutile, on l'annonce.
+class _RelaisImpose extends StatelessWidget {
+  const _RelaisImpose({required this.point});
+
+  final RelayPoint point;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.location_on_outlined, color: theme.colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Point relais',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  point.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${point.address}, ${point.city}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -278,6 +278,7 @@ abstract class AuthRepository {
     AuthProvider? authProvider,
     String? providerId,
     String? city,
+    String? cityKey,
   });
 
   /// Met à jour les informations du profil utilisateur.
@@ -320,6 +321,7 @@ abstract class AuthRepository {
     String? photoUrl,
     String? phoneNumber,
     String? city,
+    String? cityKey,
     bool? marketingEmailsEnabled,
     Wallet? wallet,
     /// Retire la photo de profil au lieu de la remplacer.

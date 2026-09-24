@@ -636,7 +636,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '📍 ${otherUser.country.name}',
+                      '📍 ${[
+                        if (otherUser.city != null &&
+                            otherUser.city!.isNotEmpty)
+                          otherUser.city,
+                        otherUser.country.name,
+                      ].join(', ')}',
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 4),

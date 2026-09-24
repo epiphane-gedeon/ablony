@@ -149,6 +149,10 @@ class User extends Equatable {
   /// Exemple : "Lomé", "Cotonou", "Sokodé"
   final String? city;
 
+  /// Version normalisée de la ville (minuscule, sans accent) — c'est ce qu'on
+  /// compare (géo-restriction « est-ce Lomé ? »). `city` reste l'affichage.
+  final String? cityKey;
+
   // ============================================================
   // PRÉFÉRENCES ET CONSENTEMENTS
   // ============================================================
@@ -326,6 +330,7 @@ class User extends Equatable {
     this.providerId,
     required this.country,
     this.city,
+    this.cityKey,
     required this.acceptedTerms,
     required this.acceptedTermsDate,
     required this.marketingEmailsEnabled,
@@ -379,6 +384,7 @@ class User extends Equatable {
     String? providerId,
     Country? country,
     String? city,
+    String? cityKey,
     bool? acceptedTerms,
     DateTime? acceptedTermsDate,
     bool? marketingEmailsEnabled,
@@ -408,6 +414,7 @@ class User extends Equatable {
       providerId: providerId ?? this.providerId,
       country: country ?? this.country,
       city: city ?? this.city,
+      cityKey: cityKey ?? this.cityKey,
       acceptedTerms: acceptedTerms ?? this.acceptedTerms,
       acceptedTermsDate: acceptedTermsDate ?? this.acceptedTermsDate,
       marketingEmailsEnabled:
@@ -452,6 +459,7 @@ class User extends Equatable {
     photoUrl,
     phoneNumber,
     city,
+    cityKey,
     role,
     wallet,
     isVerified,

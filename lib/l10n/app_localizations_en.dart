@@ -170,6 +170,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get countryErrorGeneric => 'An error occurred. Please try again.';
 
   @override
+  String get cityPickTitle => 'Your city';
+
+  @override
+  String get cityPickSubtitle =>
+      'Choose your city. It helps us offer delivery where it\'s available.';
+
+  @override
+  String get citySearchHint => 'Search a city';
+
+  @override
+  String get cityErrorGeneric => 'Could not save your city. Please try again.';
+
+  @override
   String get countryErrorNetwork =>
       'Network issue. Please check your connection.';
 

@@ -126,6 +126,17 @@ service firebase.storage {
       allow delete: if false;
     }
 
+    // Preuve d'expédition (auto-expédition). Le vendeur y dépose une photo du
+    // reçu d'envoi. Ce qui protège réellement, c'est `markParcelShipped`, qui
+    // vérifie que l'appelant est bien le vendeur du colis : une image déposée
+    // ici sans passer par lui n'entre dans aucun colis. Lecture ouverte pour
+    // que le personnel puisse voir la preuve via l'URL lors de la modération.
+    match /parcels/{code}/shipment/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isImage() && isValidSize();
+      allow delete: if false;
+    }
+
     // ============================================================
     // RÈGLE PAR DÉFAUT : TOUT REFUSER
     // ============================================================

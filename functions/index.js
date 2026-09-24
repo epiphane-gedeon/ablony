@@ -193,13 +193,27 @@ async function fraisLivraison(method, subcategoryId) {
   return method === "home" ? def.home : def.relay;
 }
 
+/** Clé de ville normalisée d'un utilisateur (ou null). */
+async function cityKeyOf(uid) {
+  try {
+    const snap = await db.collection("users").doc(uid).get();
+    return snap.exists ? (snap.data().cityKey || null) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/** Villes couvertes par la livraison Ablony au lancement (mode beg). */
+const COVERED_CITY_KEYS = new Set(["lome"]);
+
 async function normalizeDeliveryChoice(delivery, subcategoryId) {
   if (!delivery || typeof delivery !== "object") {
     throw new Error("Choisissez un mode de livraison");
   }
 
-  const method = delivery.method === "home" ? "home" : "relay";
-  const feeXof = await fraisLivraison(method, subcategoryId);
+  let method = "relay";
+  if (delivery.method === "home") method = "home";
+  else if (delivery.method === "self_ship") method = "self_ship";
 
   // Contact acheteur (nom + téléphone), pour le joindre à la livraison. NON
   // obligatoire ici : un ancien client (déjà installé) n'en envoie pas, et on
@@ -208,6 +222,21 @@ async function normalizeDeliveryChoice(delivery, subcategoryId) {
     String(delivery.contactName).slice(0, 120) : null;
   const contactPhone = delivery.contactPhone ?
     String(delivery.contactPhone).slice(0, 40) : null;
+
+  // Auto-expédition : Ablony n'achemine pas, aucun frais. Acheteur et vendeur
+  // conviennent du transport dans le chat. Rien d'autre à valider.
+  if (method === "self_ship") {
+    return {
+      method: "self_ship",
+      relayPointId: null,
+      address: null,
+      contactName: null,
+      contactPhone: null,
+      feeXof: 0,
+    };
+  }
+
+  const feeXof = await fraisLivraison(method, subcategoryId);
 
   if (method === "relay") {
     const relayPointId = delivery.relayPointId;
@@ -1457,6 +1486,29 @@ exports.initiatePayment = onRequest(async (req, res) => {
         success: false,
         error: {message: deliveryError.message},
       });
+    }
+
+    // Gating mode « beg » : la livraison Ablony (relais/domicile) n'est permise
+    // que si acheteur ET vendeur sont dans une ville couverte (Lomé). Sinon,
+    // seule l'auto-expédition est acceptée. Défense serveur (le client filtre
+    // déjà côté UI). En mode « def », aucun gating.
+    if (await appModeServeur() === "beg" &&
+        deliveryChoice.method !== "self_ship") {
+      const [buyerCity, sellerCity] = await Promise.all([
+        cityKeyOf(userId),
+        cityKeyOf(productData.sellerId),
+      ]);
+      const bothCovered = COVERED_CITY_KEYS.has(buyerCity) &&
+        COVERED_CITY_KEYS.has(sellerCity);
+      if (!bothCovered) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "La livraison Ablony n'est pas disponible pour cette " +
+              "commande. Choisissez « le vendeur m'envoie le colis ».",
+          },
+        });
+      }
     }
 
     // Le prix vient de l'annonce, jamais de la requête : le lire dans le
@@ -3211,23 +3263,27 @@ exports.adminCounts = onRequest(async (req, res) => {
     }
   };
 
-  const [moderation, reports, withdrawals, disputes, support, pickups] =
-    await Promise.all([
-      compter(
-          db.collection("products").where("moderationStatus", "==", "pending"),
-      ),
-      compter(db.collection("reports").where("status", "==", "open")),
-      compter(
-          db.collection("withdrawals").where("status", "==", "requested"),
-      ),
-      compter(db.collection("disputes").where("status", "==", "open")),
-      compter(db.collection("support").where("unreadForStaff", ">", 0)),
-      compterRamassages(),
-    ]);
+  const [
+    moderation, reports, withdrawals, disputes, support, pickups, shipments,
+  ] = await Promise.all([
+    compter(
+        db.collection("products").where("moderationStatus", "==", "pending"),
+    ),
+    compter(db.collection("reports").where("status", "==", "open")),
+    compter(
+        db.collection("withdrawals").where("status", "==", "requested"),
+    ),
+    compter(db.collection("disputes").where("status", "==", "open")),
+    compter(db.collection("support").where("unreadForStaff", ">", 0)),
+    compterRamassages(),
+    compter(db.collection("parcels").where("shipmentStatus", "==", "pending")),
+  ]);
 
   return res.json({
     success: true,
-    data: {moderation, reports, withdrawals, disputes, support, pickups},
+    data: {
+      moderation, reports, withdrawals, disputes, support, pickups, shipments,
+    },
   });
 });
 
@@ -3285,6 +3341,176 @@ exports.listPendingPickups = onRequest(async (req, res) => {
 
   items.sort((a, b) => (a.requestedAt || "").localeCompare(b.requestedAt || ""));
 
+  return res.json({success: true, data: {items}});
+});
+
+// ============================================================================
+// AUTO-EXPÉDITION (self_ship) : déclaration + modération de la preuve
+// ============================================================================
+
+/**
+ * Le vendeur déclare avoir expédié le colis, PREUVE OBLIGATOIRE. Passe le colis
+ * en modération et met le compte à rebours de remboursement EN PAUSE (on
+ * mémorise le temps restant) — il repart de là en cas de refus.
+ */
+exports.markParcelShipped = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res);
+  if (!decoded) return;
+  const {parcelCode, proofUrl} = req.body || {};
+  if (!parcelCode) {
+    return res.status(400).json({
+      success: false, error: {message: "parcelCode requis"},
+    });
+  }
+  if (!proofUrl || typeof proofUrl !== "string") {
+    return res.status(400).json({
+      success: false,
+      error: {message: "Une preuve d'expédition est obligatoire"},
+    });
+  }
+  const ref = db.collection("parcels").doc(String(parcelCode));
+  try {
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new Error("Colis introuvable");
+      const p = snap.data();
+      if (p.sellerId !== decoded.uid) {
+        throw new Error("Vous n'êtes pas le vendeur de ce colis");
+      }
+      if (p.method !== "self_ship") {
+        throw new Error("Ce colis n'est pas en auto-expédition");
+      }
+      if (p.shipmentStatus === "pending" || p.shipmentStatus === "approved") {
+        throw new Error("Expédition déjà déclarée");
+      }
+      if (p.status !== "awaiting_dropoff") {
+        throw new Error("Ce colis n'attend plus d'expédition");
+      }
+      const now = Date.now();
+      const deadlineMs = p.dropoffDeadline ? p.dropoffDeadline.toMillis() : now;
+      tx.update(ref, {
+        shipmentStatus: "pending",
+        shipmentProofUrl: String(proofUrl),
+        shipmentSubmittedAt: admin.firestore.FieldValue.serverTimestamp(),
+        deadlineRemainingMs: Math.max(0, deadlineMs - now),
+      });
+    });
+    return res.json({success: true, data: {parcelCode: String(parcelCode)}});
+  } catch (e) {
+    return res.status(400).json({success: false, error: {message: e.message}});
+  }
+});
+
+/**
+ * Modération de la preuve d'expédition (personnel).
+ * - approve → colis « en transit », l'acheteur est prévenu.
+ * - refuse  → notif au vendeur + le compte à rebours repart du temps restant.
+ */
+exports.moderateShipment = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res);
+  if (!decoded) return;
+  if (!isStaff(await roleOf(decoded.uid))) {
+    return res.status(403).json({
+      success: false,
+      error: {message: "Cette action est réservée au personnel Ablony"},
+    });
+  }
+  const {parcelCode, decision, note} = req.body || {};
+  if (!parcelCode || (decision !== "approve" && decision !== "refuse")) {
+    return res.status(400).json({
+      success: false,
+      error: {message: "parcelCode et decision (approve/refuse) requis"},
+    });
+  }
+  const ref = db.collection("parcels").doc(String(parcelCode));
+  let out;
+  try {
+    out = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new Error("Colis introuvable");
+      const p = snap.data();
+      if (p.shipmentStatus !== "pending") {
+        throw new Error("Aucune expédition à modérer pour ce colis");
+      }
+      if (decision === "approve") {
+        tx.update(ref, {
+          shipmentStatus: "approved",
+          status: "in_transit",
+          shippedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      } else {
+        const restant = Number.isFinite(p.deadlineRemainingMs) ?
+          p.deadlineRemainingMs :
+          DELIVERY_CONFIG.DROPOFF_DEADLINE_DAYS * 24 * 60 * 60 * 1000;
+        tx.update(ref, {
+          shipmentStatus: "refused",
+          shipmentProofUrl: null,
+          dropoffDeadline: admin.firestore.Timestamp.fromMillis(
+              Date.now() + restant),
+        });
+      }
+      return {
+        sellerId: p.sellerId,
+        buyerId: p.buyerId,
+        productTitle: p.productTitle || "votre article",
+        transactionRef: p.transactionRef || null,
+      };
+    });
+  } catch (e) {
+    return res.status(400).json({success: false, error: {message: e.message}});
+  }
+
+  try {
+    if (decision === "approve") {
+      await notifyUser(
+          out.buyerId,
+          "Colis expédié",
+          `Le vendeur a expédié "${out.productTitle}". ` +
+          "Confirme la réception dès que tu l'as reçu.",
+          {
+            type: "parcel_in_transit",
+            parcelCode: String(parcelCode),
+            transactionRef: out.transactionRef,
+          },
+      );
+    } else {
+      await notifyUser(
+          out.sellerId,
+          "Preuve d'expédition refusée",
+          `La preuve pour "${out.productTitle}" n'a pas été validée` +
+          `${note ? " : " + note : ""}. Renvoie une preuve valable avant la ` +
+          "fin du délai.",
+          {type: "shipment_refused", parcelCode: String(parcelCode)},
+      );
+    }
+  } catch (_) {
+    // Notif accessoire : son échec ne remet pas en cause la modération.
+  }
+  return res.json({success: true, data: {decision}});
+});
+
+/** File des preuves d'expédition à modérer (personnel). */
+exports.listShipmentReviews = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res, {method: "GET, POST"});
+  if (!decoded) return;
+  if (!isStaff(await roleOf(decoded.uid))) {
+    return res.status(403).json({
+      success: false,
+      error: {message: "Cette action est réservée au personnel Ablony"},
+    });
+  }
+  const snap = await db.collection("parcels")
+      .where("shipmentStatus", "==", "pending").limit(100).get();
+  const items = snap.docs.map((d) => {
+    const p = d.data();
+    return {
+      code: p.code || d.id,
+      productTitle: p.productTitle || "Article",
+      proofUrl: p.shipmentProofUrl || null,
+      submittedAt: p.shipmentSubmittedAt ?
+        p.shipmentSubmittedAt.toDate().toISOString() : null,
+    };
+  }).sort((a, b) => (a.submittedAt || "").localeCompare(b.submittedAt || ""));
   return res.json({success: true, data: {items}});
 });
 
@@ -3422,6 +3648,490 @@ exports.setSubcategoryDeliveryFee = onRequest(async (req, res) => {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   }, {merge: true});
   return res.json({success: true, data: {subcategoryId}});
+});
+
+// ============================================================================
+// POINTS RELAIS (gestion admin)
+// ============================================================================
+//
+// Les points relais sont en lecture publique (le client doit les proposer au
+// dépôt) mais en écriture bloquée par les règles : seuls ces endpoints admin,
+// via le SDK privilégié, peuvent les créer, modifier ou supprimer.
+
+/** Vérifie que l'appelant est administrateur. Renvoie true si autorisé. */
+async function exigerAdmin(req, res) {
+  const decoded = await authenticate(req, res, {method: "GET, POST"});
+  if (!decoded) return false;
+  if (await roleOf(decoded.uid) !== "admin") {
+    res.status(403).json({
+      success: false,
+      error: {message: "Réservé aux administrateurs"},
+    });
+    return false;
+  }
+  return true;
+}
+
+/** Liste tous les points relais (actifs ET inactifs) pour l'éditeur admin. */
+exports.listRelayPoints = onRequest(async (req, res) => {
+  if (!(await exigerAdmin(req, res))) return;
+
+  const snap = await db.collection("relayPoints").orderBy("name").get();
+  const items = snap.docs.map((d) => {
+    const x = d.data();
+    return {
+      id: d.id,
+      name: x.name || "",
+      address: x.address || "",
+      city: x.city || "",
+      latitude: Number.isFinite(x.latitude) ? x.latitude : null,
+      longitude: Number.isFinite(x.longitude) ? x.longitude : null,
+      hours: x.hours || "",
+      phone: x.phone || null,
+      isActive: x.isActive !== false,
+    };
+  });
+  return res.json({success: true, data: {items}});
+});
+
+/**
+ * Crée (sans `id`) ou met à jour (avec `id`) un point relais. Le serveur impose
+ * la présence des champs indispensables au dépôt et à l'acheminement.
+ */
+exports.setRelayPoint = onRequest(async (req, res) => {
+  if (!(await exigerAdmin(req, res))) return;
+
+  const b = req.body || {};
+  const name = String(b.name || "").trim();
+  const address = String(b.address || "").trim();
+  const city = String(b.city || "").trim();
+  const hours = String(b.hours || "").trim();
+  const phone = b.phone ? String(b.phone).trim() : null;
+  const latitude = Number(b.latitude);
+  const longitude = Number(b.longitude);
+  const isActive = b.isActive !== false;
+
+  if (!name || !address || !city || !hours) {
+    return res.status(400).json({
+      success: false,
+      error: {message: "Nom, adresse, ville et horaires sont requis"},
+    });
+  }
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return res.status(400).json({
+      success: false,
+      error: {message: "Latitude et longitude doivent être des nombres"},
+    });
+  }
+
+  const donnees = {
+    name, address, city, hours, phone, latitude, longitude, isActive,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  let id = b.id ? String(b.id) : null;
+  if (id) {
+    const ref = db.collection("relayPoints").doc(id);
+    if (!(await ref.get()).exists) {
+      return res.status(404).json({
+        success: false,
+        error: {message: "Point relais introuvable"},
+      });
+    }
+    await ref.set(donnees, {merge: true});
+  } else {
+    donnees.createdAt = admin.firestore.FieldValue.serverTimestamp();
+    const ref = await db.collection("relayPoints").add(donnees);
+    id = ref.id;
+  }
+  return res.json({success: true, data: {id}});
+});
+
+/**
+ * Supprime un point relais. Refuse si un colis en cours y est encore rattaché :
+ * le supprimer laisserait ce colis sans destination résoluble. Dans ce cas,
+ * l'admin le désactive (isActive=false) plutôt que de le supprimer.
+ */
+exports.deleteRelayPoint = onRequest(async (req, res) => {
+  if (!(await exigerAdmin(req, res))) return;
+
+  const id = req.body && req.body.id ? String(req.body.id) : null;
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      error: {message: "id requis"},
+    });
+  }
+
+  // Filtre sur le seul `relayPointId` (indexé d'office), statut en code : évite
+  // un index composite. Les colis rattachés à un même point sont peu nombreux.
+  const rattaches = await db.collection("parcels")
+      .where("relayPointId", "==", id)
+      .limit(50)
+      .get();
+  const statutsEnCours = new Set(
+      ["awaiting_dropoff", "dropped_off", "in_transit", "ready_for_pickup"]);
+  const enCours = rattaches.docs.some((d) => statutsEnCours.has(d.data().status));
+  if (enCours) {
+    return res.status(409).json({
+      success: false,
+      error: {
+        message: "Des colis en cours utilisent ce point relais. " +
+          "Désactivez-le plutôt que de le supprimer.",
+      },
+    });
+  }
+
+  await db.collection("relayPoints").doc(id).delete();
+  return res.json({success: true, data: {id}});
+});
+
+// ============================================================================
+// MODE DE L'APP (beg / def)
+// ============================================================================
+//
+// `def` = l'app complète (relais + livraison Ablony partout).
+// `beg` = mode de lancement (opération manuelle sur Lomé + auto-expédition).
+// Le mode vit dans `config/app.mode`, en lecture publique (le client l'affiche)
+// mais en écriture bloquée par les règles : seul `setAppMode` (admin) l'écrit.
+// Le serveur le lit aussi (cache court) là où il change une règle métier.
+
+let _cacheAppMode = null;
+async function appModeServeur() {
+  if (_cacheAppMode && Date.now() - _cacheAppMode.at < 60000) {
+    return _cacheAppMode.mode;
+  }
+  let mode = "def";
+  try {
+    const snap = await db.collection("config").doc("app").get();
+    const m = snap.exists ? snap.data().mode : null;
+    if (m === "beg" || m === "def") mode = m;
+  } catch (_) {
+    // Doc absent/illisible : repli sur def.
+  }
+  _cacheAppMode = {mode, at: Date.now()};
+  return mode;
+}
+
+/** Renvoie le mode courant. Réservé au personnel. */
+exports.getAppMode = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res, {method: "GET, POST"});
+  if (!decoded) return;
+  if (!isStaff(await roleOf(decoded.uid))) {
+    return res.status(403).json({
+      success: false,
+      error: {message: "Cette action est réservée au personnel Ablony"},
+    });
+  }
+  let proofToBuyer = true;
+  try {
+    const snap = await db.collection("config").doc("app").get();
+    if (snap.exists && snap.data().shipmentProofToBuyer === false) {
+      proofToBuyer = false;
+    }
+  } catch (_) {
+    // Repli : visible.
+  }
+  return res.json({
+    success: true,
+    data: {mode: await appModeServeur(), shipmentProofToBuyer: proofToBuyer},
+  });
+});
+
+/**
+ * Active/désactive l'affichage de la preuve d'expédition à l'acheteur.
+ * Réservé aux administrateurs.
+ */
+exports.setShipmentProofVisibility = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res);
+  if (!decoded) return;
+  if (await roleOf(decoded.uid) !== "admin") {
+    return res.status(403).json({
+      success: false,
+      error: {message: "Réservé aux administrateurs"},
+    });
+  }
+  const visible = req.body && req.body.visible === true;
+  await db.collection("config").doc("app").set({
+    shipmentProofToBuyer: visible,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, {merge: true});
+  return res.json({success: true, data: {shipmentProofToBuyer: visible}});
+});
+
+/** Règle le mode de l'app. Réservé aux administrateurs. */
+exports.setAppMode = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res);
+  if (!decoded) return;
+  if (await roleOf(decoded.uid) !== "admin") {
+    return res.status(403).json({
+      success: false,
+      error: {message: "Réservé aux administrateurs"},
+    });
+  }
+  const mode = req.body && req.body.mode;
+  if (mode !== "beg" && mode !== "def") {
+    return res.status(400).json({
+      success: false,
+      error: {message: "Mode invalide (attendu : beg ou def)"},
+    });
+  }
+  await db.collection("config").doc("app").set({
+    mode,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, {merge: true});
+  _cacheAppMode = null; // invalider le cache
+  return res.json({success: true, data: {mode}});
+});
+
+// ============================================================================
+// TAXONOMIE (catégories / sous-catégories / attributs) — édition admin
+// ============================================================================
+//
+// Structure : `config/categories/items`, `config/subcategories/items`
+// (`parentId` fait foi pour l'arbre ; `children[]` est maintenu en parallèle car
+// il sert à `isLeaf`), `config/attributes/items`. Écriture bloquée par les
+// règles → ces endpoints admin (SDK privilégié) sont le seul chemin.
+
+function slugTaxo(s) {
+  return String(s)
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+const CAT_COL = () => db.collection("config").doc("categories").collection("items");
+const SUB_COL = () => db.collection("config").doc("subcategories").collection("items");
+const ATTR_COL = () => db.collection("config").doc("attributes").collection("items");
+
+/** Réf du parent d'une sous-catégorie : catégorie L1 ou autre sous-catégorie. */
+async function refParentTaxo(parentId) {
+  const cat = CAT_COL().doc(parentId);
+  if ((await cat.get()).exists) return cat;
+  return SUB_COL().doc(parentId);
+}
+
+/** Génère un id de slug libre dans la collection (suffixe si collision). */
+async function slugLibre(col, name, provided) {
+  let base = provided ? slugTaxo(provided) : slugTaxo(name);
+  if (!base) base = "item";
+  let id = base;
+  let n = 2;
+  // eslint-disable-next-line no-await-in-loop
+  while ((await col.doc(id).get()).exists) {
+    id = `${base}_${n++}`;
+  }
+  return id;
+}
+
+/** Lecture complète de la taxonomie (actifs + inactifs). Réservé au personnel. */
+exports.taxonomyAll = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res, {method: "GET, POST"});
+  if (!decoded) return;
+  if (!isStaff(await roleOf(decoded.uid))) {
+    return res.status(403).json({
+      success: false,
+      error: {message: "Cette action est réservée au personnel Ablony"},
+    });
+  }
+  const [cats, subs, attrs] = await Promise.all([
+    CAT_COL().get(), SUB_COL().get(), ATTR_COL().get(),
+  ]);
+  const categories = cats.docs.map((d) => {
+    const x = d.data();
+    return {
+      id: d.id, name: x.name || d.id, order: x.order ?? null,
+      isActive: x.isActive !== false, iconUrl: x.iconUrl || null,
+    };
+  });
+  const subcategories = subs.docs.map((d) => {
+    const x = d.data();
+    return {
+      id: d.id, name: x.name || d.id, parentId: x.parentId || null,
+      order: x.order ?? null, isActive: x.isActive !== false,
+      attributes: Array.isArray(x.attributes) ? x.attributes : [],
+    };
+  });
+  const attributes = attrs.docs.map((d) => {
+    const x = d.data();
+    return {
+      id: d.id, name: x.name || d.id, type: x.type || "select",
+      values: Array.isArray(x.values) ? x.values : [],
+      isRequired: x.isRequired === true, helpText: x.helpText || null,
+      order: x.order ?? null, isActive: x.isActive !== false,
+    };
+  });
+  return res.json({success: true, data: {categories, subcategories, attributes}});
+});
+
+/** Vérifie admin, renvoie decoded ou null (après avoir répondu 403). */
+async function exigeAdminTaxo(req, res) {
+  const decoded = await authenticate(req, res);
+  if (!decoded) return null;
+  if (await roleOf(decoded.uid) !== "admin") {
+    res.status(403).json({
+      success: false, error: {message: "Réservé aux administrateurs"},
+    });
+    return null;
+  }
+  return decoded;
+}
+
+/** Crée (sans id) ou met à jour (avec id) une catégorie L1. */
+exports.saveCategory = onRequest(async (req, res) => {
+  if (!(await exigeAdminTaxo(req, res))) return;
+  const b = req.body || {};
+  const name = String(b.name || "").trim();
+  if (!name) {
+    return res.status(400).json({success: false, error: {message: "Nom requis"}});
+  }
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const data = {
+    name,
+    order: Number.isFinite(b.order) ? Math.round(b.order) : 0,
+    isActive: b.isActive !== false,
+    iconUrl: b.iconUrl ? String(b.iconUrl) : null,
+    updatedAt: now,
+  };
+  let id = b.id ? String(b.id) : null;
+  if (id) {
+    if (!(await CAT_COL().doc(id).get()).exists) {
+      return res.status(404).json({success: false, error: {message: "Catégorie introuvable"}});
+    }
+    await CAT_COL().doc(id).set(data, {merge: true});
+  } else {
+    id = await slugLibre(CAT_COL(), name, b.id);
+    await CAT_COL().doc(id).set({...data, children: [], createdAt: now});
+  }
+  return res.json({success: true, data: {id}});
+});
+
+/** Crée ou met à jour une sous-catégorie (maintient `children[]` du parent). */
+exports.saveSubcategory = onRequest(async (req, res) => {
+  if (!(await exigeAdminTaxo(req, res))) return;
+  const b = req.body || {};
+  const name = String(b.name || "").trim();
+  const parentId = String(b.parentId || "").trim();
+  if (!name || !parentId) {
+    return res.status(400).json({
+      success: false, error: {message: "Nom et parent requis"},
+    });
+  }
+  // Le parent doit exister (catégorie L1 ou sous-catégorie).
+  const parentRef = await refParentTaxo(parentId);
+  if (!(await parentRef.get()).exists) {
+    return res.status(400).json({success: false, error: {message: "Parent introuvable"}});
+  }
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const attrs = Array.isArray(b.attributes) ?
+    b.attributes.map((a) => String(a)) : [];
+  const data = {
+    name, parentId,
+    order: Number.isFinite(b.order) ? Math.round(b.order) : 0,
+    isActive: b.isActive !== false,
+    attributes: attrs,
+    updatedAt: now,
+  };
+  let id = b.id ? String(b.id) : null;
+  if (id) {
+    const snap = await SUB_COL().doc(id).get();
+    if (!snap.exists) {
+      return res.status(404).json({success: false, error: {message: "Sous-catégorie introuvable"}});
+    }
+    // Reparentage : retirer de l'ancien parent.
+    const oldParent = snap.data().parentId;
+    if (oldParent && oldParent !== parentId) {
+      const oldRef = await refParentTaxo(oldParent);
+      await oldRef.set({
+        children: admin.firestore.FieldValue.arrayRemove(id),
+      }, {merge: true});
+    }
+    await SUB_COL().doc(id).set(data, {merge: true});
+  } else {
+    id = await slugLibre(SUB_COL(), name, b.id);
+    await SUB_COL().doc(id).set({...data, children: [], createdAt: now});
+  }
+  await parentRef.set({
+    children: admin.firestore.FieldValue.arrayUnion(id),
+  }, {merge: true});
+  return res.json({success: true, data: {id}});
+});
+
+/** Supprime une catégorie ou sous-catégorie. Refuse si elle a des enfants. */
+exports.deleteTaxonomyNode = onRequest(async (req, res) => {
+  if (!(await exigeAdminTaxo(req, res))) return;
+  const b = req.body || {};
+  const id = String(b.id || "").trim();
+  const kind = b.kind === "category" ? "category" : "subcategory";
+  if (!id) {
+    return res.status(400).json({success: false, error: {message: "id requis"}});
+  }
+  // Refuser si des sous-catégories pointent dessus.
+  const enfants = await SUB_COL().where("parentId", "==", id).limit(1).get();
+  if (!enfants.empty) {
+    return res.status(409).json({
+      success: false,
+      error: {message: "Cet élément a des sous-catégories. Supprimez-les d'abord."},
+    });
+  }
+  if (kind === "subcategory") {
+    const snap = await SUB_COL().doc(id).get();
+    if (snap.exists && snap.data().parentId) {
+      const parentRef = await refParentTaxo(snap.data().parentId);
+      await parentRef.set({
+        children: admin.firestore.FieldValue.arrayRemove(id),
+      }, {merge: true});
+    }
+    await SUB_COL().doc(id).delete();
+  } else {
+    await CAT_COL().doc(id).delete();
+  }
+  return res.json({success: true, data: {id}});
+});
+
+/** Crée ou met à jour un attribut. */
+exports.saveAttribute = onRequest(async (req, res) => {
+  if (!(await exigeAdminTaxo(req, res))) return;
+  const b = req.body || {};
+  const name = String(b.name || "").trim();
+  const type = ["select", "multiSelect", "text", "number", "boolean"]
+      .includes(b.type) ? b.type : "select";
+  if (!name) {
+    return res.status(400).json({success: false, error: {message: "Nom requis"}});
+  }
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const values = Array.isArray(b.values) ?
+    b.values.map((v) => String(v)).filter((v) => v.trim() !== "") : [];
+  const data = {
+    name, type, values,
+    isRequired: b.isRequired === true,
+    helpText: b.helpText ? String(b.helpText) : null,
+    order: Number.isFinite(b.order) ? Math.round(b.order) : 0,
+    isActive: b.isActive !== false,
+    updatedAt: now,
+  };
+  let id = b.id ? String(b.id) : null;
+  if (id) {
+    if (!(await ATTR_COL().doc(id).get()).exists) {
+      return res.status(404).json({success: false, error: {message: "Attribut introuvable"}});
+    }
+    await ATTR_COL().doc(id).set(data, {merge: true});
+  } else {
+    id = await slugLibre(ATTR_COL(), name, b.id);
+    await ATTR_COL().doc(id).set({...data, createdAt: now});
+  }
+  return res.json({success: true, data: {id}});
+});
+
+/** Supprime un attribut. */
+exports.deleteAttribute = onRequest(async (req, res) => {
+  if (!(await exigeAdminTaxo(req, res))) return;
+  const id = String((req.body || {}).id || "").trim();
+  if (!id) {
+    return res.status(400).json({success: false, error: {message: "id requis"}});
+  }
+  await ATTR_COL().doc(id).delete();
+  return res.json({success: true, data: {id}});
 });
 
 // ============================================================================
@@ -5792,6 +6502,13 @@ async function rembourserDepotsNonFaits() {
 
   for (const doc of snap.docs) {
     const colis = doc.data();
+    // Auto-expédition : si une preuve est en modération ou approuvée, le
+    // vendeur a fait sa part — on ne rembourse pas et on ne relance pas. (Un
+    // refus a remis le colis en `pending: null` et repoussé la date limite.)
+    if (colis.shipmentStatus === "pending" ||
+        colis.shipmentStatus === "approved") {
+      continue;
+    }
     const limite = colis.dropoffDeadline?.toDate?.();
     if (!limite) continue;
 

@@ -78,8 +78,11 @@ class RegistrationState {
   /// Pays de résidence choisi (sélectionné dans country_selection_page)
   final Country? country;
 
-  /// Ville (optionnel, peut être ajouté plus tard)
+  /// Ville d'affichage (ex. « Lomé »), choisie à l'étape ville.
   final String? city;
+
+  /// Ville normalisée (ex. « lome »), pour les comparaisons.
+  final String? cityKey;
 
   /// L'utilisateur a accepté les CGU (checkbox obligatoire)
   final bool acceptedTerms;
@@ -115,6 +118,7 @@ class RegistrationState {
     this.username,
     this.country,
     this.city,
+    this.cityKey,
     this.acceptedTerms = false,
     this.marketingEmailsEnabled = false,
     this.status = RegistrationStatus.initial,
@@ -139,6 +143,7 @@ class RegistrationState {
     String? username,
     Country? country,
     String? city,
+    String? cityKey,
     bool? acceptedTerms,
     bool? marketingEmailsEnabled,
     RegistrationStatus? status,
@@ -156,6 +161,7 @@ class RegistrationState {
       username: username ?? this.username,
       country: country ?? this.country,
       city: city ?? this.city,
+      cityKey: cityKey ?? this.cityKey,
       acceptedTerms: acceptedTerms ?? this.acceptedTerms,
       marketingEmailsEnabled:
           marketingEmailsEnabled ?? this.marketingEmailsEnabled,
@@ -172,6 +178,8 @@ class RegistrationState {
         username != null &&
         username!.isNotEmpty &&
         country != null &&
+        cityKey != null &&
+        cityKey!.isNotEmpty &&
         acceptedTerms;
   }
 }
@@ -567,9 +575,9 @@ class RegistrationNotifier extends Notifier<RegistrationState> {
     );
   }
 
-  /// Définit la ville (optionnel).
-  void setCity(String? city) {
-    state = state.copyWith(city: city);
+  /// Définit la ville : libellé d'affichage + clé normalisée.
+  void setCity(String? city, String? cityKey) {
+    state = state.copyWith(city: city, cityKey: cityKey);
   }
 
   // ============================================================
@@ -635,6 +643,7 @@ class RegistrationNotifier extends Notifier<RegistrationState> {
         authProvider: state.authProvider,
         providerId: state.providerId,
         city: state.city,
+        cityKey: state.cityKey,
       );
 
       // Inscription terminée !

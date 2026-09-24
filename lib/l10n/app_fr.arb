@@ -214,6 +214,22 @@
   "@countryErrorGeneric": {
     "description": "Erreur générique inscription"
   },
+  "cityPickTitle": "Ta ville",
+  "@cityPickTitle": {
+    "description": "Titre de la page de sélection de la ville"
+  },
+  "cityPickSubtitle": "Choisis ta ville. Elle nous aide à te proposer la livraison là où c'est disponible.",
+  "@cityPickSubtitle": {
+    "description": "Sous-titre de la page ville"
+  },
+  "citySearchHint": "Rechercher une ville",
+  "@citySearchHint": {
+    "description": "Placeholder de recherche de ville"
+  },
+  "cityErrorGeneric": "Impossible d'enregistrer la ville. Réessaie.",
+  "@cityErrorGeneric": {
+    "description": "Erreur générique ville"
+  },
   "countryErrorNetwork": "Problème de connexion. Vérifiez votre réseau.",
   "@countryErrorNetwork": {
     "description": "Erreur réseau inscription"

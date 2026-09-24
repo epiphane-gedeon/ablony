@@ -559,3 +559,54 @@ libéré. Type `funds_released` déjà géré côté client (router + tile) → 
 uniquement, aucun build/patch mobile. Fonction déployée.
 
 **Litige vendeur** : Patch Shorebird 4 publié (formulaire vendeur dédié).
+
+**Points relais : CRUD admin + auto-sélection si unique (2026-09-21).**
+- Admin : nouvel onglet « Points relais » (lister, ajouter, modifier,
+  activer/désactiver, supprimer). Serveur : `listRelayPoints`, `setRelayPoint`,
+  `deleteRelayPoint` (admin, SDK privilégié). Suppression refusée si des colis
+  en cours y sont rattachés → désactiver plutôt (isActive=false).
+- Paiement : selon le nombre de points relais actifs — 0 = pas de retrait relais
+  (domicile seul), 1 = point imposé (affiché en clair, plus de sélecteur), ≥2 =
+  sélecteur. Modèle RelayPoint gagne `isActive` ; `activeRelayPointsProvider`.
+- Déployé : functions (3), web, admin. Mobile : Shorebird Patch 5.
+
+**Modes beg/def — étapes 4-7 (2026-09-23).** Web déployé (pas de patch mobile).
+- Étape 4 (collecte Ablony, beg) : page étiquette adaptée — « un livreur vient
+  chercher, tenez prêt » au lieu de « déposez en relais » ; wording du délai ;
+  ramassage payant masqué en beg.
+- Étape 5 (auto-expédition) : bouton vendeur « J'ai expédié » + PREUVE photo
+  obligatoire (upload Storage `parcels/{code}/shipment/`) → `markParcelShipped`
+  → file de modération admin « Expéditions » + badge (`listShipmentReviews`,
+  `moderateShipment`). Approuvé → colis en transit + acheteur notifié ; refusé →
+  vendeur notifié + compte à rebours repris (temps restant mémorisé). Job de
+  remboursement ignore les colis en modération/approuvés. Escrow inchangé
+  (confirmation acheteur → libération).
+- Étape 6 : suivi masqué pour l'auto-expédition (état simple) ; ramassage payant
+  masqué en beg ; ville ajoutée aux encarts d'info du chat.
+- Étape 7 : clause CGU « Paiements hors plateforme » (landing).
+- **À FAIRE ensuite** : auto-libération J+7 pour l'auto-expédition (si l'acheteur
+  ne confirme jamais, aucune libération auto aujourd'hui — seule la confirmation
+  acheteur libère).
+
+**Mobile — release 1.0.2+6 (2026-09-23).** Le patch sur 1.0.1+5 était impossible
+(le code des étapes 1-6 référence des icônes absentes de la police tree-shakée
+de la release → Shorebird exclut les changements d'asset). Fait à la place une
+release complète `shorebird release android` en **1.0.2+6** : AAB propre
+(icônes incluses) à `build/app/outputs/bundle/release/app-release.aab`. À uploader
+sur la Play Console (remplace l'ancien 1.0.1+5 jamais uploadé). Futurs patches :
+`shorebird patch --platforms=android --release-version=1.0.2+6`.
+
+**Admin — page Taxonomie (2026-09-23).** Nouvel onglet admin « Catégories » qui
+donne la vue d'ensemble en arbre + le CRUD des catégories, sous-catégories et
+attributs, pour composer l'offre produit du lancement.
+- Serveur (`functions/index.js`) : `taxonomyAll` (lecture des 3 collections,
+  personnel), et réservés admin `saveCategory`, `saveSubcategory`,
+  `deleteTaxonomyNode`, `saveAttribute`, `deleteAttribute`. Slug d'id auto
+  (accents retirés, suffixe si collision) ; `children[]` du parent maintenu via
+  arrayUnion/arrayRemove (reparentage géré) ; suppression refusée si le nœud a
+  des sous-catégories. `parentId` fait foi pour l'arbre.
+- Admin (`ablony_admin`) : `TaxonomyPanel.tsx` — arbre dépliable (catégorie →
+  sous-catégories récursives, attributs affichés en clair sur chaque nœud),
+  formulaires création/édition, bibliothèque d'attributs (type select/
+  multiSelect/text/number/boolean, valeurs, requis, aide). API + types ajoutés.
+- Déployé : functions (6) + admin web. Pas de changement mobile.

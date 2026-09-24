@@ -330,8 +330,12 @@ final isProfileCompleteProvider = Provider<AsyncValue<bool>>((ref) {
       // Un profil est complet si :
       // - Le username est défini (non vide)
       // - Les CGU ont été acceptées
+      // - La VILLE est renseignée (nécessaire au géo-focus du lancement). Les
+      //   comptes créés avant cette étape n'ont pas de ville → ils sont
+      //   considérés incomplets et invités à la choisir une fois (backfill).
       // Note: Le pays est obligatoire lors de la création, donc toujours défini
-      final isComplete = user.username.isNotEmpty && user.acceptedTerms;
+      final hasCity = user.cityKey != null && user.cityKey!.isNotEmpty;
+      final isComplete = user.username.isNotEmpty && user.acceptedTerms && hasCity;
 
       return AsyncValue.data(isComplete);
     },

@@ -174,6 +174,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une erreur est survenue. Veuillez réessayer.';
 
   @override
+  String get cityPickTitle => 'Ta ville';
+
+  @override
+  String get cityPickSubtitle =>
+      'Choisis ta ville. Elle nous aide à te proposer la livraison là où c\'est disponible.';
+
+  @override
+  String get citySearchHint => 'Rechercher une ville';
+
+  @override
+  String get cityErrorGeneric =>
+      'Impossible d\'enregistrer la ville. Réessaie.';
+
+  @override
   String get countryErrorNetwork =>
       'Problème de connexion. Vérifiez votre réseau.';
 

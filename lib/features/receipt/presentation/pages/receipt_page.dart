@@ -15,6 +15,7 @@ import '../../../delivery/domain/models/parcel.dart';
 import '../../domain/models/receipt.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/config/app_mode.dart';
 import '../../../dispute/domain/models/dispute.dart';
 import '../../../dispute/presentation/providers/dispute_provider.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
@@ -37,7 +38,11 @@ class ReceiptPage extends ConsumerWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          // On arrive souvent ici par redirection (après un paiement), sans
+          // page en dessous : dans ce cas la flèche ramène à l'accueil plutôt
+          // que de ne rien faire.
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
         ),
       ),
       body: ContentContainer(
@@ -98,7 +103,7 @@ class _BandeauLitige extends StatelessWidget {
           Row(
             children: [
               Icon(
-                ouvert ? Icons.hourglass_top : Icons.gavel,
+                ouvert ? Icons.schedule_outlined : Icons.gavel,
                 size: 18,
                 color: couleur.shade700,
               ),
@@ -687,6 +692,51 @@ class _Carte extends StatelessWidget {
   }
 }
 
+/// Affiche la preuve d'expédition en grand (zoomable).
+void _voirPreuve(BuildContext context, String url) {
+  showDialog(
+    context: context,
+    builder: (context) => Dialog(
+      insetPadding: const EdgeInsets.all(12),
+      backgroundColor: Colors.black,
+      child: Stack(
+        children: [
+          InteractiveViewer(
+            maxScale: 4,
+            child: Center(
+              child: Image.network(
+                url,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, progress) => progress == null
+                    ? child
+                    : const Padding(
+                        padding: EdgeInsets.all(40),
+                        child: CircularProgressIndicator(),
+                      ),
+                errorBuilder: (context, _, __) => const Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Text(
+                    'Preuve indisponible',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class _SuiviColis extends ConsumerWidget {
   final String code;
 
@@ -707,6 +757,51 @@ class _SuiviColis extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final parcel = ref.watch(parcelByCodeProvider(code)).value;
     if (parcel == null) return const SizedBox.shrink();
+
+    // Auto-expédition : pas de frise (aucun scan agent). On affiche l'état, qui
+    // suit la déclaration du vendeur + sa modération.
+    if (parcel.isSelfShip) {
+      if (parcel.status == ParcelStatus.delivered) {
+        return _EtatSimple(
+          icon: Icons.check_circle,
+          texte: 'Colis reçu.',
+          couleur: Colors.green,
+        );
+      }
+      if (parcel.shipmentStatus == 'approved' ||
+          parcel.status == ParcelStatus.inTransit) {
+        final proofVisible = ref.watch(shipmentProofVisibleProvider);
+        final proofUrl = parcel.shipmentProofUrl;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _EtatSimple(
+              icon: Icons.local_shipping_outlined,
+              texte: 'Le vendeur a expédié le colis — en route.',
+              couleur: theme.colorScheme.primary,
+            ),
+            if (proofVisible && proofUrl != null && proofUrl.isNotEmpty)
+              TextButton.icon(
+                icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                label: const Text('Voir la preuve d\'expédition'),
+                onPressed: () => _voirPreuve(context, proofUrl),
+              ),
+          ],
+        );
+      }
+      if (parcel.shipmentStatus == 'pending') {
+        return _EtatSimple(
+          icon: Icons.schedule_outlined,
+          texte: 'Le vendeur a déclaré l\'expédition (en vérification).',
+          couleur: Colors.orange,
+        );
+      }
+      return _EtatSimple(
+        icon: Icons.schedule_outlined,
+        texte: 'En attente de l\'expédition par le vendeur.',
+        couleur: theme.colorScheme.primary,
+      );
+    }
 
     // Tant qu'aucun dépôt n'a été scanné, nous ne savons rien du colis
     // physique. Afficher « en attente du dépôt par le vendeur » reviendrait à

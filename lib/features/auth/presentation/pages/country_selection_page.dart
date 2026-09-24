@@ -6,7 +6,6 @@ import '../../domain/entities/entities.dart';
 import '../../application/providers.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/responsive/responsive.dart';
-import '../../../../core/services/analytics_service.dart';
 import '../../../../core/config/feature_flags.dart';
 
 /// Page de sélection du pays lors de l'inscription.
@@ -121,44 +120,13 @@ class _CountrySelectionPageState extends ConsumerState<CountrySelectionPage> {
       // Récupérer le notifier d'inscription
       final registrationNotifier = ref.read(registrationProvider.notifier);
 
-      // 1. Mettre à jour le pays dans le state d'inscription
+      // Le pays est retenu ; la VILLE se choisit à l'étape suivante, et c'est
+      // elle qui termine l'inscription (completeRegistration). On ne complète
+      // donc plus ici.
       registrationNotifier.setCountry(country);
 
-      // Optionnel : Définir la ville principale par défaut
-      // L'utilisateur pourra la changer plus tard dans son profil
-      registrationNotifier.setCity(country.mainCity);
-
-      // 2. Compléter l'inscription (sauvegarde dans Firestore)
-      // Cette méthode crée l'utilisateur et réserve le username
-      final user = await registrationNotifier.completeRegistration();
-
-      // 3. Vérifier que l'utilisateur a bien été créé
-      if (user != null && mounted) {
-        print('✅ [CountrySelection] User créé: ${user.username}');
-
-        // Le document existe maintenant dans Firestore
-        // Les providers vont se rafraîchir automatiquement grâce aux Streams
-        // Pas besoin d'attendre, le router va gérer la redirection
-
-        if (!mounted) return;
-
-        // Inscription réussie → on la logge, puis navigation vers l'accueil.
-        ref.read(analyticsServiceProvider).logSignUp(
-              user.authProvider.name,
-            );
-
-        // Le redirect du router détectera que le profil est complet
-        context.go('/home');
-      } else if (mounted) {
-        // completeRegistration a renvoyé null sans lever d'exception : c'est
-        // que le state d'inscription est incomplet. La raison précise est
-        // dans le state — l'afficher plutôt qu'un message opaque, sinon on ne
-        // sait pas quel champ manque.
-        setState(() => _isLoading = false);
-        final l10n = AppLocalizations.of(context)!;
-        final raison = ref.read(registrationProvider).errorMessage;
-        _showError(raison ?? l10n.countryErrorGeneric);
-      }
+      if (!mounted) return;
+      context.go('/auth/city');
     } catch (e) {
       // Gestion des erreurs
       if (mounted) {

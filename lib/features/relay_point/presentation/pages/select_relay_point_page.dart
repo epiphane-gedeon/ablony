@@ -48,7 +48,9 @@ class _SelectRelayPointPageState extends ConsumerState<SelectRelayPointPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final relayPointsAsync = ref.watch(relayPointsProvider);
+    // Seuls les points actifs sont proposables : un point désactivé ne doit
+    // apparaître nulle part dans le parcours d'achat.
+    final relayPointsAsync = ref.watch(activeRelayPointsProvider);
 
     return Scaffold(
       appBar: AppBar(

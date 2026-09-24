@@ -9,12 +9,28 @@ enum DeliveryMethod {
   relay,
 
   /// Remise à l'adresse de l'acheteur.
-  home;
+  home,
 
-  String get wireValue => name;
+  /// Le vendeur expédie lui-même (auto-expédition). Ablony n'achemine pas :
+  /// acheteur et vendeur coordonnent le transport dans le chat. Aucun frais de
+  /// livraison Ablony. Proposé en mode « beg » (toujours hors Lomé, en option à
+  /// Lomé).
+  selfShip;
 
-  static DeliveryMethod fromWire(String? value) =>
-      value == 'home' ? DeliveryMethod.home : DeliveryMethod.relay;
+  String get wireValue => this == DeliveryMethod.selfShip
+      ? 'self_ship'
+      : name;
+
+  static DeliveryMethod fromWire(String? value) {
+    switch (value) {
+      case 'home':
+        return DeliveryMethod.home;
+      case 'self_ship':
+        return DeliveryMethod.selfShip;
+      default:
+        return DeliveryMethod.relay;
+    }
+  }
 }
 
 /// Adresse de remise, recopiée sur la commande.
@@ -133,14 +149,19 @@ class DeliveryChoice extends Equatable {
       address = destination;
 
   /// `true` quand le choix est complet et peut accompagner un paiement.
-  /// Le contact (nom + téléphone) est requis dans tous les cas.
+  ///
+  /// En auto-expédition, rien à renseigner : acheteur et vendeur coordonnent le
+  /// transport dans le chat (aucun contact révélé). Sinon le contact (nom +
+  /// téléphone) est requis, plus le point relais ou l'adresse selon le mode.
   bool get isComplete {
+    if (method == DeliveryMethod.selfShip) return true;
     final hasContact = (contactName?.trim().isNotEmpty ?? false) &&
         (contactPhone?.trim().isNotEmpty ?? false);
     if (!hasContact) return false;
     return switch (method) {
       DeliveryMethod.relay => relayPoint != null,
       DeliveryMethod.home => address != null,
+      DeliveryMethod.selfShip => true,
     };
   }
 
@@ -148,6 +169,7 @@ class DeliveryChoice extends Equatable {
   String get destinationSummary => switch (method) {
     DeliveryMethod.relay => relayPoint?.name ?? '',
     DeliveryMethod.home => address?.summary ?? '',
+    DeliveryMethod.selfShip => 'Envoi par le vendeur',
   };
 
   Map<String, dynamic> toJson() => {

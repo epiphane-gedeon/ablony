@@ -51,6 +51,7 @@ class UserModel extends User {
     super.providerId,
     required super.country,
     super.city,
+    super.cityKey,
     required super.acceptedTerms,
     required super.acceptedTermsDate,
     required super.marketingEmailsEnabled,
@@ -101,6 +102,7 @@ class UserModel extends User {
       providerId: user.providerId,
       country: user.country,
       city: user.city,
+      cityKey: user.cityKey,
       acceptedTerms: user.acceptedTerms,
       acceptedTermsDate: user.acceptedTermsDate,
       marketingEmailsEnabled: user.marketingEmailsEnabled,
@@ -221,6 +223,7 @@ class UserModel extends User {
         // LOCALISATION
         country: Country.fromCode(getRequiredField<String>('country')),
         city: getOptionalField<String>('city'),
+        cityKey: getOptionalField<String>('cityKey'),
 
         // CONSENTEMENTS
         acceptedTerms: getRequiredField<bool>('acceptedTerms'),
@@ -298,6 +301,7 @@ class UserModel extends User {
       providerId: json['providerId'] as String?,
       country: Country.fromCode(json['country'] as String),
       city: json['city'] as String?,
+      cityKey: json['cityKey'] as String?,
       acceptedTerms: json['acceptedTerms'] as bool,
       acceptedTermsDate: DateTime.parse(json['acceptedTermsDate'] as String),
       marketingEmailsEnabled: json['marketingEmailsEnabled'] as bool,
@@ -398,6 +402,9 @@ class UserModel extends User {
     if (city != null) {
       data['city'] = city;
     }
+    if (cityKey != null) {
+      data['cityKey'] = cityKey;
+    }
     if (wallet != null) {
       data['wallet'] = wallet!.toFirestore();
     }
@@ -462,6 +469,9 @@ class UserModel extends User {
     }
     if (city != null) {
       json['city'] = city;
+    }
+    if (cityKey != null) {
+      json['cityKey'] = cityKey;
     }
 
     return json;
@@ -528,6 +538,7 @@ class UserModel extends User {
     String? providerId,
     Country? country,
     String? city,
+    String? cityKey,
     bool? acceptedTerms,
     DateTime? acceptedTermsDate,
     bool? marketingEmailsEnabled,
@@ -552,6 +563,7 @@ class UserModel extends User {
       providerId: providerId ?? this.providerId,
       country: country ?? this.country,
       city: city ?? this.city,
+      cityKey: cityKey ?? this.cityKey,
       acceptedTerms: acceptedTerms ?? this.acceptedTerms,
       acceptedTermsDate: acceptedTermsDate ?? this.acceptedTermsDate,
       marketingEmailsEnabled:

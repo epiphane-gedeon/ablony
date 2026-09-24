@@ -146,6 +146,13 @@ class Parcel extends Equatable {
   /// (ramassage à domicile) au lieu de le déposer en point relais.
   final bool pickupRequested;
 
+  /// Auto-expédition (`method == selfShip`) : état de la preuve d'expédition.
+  /// null (rien soumis) · `pending` (en modération) · `approved` · `refused`.
+  final String? shipmentStatus;
+
+  /// URL de la preuve d'expédition soumise par le vendeur.
+  final String? shipmentProofUrl;
+
   /// Horodatage de chaque étape franchie, pour la frise de suivi. Alimenté par
   /// les scans des agents (`recordParcelCheckpoint`).
   final Map<ParcelStatus, DateTime> stepsAt;
@@ -166,6 +173,8 @@ class Parcel extends Equatable {
     this.relayPointId,
     this.stepsAt = const {},
     this.pickupRequested = false,
+    this.shipmentStatus,
+    this.shipmentProofUrl,
   });
 
   factory Parcel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -187,8 +196,13 @@ class Parcel extends Equatable {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       stepsAt: _lireStepsAt(data['stepsAt']),
       pickupRequested: data['pickupRequested'] as bool? ?? false,
+      shipmentStatus: data['shipmentStatus'] as String?,
+      shipmentProofUrl: data['shipmentProofUrl'] as String?,
     );
   }
+
+  /// L'article est expédié par le vendeur lui-même (auto-expédition).
+  bool get isSelfShip => method == DeliveryMethod.selfShip;
 
   static Map<ParcelStatus, DateTime> _lireStepsAt(Object? raw) {
     if (raw is! Map) return const {};
@@ -212,6 +226,8 @@ class Parcel extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [code, status, droppedOffAt, deliveredAt, pickupRequested];
+  List<Object?> get props => [
+        code, status, droppedOffAt, deliveredAt, pickupRequested,
+        shipmentStatus, shipmentProofUrl,
+      ];
 }

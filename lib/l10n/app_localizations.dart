@@ -410,6 +410,30 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get countryErrorGeneric;
 
+  /// Titre de la page de sélection de la ville
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta ville'**
+  String get cityPickTitle;
+
+  /// Sous-titre de la page ville
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis ta ville. Elle nous aide à te proposer la livraison là où c\'est disponible.'**
+  String get cityPickSubtitle;
+
+  /// Placeholder de recherche de ville
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une ville'**
+  String get citySearchHint;
+
+  /// Erreur générique ville
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer la ville. Réessaie.'**
+  String get cityErrorGeneric;
+
   /// Erreur réseau inscription
   ///
   /// In fr, this message translates to:

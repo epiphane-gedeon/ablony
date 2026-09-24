@@ -214,6 +214,22 @@
   "@countryErrorGeneric": {
     "description": "Generic registration error"
   },
+  "cityPickTitle": "Your city",
+  "@cityPickTitle": {
+    "description": "City selection page title"
+  },
+  "cityPickSubtitle": "Choose your city. It helps us offer delivery where it's available.",
+  "@cityPickSubtitle": {
+    "description": "City page subtitle"
+  },
+  "citySearchHint": "Search a city",
+  "@citySearchHint": {
+    "description": "City search placeholder"
+  },
+  "cityErrorGeneric": "Could not save your city. Please try again.",
+  "@cityErrorGeneric": {
+    "description": "City generic error"
+  },
   "countryErrorNetwork": "Network issue. Please check your connection.",
   "@countryErrorNetwork": {
     "description": "Network registration error"

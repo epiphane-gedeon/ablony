@@ -31,9 +31,14 @@ String? destinationOf(String type, Map<String, dynamic> data) {
     case 'parcel_on_its_way':
     case 'parcel_ready_for_pickup':
     case 'parcel_delivered':
+    case 'parcel_in_transit':
     case 'dispute_opened':
     case 'dispute_resolved':
       return _recu(ref);
+
+    // Preuve d'expédition refusée : le vendeur doit en renvoyer une → étiquette.
+    case 'shipment_refused':
+      return colis != null ? '/delivery/label/$colis' : null;
 
     // L'argent a bougé : le relevé est le seul écran qui le montre.
     case 'refund_issued':

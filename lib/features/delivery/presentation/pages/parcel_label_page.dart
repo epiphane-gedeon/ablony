@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../../core/config/app_mode.dart';
 import '../../../product/presentation/providers/product_provider.dart';
+import '../../data/parcel_seller_service.dart';
 import '../../domain/models/parcel.dart';
 
 /// L'étiquette que le vendeur imprime et colle sur son colis.
@@ -24,7 +28,7 @@ import '../../domain/models/parcel.dart';
 /// douchette de nos agents ; le texte est pour l'humain, quand l'étiquette
 /// s'est froissée ou que le téléphone n'arrive pas à lire. L'alphabet exclut
 /// O/0 et I/1 pour qu'on puisse le dicter sans se tromper.
-class ParcelLabelPage extends StatelessWidget {
+class ParcelLabelPage extends ConsumerWidget {
   final Parcel parcel;
 
   const ParcelLabelPage({super.key, required this.parcel});
@@ -135,11 +139,15 @@ class ParcelLabelPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final dateFormat = DateFormat.yMMMMd(
       Localizations.localeOf(context).languageCode,
     );
+    // En mode « beg », le vendeur ne dépose plus en relais : un livreur Ablony
+    // vient chercher le colis (collecte gratuite). Le paiement du ramassage est
+    // donc masqué.
+    final bool beg = ref.watch(currentAppModeProvider) == AppMode.beg;
 
     return Scaffold(
       appBar: AppBar(
@@ -153,7 +161,28 @@ class ParcelLabelPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          if (parcel.status.needsSellerAction)
+          if (parcel.status.needsSellerAction && parcel.isSelfShip)
+            _Consigne(
+              icon: Icons.local_shipping_outlined,
+              titre: 'À expédier vous-même',
+              texte:
+                  'Vous avez choisi que le vendeur expédie « ${parcel.productTitle} ». '
+                  'Convenez du transport avec l\'acheteur dans la discussion, '
+                  'envoyez le colis, puis déclarez l\'expédition ci-dessous '
+                  'avec une preuve.',
+              couleur: theme.colorScheme.primary,
+            )
+          else if (parcel.status.needsSellerAction && beg)
+            _Consigne(
+              icon: Icons.inventory_2_outlined,
+              titre: 'Tenez le colis prêt',
+              texte:
+                  'Emballez « ${parcel.productTitle} » et collez ce code bien à '
+                  'plat sur le carton. Un livreur Ablony viendra le récupérer '
+                  'chez vous — restez joignable.',
+              couleur: theme.colorScheme.primary,
+            )
+          else if (parcel.status.needsSellerAction)
             _Consigne(
               icon: Icons.inventory_2_outlined,
               titre: 'À faire maintenant',
@@ -240,36 +269,45 @@ class ParcelLabelPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Alternative payante : se faire récupérer le colis à domicile plutôt
-          // que de le déposer en relais. Uniquement tant que le vendeur a encore
-          // le colis à charge et qu'un ramassage n'a pas déjà été demandé.
-          if (parcel.status.needsSellerAction) ...[
-            if (parcel.pickupRequested)
-              _Consigne(
-                icon: Icons.local_shipping_outlined,
-                titre: 'Ramassage demandé',
-                texte:
-                    'Un agent viendra récupérer le colis à l\'adresse que vous '
-                    'avez indiquée. Gardez l\'étiquette collée sur le carton.',
-                couleur: Colors.green,
-              )
-            else
-              _BoutonRamassage(parcel: parcel),
-            const SizedBox(height: 16),
-          ],
+          // Auto-expédition : déclaration + preuve + suivi de la modération.
+          if (parcel.status.needsSellerAction && parcel.isSelfShip)
+            _SelfShipAction(parcel: parcel),
 
-          if (parcel.status.needsSellerAction && !parcel.pickupRequested)
-            _Consigne(
-              icon: Icons.schedule_outlined,
-              titre: parcel.daysLeftToDropOff > 0
-                  ? 'Il vous reste ${parcel.daysLeftToDropOff} jour(s)'
-                  : 'Dernier jour',
-              texte:
-                  'Déposez le colis avant le '
-                  '${dateFormat.format(parcel.dropoffDeadline)}. Passé ce '
-                  'délai, l\'acheteur est remboursé automatiquement.',
-              couleur: theme.colorScheme.error,
-            ),
+          // Modèle relais/domicile (non auto-expédition).
+          if (parcel.status.needsSellerAction && !parcel.isSelfShip) ...[
+            // Ramassage payant : seulement en mode « def ». En « beg » la
+            // collecte chez le vendeur est déjà le modèle (gratuite).
+            if (!beg) ...[
+              if (parcel.pickupRequested)
+                _Consigne(
+                  icon: Icons.local_shipping_outlined,
+                  titre: 'Ramassage demandé',
+                  texte:
+                      'Un agent viendra récupérer le colis à l\'adresse que '
+                      'vous avez indiquée. Gardez l\'étiquette collée sur le '
+                      'carton.',
+                  couleur: Colors.green,
+                )
+              else
+                _BoutonRamassage(parcel: parcel),
+              const SizedBox(height: 16),
+            ],
+            if (!parcel.pickupRequested)
+              _Consigne(
+                icon: Icons.schedule_outlined,
+                titre: parcel.daysLeftToDropOff > 0
+                    ? 'Il vous reste ${parcel.daysLeftToDropOff} jour(s)'
+                    : 'Dernier jour',
+                texte: beg
+                    ? 'Un livreur passera récupérer le colis avant le '
+                        '${dateFormat.format(parcel.dropoffDeadline)}. Tenez-le '
+                        'prêt. Passé ce délai, l\'acheteur est remboursé.'
+                    : 'Déposez le colis avant le '
+                        '${dateFormat.format(parcel.dropoffDeadline)}. Passé ce '
+                        'délai, l\'acheteur est remboursé automatiquement.',
+                couleur: theme.colorScheme.error,
+              ),
+          ],
         ],
       ),
     );
@@ -376,6 +414,120 @@ class _Consigne extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Section auto-expédition côté vendeur : déclarer l'envoi avec une preuve
+/// (obligatoire), puis suivre l'état de sa modération.
+class _SelfShipAction extends ConsumerStatefulWidget {
+  const _SelfShipAction({required this.parcel});
+  final Parcel parcel;
+
+  @override
+  ConsumerState<_SelfShipAction> createState() => _SelfShipActionState();
+}
+
+class _SelfShipActionState extends ConsumerState<_SelfShipAction> {
+  bool _envoi = false;
+  bool _soumisLocalement = false;
+
+  Future<void> _declarer() async {
+    setState(() => _envoi = true);
+    try {
+      final img = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+        maxWidth: 1600,
+      );
+      if (img == null) {
+        if (mounted) setState(() => _envoi = false);
+        return;
+      }
+      final bytes = await img.readAsBytes();
+      final storageRef = FirebaseStorage.instance.ref(
+        'parcels/${widget.parcel.code}/shipment/'
+        '${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+      await storageRef.putData(
+        bytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      final url = await storageRef.getDownloadURL();
+      await ref
+          .read(parcelSellerServiceProvider)
+          .markShipped(parcelCode: widget.parcel.code, proofUrl: url);
+      if (mounted) {
+        setState(() => _soumisLocalement = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expédition déclarée. En attente de vérification.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur : ${e.toString().replaceAll('Exception:', '').trim()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _envoi = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = widget.parcel.shipmentStatus;
+
+    if (_soumisLocalement || status == 'pending') {
+      return _Consigne(
+        icon: Icons.schedule_outlined,
+        titre: 'Preuve en vérification',
+        texte:
+            'Votre preuve d\'expédition est en cours de vérification par Ablony. '
+            'Vous serez notifié dès qu\'elle est validée.',
+        couleur: Colors.orange,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (status == 'refused') ...[
+          _Consigne(
+            icon: Icons.error_outline,
+            titre: 'Preuve refusée',
+            texte:
+                'Votre preuve n\'a pas été validée. Renvoyez une preuve '
+                'd\'expédition valable avant la fin du délai.',
+            couleur: theme.colorScheme.error,
+          ),
+          const SizedBox(height: 12),
+        ],
+        FilledButton.icon(
+          icon: _envoi
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.local_shipping_outlined),
+          label: const Text('J\'ai expédié le colis (avec preuve)'),
+          onPressed: _envoi ? null : _declarer,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(double.infinity, 52),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Joignez une photo du reçu d\'envoi (gare routière, transporteur…). '
+          'Elle est vérifiée par Ablony avant validation.',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

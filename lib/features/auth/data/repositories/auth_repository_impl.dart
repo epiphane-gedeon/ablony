@@ -533,6 +533,7 @@ class AuthRepositoryImpl implements AuthRepository {
     AuthProvider? authProvider,
     String? providerId,
     String? city,
+    String? cityKey,
   }) async {
     try {
       print(
@@ -563,6 +564,7 @@ class AuthRepositoryImpl implements AuthRepository {
         providerId: providerId,
         country: country,
         city: city,
+        cityKey: cityKey,
         acceptedTerms: acceptedTerms,
         acceptedTermsDate: now,
         marketingEmailsEnabled: marketingEmailsEnabled,
@@ -636,6 +638,7 @@ class AuthRepositoryImpl implements AuthRepository {
     String? photoUrl,
     String? phoneNumber,
     String? city,
+    String? cityKey,
     bool? marketingEmailsEnabled,
     Wallet? wallet,
     bool effacerPhoto = false,
@@ -660,6 +663,7 @@ class AuthRepositoryImpl implements AuthRepository {
         effacerPhoto: effacerPhoto,
         phoneNumber: phoneNumber,
         city: city,
+        cityKey: cityKey,
         marketingEmailsEnabled: marketingEmailsEnabled,
         wallet: wallet,
         updatedAt: DateTime.now(),

@@ -20,5 +20,7 @@ abstract final class DeliveryPricing {
   static int shippingFeeFor(DeliveryMethod method) => switch (method) {
     DeliveryMethod.relay => relayFeeXof,
     DeliveryMethod.home => homeFeeXof,
+    // Auto-expédition : aucun acheminement Ablony, donc aucun frais.
+    DeliveryMethod.selfShip => 0,
   };
 }

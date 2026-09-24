@@ -271,15 +271,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         const authRoutes = [
           '/auth/username',
           '/auth/country',
+          '/auth/city',
           '/auth/signup/email',
         ];
 
-        // Si l'utilisateur n'est pas sur une route d'auth
-        if (!authRoutes.contains(location)) {
-          return '/auth/username'; // Forcer la complétion du profil
+        // Déjà sur une étape de complétion → laisser faire.
+        if (authRoutes.contains(location)) {
+          return null;
         }
 
-        return null; // Laisser passer pour les routes /auth
+        // On vise l'étape MANQUANTE, pas systématiquement le username : un
+        // compte existant qui a déjà tout sauf la ville (backfill) ne doit pas
+        // recommencer par le pseudo. Le document existe alors et a un username.
+        final existingUser = ref.read(currentUserProvider).value;
+        if (existingUser != null && existingUser.username.isNotEmpty) {
+          return '/auth/city';
+        }
+        return '/auth/username';
       }
 
       // ============================================================
@@ -295,6 +303,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           '/auth/signup/email',
           '/auth/login',
           '/auth/country',
+          '/auth/city',
         ];
 
         // Si l'utilisateur est sur une de ces routes
@@ -410,6 +419,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'country',
             name: 'country',
             builder: (context, state) => const CountrySelectionPage(),
+          ),
+
+          // ====================================================
+          // ÉTAPE 4 : VILLE
+          // ====================================================
+          /// Sélection de la ville (après le pays). C'est elle qui termine
+          /// l'inscription. Sert aussi au backfill des comptes existants.
+          GoRoute(
+            path: 'city',
+            name: 'city',
+            builder: (context, state) => const CitySelectionPage(),
           ),
         ],
       ),
