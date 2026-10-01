@@ -4504,10 +4504,16 @@ exports.nyoleWebhook = onRequest(async (req, res) => {
   let reference = donnees.metadata?.reference || null;
 
   try {
-    // Le mode doit concorder : un événement de test ne doit jamais finaliser
-    // une transaction réelle, ni l'inverse.
-    if (evenement.livemode === true && MODE_BAC_A_SABLE_NYOLE) {
-      console.warn("[nyole] Événement live reçu avec des clés de test, ignoré");
+    // Le mode doit concorder, dans les DEUX sens : un événement de test ne doit
+    // jamais finaliser une transaction réelle, ni un événement live être traité
+    // avec des clés de test. La signature l'empêche déjà (chaque mode signe
+    // avec sa propre clé), mais ce contrôle explicite coûte une ligne et
+    // protège le jour où les clés seraient mal posées dans l'environnement.
+    const evenementLive = evenement.livemode === true;
+    if (evenementLive === MODE_BAC_A_SABLE_NYOLE) {
+      console.warn(
+          `[nyole] Mode discordant : événement livemode=${evenementLive}, ` +
+          `clés de test=${MODE_BAC_A_SABLE_NYOLE}. Ignoré.`);
       return res.status(200).json({success: true, message: "Mode discordant"});
     }
 
