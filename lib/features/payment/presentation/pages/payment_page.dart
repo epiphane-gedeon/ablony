@@ -196,7 +196,19 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     try {
       final paymentService = ref.read(paymentServiceProvider);
 
-      // Formater le numéro de téléphone pour GeniusPay (format international +228...)
+      // Formater le numéro de téléphone (format international +228...)
+      //
+      // À CORRIGER quand le Bénin ouvrira : l'indicatif togolais est forcé
+      // pour tout le monde, alors que `user.country` distingue déjà
+      // togo('TG') de benin('BJ'). Un Béninois qui saisit son numéro local
+      // obtiendrait un numéro **togolais** : la demande de paiement partirait
+      // vers un numéro qui n'est pas le sien — elle échouerait, ou pire,
+      // atteindrait un inconnu au Togo. Seuls ceux qui tapent « +229 » en
+      // entier y échappent, puisqu'on ne préfixe qu'en l'absence de « + ».
+      //
+      // Le correctif : ajouter un `dialCode` à l'enum Country (il n'en a pas
+      // encore) et utiliser `user.country.dialCode` ici. Sans danger
+      // aujourd'hui, la zone étant limitée au Togo.
       String? phone = _paymentPhoneNumber;
       if (phone != null && !phone.startsWith('+')) {
         phone = '+228${phone.replaceAll(' ', '')}'; // +228 = indicatif Togo

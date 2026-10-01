@@ -610,3 +610,12 @@ attributs, pour composer l'offre produit du lancement.
   formulaires création/édition, bibliothèque d'attributs (type select/
   multiSelect/text/number/boolean, valeurs, requis, aide). API + types ajoutés.
 - Déployé : functions (6) + admin web. Pas de changement mobile.
+
+**À CORRIGER avant l'ouverture du Bénin — indicatif téléphonique forcé.**
+`payment_page.dart` préfixe tout numéro sans « + » par `+228` (Togo), alors que
+`User.country` distingue déjà `togo('TG')` de `benin('BJ')`. Un Béninois
+saisissant son numéro local obtiendrait un numéro togolais : la demande de
+paiement partirait vers un numéro qui n'est pas le sien. Sans effet aujourd'hui
+(zone limitée au Togo), bloquant le jour où le Bénin ouvre. Correctif : ajouter
+un `dialCode` à l'enum `Country` et l'utiliser au lieu du littéral. Repéré le
+2026-10-01 en relisant le formatage du téléphone pour nyole.
