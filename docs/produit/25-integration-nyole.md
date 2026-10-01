@@ -142,6 +142,39 @@ config/app : { paymentProvider: "geniuspay" | "nyole" }
   MoMo, Moov) — la doc ne garantit rien sur l'UX par opérateur, à constater en
   vrai.
 
+### 6 bis. Résultats des tests en bac à sable (2026-10-01)
+
+Testé contre les clés `af_test_`, webhook déclaré en `mode: test` (donc
+`testWebhookUrl` posée, `webhookUrl` de production laissée nulle).
+
+| Vérification | Résultat |
+|---|---|
+| Création de session (clé test) | ✅ 201, `livemode: false` |
+| `initiatePayment` via le chemin nyole | ✅ rend `{reference, status, paymentUrl}` |
+| Transaction écrite avec sa provenance | ✅ `nyoleSessionId` + `nyoleOrderId` |
+| Webhook reçu et signature acceptée | ✅ livré en 1 tentative, 200 en ~2 s |
+| Webhook non signé rejeté | ✅ 401 sur les deux URLs |
+| Recharge finalisée | ✅ solde 0 → 1500 |
+| **Rejeu du webhook (idempotence)** | ✅ tentative 2 en 200, solde **reste** 1500 |
+| `confirmPayment` sur transaction finalisée | ✅ « déjà complétée », pas de recrédit |
+| Chemin d'échec (`issue: echec`) | ✅ `status: failed`, `nyoleStatus: FAILED`, solde intact |
+| Extraction de `finaliserSelonType` fidèle | ✅ 24 champs identiques à l'ancien code inline |
+
+Mesure utile : le webhook a répondu en **1981 ms** à la première livraison
+(démarrage à froid de la fonction) puis **233 ms** au rejeu. nyole coupe à 10 s,
+donc large marge — mais c'est mesuré depuis leurs serveurs, pas depuis le Togo.
+
+**Pas encore testé : le parcours `purchase`.** Le risque résiduel y est faible
+(la couche fournisseur est prouvée ci-dessus, et `finaliserSelonType` est
+désormais partagée avec GeniusPay dont les achats tournent en production), mais
+un achat réel touche plus de choses — crédit `pendingAmount` du vendeur,
+produit marqué vendu, création du colis, notifications. À valider avec des
+fixtures dédiées avant toute bascule.
+
+Le drapeau a été remis à `geniuspay` après les tests : il serait imprudent de
+laisser la production sur un fournisseur dont le parcours d'achat n'est pas
+encore vérifié.
+
 ### 7. Bascule prudente
 - Flag `paymentProvider` à `"nyole"` d'abord en interne (compte de test réel,
   petit montant) avant tout utilisateur.
