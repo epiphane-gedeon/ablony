@@ -1974,8 +1974,89 @@ exports.initiatePayment = onRequest(async (req, res) => {
 
     // =============================================
     // CAS 2 : Paiement externe (tmoney/flooz/carte) ou mixte (wallet + externe)
-    // → Appel GeniusPay, la finalisation se fera via confirmPayment ou webhook
+    // → Appel du fournisseur actif, la finalisation se fera via
+    //   confirmPayment ou le webhook
     // =============================================
+
+    const libellePaiement = description || (
+      type === "purchase" ? "Achat article Ablony" :
+      type === "boost" ? "Boost produit Ablony" :
+      type === "boostpack" ? "Lot de boosts Ablony" :
+      type === "pickup" ? "Ramassage à domicile Ablony" :
+      "Recharge portefeuille Ablony");
+
+    // --- Chemin nyole (second fournisseur, derrière le drapeau) -------------
+    //
+    // Rend exactement la même forme que le chemin GeniusPay
+    // (`{reference, status, paymentUrl}`) : l'app Flutter ne voit aucune
+    // différence, donc rien à changer côté client.
+    if (await fournisseurPaiement() === "nyole") {
+      // Notre référence, générée avant l'appel : elle sert de clé
+      // d'idempotence ET d'identifiant du document de transaction. La laisser
+      // choisir par nyole obligerait à appeler d'abord, puis à écrire — et une
+      // coupure entre les deux laisserait un paiement encaissé sans trace.
+      const reference = "NY-" + Date.now() + "-" +
+        crypto.randomBytes(3).toString("hex").toUpperCase();
+
+      const session = await creerSessionNyole({
+        montant: Number(amount),
+        reference: reference,
+        description: libellePaiement,
+        // Sur mobile, la WebView intercepte ces URLs sans jamais les charger
+        // (NavigationDecision.prevent) : seuls les mots « success »/« cancel »
+        // comptent. Sur le web, la fermeture est pilotée par le statut de la
+        // transaction en base, pas par ce retour — d'où l'importance du
+        // webhook sur ce chemin.
+        successUrl: "https://ablony-a5db9.web.app/paiement/success",
+        cancelUrl: "https://ablony-a5db9.web.app/paiement/cancel",
+        metadata: {
+          reference: reference,
+          type: type || "recharge",
+          productId: productId || null,
+          sellerId: sellerId || null,
+          buyerId: userId,
+        },
+        nom: name || null,
+        email: email || null,
+        telephone: phone || null,
+      });
+
+      await db.collection("transactions").doc(reference).set({
+        reference: reference,
+        // La provenance, portée par la transaction elle-même : c'est ce qui
+        // permet de rebasculer le drapeau sur GeniusPay sans laisser les
+        // paiements nyole déjà lancés inconfirmables.
+        nyoleSessionId: session.id,
+        nyoleOrderId: session.order_id || null,
+        userId: userId,
+        amount: Number(amount),
+        paymentMethod: paymentMethod,
+        status: "pending",
+        type: type || "recharge",
+        productId: productId || null,
+        sellerId: sellerId || null,
+        productPrice: productPrice ? Number(productPrice) : null,
+        walletDeduction: walletDeduction ? Number(walletDeduction) : null,
+        quantity: type === "boostpack" ? Number(quantity) : null,
+        delivery: deliveryChoice,
+        pickup: pickupContext,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      console.log(`[nyole] Session ${session.id} créée pour ${reference}`);
+
+      return res.status(201).json({
+        success: true,
+        data: {
+          reference: reference,
+          status: "pending",
+          paymentUrl: session.url,
+        },
+      });
+    }
+
+    // --- Chemin GeniusPay (historique, inchangé) ---------------------------
 
     // 1. Construire le corps de la requête GeniusPay
     const requestBody = {
@@ -1984,7 +2065,7 @@ exports.initiatePayment = onRequest(async (req, res) => {
       // Imposée, pour ne pas laisser choisir un opérateur indisponible ici —
       // et pour prendre la moins chère qui convienne.
       payment_method: passerellePour(paymentMethod),
-      description: description || (type === "purchase" ? "Achat article Ablony" : type === "boost" ? "Boost produit Ablony" : type === "boostpack" ? "Lot de boosts Ablony" : type === "pickup" ? "Ramassage à domicile Ablony" : "Recharge portefeuille Ablony"),
+      description: libellePaiement,
       success_url: "https://geniuspaywebhook-mahukqtfea-uc.a.run.app/success",
       error_url: "https://geniuspaywebhook-mahukqtfea-uc.a.run.app/cancel",
       metadata: {
@@ -2088,9 +2169,69 @@ exports.initiatePayment = onRequest(async (req, res) => {
 // ============================================================================
 
 /**
+ * Aiguille une transaction confirmée vers la finalisation de son type.
+ *
+ * Cette couche ne connaît aucun fournisseur de paiement : elle reçoit une
+ * transaction déjà vérifiée et applique l'effet métier. C'est elle qui rend le
+ * changement de fournisseur possible sans toucher à la logique d'argent — et
+ * c'est aussi pourquoi elle est partagée entre `confirmPayment` et les
+ * webhooks, qui courent l'un après l'autre et doivent aboutir au même état.
+ *
+ * Les `finalize*` vérifient chacun l'idempotence (statut `completed` déjà
+ * posé) : être appelé deux fois ne crédite pas deux fois.
+ *
+ * @param {Object} transaction Les données du document de transaction.
+ * @param {string} reference L'identifiant du document (= la référence).
+ * @return {Promise<void>}
+ */
+async function finaliserSelonType(transaction, reference) {
+  if (transaction.type === "purchase") {
+    await finalizePurchase({
+      buyerId: transaction.userId,
+      sellerId: transaction.sellerId,
+      productId: transaction.productId,
+      productPrice: Number(transaction.productPrice || transaction.amount),
+      walletDeduction: Number(transaction.walletDeduction || 0),
+      transactionRef: reference,
+      paymentMethod: transaction.paymentMethod,
+      totalAmount: Number(transaction.amount),
+      delivery: transaction.delivery || null,
+    });
+  } else if (transaction.type === "boost") {
+    await finalizeBoost({
+      userId: transaction.userId,
+      productId: transaction.productId,
+      walletDeduction: Number(transaction.walletDeduction || 0),
+      transactionRef: reference,
+    });
+  } else if (transaction.type === "boostpack") {
+    await finalizeBoostPack({
+      userId: transaction.userId,
+      quantity: Number(transaction.quantity || 1),
+      walletDeduction: Number(transaction.walletDeduction || 0),
+      transactionRef: reference,
+    });
+  } else if (transaction.type === "pickup") {
+    const pk = transaction.pickup || {};
+    await finalizePickup({
+      userId: transaction.userId,
+      parcelCode: pk.parcelCode,
+      walletDeduction: Number(transaction.walletDeduction || 0),
+      feeXof: Number(pk.feeXof || transaction.amount || 0),
+      pickupContact: pk.contact || null,
+      pickupAddress: pk.address || null,
+      transactionRef: reference,
+    });
+  } else {
+    await finalizeRecharge(
+        transaction.userId, Number(transaction.amount), reference);
+  }
+}
+
+/**
  * Endpoint appelé par l'application Flutter après que la WebView de paiement
  * a redirigé vers l'URL de succès.
- * Vérifie le statut auprès de GeniusPay, puis finalise la transaction.
+ * Vérifie le statut auprès du fournisseur qui a encaissé, puis finalise.
  */
 exports.confirmPayment = onRequest(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
@@ -2130,7 +2271,56 @@ exports.confirmPayment = onRequest(async (req, res) => {
       });
     }
 
-    // 2. Vérifier le statut auprès de GeniusPay
+    // 2. Vérifier le statut auprès du fournisseur qui a encaissé.
+    //
+    // On se fie à la provenance portée par la transaction, pas au drapeau
+    // courant : si le drapeau est revenu à GeniusPay entre-temps, un paiement
+    // nyole déjà lancé doit rester confirmable, sinon l'argent serait encaissé
+    // sans que la commande n'aboutisse.
+    if (transaction.nyoleSessionId) {
+      const statut = await statutSessionNyole(transaction.nyoleSessionId);
+      console.log("[confirmPayment/nyole] Statut:", JSON.stringify(statut));
+
+      // `paid` ne vaut true que si status === "SUCCESS" (doc nyole) : c'est le
+      // champ qui fait foi, jamais la redirection du navigateur.
+      if (statut.paid !== true && statut.status !== "SUCCESS") {
+        await db.collection("transactions").doc(reference).update({
+          // Un échec franc doit être écrit : sur le web, l'écran d'attente se
+          // referme sur le statut en base. Laissé « pending », il tournerait
+          // jusqu'au délai de patience alors que la réponse est connue.
+          ...(statut.status === "FAILED" || statut.status === "CANCELLED" ?
+            {status: "failed"} : {}),
+          nyoleStatus: statut.status || null,
+          nyoleFailureMessage: statut.failure_message || null,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: statut.failure_message ||
+              `Paiement non confirmé par nyole (statut: ${statut.status})`,
+          },
+        });
+      }
+
+      // Le montant encaissé doit correspondre à ce qu'on a demandé. Sans ce
+      // contrôle, une session rejouée avec un montant moindre créditerait la
+      // commande entière.
+      const attendu = Number(transaction.amount);
+      const encaisse = Number(statut.amount || 0);
+      if (encaisse < attendu) {
+        console.error(
+            `[confirmPayment/nyole] Montant insuffisant : ${encaisse} < ${attendu}`);
+        return res.status(400).json({
+          success: false,
+          error: {message: "Montant encaissé inférieur au montant attendu"},
+        });
+      }
+
+      await finaliserSelonType(transaction, reference);
+      return res.status(200).json({success: true, data: {status: "completed"}});
+    }
+
     const gpResponse = await fetch(`${GENIUSPAY_CONFIG.BASE_URL}/payments/${reference}`, {
       method: "GET",
       headers: {
@@ -2161,50 +2351,7 @@ exports.confirmPayment = onRequest(async (req, res) => {
     }
 
     // 3. Finaliser selon le type de transaction
-    if (transaction.type === "purchase") {
-      const productPrice = Number(transaction.productPrice || transaction.amount);
-      const walletDeduction = Number(transaction.walletDeduction || 0);
-
-      await finalizePurchase({
-        buyerId: transaction.userId,
-        sellerId: transaction.sellerId,
-        productId: transaction.productId,
-        productPrice: productPrice,
-        walletDeduction: walletDeduction,
-        transactionRef: reference,
-        paymentMethod: transaction.paymentMethod,
-        totalAmount: Number(transaction.amount),
-        delivery: transaction.delivery || null,
-      });
-    } else if (transaction.type === "boost") {
-      await finalizeBoost({
-        userId: transaction.userId,
-        productId: transaction.productId,
-        walletDeduction: Number(transaction.walletDeduction || 0),
-        transactionRef: reference,
-      });
-    } else if (transaction.type === "boostpack") {
-      await finalizeBoostPack({
-        userId: transaction.userId,
-        quantity: Number(transaction.quantity || 1),
-        walletDeduction: Number(transaction.walletDeduction || 0),
-        transactionRef: reference,
-      });
-    } else if (transaction.type === "pickup") {
-      const pk = transaction.pickup || {};
-      await finalizePickup({
-        userId: transaction.userId,
-        parcelCode: pk.parcelCode,
-        walletDeduction: Number(transaction.walletDeduction || 0),
-        feeXof: Number(pk.feeXof || transaction.amount || 0),
-        pickupContact: pk.contact || null,
-        pickupAddress: pk.address || null,
-        transactionRef: reference,
-      });
-    } else {
-      // Recharge de portefeuille
-      await finalizeRecharge(transaction.userId, Number(transaction.amount), reference);
-    }
+    await finaliserSelonType(transaction, reference);
 
     return res.status(200).json({
       success: true,
