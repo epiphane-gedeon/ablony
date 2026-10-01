@@ -62,14 +62,14 @@ const NYOLE_CONFIG = {
   BASE_URL: "https://app.nyole.com/api",
 };
 
-/// En bac à sable chez nyole ? Déduit du préfixe de la clé elle-même, comme
-/// pour GeniusPay : le jour où une clé `af_live_sec_` est posée dans
-/// functions/.env, les tolérances réservées aux tests s'éteignent d'elles-mêmes.
+// En bac à sable chez nyole ? Déduit du préfixe de la clé elle-même, comme
+// pour GeniusPay : le jour où une clé `af_live_sec_` est posée dans
+// functions/.env, les tolérances réservées aux tests s'éteignent d'elles-mêmes.
 const MODE_BAC_A_SABLE_NYOLE =
   String(NYOLE_CONFIG.SECRET_KEY).startsWith("af_test_");
 
-/// nyole signe ses webhooks avec la clé secrète du même mode (test ou live) —
-/// il n'y a pas de secret de webhook distinct, contrairement à GeniusPay.
+// nyole signe ses webhooks avec la clé secrète du même mode (test ou live) —
+// il n'y a pas de secret de webhook distinct, contrairement à GeniusPay.
 const NYOLE_WEBHOOK_SECRET = () => NYOLE_CONFIG.SECRET_KEY;
 
 let _cacheFournisseur = null;
