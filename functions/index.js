@@ -49,6 +49,178 @@ function passerellePour(moyen) {
     GENIUSPAY_CONFIG.GATEWAY_DEFAUT;
 }
 
+// Configuration de nyole — second fournisseur de paiement, candidat au
+// remplacement de GeniusPay (voir docs/produit/25-integration-nyole.md).
+//
+// nyole n'expose pas de charge 100 % API : le paiement se fait sur une page
+// hébergée ouverte en WebView, exactement comme GeniusPay aujourd'hui. Le
+// remplacement est donc purement serveur — le contrat rendu à l'app Flutter
+// (`{reference, status, paymentUrl}`) ne change pas.
+const NYOLE_CONFIG = {
+  SECRET_KEY: process.env.NYOLE_SECRET_KEY || "",
+  PUBLIC_KEY: process.env.NYOLE_PUBLIC_KEY || "",
+  BASE_URL: "https://app.nyole.com/api",
+};
+
+/// En bac à sable chez nyole ? Déduit du préfixe de la clé elle-même, comme
+/// pour GeniusPay : le jour où une clé `af_live_sec_` est posée dans
+/// functions/.env, les tolérances réservées aux tests s'éteignent d'elles-mêmes.
+const MODE_BAC_A_SABLE_NYOLE =
+  String(NYOLE_CONFIG.SECRET_KEY).startsWith("af_test_");
+
+/// nyole signe ses webhooks avec la clé secrète du même mode (test ou live) —
+/// il n'y a pas de secret de webhook distinct, contrairement à GeniusPay.
+const NYOLE_WEBHOOK_SECRET = () => NYOLE_CONFIG.SECRET_KEY;
+
+let _cacheFournisseur = null;
+
+/**
+ * Le fournisseur de paiement actif, lu dans `config/app.paymentProvider`.
+ *
+ * Deux chemins coexistent dans `initiatePayment` : ce drapeau décide lequel
+ * sert les **nouveaux** paiements. Les paiements déjà initiés restent
+ * confirmables par leur fournisseur d'origine — la transaction porte sa propre
+ * provenance (`nyoleSessionId` vs `geniusPayId`), donc revenir en arrière ne
+ * laisse aucun paiement en cours orphelin.
+ *
+ * Repli sur `geniuspay` : tant que personne n'a posé le drapeau, rien ne
+ * change.
+ *
+ * @return {Promise<string>} `"geniuspay"` ou `"nyole"`.
+ */
+async function fournisseurPaiement() {
+  if (_cacheFournisseur && Date.now() - _cacheFournisseur.at < 60000) {
+    return _cacheFournisseur.nom;
+  }
+  let nom = "geniuspay";
+  try {
+    const snap = await db.collection("config").doc("app").get();
+    const p = snap.exists ? snap.data().paymentProvider : null;
+    if (p === "geniuspay" || p === "nyole") nom = p;
+  } catch (_) {
+    // Doc absent/illisible : repli sur le fournisseur historique.
+  }
+  _cacheFournisseur = {nom, at: Date.now()};
+  return nom;
+}
+
+/**
+ * Crée une session de paiement chez nyole.
+ *
+ * `Idempotency-Key` porte **notre** référence de transaction : si le réseau
+ * coupe après l'envoi mais avant la réponse, le rappel renvoie la session
+ * existante au lieu d'en créer une seconde — donc pas de double paiement pour
+ * une seule commande.
+ *
+ * @param {Object} p Paramètres.
+ * @param {number} p.montant Montant entier dans l'unité de la devise.
+ * @param {string} p.reference Notre référence de transaction (clé d'idempotence).
+ * @param {string} p.description Libellé montré au client.
+ * @param {string} p.successUrl Retour après paiement réussi.
+ * @param {string} p.cancelUrl Retour si le client abandonne.
+ * @param {Object} p.metadata Données libres, rendues dans le webhook.
+ * @param {string|null} p.nom Nom du client.
+ * @param {string|null} p.email E-mail du client.
+ * @param {string|null} p.telephone Téléphone au format E.164.
+ * @return {Promise<Object>} La session créée (`{id, url, order_id, ...}`).
+ */
+async function creerSessionNyole({
+  montant, reference, description, successUrl, cancelUrl, metadata,
+  nom, email, telephone,
+}) {
+  if (!NYOLE_CONFIG.SECRET_KEY) {
+    throw new Error("Clé secrète nyole absente (NYOLE_SECRET_KEY)");
+  }
+  const corps = {
+    amount: Number(montant),
+    currency: "XOF",
+    description: description,
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+    metadata: metadata || {},
+  };
+  if (nom) corps.customer_name = nom;
+  if (email) corps.customer_email = email;
+  if (telephone) corps.customer_phone = telephone;
+
+  const reponse = await fetch(`${NYOLE_CONFIG.BASE_URL}/v1/checkout/sessions`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${NYOLE_CONFIG.SECRET_KEY}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": reference,
+    },
+    body: JSON.stringify(corps),
+  });
+
+  const resultat = await reponse.json().catch(() => ({}));
+  if (!reponse.ok) {
+    const msg = resultat.error || resultat.message ||
+      `nyole a refusé la création de session (${reponse.status})`;
+    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+  }
+  if (!resultat.url || !resultat.id) {
+    throw new Error("Réponse nyole inattendue : ni url ni id de session");
+  }
+  return resultat;
+}
+
+/**
+ * Lit le statut d'une session nyole.
+ *
+ * `paid` ne vaut `true` que si `status === "SUCCESS"` — c'est le champ qui
+ * fait foi, pas la redirection du navigateur.
+ *
+ * @param {string} sessionId L'identifiant de session rendu à la création.
+ * @return {Promise<Object>} Le statut (`{status, paid, amount, ...}`).
+ */
+async function statutSessionNyole(sessionId) {
+  if (!NYOLE_CONFIG.SECRET_KEY) {
+    throw new Error("Clé secrète nyole absente (NYOLE_SECRET_KEY)");
+  }
+  const reponse = await fetch(
+      `${NYOLE_CONFIG.BASE_URL}/v1/checkout/sessions/${sessionId}/status`,
+      {headers: {"Authorization": `Bearer ${NYOLE_CONFIG.SECRET_KEY}`}},
+  );
+  const resultat = await reponse.json().catch(() => ({}));
+  if (!reponse.ok) {
+    const msg = resultat.error || resultat.message ||
+      `nyole n'a pas rendu le statut (${reponse.status})`;
+    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+  }
+  return resultat;
+}
+
+/**
+ * Vérifie la signature d'un webhook nyole.
+ *
+ * Schéma (doc nyole) : `HMAC-SHA256(secret, "<timestamp>.<corps brut>")` en
+ * hexadécimal, horodatage toléré 5 minutes. Les en-têtes portent encore le
+ * nom de marque historique `X-Afriflow-*` — ce n'est pas une coquille de notre
+ * côté, c'est bien ce que nyole envoie.
+ *
+ * Comparaison à temps constant : un `!==` fuit la position du premier octet
+ * divergent, ce qui suffit à reconstruire une signature valide octet par octet.
+ *
+ * @param {Object} entetes `req.headers`.
+ * @param {string} corpsBrut Le corps **brut**, pas l'objet reparsé.
+ * @param {string} secret La clé secrète du même mode que l'événement.
+ * @return {boolean} Vrai si la signature est authentique et fraîche.
+ */
+function signatureNyoleValide(entetes, corpsBrut, secret) {
+  if (!secret) return false;
+  const ts = entetes["x-afriflow-timestamp"];
+  const entete = String(entetes["x-afriflow-signature"] || "");
+  const sig = entete.split(",")
+      .find((p) => p.trim().startsWith("v1="))?.trim().slice(3);
+  if (!ts || !sig) return false;
+  if (Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false;
+  const attendu = crypto.createHmac("sha256", secret)
+      .update(`${ts}.${corpsBrut}`).digest("hex");
+  if (attendu.length !== sig.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(attendu), Buffer.from(sig));
+}
+
 /// Sommes-nous en bac à sable ? Déduit des clés elles-mêmes, et non d'un
 /// drapeau séparé qu'on oublierait de basculer : le jour où des clés `pk_live_`
 /// sont posées dans functions/.env, tout assouplissement réservé aux tests
