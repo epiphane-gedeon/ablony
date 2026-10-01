@@ -31,6 +31,7 @@ import '../../features/wallet/presentation/pages/wallet_statement_page.dart';
 import '../../features/wallet/presentation/pages/withdraw_page.dart';
 import '../../features/product_fav/presentation/pages/favorites_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
+import '../../features/payment/presentation/pages/payment_return_page.dart';
 import '../../features/address/presentation/pages/add_address_page.dart';
 import '../../features/payment_method/presentation/pages/payment_method_page.dart';
 import '../../features/relay_point/presentation/pages/select_relay_point_page.dart';
@@ -247,6 +248,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           '/search',
           '/searching',
           '/search-results',
+          // Retours de paiement : l'onglet ouvert par le fournisseur ne porte
+          // pas forcément la session (autre navigateur, mode privé). Le
+          // renvoyer vers l'onboarding juste après un débit serait le pire
+          // signal possible — et il n'y a rien de sensible sur ces pages.
+          '/paiement/success',
+          '/paiement/cancel',
         ];
 
         // Les fiches produit sont publiques (lecture Firestore ouverte, cf.
@@ -342,6 +349,26 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         name: 'onboarding',
         builder: (context, state) => const OnboardingPage(),
+      ),
+
+      // ============================================================
+      // ROUTES : RETOUR DE PAIEMENT
+      // ============================================================
+      /// Où le fournisseur de paiement renvoie le navigateur.
+      ///
+      /// Invisibles sur mobile (la WebView intercepte ces URLs sans les
+      /// charger), mais bien réelles sur le web où le paiement s'ouvre dans un
+      /// autre onglet. Sans ces routes, on atterrissait sur « Page non
+      /// trouvée » juste après avoir payé.
+      GoRoute(
+        path: '/paiement/success',
+        name: 'paiement-success',
+        builder: (context, state) => const PaymentReturnPage(reussi: true),
+      ),
+      GoRoute(
+        path: '/paiement/cancel',
+        name: 'paiement-cancel',
+        builder: (context, state) => const PaymentReturnPage(reussi: false),
       ),
 
       // ============================================================
