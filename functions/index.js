@@ -75,7 +75,7 @@ const NYOLE_WEBHOOK_SECRET = () => NYOLE_CONFIG.SECRET_KEY;
 let _cacheFournisseur = null;
 
 /**
- * Le fournisseur de paiement actif, lu dans `config/app.paymentProvider`.
+ * Le fournisseur de paiement actif pour cet utilisateur.
  *
  * Deux chemins coexistent dans `initiatePayment` : ce drapeau décide lequel
  * sert les **nouveaux** paiements. Les paiements déjà initiés restent
@@ -83,25 +83,40 @@ let _cacheFournisseur = null;
  * provenance (`nyoleSessionId` vs `geniusPayId`), donc revenir en arrière ne
  * laisse aucun paiement en cours orphelin.
  *
+ * `paymentProviderTestUsers` permet d'essayer un nouveau fournisseur en
+ * production **sans l'imposer à tout le monde** : seuls les comptes listés y
+ * passent. Sans ça, valider un fournisseur demanderait de basculer tous les
+ * utilisateurs d'un coup sur un parcours d'achat encore non vérifié.
+ *
  * Repli sur `geniuspay` : tant que personne n'a posé le drapeau, rien ne
  * change.
  *
+ * @param {string|null} userId L'utilisateur qui paie, pour la liste d'essai.
  * @return {Promise<string>} `"geniuspay"` ou `"nyole"`.
  */
-async function fournisseurPaiement() {
-  if (_cacheFournisseur && Date.now() - _cacheFournisseur.at < 60000) {
-    return _cacheFournisseur.nom;
+async function fournisseurPaiement(userId = null) {
+  if (!_cacheFournisseur || Date.now() - _cacheFournisseur.at >= 60000) {
+    let nom = "geniuspay";
+    let essai = [];
+    try {
+      const snap = await db.collection("config").doc("app").get();
+      const d = snap.exists ? snap.data() : {};
+      if (d.paymentProvider === "geniuspay" || d.paymentProvider === "nyole") {
+        nom = d.paymentProvider;
+      }
+      if (Array.isArray(d.paymentProviderTestUsers)) {
+        essai = d.paymentProviderTestUsers.map(String);
+      }
+    } catch (_) {
+      // Doc absent/illisible : repli sur le fournisseur historique.
+    }
+    _cacheFournisseur = {nom, essai, at: Date.now()};
   }
-  let nom = "geniuspay";
-  try {
-    const snap = await db.collection("config").doc("app").get();
-    const p = snap.exists ? snap.data().paymentProvider : null;
-    if (p === "geniuspay" || p === "nyole") nom = p;
-  } catch (_) {
-    // Doc absent/illisible : repli sur le fournisseur historique.
+  // Un compte d'essai passe chez nyole quel que soit le drapeau global.
+  if (userId && _cacheFournisseur.essai.includes(String(userId))) {
+    return "nyole";
   }
-  _cacheFournisseur = {nom, at: Date.now()};
-  return nom;
+  return _cacheFournisseur.nom;
 }
 
 /**
@@ -1990,7 +2005,7 @@ exports.initiatePayment = onRequest(async (req, res) => {
     // Rend exactement la même forme que le chemin GeniusPay
     // (`{reference, status, paymentUrl}`) : l'app Flutter ne voit aucune
     // différence, donc rien à changer côté client.
-    if (await fournisseurPaiement() === "nyole") {
+    if (await fournisseurPaiement(userId) === "nyole") {
       // Notre référence, générée avant l'appel : elle sert de clé
       // d'idempotence ET d'identifiant du document de transaction. La laisser
       // choisir par nyole obligerait à appeler d'abord, puis à écrire — et une
