@@ -67,3 +67,7 @@ functions/.env
 firestore-debug.log
 firebase-debug.log
 ui-debug.log
+
+# Cache de déploiement Firebase Hosting (régénéré à chaque déploiement,
+# ne rapporte rien en historique — pure churn)
+.firebase/
