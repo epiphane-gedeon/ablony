@@ -4454,6 +4454,202 @@ exports.deleteAttribute = onRequest(async (req, res) => {
 });
 
 // ============================================================================
+// WEBHOOK DE NYOLE
+// ============================================================================
+//
+// Distinct de `geniusPayWebhook` à dessein : les deux fournisseurs signent
+// différemment (noms d'en-têtes, format de l'en-tête de signature) et nomment
+// leurs événements autrement. Les mêler dans une seule fonction obligerait à
+// deviner lequel parle avant d'avoir vérifié la signature — c'est-à-dire à
+// faire confiance au corps de la requête avant de l'avoir authentifié.
+//
+// Sur le web, c'est ce webhook qui referme l'écran de paiement : la page
+// surveille `transactions/{reference}.status`. D'où l'écriture systématique
+// d'un statut final, succès comme échec — « pending » laissé en place
+// ferait tourner le sablier jusqu'au délai de patience alors que la réponse
+// est connue.
+
+exports.nyoleWebhook = onRequest(async (req, res) => {
+  const corpsBrut = req.rawBody ?
+    req.rawBody.toString("utf8") : JSON.stringify(req.body || {});
+
+  // La signature d'abord, avant de lire quoi que ce soit du corps : un
+  // webhook non authentifié peut déclarer n'importe quel paiement réussi.
+  if (!signatureNyoleValide(req.headers, corpsBrut, NYOLE_WEBHOOK_SECRET())) {
+    console.warn("[nyole] Signature de webhook invalide, requête rejetée");
+    return res.status(401).json({success: false, error: "Signature invalide"});
+  }
+
+  const evenement = req.body || {};
+  const nom = evenement.event;
+  const donnees = evenement.data || {};
+  const sessionId = donnees.id;
+  // `metadata.reference` est notre propre référence, posée à la création de la
+  // session : c'est le lien le plus direct vers le document de transaction.
+  let reference = donnees.metadata?.reference || null;
+
+  try {
+    // Le mode doit concorder : un événement de test ne doit jamais finaliser
+    // une transaction réelle, ni l'inverse.
+    if (evenement.livemode === true && MODE_BAC_A_SABLE_NYOLE) {
+      console.warn("[nyole] Événement live reçu avec des clés de test, ignoré");
+      return res.status(200).json({success: true, message: "Mode discordant"});
+    }
+
+    // Repli si la métadonnée manque : on retrouve la transaction par l'id de
+    // session. Plus coûteux, mais ça évite de perdre un paiement encaissé.
+    if (!reference && sessionId) {
+      const trouve = await db.collection("transactions")
+          .where("nyoleSessionId", "==", sessionId).limit(1).get();
+      if (!trouve.empty) reference = trouve.docs[0].id;
+    }
+
+    if (!reference) {
+      console.warn(`[nyole] Événement ${nom} sans référence exploitable`);
+      return res.status(200).json({success: true, message: "Référence absente"});
+    }
+
+    const snap = await db.collection("transactions").doc(reference).get();
+    if (!snap.exists) {
+      console.warn(`[nyole] Transaction ${reference} introuvable`);
+      return res.status(200).json({success: true, message: "Transaction inconnue"});
+    }
+    const transaction = snap.data();
+
+    // Déjà tranchée : on acquitte sans rejouer. nyole retente jusqu'à 10 fois
+    // sur ~72 h, et un même événement peut arriver deux fois.
+    if (transaction.status === "completed" || transaction.status === "failed") {
+      return res.status(200).json({success: true, message: "Déjà traitée"});
+    }
+
+    const statut = donnees.status;
+
+    if (nom === "payment.completed" || statut === "SUCCESS") {
+      // Le montant encaissé fait foi, pas le montant annoncé à la création.
+      const encaisse = Number(donnees.amount || 0);
+      const attendu = Number(transaction.amount);
+      if (encaisse < attendu) {
+        console.error(
+            `[nyole] ${reference} : encaissé ${encaisse} < attendu ${attendu}`);
+        await db.collection("transactions").doc(reference).update({
+          nyoleStatus: statut || null,
+          nyoleAmountMismatch: encaisse,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return res.status(200).json({
+          success: true, message: "Montant insuffisant, non finalisée",
+        });
+      }
+
+      await finaliserSelonType(transaction, reference);
+      console.log(`✅ [nyole] ${reference} finalisée (${nom})`);
+      return res.status(200).json({success: true, message: "Finalisée"});
+    }
+
+    if (nom === "payment.failed" || nom === "payment.cancelled" ||
+        statut === "FAILED" || statut === "CANCELLED") {
+      await db.collection("transactions").doc(reference).update({
+        status: "failed",
+        nyoleStatus: statut || null,
+        nyoleFailureMessage: donnees.failure_message || null,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      console.log(`[nyole] ${reference} marquée en échec (${nom})`);
+      return res.status(200).json({success: true, message: "Échec enregistré"});
+    }
+
+    // `payment.updated` (dont les remboursements) et le reste : on trace sans
+    // rien finaliser. Un remboursement se traite depuis l'espace nyole et
+    // suit le parcours de litige côté Ablony, pas un rappel automatique.
+    await db.collection("transactions").doc(reference).update({
+      nyoleStatus: statut || null,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return res.status(200).json({success: true, message: "Statut noté"});
+  } catch (erreur) {
+    console.error(`[nyole] Erreur de traitement (${nom}, ${reference}):`, erreur);
+    // 500 pour que nyole retente : l'échec est peut-être transitoire
+    // (Firestore indisponible), et l'événement ne doit pas être perdu.
+    return res.status(500).json({success: false, error: "Erreur interne"});
+  }
+});
+
+/**
+ * Lit et déclare auprès de nyole l'URL qui reçoit ses webhooks. Admin seul.
+ *
+ * `GET` sans corps renvoie la configuration courante ; passer `{set: true}`
+ * déclare notre fonction `nyoleWebhook`.
+ *
+ * Deux pièges que cet endpoint traite explicitement :
+ * - `mode` doit valoir `test` pour que les événements de **test** arrivent
+ *   chez nous. Avec des clés `af_test_` et un mode `live`, les webhooks de
+ *   test partiraient vers l'URL de production (souvent aucune) et les tests
+ *   paraîtraient muets.
+ * - `payment.cancelled` est plus récent que les premiers webhooks et doit
+ *   être demandé explicitement, sinon il n'est pas envoyé. On liste donc les
+ *   événements au lieu de s'en remettre au défaut.
+ */
+exports.nyoleConfigWebhook = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res);
+  if (!decoded) return;
+  if (await roleOf(decoded.uid) !== "admin") {
+    return res.status(403).json({
+      success: false, error: {message: "Réservé aux administrateurs"},
+    });
+  }
+  if (!NYOLE_CONFIG.SECRET_KEY) {
+    return res.status(400).json({
+      success: false,
+      error: {message: "Clé secrète nyole absente (NYOLE_SECRET_KEY)"},
+    });
+  }
+
+  const enTetes = {
+    "Authorization": `Bearer ${NYOLE_CONFIG.SECRET_KEY}`,
+    "Content-Type": "application/json",
+  };
+  const url = `${NYOLE_CONFIG.BASE_URL}/v1/config/webhook`;
+
+  try {
+    if ((req.body || {}).set === true) {
+      const notreUrl = "https://us-central1-ablony-a5db9.cloudfunctions.net/" +
+        "nyoleWebhook";
+      const r = await fetch(url, {
+        method: "PATCH",
+        headers: enTetes,
+        body: JSON.stringify({
+          webhookUrl: notreUrl,
+          mode: MODE_BAC_A_SABLE_NYOLE ? "test" : "live",
+          events: [
+            "payment.completed", "payment.failed",
+            "payment.cancelled", "payment.updated",
+          ],
+        }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        return res.status(r.status).json({success: false, error: data});
+      }
+      return res.json({
+        success: true,
+        data: {declare: notreUrl, mode: MODE_BAC_A_SABLE_NYOLE ? "test" : "live", nyole: data},
+      });
+    }
+
+    const r = await fetch(url, {headers: enTetes});
+    const data = await r.json().catch(() => ({}));
+    return res.status(r.ok ? 200 : r.status).json({
+      success: r.ok,
+      data: r.ok ? {sandbox: MODE_BAC_A_SABLE_NYOLE, nyole: data} : undefined,
+      error: r.ok ? undefined : data,
+    });
+  } catch (e) {
+    console.error("nyoleConfigWebhook:", e);
+    return res.status(500).json({success: false, error: {message: e.message}});
+  }
+});
+
+// ============================================================================
 // APERÇU DE LIEN PARTAGÉ (Open Graph / Twitter Cards)
 // ============================================================================
 //
