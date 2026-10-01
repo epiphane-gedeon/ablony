@@ -175,6 +175,43 @@ Le drapeau a été remis à `geniuspay` après les tests : il serait imprudent d
 laisser la production sur un fournisseur dont le parcours d'achat n'est pas
 encore vérifié.
 
+### 6 ter. Limite découverte : le moyen de paiement n'est pas pilotable
+
+Constaté en test réel (l'utilisateur choisit Flooz dans Ablony, la page nyole
+présélectionne T-Money), puis vérifié contre l'API :
+
+- `CreateCheckoutSessionRequest` **n'a aucun champ** de moyen de paiement,
+  d'opérateur ou de passerelle. Les champs `payment_method`, `paymentMethod` et
+  `operator` passés malgré tout (`additionalProperties: true`) sont
+  **silencieusement ignorés**.
+- `GET /sessions/{id}/methods?country=tg` rend toujours le même ordre :
+  `t-money-togo → flooz-togo → card-xof-stripe`. La page présélectionne le
+  premier.
+- Le préfixe du `customer_phone` **ne change rien** : testé avec un numéro
+  Moov (`+22879…`) et un numéro Togocom (`+22890…`), ordre identique.
+
+Deux conséquences, l'une d'ergonomie, l'autre d'argent :
+
+1. **Le sélecteur de moyen de paiement d'Ablony devient mensonger** sur le
+   chemin nyole : le choix de l'utilisateur est jeté, et il doit re-choisir sur
+   la page nyole où le défaut est T-Money. Quelqu'un qui ne regarde pas paiera
+   avec le mauvais opérateur.
+2. **On perd le levier de routage par coût.** Avec GeniusPay, `passerellePour()`
+   envoie la carte chez Paystack et économise cinq points par rapport à
+   PaiementPro (cf. commentaire dans `functions/index.js`). Chez nyole, c'est
+   **le client qui choisit** : ce levier n'existe plus. À noter, les passerelles
+   nyole au Togo diffèrent aussi — PayDunya pour le mobile money, Stripe pour
+   les cartes.
+
+Correctifs possibles si l'on continue avec nyole :
+- **(a)** Masquer l'étape « moyen de paiement » dans Ablony quand nyole est
+  actif, et annoncer « vous choisirez sur la page sécurisée ». Honnête, demande
+  d'exposer le fournisseur actif au client et un rebuild.
+- **(b)** Garder l'étape à titre indicatif — déconseillé : c'est précisément ce
+  qui a produit l'incohérence constatée.
+- **(c)** Demander à nyole s'il existe un paramètre de présélection non
+  documenté.
+
 ### 7. Bascule prudente
 - Flag `paymentProvider` à `"nyole"` d'abord en interne (compte de test réel,
   petit montant) avant tout utilisateur.
