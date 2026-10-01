@@ -16,6 +16,14 @@
             ],
             "rewrites": [
                 {
+                    "comment": "Aperçu de lien (Open Graph/Twitter) pour les produits partagés : sert index.html avec les balises méta du produit injectées côté serveur, car les crawlers n'exécutent pas le JS du SPA.",
+                    "source": "/product/**",
+                    "function": {
+                        "functionId": "productShare",
+                        "region": "us-central1"
+                    }
+                },
+                {
                     "source": "**",
                     "destination": "/index.html"
                 }

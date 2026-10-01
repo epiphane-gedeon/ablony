@@ -4135,6 +4135,129 @@ exports.deleteAttribute = onRequest(async (req, res) => {
 });
 
 // ============================================================================
+// APERÇU DE LIEN PARTAGÉ (Open Graph / Twitter Cards)
+// ============================================================================
+//
+// L'app web est un SPA Flutter : les crawlers (Facebook, WhatsApp, Twitter,
+// iMessage, LinkedIn…) n'exécutent pas le JS, donc des balises méta injectées
+// côté client ne seraient jamais lues. Le hosting réécrit `/product/**` vers
+// cette fonction, qui sert le VRAI index.html du build en y injectant les
+// balises og:/twitter: du produit (titre, prix, 1re photo). Résultat : le
+// crawler voit une carte correcte, et un navigateur réel reçoit un index.html
+// complet qui démarre Flutter normalement (base href = "/") — pas de
+// redirection, pas de boucle, pas de reniflage d'User-Agent.
+
+const OG_HOST = "https://ablony-a5db9.web.app";
+const OG_IMAGE_DEFAUT = `${OG_HOST}/icons/Icon-512.png`;
+let _indexHtmlCache = {html: null, at: 0};
+
+/** Échappe le texte destiné à un attribut HTML (guillemets inclus). */
+function escapeAttr(s) {
+  return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+/** Récupère l'index.html déployé (mémoïsé 10 min pour éviter un aller-retour). */
+async function indexHtmlTemplate() {
+  const frais = Date.now() - _indexHtmlCache.at < 10 * 60 * 1000;
+  if (_indexHtmlCache.html && frais) return _indexHtmlCache.html;
+  const r = await fetch(`${OG_HOST}/index.html`, {
+    headers: {"User-Agent": "AblonyOG/1.0"},
+  });
+  if (!r.ok) throw new Error(`index.html indisponible (${r.status})`);
+  const html = await r.text();
+  _indexHtmlCache = {html, at: Date.now()};
+  return html;
+}
+
+/** Construit le bloc de balises méta pour un produit (ou l'aperçu par défaut). */
+function balisesOg({url, title, description, image}) {
+  const t = escapeAttr(title);
+  const d = escapeAttr(description);
+  const img = escapeAttr(image);
+  const u = escapeAttr(url);
+  return [
+    `<meta property="og:type" content="product">`,
+    `<meta property="og:site_name" content="Ablony">`,
+    `<meta property="og:title" content="${t}">`,
+    `<meta property="og:description" content="${d}">`,
+    `<meta property="og:image" content="${img}">`,
+    `<meta property="og:url" content="${u}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<meta name="twitter:title" content="${t}">`,
+    `<meta name="twitter:description" content="${d}">`,
+    `<meta name="twitter:image" content="${img}">`,
+  ].join("\n  ");
+}
+
+/** Injecte les balises + titre dans l'index.html (remplace les valeurs par défaut). */
+function injecterOg(template, {title, description, ogBlock}) {
+  let html = template;
+  // Remplace le <title> et la description génériques d'Ablony.
+  html = html.replace(
+      /<title>[^<]*<\/title>/i, `<title>${escapeAttr(title)}</title>`);
+  html = html.replace(
+      /<meta\s+name="description"\s+content="[^"]*"\s*>/i,
+      `<meta name="description" content="${escapeAttr(description)}">`);
+  // Insère le bloc og:/twitter: juste avant </head>.
+  return html.replace(/<\/head>/i, `  ${ogBlock}\n</head>`);
+}
+
+exports.productShare = onRequest(async (req, res) => {
+  // Ne jamais bloquer l'ouverture d'un lien : toute erreur retombe sur l'app.
+  try {
+    const segments = (req.path || "").split("/").filter(Boolean);
+    const id = segments[segments.length - 1] || "";
+    const template = await indexHtmlTemplate();
+    const url = `${OG_HOST}/product/${id}`;
+
+    let meta = {
+      url,
+      title: "Ablony",
+      description: "Achetez et vendez la mode d'occasion au Togo et au Bénin.",
+      image: OG_IMAGE_DEFAUT,
+    };
+
+    if (id) {
+      const snap = await db.collection("products").doc(id).get();
+      if (snap.exists) {
+        const p = snap.data() || {};
+        const cache = String(p.moderationStatus || "") === "rejected" ||
+          p.isRemoved === true;
+        if (!cache) {
+          const images = Array.isArray(p.imageUrls) ? p.imageUrls : [];
+          const prix = Math.round(Number(p.price || 0));
+          const titre = String(p.title || "Article").trim() || "Article";
+          const desc = String(p.description || "").trim();
+          meta = {
+            url,
+            title: prix > 0 ? `${titre} — ${prix} FCFA` : titre,
+            description: desc.length > 200 ? `${desc.slice(0, 197)}…` :
+              (desc || "Découvrez cet article sur Ablony."),
+            image: images[0] || OG_IMAGE_DEFAUT,
+          };
+        }
+      }
+    }
+
+    const ogBlock = balisesOg(meta);
+    const html = injecterOg(template, {
+      title: meta.title, description: meta.description, ogBlock,
+    });
+
+    res.set("Content-Type", "text/html; charset=utf-8");
+    // Le CDN garde l'aperçu 10 min ; le navigateur revalide.
+    res.set("Cache-Control", "public, max-age=0, s-maxage=600");
+    return res.status(200).send(html);
+  } catch (e) {
+    console.error("productShare:", e);
+    // Repli : rediriger vers l'app pour ne pas casser le lien.
+    return res.redirect(302, `${OG_HOST}/`);
+  }
+});
+
+// ============================================================================
 // LES DEUX DÉNOUEMENTS D'UNE VENTE
 // ============================================================================
 //
