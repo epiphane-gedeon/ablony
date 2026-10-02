@@ -3575,7 +3575,7 @@ abstract class AppLocalizations {
   /// No description provided for @withdrawFeeExplained.
   ///
   /// In fr, this message translates to:
-  /// **'Ces frais couvrent le transfert vers votre compte mobile money. Ils sont proportionnels au montant retiré, et plafonnés.'**
+  /// **'Ces frais couvrent le transfert vers votre compte mobile money. Ils sont proportionnels au montant retiré.'**
   String get withdrawFeeExplained;
 
   /// No description provided for @withdrawInsufficient.

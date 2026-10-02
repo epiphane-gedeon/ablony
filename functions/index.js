@@ -5730,17 +5730,21 @@ function memeTableau(a, b) {
 //
 // La réserve posée plus haut reste vraie et n'a pas disparu : à 5 %, on est
 // plus près d'une commission que de frais de transfert, et c'est ressenti au
-// moment le plus sensible — quand le vendeur touche son argent. D'où le
-// plafond, qui évite qu'un gros retrait paraisse puni, et l'affichage du net
-// **avant** validation (withdraw_page.dart).
+// moment le plus sensible — quand le vendeur touche son argent. D'où
+// l'affichage du net **avant** validation (withdraw_page.dart).
 //
-//   2 000 F →   100 F  (5,0 %)
-//  10 000 F →   500 F  (5,0 %)
-//  50 000 F → 2 500 F  (5,0 %)
-// 200 000 F → 5 000 F  (2,5 %)   ← plafonné
+// **Pas de plafond.** Un plafond avait été posé à 5 000 F, puis retiré : le
+// coût de sortie étant lui-même proportionnel (2,5 % chez nyole), plafonner
+// les frais ouvrait une zone de perte au-delà de 200 000 F — 12 500 F de coût
+// pour 5 000 F facturés sur un retrait de 500 000. Un taux plat n'a pas ce
+// défaut, et s'explique en une phrase.
+//
+//   2 000 F →   100 F  (5 %)
+//  10 000 F →   500 F  (5 %)
+//  50 000 F → 2 500 F  (5 %)
+// 500 000 F → 25 000 F (5 %)
 const WITHDRAWAL_FEE_FIXED_XOF = 0;
 const WITHDRAWAL_FEE_RATE = 0.05;
-const WITHDRAWAL_FEE_CAP_XOF = 5000;
 
 /** En dessous, les frais pèsent trop lourd dans le montant retiré. */
 const WITHDRAWAL_MIN_XOF = 2000;
@@ -5755,9 +5759,8 @@ const WITHDRAWAL_MIN_XOF = 2000;
  * @return {number} Les frais, en FCFA.
  */
 function withdrawalFee(montant) {
-  const brut = WITHDRAWAL_FEE_FIXED_XOF +
+  return WITHDRAWAL_FEE_FIXED_XOF +
     Math.ceil(montant * WITHDRAWAL_FEE_RATE);
-  return Math.min(brut, WITHDRAWAL_FEE_CAP_XOF);
 }
 
 /** Un retrait tranché ne se retranche pas. */

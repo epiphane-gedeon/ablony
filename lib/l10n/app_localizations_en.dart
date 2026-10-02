@@ -1883,7 +1883,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get withdrawFeeExplained =>
-      'This fee covers the transfer to your mobile money account. It is proportional to the amount withdrawn, and capped.';
+      'This fee covers the transfer to your mobile money account. It is proportional to the amount withdrawn.';
 
   @override
   String get withdrawInsufficient =>

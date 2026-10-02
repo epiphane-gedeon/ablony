@@ -91,12 +91,17 @@ l'essentiel du modèle**, la protection ne laissant que 0,7 %.
 | 2 000 F | 100 F (5,0 %) | 1 900 F |
 | 10 000 F | 500 F (5,0 %) | 9 500 F |
 | 50 000 F | 2 500 F (5,0 %) | 47 500 F |
-| 200 000 F | 5 000 F (2,5 %) | 195 000 F ← plafonné |
+| 500 000 F | 25 000 F (5,0 %) | 475 000 F |
+
+**Pas de plafond.** Un plafond à 5 000 F avait été posé, puis retiré : le coût
+de sortie étant lui-même proportionnel (2,5 %), plafonner les frais ouvrait une
+zone de perte au-delà de 200 000 F — 12 500 F de coût pour 5 000 F facturés sur
+un retrait de 500 000.
 
 **La réserve à garder en tête :** à 5 %, on est plus près d'une commission que
 de frais de transfert, et c'est ressenti au moment le plus sensible — quand le
-vendeur touche son argent. D'où le plafond et l'affichage du net **avant**
-validation. Si les vendeurs regimbent, c'est le premier taux à revoir.
+vendeur touche son argent. D'où l'affichage du net **avant** validation. Si les
+vendeurs regimbent, c'est le premier taux à revoir.
 
 ## La boucle recharge → retrait
 

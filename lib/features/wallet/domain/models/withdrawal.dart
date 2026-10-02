@@ -118,15 +118,13 @@ abstract final class WithdrawalFees {
   // annonce les frais avant validation, le serveur les prélève. Un écart et le
   // vendeur voit un net à l'écran puis en reçoit un autre — exactement la
   // promesse qu'il ne faut pas casser.
+  // Pas de plafond : le coût de sortie étant lui-même proportionnel, plafonner
+  // les frais ouvrirait une zone de perte sur les gros retraits.
   static const int minimumXof = 2000;
   static const int fixedXof = 0;
   static const double rate = 0.05;
-  static const int capXof = 5000;
 
-  static int of(int amountXof) {
-    final brut = fixedXof + (amountXof * rate).ceil();
-    return brut < capXof ? brut : capXof;
-  }
+  static int of(int amountXof) => fixedXof + (amountXof * rate).ceil();
 
   static int netOf(int amountXof) => amountXof - of(amountXof);
 }
