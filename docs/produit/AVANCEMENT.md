@@ -619,3 +619,25 @@ paiement partirait vers un numéro qui n'est pas le sien. Sans effet aujourd'hui
 (zone limitée au Togo), bloquant le jour où le Bénin ouvre. Correctif : ajouter
 un `dialCode` à l'enum `Country` et l'utiliser au lieu du littéral. Repéré le
 2026-10-01 en relisant le formatage du téléphone pour nyole.
+
+**Audit de mise en service Togo (2026-10-02).** Plateforme jugée utilisable sur
+le web. Vérifications faites sur données réelles, pas sur hypothèse :
+- **Parcours d'achat via nyole testé de bout en bout** (le dernier maillon non
+  vérifié) : transaction `completed`, produit marqué vendu, vendeur crédité en
+  séquestre, colis créé. Testé sans dépense réelle, en rejouant un webhook
+  signé sur une transaction nyole reconstituée ; fixtures supprimées ensuite.
+- Mode `beg`, paiement `nyole`, 0 point relais actif (cohérent : porte-à-porte
+  au lancement), 8 catégories / 253 sous-catégories, 16 produits disponibles,
+  24 membres à Lomé, aucun litige ni retrait en attente.
+- **Trou connu, non bloquant mais certain d'arriver** : en auto-expédition, si
+  l'acheteur ne confirme jamais la réception, l'argent du vendeur reste bloqué.
+  La libération automatique (3 j) exige un colis `delivered`, qui suppose un
+  scan d'agent ou la confirmation de l'acheteur — or l'auto-expédition n'a pas
+  d'agent. Et `rembourserDepotsNonFaits` ignore les colis en auto-expédition
+  approuvée. Ni libération, ni remboursement : déblocage manuel par l'admin
+  (crédit manuel ou résolution de litige) en attendant un correctif.
+- **Mobile** : 1.0.2+6 jamais publié et désormais périmé (protection 5 % en dur
+  contre 6 % sur le web). Release **1.0.3+7** lancée.
+- Restent ouverts : taux réel sur carte (Stripe) non mesuré ;
+  `PROTECTION_RATE_LEGACY` à retirer quand le parc mobile aura basculé ;
+  indicatif Bénin forcé à +228 ; `ablony_admin` toujours sans dépôt git.
