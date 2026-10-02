@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/services/analytics_service.dart';
+import '../../../delivery/domain/models/delivery_pricing.dart';
 import '../../../../shared/widgets/user_badges.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/buttons/buttons.dart';
@@ -622,7 +623,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           Row(
                             children: [
                               Text(
-                                '${(product.price * 1.05).toStringAsFixed(2)} FCFA ${AppLocalizations.of(context)!.priceIncl} ',
+                                // Taux pris sur DeliveryPricing, jamais écrit
+                                // en dur : la fiche doit annoncer le prix que
+                                // le panier facturera.
+                                '${(product.price * (1 + DeliveryPricing.protectionRate)).toStringAsFixed(2)} FCFA ${AppLocalizations.of(context)!.priceIncl} ',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.primary,
                                 ),

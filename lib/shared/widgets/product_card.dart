@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/delivery/domain/models/delivery_pricing.dart';
 import '../../features/product/domain/entities/product.dart';
 import '../../features/product/presentation/providers/product_provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -61,8 +62,11 @@ class ProductCard extends ConsumerWidget {
         sizeAttributeId ?? product?.primarySizeAttributeId ?? 'size';
     final effectiveCondition = condition ?? product?.condition.index;
     final effectivePrice = product?.price ?? price;
+    // Le taux vient de DeliveryPricing, jamais d'un littéral : écrit en dur
+    // ici, il affichait encore 5 % alors que l'achat en facturait 6 % — le
+    // prix annoncé sur la carte n'était plus celui payé au panier.
     final effectivePriceWithProtection = product != null
-        ? product!.price * 1.05
+        ? product!.price * (1 + DeliveryPricing.protectionRate)
         : priceWithProtection;
 
     // Résolution dynamique des libellés (index -> label ou string -> string)

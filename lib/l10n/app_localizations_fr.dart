@@ -1893,7 +1893,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get withdrawFeeExplained =>
-      'Ces frais couvrent le transfert vers votre compte mobile money. Retirer une grosse somme d\'un coup coûte proportionnellement moins cher.';
+      'Ces frais couvrent le transfert vers votre compte mobile money. Ils sont proportionnels au montant retiré, et plafonnés.';
 
   @override
   String get withdrawInsufficient =>

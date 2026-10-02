@@ -2296,7 +2296,7 @@
   "withdrawAmountRequested": "Requested amount",
   "withdrawFee": "Transfer fee",
   "withdrawYouReceive": "You receive",
-  "withdrawFeeExplained": "This fee covers the transfer to your mobile money account. Withdrawing a larger amount at once costs proportionally less.",
+  "withdrawFeeExplained": "This fee covers the transfer to your mobile money account. It is proportional to the amount withdrawn, and capped.",
   "withdrawInsufficient": "Your available balance does not cover this amount.",
   "withdrawAlreadyPending": "A request is already being processed. You can make another, but they will be paid out separately.",
   "withdrawConfirm": "Request withdrawal",
