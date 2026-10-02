@@ -2477,7 +2477,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paymentSecuredNotice =>
-      'Vos informations sont chiffrées et sécurisées.';
+      'Vos informations sont chiffrées et sécurisées par nyole.';
 
   @override
   String get paymentOpenFailed =>

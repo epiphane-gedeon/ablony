@@ -4634,10 +4634,10 @@ abstract class AppLocalizations {
   /// **'Annuler le paiement'**
   String get paymentCancel;
 
-  /// Reassurance shown under the pay button. Deliberately names no provider: it is switchable server-side, and a stale name would be worse than none.
+  /// Reassurance shown under the pay button. Names the active payment provider (nyole); update it if the provider changes.
   ///
   /// In fr, this message translates to:
-  /// **'Vos informations sont chiffrées et sécurisées.'**
+  /// **'Vos informations sont chiffrées et sécurisées par nyole.'**
   String get paymentSecuredNotice;
 
   /// Parcours de paiement sur navigateur

@@ -2681,9 +2681,9 @@
     "description": "Parcours de paiement sur navigateur"
   },
   "paymentCancel": "Cancel payment",
-  "paymentSecuredNotice": "Your information is encrypted and secure.",
+  "paymentSecuredNotice": "Your information is encrypted and secured by nyole.",
   "@paymentSecuredNotice": {
-    "description": "Reassurance shown under the pay button. Deliberately names no provider: it is switchable server-side, and a stale name would be worse than none."
+    "description": "Reassurance shown under the pay button. Names the active payment provider (nyole); update it if the provider changes."
   },
   "@paymentCancel": {
     "description": "Parcours de paiement sur navigateur"

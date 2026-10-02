@@ -1063,10 +1063,10 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                         SizedBox(width: screenWidth * 0.01),
                         Flexible(
                           child: Text(
-                            // Ne nomme aucun prestataire : il se change côté
-                            // serveur par un drapeau, et un nom périmé sous le
-                            // bouton « payer » inspirerait moins confiance que
-                            // pas de nom du tout.
+                            // Nomme le prestataire actif (nyole). À mettre à
+                            // jour si le drapeau serveur change de
+                            // fournisseur : un nom périmé sous le bouton
+                            // « payer » se remarque.
                             AppLocalizations.of(context)!.paymentSecuredNotice,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(

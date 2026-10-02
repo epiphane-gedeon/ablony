@@ -2457,7 +2457,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentSecuredNotice =>
-      'Your information is encrypted and secure.';
+      'Your information is encrypted and secured by nyole.';
 
   @override
   String get paymentOpenFailed =>
