@@ -15,8 +15,8 @@ class PaymentService {
 
   /// Initie un paiement auprès de nyole via la Cloud Function.
   ///
-  /// Le prestataire est choisi **côté serveur** par un drapeau (nyole par
-  /// défaut, GeniusPay encore activable) : le client ne le connaît pas.
+  /// Le prestataire est choisi **côté serveur** : le client ne le connaît
+  /// pas et n'a pas à le connaître.
   ///
   /// [delivery] est obligatoire pour un achat : le serveur refuse une commande
   /// sans destination exploitable, et vérifie le point relais **avant** tout

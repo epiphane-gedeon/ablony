@@ -62,8 +62,7 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
             setState(() {
               _isLoading = false;
             });
-            // Détecter les URLs de retour de nyole (ou de GeniusPay, encore
-            // activable par le drapeau serveur)
+            // Détecter les URLs de retour de nyole
             // afin de fermer automatiquement la WebView avec le bon résultat.
             if (url.contains('success') || url.contains('completed') || url.contains('callback')) {
               Navigator.of(context).pop(true);
