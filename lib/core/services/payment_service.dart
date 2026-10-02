@@ -13,7 +13,10 @@ class PaymentService {
   static const String _applyBoostUrl =
       'https://us-central1-ablony-a5db9.cloudfunctions.net/applyBoost';
 
-  /// Initie un paiement auprès de GeniusPay via la Cloud Function.
+  /// Initie un paiement via la Cloud Function.
+  ///
+  /// Le prestataire (nyole, GeniusPay) est choisi **côté serveur** par un
+  /// drapeau : le client ne le connaît pas et n'a pas à le connaître.
   ///
   /// [delivery] est obligatoire pour un achat : le serveur refuse une commande
   /// sans destination exploitable, et vérifie le point relais **avant** tout
@@ -81,7 +84,7 @@ class PaymentService {
   }
 
   /// Confirme un paiement après retour de la WebView.
-  /// Vérifie le statut auprès de GeniusPay et finalise la transaction
+  /// Vérifie le statut auprès du prestataire et finalise la transaction
   /// (débit wallet, crédit pendingAmount vendeur, produit marqué vendu).
   Future<Map<String, dynamic>> confirmPayment({
     required String reference,

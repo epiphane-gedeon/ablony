@@ -4634,6 +4634,12 @@ abstract class AppLocalizations {
   /// **'Annuler le paiement'**
   String get paymentCancel;
 
+  /// Reassurance shown under the pay button. Deliberately names no provider: it is switchable server-side, and a stale name would be worse than none.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos informations sont chiffrées et sécurisées.'**
+  String get paymentSecuredNotice;
+
   /// Parcours de paiement sur navigateur
   ///
   /// In fr, this message translates to:

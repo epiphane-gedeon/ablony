@@ -20,8 +20,8 @@ import '../../../../l10n/app_localizations.dart';
 /// gris vide, et le paiement était impossible depuis un navigateur. On y ouvre
 /// la page de paiement dans un nouvel onglet, et on **surveille la transaction
 /// en base** : c'est le serveur qui dit si elle a abouti, prévenu par le
-/// webhook de GeniusPay. Cela vaut mieux que de se fier au retour de
-/// l'utilisateur, qui peut fermer l'onglet à tout moment.
+/// webhook du prestataire de paiement. Cela vaut mieux que de se fier au
+/// retour de l'utilisateur, qui peut fermer l'onglet à tout moment.
 class PaymentWebViewPage extends StatefulWidget {
   final String url;
   final String title;
@@ -62,7 +62,7 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
             setState(() {
               _isLoading = false;
             });
-            // Détecter les URLs de callback/redirection de GeniusPay ou Paystack
+            // Détecter les URLs de retour du prestataire de paiement
             // afin de fermer automatiquement la WebView avec le bon résultat.
             if (url.contains('success') || url.contains('completed') || url.contains('callback')) {
               Navigator.of(context).pop(true);

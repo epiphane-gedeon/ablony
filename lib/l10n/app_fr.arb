@@ -2705,6 +2705,10 @@
     "description": "Parcours de paiement sur navigateur"
   },
   "paymentCancel": "Annuler le paiement",
+  "paymentSecuredNotice": "Vos informations sont chiffrées et sécurisées.",
+  "@paymentSecuredNotice": {
+    "description": "Reassurance shown under the pay button. Deliberately names no provider: it is switchable server-side, and a stale name would be worse than none."
+  },
   "@paymentCancel": {
     "description": "Parcours de paiement sur navigateur"
   },

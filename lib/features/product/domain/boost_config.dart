@@ -2,7 +2,7 @@
 ///
 /// Un boost est un **service numérique consommé dans l'application**. Google
 /// Play et l'App Store imposent leur propre système de facturation pour ce
-/// type d'achat — pas un prestataire tiers comme GeniusPay. Les articles du
+/// type d'achat — pas un prestataire de paiement tiers. Les articles du
 /// marketplace, eux, sont des biens **physiques** : ils restent exemptés, et
 /// leur paiement ne change pas.
 ///
@@ -17,8 +17,8 @@ bool get boostsDisponibles => true;
 /// Un boost est une **mise en avant d'annonce** — un service de promotion vendu
 /// à un vendeur pour vendre un bien physique, comme le « Bump » de Vinted ou les
 /// « promoted listings » d'eBay/Etsy, historiquement facturés par le paiement
-/// maison sans Play Billing. On l'active donc partout, payé via GeniusPay (qui
-/// prend T-Money/Flooz).
+/// maison sans Play Billing. On l'active donc partout, payé par le
+/// prestataire de paiement (qui prend T-Money/Flooz).
 ///
 /// Zone grise assumée : Google *pourrait* le classer en contenu numérique et
 /// exiger Play Billing. Le pire cas est un refus de version, réversible en

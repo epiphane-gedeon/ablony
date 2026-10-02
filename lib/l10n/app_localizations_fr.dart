@@ -2476,6 +2476,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paymentCancel => 'Annuler le paiement';
 
   @override
+  String get paymentSecuredNotice =>
+      'Vos informations sont chiffrées et sécurisées.';
+
+  @override
   String get paymentOpenFailed =>
       'Impossible d\'ouvrir la page de paiement. Votre navigateur a peut-être bloqué la fenêtre — autorisez-la, puis réessayez.';
 
