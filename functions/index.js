@@ -265,7 +265,15 @@ const DELIVERY_CONFIG = {
   // chez lui au lieu de le déposer en relais. Défaut de repli ; le vrai tarif
   // vient de la sous-catégorie, sinon du défaut modifiable en admin.
   PICKUP_FEE_XOF: 1500,
-  PROTECTION_RATE: 0.05,
+  // Protection acheteur. Portée à 6 % le 2026-10-02 : nyole prélève 5 % sur
+  // TOUT ce qui transite (prix + protection), donc le taux plancher pour ne
+  // pas perdre d'argent est 5 / 95 = 5,27 %, et non 5 %. À 6 %, la marge nette
+  // est de 0,7 % du prix de l'article. Voir docs/produit/27-economie-frais.md.
+  PROTECTION_RATE: 0.06,
+  // Le taux qu'appliquent encore les clients déjà installés, qui le portent en
+  // dur. Le serveur accepte les deux le temps que le parc se mette à jour :
+  // refuser l'ancien bloquerait tout achat depuis une app non mise à jour.
+  PROTECTION_RATE_LEGACY: 0.05,
   // Du paiement au dépôt. Au-delà, l'acheteur doit être remboursé : il n'a
   // pas à attendre indéfiniment un colis qui n'est jamais parti.
   DROPOFF_DEADLINE_DAYS: 5,
@@ -1735,24 +1743,46 @@ exports.initiatePayment = onRequest(async (req, res) => {
     const partPorteMonnaie = walletDeduction != null ? Number(walletDeduction) : 0;
     const totalAnnonce = Number(amount) + partPorteMonnaie;
 
+    // Transition de taux de protection (5 % → 6 %).
+    //
+    // Les clients déjà installés portent l'ancien taux en dur : exiger le
+    // nouveau ferait échouer **tous** leurs achats avec « montant incohérent ».
+    // On accepte donc aussi l'ancien total, et on facture alors ce qui a été
+    // affiché — faire payer 6 % à qui en a vu 5 % serait pire que l'écart de
+    // marge. À retirer quand le parc installé aura basculé.
+    const attenduLegacy = Math.round(
+        productPrice +
+      productPrice * DELIVERY_CONFIG.PROTECTION_RATE_LEGACY +
+      deliveryChoice.feeXof,
+    );
+
+    let totalRetenu = attendu;
     if (Math.abs(totalAnnonce - attendu) > 1) {
-      return res.status(400).json({
-        success: false,
-        error: {message: `Montant incohérent : ${attendu} FCFA attendus`},
-      });
+      if (Math.abs(totalAnnonce - attenduLegacy) <= 1) {
+        totalRetenu = attenduLegacy;
+        console.log(
+            `[protection] Client à l'ancien taux (${attenduLegacy} au lieu de ` +
+          `${attendu}) pour ${productId || "?"} — toléré.`);
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: {message: `Montant incohérent : ${attendu} FCFA attendus`},
+        });
+      }
     }
 
-    // Le montant qui fait foi est le total attendu (entier). On aligne dessus
-    // ce qui sera débité/stocké, pour qu'aucun demi-franc issu de l'affichage
+    // Le montant qui fait foi est le total retenu (entier) — celui du nouveau
+    // taux, ou de l'ancien si le client en est encore là. On aligne dessus ce
+    // qui sera débité/stocké, pour qu'aucun demi-franc issu de l'affichage
     // client ne parvienne au solde ni au reçu. En wallet-only, la déduction est
     // le total ; en mixte, on garde la part externe entière et on complète au
-    // porte-monnaie pour retomber exactement sur `attendu`.
+    // porte-monnaie pour retomber exactement dessus.
     if (walletDeduction != null && Number(walletDeduction) > 0) {
       const partExterne = Math.round(Number(amount) || 0);
-      walletDeduction = Math.max(0, attendu - partExterne);
-      amount = partExterne > 0 ? partExterne : attendu;
+      walletDeduction = Math.max(0, totalRetenu - partExterne);
+      amount = partExterne > 0 ? partExterne : totalRetenu;
     } else {
-      amount = attendu;
+      amount = totalRetenu;
     }
   }
 
@@ -5687,12 +5717,30 @@ function memeTableau(a, b) {
 //  50 000 F →  600 F  (1,2 %)
 // 200 000 F → 2 100 F (1,1 %)   ← plafonné
 //
-// **À confirmer** contre les tarifs réels de T-Money et Flooz : au-delà d'un
-// certain montant, leurs frais plafonnent, et un pourcentage nu vous ferait
-// facturer plus que votre coût.
-const WITHDRAWAL_FEE_FIXED_XOF = 100;
-const WITHDRAWAL_FEE_RATE = 0.01;
-const WITHDRAWAL_FEE_CAP_XOF = 2100;
+// **Révisé le 2026-10-02**, en même temps que le passage à nyole.
+//
+// L'ancienne grille (100 F + 1 %, soit 200 F sur 10 000) était en dessous du
+// coût réel : sortir l'argent de nyole coûte 2,5 % au Togo, soit 245 F sur ce
+// même retrait. Chaque versement perdait donc de l'argent.
+//
+// À 5 %, le retrait couvre ce coût et dégage une marge — c'est d'ailleurs lui
+// qui porte l'essentiel du modèle : la protection acheteur ne laisse que 0,7 %
+// du prix, le retrait en apporte environ 2,6 %. Voir
+// docs/produit/27-economie-frais.md.
+//
+// La réserve posée plus haut reste vraie et n'a pas disparu : à 5 %, on est
+// plus près d'une commission que de frais de transfert, et c'est ressenti au
+// moment le plus sensible — quand le vendeur touche son argent. D'où le
+// plafond, qui évite qu'un gros retrait paraisse puni, et l'affichage du net
+// **avant** validation (withdraw_page.dart).
+//
+//   2 000 F →   100 F  (5,0 %)
+//  10 000 F →   500 F  (5,0 %)
+//  50 000 F → 2 500 F  (5,0 %)
+// 200 000 F → 5 000 F  (2,5 %)   ← plafonné
+const WITHDRAWAL_FEE_FIXED_XOF = 0;
+const WITHDRAWAL_FEE_RATE = 0.05;
+const WITHDRAWAL_FEE_CAP_XOF = 5000;
 
 /** En dessous, les frais pèsent trop lourd dans le montant retiré. */
 const WITHDRAWAL_MIN_XOF = 2000;

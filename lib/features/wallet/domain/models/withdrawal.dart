@@ -114,10 +114,14 @@ class Withdrawal extends Equatable {
 ///
 /// Doit rester identique à `withdrawalFee` dans `functions/index.js`.
 abstract final class WithdrawalFees {
+  // À garder synchrone avec functions/index.js (WITHDRAWAL_FEE_*) : cet écran
+  // annonce les frais avant validation, le serveur les prélève. Un écart et le
+  // vendeur voit un net à l'écran puis en reçoit un autre — exactement la
+  // promesse qu'il ne faut pas casser.
   static const int minimumXof = 2000;
-  static const int fixedXof = 100;
-  static const double rate = 0.01;
-  static const int capXof = 2100;
+  static const int fixedXof = 0;
+  static const double rate = 0.05;
+  static const int capXof = 5000;
 
   static int of(int amountXof) {
     final brut = fixedXof + (amountXof * rate).ceil();
