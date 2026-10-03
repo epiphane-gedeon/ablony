@@ -1,7 +1,10 @@
-# Ablony — brief pour la création publicitaire
+# Ablony — description de référence pour la création publicitaire
 
-Document destiné à un prestataire extérieur (motion design). Il décrit ce
-qu'est Ablony, à qui elle s'adresse et ce que la vidéo doit faire comprendre.
+Document destiné à un prestataire extérieur (motion design, réseaux sociaux,
+affichage). Il décrit ce qu'est Ablony, à qui elle s'adresse et ce qu'il faut
+faire comprendre — de quoi alimenter **plusieurs campagnes**, pas une seule
+vidéo. Les angles proposés en fin de document sont indépendants et peuvent être
+traités séparément ou déclinés en série.
 
 ---
 
@@ -112,7 +115,10 @@ cherchent une raison d'oser une transaction qu'ils n'osaient pas.
 
 ---
 
-## Ce que la vidéo doit faire comprendre, par ordre de priorité
+## Les messages, par ordre de priorité
+
+Valable pour toute création : si une pub n'a le temps que d'un seul message,
+c'est le premier.
 
 1. **On ne peut pas se faire avoir.** L'argent est bloqué jusqu'à la réception.
    Si une seule idée doit rester, c'est celle-là.
@@ -143,6 +149,37 @@ livraison et le paiement Mobile Money inclus.
 
 ---
 
+## Angles de campagne
+
+Six entrées distinctes dans la même histoire. Chacune peut faire une pub à elle
+seule, et elles fonctionnent aussi en série.
+
+**1. La confiance — « L'argent attend. »**
+Le mécanisme, raconté sans un mot de technique : l'acheteur paie, l'argent reste
+visible mais immobile, le colis voyage, l'acheteur confirme, l'argent part. Le
+plus fort des six, et le plus singulier.
+
+**2. L'armoire qui dort — « Ce que tu ne portes plus vaut de l'argent. »**
+On ouvre une armoire pleine. Chaque vêtement oublié porte un prix. S'adresse au
+vendeur qui n'a jamais pensé à vendre.
+
+**3. Sans se déplacer — « Reste chez toi. »**
+Le vendeur emballe. On vient chercher. L'acheteur reçoit. Les deux ne se
+croisent jamais. Visuellement le plus simple à animer, et il règle l'objection
+« je n'ai pas le temps ».
+
+**4. La trouvaille — « Elle était à quelqu'un. Maintenant elle est à toi. »**
+Centré sur le désir : la pièce qu'on n'aurait pas trouvée en boutique, au prix
+qu'on peut mettre. S'adresse à l'acheteuse, pas au vendeur.
+
+**5. Le prix négocié — « Propose ton prix. »**
+La fonction d'offre, qui reproduit le marchandage familier mais sans gêne, sans
+face-à-face. Très local dans l'esprit.
+
+**6. La réputation — « Les bons vendeurs se reconnaissent. »**
+Avis, badges, profil qui se remplit. Pour la phase où il faut donner envie de
+vendre sérieusement, pas juste une fois.
+
 ## Formules réutilisables
 
 - « Vendez ce que vous ne portez plus. »
@@ -151,6 +188,8 @@ livraison et le paiement Mobile Money inclus.
 - « Votre armoire vaut de l'argent. »
 - « Achetez tranquille. Vendez sans bouger. »
 
-## Une phrase pour finir le film
+## Signature
 
-**Ablony — la seconde main, en toute confiance.**
+À utiliser en fin de chaque création :
+
+**Fais de ton ancien le nouveau de quelqu'un.**
