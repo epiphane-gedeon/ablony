@@ -115,14 +115,39 @@ plan :
 
 # 5. FILM PILIER — « Prendre Ablony en main »
 
-**Conçu en 6 chapitres autonomes.** Montés bout à bout, ils forment le film de
-~2 min (YouTube, site, bio). Publiés séparément, chacun est un format court
+**Conçu en 9 chapitres autonomes.** Montés bout à bout, ils forment le film de
+~3 min (YouTube, site, bio). Publiés séparément, chacun est un format court
 qui se suffit à lui-même. **Une seule production, deux usages.**
+
+> **Pourquoi 3 min et pas 2.** Un film de 2 min suffirait à *séduire*, pas à
+> *prendre en main*. Il laissait de côté trois choses qu'un nouvel utilisateur
+> doit savoir : comment créer son compte, ce qui se passe si la commande tourne
+> mal, et comment récupérer son argent. Les deux dernières sont justement ce
+> qui fonde la confiance — promettre que l'argent est bloqué sans jamais dire
+> ce qui arrive en cas de problème, c'est ne tenir que la moitié de la
+> promesse.
+>
+> Allonger ne coûte rien ici : chaque chapitre ajouté est **aussi un format
+> court de plus**. Et l'audience des réseaux ne verra de toute façon jamais la
+> version longue.
 
 **Voix off féminine**, posée, chaleureuse, français d'Afrique de l'Ouest. Le
 débit d'une amie qui montre, pas d'une publicité qui vend.
 
-### Chapitre 1 — « Ce que tu ne portes plus » (0:00–0:20)
+### Chapitre 0 — « Créer ton compte » (0:00–0:20)
+
+Étape sautée dans une version précédente de ce document. Sans elle, le film
+explique une application que le spectateur ne sait pas démarrer.
+
+| Plan | Image | Voix off |
+|---|---|---|
+| 1 | Un téléphone, l'icône Ablony, appui. | « On commence par créer son compte. » |
+| 2 | Écran d'inscription : bouton Google, ou e-mail. | « Avec Google, ou une adresse e-mail. » |
+| 3 | Saisie du nom d'utilisateur. | « On choisit son nom. » |
+| 4 | Sélection du pays, puis de la ville — Lomé se coche. | « Son pays, sa ville. C'est ce qui permet de savoir où livrer. » |
+| 5 | L'accueil s'ouvre, rempli d'annonces. Afi apparaît. | « Et c'est tout. On peut commencer. » |
+
+### Chapitre 1 — « Ce que tu ne portes plus » (0:20–0:40)
 
 | Plan | Image | Voix off / Texte |
 |---|---|---|
@@ -130,7 +155,7 @@ débit d'une amie qui montre, pas d'une publicité qui vend.
 | 2 | Afi, téléphone en main, apparaît. Pastille : « Afi · acheteuse ». | « Et ailleurs en ville, quelqu'un les cherche. » |
 | 3 | Titre : « Elle a trouvé **LA robe.** » | — |
 
-### Chapitre 2 — « Vendre sans bouger » (0:20–0:45)
+### Chapitre 2 — « Vendre sans bouger » (0:40–1:05)
 
 | Plan | Image | Voix off |
 |---|---|---|
@@ -138,14 +163,14 @@ débit d'une amie qui montre, pas d'une publicité qui vend.
 | 2 | Formulaire « Vends un article » : titre, catégorie, taille, état, prix. | « Un titre, une catégorie, un prix. » |
 | 3 | Appui sur « Publier ». Confettis. | « Et on publie. **C'est gratuit.** » |
 
-### Chapitre 3 — « Acheter, ou proposer son prix » (0:45–1:05)
+### Chapitre 3 — « Acheter, ou proposer son prix » (1:05–1:25)
 
 | Plan | Image | Voix off |
 |---|---|---|
 | 1 | Afi parcourt le fil. Filtres : taille, marque, état, prix. | « Pour acheter, on parcourt, on filtre. » |
 | 2 | Fiche produit : « Robe wax · Taille M · 12 000 FCFA », vendeur Koffi ★4.9. Boutons « Acheter » et « Faire une offre ». | « Et si le prix ne vous va pas, vous proposez le vôtre. » |
 
-### Chapitre 4 — « L'argent attend » (1:05–1:25) ⭐
+### Chapitre 4 — « L'argent attend » (1:25–1:45) ⭐
 
 **Le cœur du film.** Reprend exactement la composition déjà produite.
 
@@ -155,14 +180,14 @@ débit d'une amie qui montre, pas d'une publicité qui vend.
 | 2 | Les billets CFA tombent du téléphone et **entrent dans le coffre, qui se ferme**. Cadenas doré. | « Et c'est là que tout change : votre argent reste chez Ablony. » |
 | 3 | Titre : « …et l'argent **attend.** » Koffi apparaît, les mains vides. | « Le vendeur ne l'a pas encore. » |
 
-### Chapitre 5 — « Le colis voyage » (1:25–1:45)
+### Chapitre 5 — « Le colis voyage » (1:45–2:05)
 
 | Plan | Image | Voix off |
 |---|---|---|
 | 1 | Split : en haut Koffi tend le colis au livreur devant chez lui. En bas, Afi attend. Entre les deux, le coffre fermé, pastille « 12 000 FCFA · en attente ». | « On vient chercher le colis chez le vendeur. Il ne se déplace pas. » |
 | 2 | Le scooter traverse la ville. Le coffre reste fermé, bien visible. | « Pendant tout le trajet, l'argent ne bouge pas. » |
 
-### Chapitre 6 — « Et là, Koffi est payé » (1:45–2:05) ⭐
+### Chapitre 6 — « Et là, Koffi est payé » (2:05–2:25) ⭐
 
 | Plan | Image | Voix off |
 |---|---|---|
@@ -171,12 +196,35 @@ débit d'une amie qui montre, pas d'une publicité qui vend.
 | 3 | **Le coffre s'ouvre**, cadenas déverrouillé, pastille « Versé à Koffi ✓ ». Confettis chez Koffi, notification « Ablony · Paiement reçu +12 000 FCFA ». Titre : « …et là, Koffi est **payé.** » | « Et seulement là, le vendeur est payé. » |
 | 4 | Afi porte la robe. Logo, `ablony.net`, signature. | « Ablony. Fais de ton ancien le nouveau de quelqu'un. » |
 
-### Chapitre bonus — « Retirer son argent » (à ajouter en fin de version longue)
+### Chapitre 7 — « Et si ça se passe mal ? » (2:25–2:45) ⭐
 
-Porte-monnaie de Koffi, solde qui monte. Appui sur « Retirer ». Choix du Mobile
-Money. **L'écran affiche les frais et le montant net avant validation.**
-Notification Mobile Money. VO : « Son argent s'accumule. Il le retire quand il
-veut, en voyant exactement ce qu'il reçoit. »
+**Le chapitre qui manquait le plus.** Dire que l'argent est bloqué ne tient que
+la moitié de la promesse ; l'autre moitié, c'est ce qui arrive quand la commande
+tourne mal. Un spectateur qui se pose la question et n'obtient pas de réponse
+retient le doute, pas la promesse.
+
+Ton : **calme et factuel**. Ni dramatisation, ni musique inquiétante — on
+montre un recours, pas un danger.
+
+| Plan | Image | Voix off |
+|---|---|---|
+| 1 | Afi ouvre le colis. Son sourire retombe : l'article ne correspond pas. | « Et si l'article ne correspond pas ? » |
+| 2 | Elle **ne confirme pas**. Le coffre reste fermé, cadenas doré bien visible. | « Vous ne confirmez pas. L'argent reste où il est. » |
+| 3 | Appui sur « Un problème ? », puis « J'ai un problème avec cette commande ». Écran de litige, ajout de photos. | « Vous signalez le problème, photos à l'appui. » |
+| 4 | Une pastille Ablony s'intercale entre le coffre et les deux personnages. | « Ablony examine. » |
+| 5 | Le coffre s'ouvre **vers Afi** : les billets reviennent vers elle. Pastille « Remboursée ✓ ». | « Et si vous avez raison, vous êtes remboursée. » |
+| 6 | Titre : « Ton argent **revient.** » | — |
+
+### Chapitre 8 — « Retirer son argent » (2:45–3:05)
+
+| Plan | Image | Voix off |
+|---|---|---|
+| 1 | Porte-monnaie de Koffi, solde qui monte après plusieurs ventes. | « L'argent de vos ventes s'accumule dans votre porte-monnaie. » |
+| 2 | Appui sur « Retirer ». Choix du Mobile Money, saisie du numéro. | « Vous le retirez quand vous voulez. » |
+| 3 | **Plan important** : l'écran affiche les frais **et le montant net** avant validation. | « En voyant exactement ce que vous allez recevoir. » |
+| 4 | Notification Mobile Money sur le téléphone de Koffi. Logo, `ablony.net`, signature. | « Sur votre Mobile Money. » |
+
+**Ne pas masquer les frais** : les montrer est précisément l'argument.
 
 ---
 
@@ -222,11 +270,11 @@ Pastille finale : « Plus vue. Plus **vendue.** »
 
 | Phase | Contenu | But |
 |---|---|---|
-| **Lancement** | Chapitre 4 seul, puis C1 | Poser le mécanisme, puis élargir |
+| **Lancement** | Chapitres 4 **et 7**, puis C1 | Poser le mécanisme et son recours |
 | **Semaine 2** | Chapitre 2 (vendeurs) **et** Chapitre 3 (acheteurs) | Les deux côtés en parallèle |
 | **Semaine 3** | Film pilier complet, épinglé partout | Convertir les curieux |
-| **Ensuite** | Chapitres 5 et 6, C2, C3 | Approfondir, réduire le support |
-| **Plus tard** | C4, chapitre bonus | Monétiser une base active |
+| **Ensuite** | Chapitre 7 (litige), chapitres 5 et 6, C2, C3 | Approfondir, lever le dernier doute |
+| **Plus tard** | Chapitre 8 (retrait), C4 | Fidéliser et monétiser une base active |
 
 **Le chapitre 4 d'abord.** Tant que le mécanisme de confiance n'est pas compris,
 les vidéos de fonctionnalités tombent à plat : elles vantent les détails d'une
