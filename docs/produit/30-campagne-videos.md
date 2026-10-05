@@ -293,3 +293,84 @@ catalogue sans acheteurs ; l'inverse, des acheteurs sans rien à acheter.
 - Les deux états du coffre (fermé/cadenas doré, ouvert/déverrouillé).
 - Captures d'écran réelles et à jour de l'application.
 - Logo vectoriel, `ablony.net`, badges de téléchargement.
+
+---
+
+# 9. Méthode de production avec un modèle génératif
+
+## Le point de départ : Claude ne rend pas de vidéo
+
+Il écrit du **code qui s'anime** — SVG animé, HTML/CSS, Lottie, Remotion — que
+l'on enregistre ou rend ensuite. Conséquence directe sur la méthode : la
+cohérence des personnages ne s'obtient **pas** en redécrivant Afi à chaque
+plan, mais en **réutilisant le même composant** d'un plan à l'autre.
+
+C'est une bonne nouvelle : un composant figé ne dérive jamais, là où une
+description retapée dérive toujours.
+
+## Ne pas donner tout le document d'un coup
+
+Neuf vidéos dans un seul message, et l'attention se répartit sur l'ensemble au
+lieu de se concentrer sur le plan en cours. Travailler **plan par plan**.
+
+## Séance 1 — la trousse d'éléments (à faire avant tout plan)
+
+Objectif : produire **une fois** les éléments réutilisables, les figer, ne plus
+y toucher.
+
+À obtenir, chacun en composant autonome et paramétrable :
+
+1. **Afi**, en 4 poses : face, trois-quarts, bras levés, assise.
+2. **Koffi**, en 4 poses : face, derrière sa table, tendant un colis, bras levés.
+3. **Le coffre**, dans ses deux états (fermé/cadenas doré, ouvert/déverrouillé).
+4. **Le mockup de téléphone**, avec un écran interchangeable.
+5. **Le livreur et son scooter.**
+6. **Le décor** : fond dégradé + filigrane « A », silhouette de ville et palmiers.
+7. **La pastille de titre** (texte + mot encadré) et **la pastille de nom**.
+8. **Les billets CFA** et les confettis.
+
+Joindre **les quatre images déjà produites** : elles valent mieux que n'importe
+quelle description écrite.
+
+### Message d'amorce pour cette séance
+
+> Je produis une série de vidéos en motion design pour Ablony, une application
+> togolaise de vente d'occasion entre particuliers. Tu vas m'aider à construire
+> les animations en SVG/HTML animé.
+>
+> Première étape : je veux une **bibliothèque de composants réutilisables**, pas
+> encore de scène. Je te joins quatre images de référence du style déjà validé.
+>
+> Charte : fond dégradé bleu #2385AE avec monogramme « A » en filigrane,
+> illustration vectorielle plate, contours nets, aucune ombre réaliste, format
+> vertical 1080×1920. Titres en sans-serif grasse blanche, un seul mot encadré
+> dans une pastille blanche arrondie à texte bleu.
+>
+> Commence par **Afi** seule : jeune femme togolaise, foulard bleu-vert à
+> feuilles jaunes, grandes boucles d'oreilles dorées en anneau, robe wax orange
+> à motifs circulaires jaunes et bleus, tient un téléphone. Donne-moi un
+> composant SVG propre, avec les couleurs en variables, que je pourrai
+> réutiliser tel quel dans toutes les scènes suivantes.
+
+## Séances suivantes — un plan à la fois
+
+Pour chaque plan, fournir **seulement** :
+
+1. Les composants déjà validés (le code, pas une description).
+2. Le plan concerné, copié depuis ce document.
+3. L'animation voulue en une phrase : ce qui bouge, dans quel ordre, en combien
+   de temps.
+
+Exemple pour le chapitre 4, plan 2 :
+
+> Avec les composants ci-joints, anime cette scène sur 4 secondes :
+> les billets CFA sortent du téléphone, tombent vers le coffre, le coffre se
+> ferme, le cadenas doré se verrouille avec un léger rebond. La pastille
+> « 12 000 FCFA · en attente » apparaît en fondu à la fin. Titre fixe en haut.
+
+## L'ordre de production conseillé
+
+Produire **le chapitre 4 en entier** d'abord. C'est le plan le plus exigeant
+(le coffre, les billets, le timing) et le plus important. Une fois qu'il est
+juste, tout le reste s'y aligne — et s'il ne l'est pas, mieux vaut le découvrir
+sur un plan que sur quarante.
