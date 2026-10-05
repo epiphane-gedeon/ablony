@@ -1,226 +1,247 @@
-# Ablony — campagne vidéo : briefs et scénarios
+# Ablony — campagne vidéo : charte, personnages et scénarios
 
-Neuf vidéos : un film pilier explicatif et huit formats courts.
-À lire avec `29-brief-publicitaire.md`, qui contient la description du produit,
-la cible, le ton et les angles.
+À lire avec `29-brief-publicitaire.md` (produit, cible, ton, angles).
 
-> **Note.** Les libellés entre guillemets sont ceux de l'application réelle
-> (« Vends un article », « Acheter », « J'ai reçu mon colis »…). Les respecter :
-> un utilisateur doit retrouver à l'écran exactement ce qu'il a vu dans la pub.
-
----
-
-## Règles communes à toutes les vidéos
-
-**Format.** Vertical 9:16, 1080×1920, sauf mention contraire. Les formats
-courts sont pensés pour Reels, TikTok et le statut WhatsApp.
-
-**Pas de dialogue entre personnages.** L'explication passe par la voix off ou
-le texte à l'écran. Les personnages illustrent, ils ne discutent pas.
-
-**Sous-titres incrustés obligatoires.** La majorité des vues se font sans le
-son.
-
-**Les trois premières secondes décident de tout.** Chaque vidéo s'ouvre sur une
-image ou une question qui arrête le défilement, jamais sur un logo.
-
-**Fin systématique.** Logo Ablony + `ablony.net` + badge de téléchargement +
-la signature :
-
-> **Fais de ton ancien le nouveau de quelqu'un.**
-
-**À montrer avec soin.** Le moment où l'argent se débloque : c'est la promesse
-rendue visible. Lui donner le temps et le soin qu'on donnerait à un plan final.
-
-**À éviter.** Le vocabulaire technique (séquestre, escrow, API). Le registre de
-la peur ou de l'arnaque filmée frontalement. L'imagerie corporate occidentale.
+Les vidéos sont destinées à être **animées par une IA générative**. D'où la
+structure de ce document : une charte et une fiche personnages à réinjecter
+dans **chaque** génération, puis des plans décrits de façon autonome. Sans cet
+ancrage répété, les personnages dérivent d'un plan à l'autre.
 
 ---
 
-# FILM PILIER
+# 1. Charte visuelle
 
-## V0 — « Prendre Ablony en main »
+Établie d'après les images déjà produites.
 
-**Objectif.** Expliquer l'application de bout en bout à quelqu'un qui vient de
-l'installer. Sert aussi de tutoriel permanent (épinglé en bio, page d'aide,
-YouTube).
+**Couleurs de marque** (valeurs réelles de l'application) :
 
-**Durée.** 1 min 45 à 2 min. **Format.** 9:16 pour les réseaux, et une
-déclinaison 16:9 pour YouTube et le site.
+| Usage | Hex |
+|---|---|
+| Bleu Ablony (fond, boutons, accents) | `#2385AE` |
+| Bleu clair (secondaire) | `#4A9DC4` |
+| Blanc (texte, cartes, pastilles) | `#FFFFFF` |
+| Rouge (erreur, refus — à utiliser avec parcimonie) | `#D32F2F` |
 
-**Voix off.** **Féminine**, posée, chaleureuse, le débit d'une amie qui montre
-plutôt que d'une publicité qui vend. Français d'Afrique de l'Ouest.
+**Fond.** Dégradé bleu Ablony, du plus clair en haut au plus profond en bas,
+avec le monogramme « A » répété en filigrane très discret.
 
-**Cible.** Nouvel inscrit, ou curieux qui hésite encore.
+**Illustration.** Vectoriel plat, sans dégradé sur les personnages, contours
+nets, couleurs franches. Aucune texture, aucune ombre portée réaliste.
 
-### Découpage
+**Typographie.** Sans-serif grasse, blanche. Le **mot clé de chaque phrase est
+encadré dans une pastille blanche à coins arrondis**, texte en bleu Ablony.
+C'est la signature typographique de la marque : une seule pastille par plan.
 
-| Temps | Image | Voix off |
+**Décors.** Scènes d'intérieur dans des cartes à coins arrondis, posées sur une
+silhouette de ville bleue avec palmiers. Intérieur vendeur en haut, intérieur
+acheteuse en bas quand les deux coexistent.
+
+**Pastilles de nom.** Chaque personnage porte une étiquette blanche arrondie :
+« Afi · acheteuse », « Koffi · vendeur ».
+
+**Interface.** Téléphone en mockup sombre à coins arrondis, écran blanc,
+boutons bleu Ablony. Reprendre les libellés réels : « Acheter », « Publier »,
+« J'ai reçu mon colis », « Retirer ».
+
+---
+
+# 2. Les personnages
+
+**Deux, et seulement deux.** Ils incarnent les deux faces du marché. En ajouter
+d'autres diluerait : l'histoire d'Ablony est celle d'une rencontre qui n'a pas
+besoin d'avoir lieu.
+
+### Afi · acheteuse
+
+Jeune femme togolaise, peau foncée, visage rond et souriant, **foulard noué
+bleu-vert à motif de feuilles jaunes**, grandes **boucles d'oreilles dorées en
+anneau**, **robe wax orange à motifs circulaires jaunes et bleus**. Tient
+toujours un téléphone affichant le logo Ablony. Attitude : curieuse, posée,
+jamais inquiète.
+
+### Koffi · vendeur
+
+Homme togolais, peau foncée, cheveux courts, **chemise verte à manches
+longues**, souvent derrière une table ou un comptoir en bois. Manipule un colis
+en carton. Attitude : tranquille, chaleureux, jamais commerçant insistant.
+
+### Le livreur
+
+**Volontairement anonyme** : casque et tenue aux couleurs Ablony, scooter bleu
+marqué du logo. C'est une fonction, pas un personnage. Pas d'étiquette de nom,
+pas de gros plan sur le visage.
+
+### Le coffre
+
+Objet central de la marque : **coffre-fort bleu avec un cadenas doré**, contenant
+des billets CFA verts. Deux états à respecter absolument :
+- **fermé, cadenas doré** + pastille « 12 000 FCFA · en attente »
+- **ouvert, cadenas déverrouillé** + pastille « Versé à Koffi ✓ »
+
+---
+
+# 3. Bloc de style à réinjecter
+
+À coller en tête de **chaque** prompt de génération, avant la description du
+plan :
+
+> Illustration vectorielle plate, style flat design africain contemporain.
+> Fond dégradé bleu pétrole (#2385AE), monogramme « A » en filigrane discret.
+> Contours nets, couleurs franches, aucune ombre réaliste, aucune texture.
+> Format vertical 9:16, 1080×1920.
+> Personnages récurrents, à reproduire à l'identique :
+> — **Afi**, jeune femme togolaise, foulard bleu-vert à feuilles jaunes,
+> grandes boucles d'oreilles dorées en anneau, robe wax orange à motifs
+> circulaires jaunes et bleus, tient un téléphone.
+> — **Koffi**, homme togolais, cheveux courts, chemise verte à manches longues,
+> derrière une table en bois, manipule un colis en carton.
+> Titre en haut : sans-serif grasse blanche, **un seul mot encadré dans une
+> pastille blanche arrondie** avec texte en bleu #2385AE.
+
+---
+
+# 4. Règles communes
+
+- **Vertical 9:16** par défaut. Le film pilier a en plus une version 16:9.
+- **Aucun dialogue entre personnages.** Voix off ou texte à l'écran.
+- **Sous-titres incrustés** : la plupart des vues se font sans le son.
+- **Les 3 premières secondes** arrêtent le défilement. Jamais de logo en ouverture.
+- **Fin systématique** : logo + `ablony.net` + badge de téléchargement + signature
+  **« Fais de ton ancien le nouveau de quelqu'un. »**
+- **Une seule pastille blanche par plan.** C'est ce qui la rend lisible.
+- **Le moment où le coffre s'ouvre** est le pic du film. Lui donner du temps.
+
+---
+
+# 5. FILM PILIER — « Prendre Ablony en main »
+
+**Conçu en 6 chapitres autonomes.** Montés bout à bout, ils forment le film de
+~2 min (YouTube, site, bio). Publiés séparément, chacun est un format court
+qui se suffit à lui-même. **Une seule production, deux usages.**
+
+**Voix off féminine**, posée, chaleureuse, français d'Afrique de l'Ouest. Le
+débit d'une amie qui montre, pas d'une publicité qui vend.
+
+### Chapitre 1 — « Ce que tu ne portes plus » (0:00–0:20)
+
+| Plan | Image | Voix off / Texte |
 |---|---|---|
-| 0:00–0:08 | Une armoire s'ouvre, pleine. Une main hésite sur un vêtement. | « Vous avez sûrement, chez vous, des choses que vous ne portez plus. Et ailleurs en ville, quelqu'un les cherche. » |
-| 0:08–0:18 | Logo Ablony. Le téléphone s'allume sur l'accueil de l'app. | « Ablony, c'est l'application qui met ces deux personnes en relation — sans qu'elles aient besoin de se rencontrer, ni de se faire confiance. » |
-| 0:18–0:32 | **Créer son compte.** Écran d'inscription, puis choix du pays, puis de la ville. | « On commence par créer son compte. On choisit son pays, sa ville — c'est ce qui permet de savoir où livrer. » |
-| 0:32–0:55 | **Vendre.** Appui sur « Vendre » dans la barre du bas. Le formulaire « Vends un article ». « Ajouter photos ». Titre, description, catégorie, taille, état, prix. Appui sur « Publier ». | « Pour vendre, on appuie sur Vendre. On ajoute des photos — c'est ce qui compte le plus. Un titre, une description, une catégorie, un prix. Et on publie. **C'est gratuit.** » |
-| 0:55–1:12 | **Acheter.** Fil d'annonces, filtres (taille, marque, état, prix). Fiche produit. Boutons « Acheter » et « Faire une offre ». | « Pour acheter, on parcourt, on filtre. Et si le prix ne vous va pas, vous pouvez proposer le vôtre. » |
-| 1:12–1:30 | **Le paiement.** Écran de paiement, Mobile Money. Puis une animation claire : une pièce entre dans un coffre Ablony et **s'y arrête**. Le colis, lui, voyage. | « Vous payez dans l'application. Et c'est là que tout change : **votre argent reste chez Ablony.** Le vendeur ne l'a pas encore. » |
-| 1:30–1:45 | Le colis arrive. Appui sur **« J'ai reçu mon colis »**. Le coffre s'ouvre, la pièce file vers le vendeur qui sourit. | « Le colis vous est livré. Vous confirmez l'avoir reçu — et seulement là, le vendeur est payé. Si quelque chose ne va pas, vous ouvrez un litige, et l'argent ne bouge pas. » |
-| 1:45–1:55 | Porte-monnaie, bouton « Retirer », arrivée sur Mobile Money. | « Votre argent de vente s'accumule dans votre porte-monnaie. Vous le retirez quand vous voulez. » |
-| 1:55–fin | Logo, `ablony.net`, signature. | « Ablony. Fais de ton ancien le nouveau de quelqu'un. » |
+| 1 | Une armoire s'ouvre, pleine. Une main hésite sur un vêtement. | « Vous avez, chez vous, des choses que vous ne portez plus. » |
+| 2 | Afi, téléphone en main, apparaît. Pastille : « Afi · acheteuse ». | « Et ailleurs en ville, quelqu'un les cherche. » |
+| 3 | Titre : « Elle a trouvé **LA robe.** » | — |
 
----
+### Chapitre 2 — « Vendre sans bouger » (0:20–0:45)
 
-# FORMATS COURTS
-
-## V1 — « C'est quoi Ablony ? »
-
-**Objectif.** Notoriété. La vidéo qu'on pousse en publicité payante.
-**Durée.** 15 s. **Cible.** Large.
-
-| Temps | Image | Texte écran |
+| Plan | Image | Voix off |
 |---|---|---|
-| 0–3 | Gros plan sur un vêtement plié dans une armoire. | « Ça, tu ne le portes plus. » |
-| 3–7 | Le vêtement devient une annonce sur un téléphone. | « Quelqu'un le cherche. » |
-| 7–11 | Split : le colis part / l'argent entre dans le coffre. | « Tu vends. Il achète. » |
-| 11–15 | Le coffre s'ouvre à la confirmation. Logo + `ablony.net`. | « Personne ne se déplace. Personne ne se fait avoir. » |
+| 1 | Koffi photographie un vêtement posé sur sa table. Écran : « Ajouter photos ». | « Pour vendre, on photographie. C'est ce qui compte le plus. » |
+| 2 | Formulaire « Vends un article » : titre, catégorie, taille, état, prix. | « Un titre, une catégorie, un prix. » |
+| 3 | Appui sur « Publier ». Confettis. | « Et on publie. **C'est gratuit.** » |
 
-**Son.** Musique rythmée, pas de voix off. Tout passe par le texte.
+### Chapitre 3 — « Acheter, ou proposer son prix » (0:45–1:05)
 
----
-
-## V2 — « Vendre en 2 minutes »
-
-**Objectif.** Tutoriel vente + recrutement de vendeurs. **Durée.** 30 s.
-**Cible.** Celui qui a des choses à vendre et croit que c'est compliqué.
-
-| Temps | Image | Texte écran |
+| Plan | Image | Voix off |
 |---|---|---|
-| 0–3 | Un personnage ouvre son armoire, l'air débordé. | « Vendre, c'est long ? » |
-| 3–8 | Il pose un vêtement sur un fond uni, photographie. Interface : « Ajouter photos ». | « 1. Photographie » |
-| 8–14 | Saisie du titre, de la catégorie, de la taille, de l'état. | « 2. Décris » |
-| 14–19 | Saisie du prix. Appui sur « Publier ». Confettis de l'app. | « 3. Publie — c'est gratuit » |
-| 19–25 | Il repose son téléphone et s'assoit. Notification : vendu. | « 4. Attends » |
-| 25–30 | Un livreur récupère le colis **chez lui**. Logo + signature. | « Le colis est récupéré chez toi. » |
+| 1 | Afi parcourt le fil. Filtres : taille, marque, état, prix. | « Pour acheter, on parcourt, on filtre. » |
+| 2 | Fiche produit : « Robe wax · Taille M · 12 000 FCFA », vendeur Koffi ★4.9. Boutons « Acheter » et « Faire une offre ». | « Et si le prix ne vous va pas, vous proposez le vôtre. » |
 
-**Insister** sur le fait qu'il ne se lève pas. C'est l'objection principale.
+### Chapitre 4 — « L'argent attend » (1:05–1:25) ⭐
 
----
+**Le cœur du film.** Reprend exactement la composition déjà produite.
 
-## V3 — « Acheter sans risque »
-
-**Objectif.** Tutoriel achat + lever la peur. **Durée.** 30 s.
-**Cible.** Acheteuse, 18–35 ans.
-
-| Temps | Image | Texte écran |
+| Plan | Image | Voix off |
 |---|---|---|
-| 0–4 | Une femme regarde une annonce sur un autre réseau. Message : « Envoie l'argent d'abord ». Elle ferme. | « Tu as déjà hésité. » |
-| 4–9 | Même pièce, sur Ablony. Fiche produit propre, photos, taille, état. | « Sur Ablony, c'est différent. » |
-| 9–15 | Appui sur « Acheter ». Paiement Mobile Money. | « Tu paies dans l'application. » |
-| 15–22 | **Plan clé** : la pièce entre dans le coffre Ablony et s'arrête. Le vendeur, à côté, les mains vides. | « Ton argent reste bloqué. Le vendeur ne l'a pas. » |
-| 22–27 | Le colis arrive. Elle ouvre, sourit, appuie sur « J'ai reçu mon colis ». Le coffre s'ouvre. | « Il n'est payé que quand tu confirmes. » |
-| 27–30 | Logo + signature. | |
+| 1 | Écran « Paiement » : Mobile Money / Carte bancaire, encart « Ablony garde ton argent jusqu'à ce que tu reçoives ta robe ». Bouton « ✓ Payé ». | « Vous payez dans l'application. » |
+| 2 | Les billets CFA tombent du téléphone et **entrent dans le coffre, qui se ferme**. Cadenas doré. | « Et c'est là que tout change : votre argent reste chez Ablony. » |
+| 3 | Titre : « …et l'argent **attend.** » Koffi apparaît, les mains vides. | « Le vendeur ne l'a pas encore. » |
 
----
+### Chapitre 5 — « Le colis voyage » (1:25–1:45)
 
-## V4 — « L'argent attend »
-
-**Objectif.** Le mécanisme de confiance, seul. La vidéo la plus singulière.
-**Durée.** 20 s. **Format.** Animation pure, pas de personnage.
-
-Une ligne horizontale. Trois jalons : **Acheteur — Ablony — Vendeur**.
-
-| Temps | Image | Texte écran |
+| Plan | Image | Voix off |
 |---|---|---|
-| 0–4 | La pièce part de l'acheteur, glisse, **s'arrête net** sur Ablony. Vibration. | « Tu paies. » |
-| 4–9 | Le colis, lui, continue : Ablony → acheteur. La pièce ne bouge pas. | « Le colis part. L'argent attend. » |
-| 9–14 | L'acheteur coche. La pièce repart enfin vers le vendeur. | « Tu confirmes. Il est payé. » |
-| 14–17 | Variante : l'acheteur fait non. La pièce **revient** vers lui. | « Un problème ? Elle revient. » |
-| 17–20 | Logo + `ablony.net`. | « L'argent n'avance jamais avant toi. » |
+| 1 | Split : en haut Koffi tend le colis au livreur devant chez lui. En bas, Afi attend. Entre les deux, le coffre fermé, pastille « 12 000 FCFA · en attente ». | « On vient chercher le colis chez le vendeur. Il ne se déplace pas. » |
+| 2 | Le scooter traverse la ville. Le coffre reste fermé, bien visible. | « Pendant tout le trajet, l'argent ne bouge pas. » |
 
-**C'est la vidéo à produire en premier.** Elle explique ce qu'aucun concurrent
-local ne propose, et elle sert de socle à toutes les autres.
+### Chapitre 6 — « Et là, Koffi est payé » (1:45–2:05) ⭐
 
----
-
-## V5 — « Propose ton prix »
-
-**Objectif.** Faire connaître l'offre. **Durée.** 15 s.
-
-| Temps | Image | Texte écran |
+| Plan | Image | Voix off |
 |---|---|---|
-| 0–4 | Fiche produit, prix affiché. Un personnage fait une petite moue. | « Le prix te freine ? » |
-| 4–9 | Appui sur « Faire une offre ». Saisie d'un montant plus bas. | « Propose le tien. » |
-| 9–13 | Côté vendeur, notification. Badge « Acceptée ». | « Il accepte, ou il refuse. » |
-| 13–15 | Logo + signature. | « Négocier, sans gêne. » |
+| 1 | Afi reçoit le colis, en sort la robe wax, sourit. | « Vous recevez votre colis. » |
+| 2 | Appui sur **« J'ai reçu mon colis »**. | « Vous confirmez. » |
+| 3 | **Le coffre s'ouvre**, cadenas déverrouillé, pastille « Versé à Koffi ✓ ». Confettis chez Koffi, notification « Ablony · Paiement reçu +12 000 FCFA ». Titre : « …et là, Koffi est **payé.** » | « Et seulement là, le vendeur est payé. » |
+| 4 | Afi porte la robe. Logo, `ablony.net`, signature. | « Ablony. Fais de ton ancien le nouveau de quelqu'un. » |
+
+### Chapitre bonus — « Retirer son argent » (à ajouter en fin de version longue)
+
+Porte-monnaie de Koffi, solde qui monte. Appui sur « Retirer ». Choix du Mobile
+Money. **L'écran affiche les frais et le montant net avant validation.**
+Notification Mobile Money. VO : « Son argent s'accumule. Il le retire quand il
+veut, en voyant exactement ce qu'il reçoit. »
 
 ---
 
-## V6 — « Où est mon colis ? »
+# 6. FORMATS COURTS COMPLÉMENTAIRES
 
-**Objectif.** Rassurer après l'achat, réduire les messages au support.
-**Durée.** 20 s.
+Les chapitres ci-dessus couvrent déjà la vente, l'achat, le paiement, la
+livraison et la confirmation. Ces quatre-là ajoutent ce qui manque.
 
-| Temps | Image | Texte écran |
+## C1 — « C'est quoi Ablony ? » · 15 s · notoriété
+
+| Temps | Image | Pastille |
 |---|---|---|
-| 0–4 | Un personnage regarde la porte, puis son téléphone. | « Et mon colis ? » |
-| 4–10 | Écran « Reçu » : « Code du colis », statut, étapes qui s'allument. | « Tout est dans ton reçu. » |
-| 10–15 | La barre de suivi progresse. Notification d'arrivée. | « Tu suis chaque étape. » |
-| 15–20 | Livraison. Appui sur « J'ai reçu mon colis ». Logo. | « Et tu confirmes en un geste. » |
+| 0–3 | Gros plan sur un vêtement plié dans une armoire. | « Ça, tu ne le **portes plus.** » |
+| 3–7 | Le vêtement se transforme en annonce sur le téléphone d'Afi. | « Quelqu'un le **cherche.** » |
+| 7–11 | Split : le colis part / les billets entrent dans le coffre. | « Tu vends. Il **achète.** » |
+| 11–15 | Le coffre s'ouvre. Logo + `ablony.net`. | « Personne ne se **déplace.** » |
+
+Musique rythmée, pas de voix off.
+
+## C2 — « Propose ton prix » · 15 s
+
+Afi devant une fiche produit, petite moue. Appui sur « Faire une offre », saisie
+d'un montant plus bas. Côté Koffi : notification, badge « Acceptée ».
+Pastille finale : « Négocier, **sans gêne.** »
+
+## C3 — « Où est mon colis ? » · 20 s
+
+Afi regarde la porte, puis son téléphone. Écran « Reçu » : « Code du colis »,
+étapes qui s'allument une à une. Le scooter avance en parallèle. Notification
+d'arrivée, appui sur « J'ai reçu mon colis ».
+Pastille finale : « Tu suis **chaque étape.** »
+
+## C4 — « Fais-toi voir » · 15 s · à diffuser plus tard
+
+Fil d'annonces qui défile vite, celle de Koffi passe inaperçue. Appui sur la
+mise en avant : l'annonce remonte, surlignée. Compteur de vues qui grimpe, puis
+notification de vente.
+Pastille finale : « Plus vue. Plus **vendue.** »
 
 ---
 
-## V7 — « Retire ton argent »
+# 7. Plan de diffusion
 
-**Objectif.** Montrer que l'argent sort vraiment. Objection fréquente.
-**Durée.** 20 s. **Cible.** Vendeurs.
-
-| Temps | Image | Texte écran |
+| Phase | Contenu | But |
 |---|---|---|
-| 0–4 | Porte-monnaie Ablony, solde qui monte après plusieurs ventes. | « Tes ventes s'accumulent. » |
-| 4–10 | Appui sur « Retirer ». Choix du Mobile Money, saisie du numéro. | « Tu retires quand tu veux. » |
-| 10–15 | **Plan important** : l'écran affiche les frais **et le montant net** avant validation. | « Tu vois exactement ce que tu reçois. » |
-| 15–20 | Notification Mobile Money sur le téléphone. Logo + signature. | « Sur ton Mobile Money. » |
+| **Lancement** | Chapitre 4 seul, puis C1 | Poser le mécanisme, puis élargir |
+| **Semaine 2** | Chapitre 2 (vendeurs) **et** Chapitre 3 (acheteurs) | Les deux côtés en parallèle |
+| **Semaine 3** | Film pilier complet, épinglé partout | Convertir les curieux |
+| **Ensuite** | Chapitres 5 et 6, C2, C3 | Approfondir, réduire le support |
+| **Plus tard** | C4, chapitre bonus | Monétiser une base active |
 
-**Ne pas masquer les frais** : les montrer est précisément l'argument.
+**Le chapitre 4 d'abord.** Tant que le mécanisme de confiance n'est pas compris,
+les vidéos de fonctionnalités tombent à plat : elles vantent les détails d'une
+application en laquelle on n'a pas encore confiance.
 
----
-
-## V8 — « Fais-toi voir »
-
-**Objectif.** Mise en avant payante. **Durée.** 15 s.
-**Cible.** Vendeurs actifs. À diffuser plus tard, une fois la base installée.
-
-| Temps | Image | Texte écran |
-|---|---|---|
-| 0–4 | Un fil d'annonces défile vite. Une annonce passe inaperçue. | « Ton annonce se perd ? » |
-| 4–9 | Appui sur la mise en avant. L'annonce remonte en haut du fil, surlignée. | « Mets-la en avant. » |
-| 9–13 | Compteur de vues qui grimpe, puis notification de vente. | « Plus vue. Plus vendue. » |
-| 13–15 | Logo + signature. | |
+**Les chapitres 2 et 3 ensemble.** Recruter seulement des vendeurs donne un
+catalogue sans acheteurs ; l'inverse, des acheteurs sans rien à acheter.
 
 ---
 
-# Plan de diffusion suggéré
+# 8. À préparer
 
-| Phase | Vidéos | But |
-|---|---|---|
-| **Lancement** | V4, puis V1 | Poser le mécanisme, puis élargir |
-| **Semaine 2** | V2 et V3 | Recruter vendeurs **et** acheteurs en parallèle |
-| **Semaine 3** | V0 épinglé partout | Convertir les curieux en utilisateurs |
-| **Ensuite** | V5, V6, V7 | Approfondir l'usage, réduire le support |
-| **Plus tard** | V8 | Monétiser une base déjà active |
-
-**V4 d'abord.** Tant que le mécanisme de confiance n'est pas compris, les
-vidéos de fonctionnalités tombent à plat.
-
-**V2 et V3 ensemble.** Une place de marché vide des deux côtés ne démarre pas.
-
----
-
-# À fournir au prestataire
-
-- Logo Ablony (vectoriel), couleurs et police de la marque
-- Captures d'écran réelles de l'application, à jour
-- Le lien `ablony.net` et les badges de téléchargement
-- Ce document et `29-brief-publicitaire.md`
-
-**À demander en retour :** les projets sources, et une déclinaison 1:1 et 16:9
-des vidéos que vous voudrez pousser en publicité payante.
+- Afi et Koffi figés en **plusieurs poses de référence** (face, trois-quarts,
+  bras levés, assis) avant de lancer les plans : c'est ce qui tient la
+  cohérence d'un plan à l'autre.
+- Les deux états du coffre (fermé/cadenas doré, ouvert/déverrouillé).
+- Captures d'écran réelles et à jour de l'application.
+- Logo vectoriel, `ablony.net`, badges de téléchargement.
