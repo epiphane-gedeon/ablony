@@ -230,8 +230,11 @@ montre un recours, pas un danger.
 
 # 6. FORMATS COURTS COMPLÉMENTAIRES
 
-Les chapitres ci-dessus couvrent déjà la vente, l'achat, le paiement, la
-livraison et la confirmation. Ces quatre-là ajoutent ce qui manque.
+Les neuf chapitres couvrent déjà l'inscription, la vente, l'achat, le
+paiement, la livraison, la confirmation, le litige et le retrait — et chacun
+est publiable seul. Les quatre ci-dessous ne répètent pas : C1 est un crochet
+de notoriété, C2 et C3 développent ce que les chapitres ne font que nommer
+(l'offre, le suivi), C4 couvre la mise en avant, absente du film.
 
 ## C1 — « C'est quoi Ablony ? » · 15 s · notoriété
 
