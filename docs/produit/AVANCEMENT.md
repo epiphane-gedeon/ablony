@@ -641,3 +641,27 @@ le web. Vérifications faites sur données réelles, pas sur hypothèse :
 - Restent ouverts : taux réel sur carte (Stripe) non mesuré ;
   `PROTECTION_RATE_LEGACY` à retirer quand le parc mobile aura basculé ;
   indicatif Bénin forcé à +228 ; `ablony_admin` toujours sans dépôt git.
+
+**Délai de dépôt : grâce et fin de journée (2026-10-09).** Un colis remis au
+livreur à 9h59 mais scanné à 10h02 pouvait être remboursé entre les deux : la
+date limite était un horodatage précis (création + 5 × 24 h, donc une heure
+arbitraire) et la tâche horaire remboursait sans délai. Le colis passait en
+`returned`, et le scan suivant était rejeté (`dropped_off` n'est autorisé que
+depuis `awaiting_dropoff`). Résultat : acheteur remboursé, **vendeur privé de
+son article**, livreur avec un colis que le système ne reconnaissait plus.
+- La date limite tombe désormais en **fin de journée** (23:59:59 UTC = heure
+  locale au Togo) : « vendredi », pas « vendredi 10:02 ».
+- **Délai de grâce de 12 h** (`DROPOFF_GRACE_HOURS`) avant tout remboursement.
+  Un acheteur qui attend une demi-journée de plus n'est pas lésé ; une vente
+  annulée à tort, si. Le scénario ci-dessus dispose maintenant de ~38 h de
+  marge. Vérifié sur 7 cas limites.
+- **Un remboursement ne remet plus l'article en vente.** Il passe en `hidden` :
+  le laisser `sold` le rendrait invisible pour toujours, mais le republier
+  d'office présumerait que le vendeur le veut encore — or l'article a pu partir
+  chez le livreur ou être remboursé pour un défaut. Le vendeur republie d'un
+  geste. Notification vendeur reformulée en conséquence.
+- **À FAIRE plus tard — verrou « collecte en cours ».** Marquer un colis quand
+  un livreur part le chercher, pour que la tâche l'ignore. Le mécanisme existe
+  déjà pour l'auto-expédition (la tâche saute `shipmentStatus` pending/approved)
+  ; il manque son équivalent pour la collecte. Inutile tant que le fondateur
+  collecte lui-même et sait quand il part.

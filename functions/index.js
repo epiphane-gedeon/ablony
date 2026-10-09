@@ -1078,8 +1078,17 @@ async function notifyPurchase({
   // Le vendeur imprime ce code, le colle sur le carton, et le dépose en point
   // relais — son travail s'arrête là.
   const parcelCode = newParcelCode();
+  // Fin de journée, et non l'heure exacte de la commande.
+  //
+  // Une limite à « vendredi 10:02 » n'est pas la façon dont on comprend un
+  // délai : on retient « vendredi ». Quelqu'un qui dépose vendredi après-midi
+  // en croyant être dans les temps ne doit pas découvrir que sa vente a été
+  // annulée le matin même.
   const dropoffDeadline = admin.firestore.Timestamp.fromMillis(
-      Date.now() + DELIVERY_CONFIG.DROPOFF_DEADLINE_DAYS * 24 * 60 * 60 * 1000,
+      finDeJournee(
+          Date.now() +
+      DELIVERY_CONFIG.DROPOFF_DEADLINE_DAYS * 24 * 60 * 60 * 1000,
+      ),
   );
 
   const parcelRef = db.collection("parcels").doc(parcelCode);
@@ -4976,13 +4985,16 @@ async function appliquerRemboursement(dbTx, txRef, tx, {reason, par}) {
     dbTx.update(parcelSnap.ref, {status: "returned", settledAt: now});
   }
 
-  // L'article redevient vendable : le remboursement dit précisément que la
-  // vente n'a pas eu lieu. `status` autant que les booléens hérités — sans
-  // lui l'annonce resterait « vendue » pour `computeIsListable`, donc
-  // invisible pour toujours.
+  // L'article repasse en « masqué », **pas** en vente.
+  //
+  // Le laisser « vendu » le rendrait invisible pour toujours, puisque la vente
+  // n'a pas eu lieu. Mais le remettre en ligne tout seul serait présumer que
+  // le vendeur le veut encore : l'article a pu partir chez le livreur, être
+  // vendu ailleurs, ou avoir été remboursé pour un défaut. C'est au vendeur de
+  // décider, et il lui suffit d'un geste pour republier.
   if (tx.productId) {
     dbTx.update(db.collection("products").doc(tx.productId), {
-      status: "active",
+      status: "hidden",
       isSold: false,
       soldAt: null,
       updatedAt: now,
@@ -7122,6 +7134,33 @@ exports.resolveDispute = onRequest(async (req, res) => {
 
 const PURGE_REJECTED_DAYS = 10;
 const RELEASE_AFTER_DELIVERY_DAYS = 3;
+
+/**
+ * Délai de grâce après la date limite de dépôt, avant tout remboursement.
+ *
+ * Sans lui, un colis remis au livreur à 9h59 mais scanné à 10h02 était
+ * remboursé entre les deux : l'acheteur récupérait son argent, le vendeur
+ * perdait son article, et le livreur se retrouvait avec un colis que le
+ * système ne reconnaissait plus. Le vendeur avait tout fait correctement.
+ *
+ * Douze heures ne lèsent pas l'acheteur — il attendait déjà cinq jours. Une
+ * vente annulée à tort, si.
+ */
+const DROPOFF_GRACE_HOURS = 12;
+
+/**
+ * Ramène un instant à la fin de sa journée (23:59:59 UTC).
+ *
+ * Le Togo est à UTC+0 : la fin de journée UTC est la fin de journée locale.
+ *
+ * @param {number} ms Un instant en millisecondes.
+ * @return {number} Le dernier instant de cette journée-là.
+ */
+function finDeJournee(ms) {
+  const d = new Date(ms);
+  d.setUTCHours(23, 59, 59, 999);
+  return d.getTime();
+}
 /** Rappels au vendeur quand il reste 3 jours, puis 1 jour, pour déposer. */
 const DROPOFF_REMINDER_DAYS = [3, 1];
 
@@ -7249,6 +7288,14 @@ async function rembourserDepotsNonFaits() {
     const limite = colis.dropoffDeadline?.toDate?.();
     if (!limite) continue;
 
+    // Le délai de grâce : la limite est passée, mais pas encore assez pour
+    // qu'on puisse conclure que le colis ne partira jamais. On ne relance plus
+    // (le vendeur a déjà eu ses rappels) et on ne rembourse pas encore.
+    const finGrace = limite.getTime() + DROPOFF_GRACE_HOURS * 3600 * 1000;
+    if (limite <= maintenant && maintenant.getTime() < finGrace) {
+      continue;
+    }
+
     if (limite > maintenant) {
       // Pas encore en retard : relancer, une fois par palier.
       const restants = (limite - maintenant) / JOUR_MS;
@@ -7296,7 +7343,8 @@ async function rembourserDepotsNonFaits() {
             resultat.sellerId,
             "Vente annulée",
             `« ${resultat.title} » n'a pas été déposé dans le délai. ` +
-            `L'acheteur a été remboursé et l'article est de nouveau en vente.`,
+            `L'acheteur a été remboursé. Votre annonce a été masquée : ` +
+            `republiez-la depuis votre profil si vous souhaitez la revendre.`,
             {type: "sale_refunded", transactionRef: colis.transactionRef},
         ),
       ]);
