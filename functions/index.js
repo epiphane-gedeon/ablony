@@ -4849,6 +4849,53 @@ exports.productShare = onRequest(async (req, res) => {
 });
 
 // ============================================================================
+// SUPPORT : PRÉVENIR L'UTILISATEUR QUAND L'ÉQUIPE ÉCRIT
+// ============================================================================
+
+/**
+ * Notifie un membre dès qu'un message de l'équipe arrive dans son fil.
+ *
+ * Sans ceci, une réponse du support ne posait qu'un compteur non lu : elle
+ * n'était vue que si la personne ouvrait l'application **et** pensait à aller
+ * dans « Assistance ». Or c'est précisément par là qu'on instruit un litige —
+ * demander une photo, une précision. Une question jamais lue bloque un dossier
+ * où de l'argent est en séquestre.
+ *
+ * Posé en déclencheur plutôt que dans l'endpoint d'envoi : la console admin
+ * écrit directement dans Firestore, et un chemin d'écriture ajouté plus tard
+ * bénéficiera de la notification sans qu'on y pense.
+ *
+ * L'auteur est reconnu par comparaison : dans le fil `support/{userId}`, un
+ * message dont `senderId` diffère de `userId` vient forcément de l'équipe.
+ */
+exports.onSupportMessage = onDocumentCreated(
+    "support/{userId}/messages/{messageId}",
+    async (event) => {
+      const snap = event.data;
+      if (!snap) return;
+      const {userId} = event.params;
+      const msg = snap.data() || {};
+
+      // Message écrit par le membre lui-même : rien à lui annoncer.
+      if (!msg.senderId || msg.senderId === userId) return;
+
+      const texte = String(msg.text || msg.message || "").trim();
+      const extrait = texte.length > 110 ? `${texte.slice(0, 107)}…` : texte;
+
+      try {
+        await notifyUser(
+            userId,
+            "Réponse de l'équipe Ablony",
+            extrait || "Vous avez un nouveau message de l'équipe Ablony.",
+            {type: "support_reply"},
+        );
+      } catch (error) {
+        console.error(`Notif support échouée pour ${userId}:`, error.message);
+      }
+    },
+);
+
+// ============================================================================
 // LES DEUX DÉNOUEMENTS D'UNE VENTE
 // ============================================================================
 //
