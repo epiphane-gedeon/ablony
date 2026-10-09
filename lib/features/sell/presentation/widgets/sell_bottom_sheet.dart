@@ -766,7 +766,9 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
             'label': l10n.indicateYourPrice,
             'placeholder': l10n.priceFormatPlaceholder,
             'inputType': 'number',
-            'suffixIcon': 'euro',
+            // Pas d'icône de devise : on vend en francs CFA, et le symbole
+            // euro disait le contraire. Le format « 0,00 FCFA » de l'invite
+            // suffit à indiquer la monnaie.
             'autofocus': true,
           },
         },

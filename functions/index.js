@@ -7810,8 +7810,30 @@ exports.setFoundersOpen = onRequest(async (req, res) => {
     });
   }
 
+  // **Sens unique : on ne peut que fermer.**
+  //
+  // La promesse faite aux fondateurs est celle d'une rareté. Rouvrir la
+  // fenêtre après l'avoir annoncée fermée ne dévaluerait pas seulement le
+  // badge : elle apprendrait aux membres que les annonces d'Ablony se
+  // reprennent. Une place de marché vit de la crédibilité de ses promesses,
+  // et celle-ci est la première qu'on leur fait.
+  //
+  // Verrouillé côté serveur plutôt que côté interface : une tentation à
+  // 23 h un soir de lancement poussif ne doit pas dépendre d'un bouton
+  // qu'on peut rappeler.
+  if (open === true) {
+    return res.status(409).json({
+      success: false,
+      error: {
+        code: "founders_window_one_way",
+        message: "La fenêtre des fondateurs ne peut pas être rouverte.",
+      },
+    });
+  }
+
   await REGLAGES_BADGES().set({
     foundersOpen: open,
+    closedAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedBy: decoded.uid,
   }, {merge: true});
