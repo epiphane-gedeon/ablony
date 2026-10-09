@@ -4,6 +4,7 @@ const {onDocumentCreated, onDocumentWritten} = require("firebase-functions/v2/fi
 const {onSchedule} = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
 const crypto = require("crypto");
+const emails = require("./emails");
 
 // Initialiser Firebase Admin
 admin.initializeApp();
@@ -4892,6 +4893,22 @@ exports.onSupportMessage = onDocumentCreated(
       } catch (error) {
         console.error(`Notif support échouée pour ${userId}:`, error.message);
       }
+
+      // Doublé par e-mail : c'est souvent par là qu'on demande une précision
+      // pour instruire un litige, et une question jamais lue bloque un dossier
+      // où de l'argent est en séquestre.
+      try {
+        const u = (await db.collection("users").doc(userId).get()).data() || {};
+        if (u.email) {
+          await emails.emailMessageEquipe({
+            to: u.email,
+            prenom: u.username || null,
+            message: texte,
+          });
+        }
+      } catch (error) {
+        console.error(`E-mail support échoué pour ${userId}:`, error.message);
+      }
     },
 );
 
@@ -6968,6 +6985,22 @@ exports.openDispute = onRequest(async (req, res) => {
         `L'administration l'examine.`,
         {type: "dispute_opened", transactionRef},
     );
+
+    // Et par e-mail : de l'argent est bloqué, la personne doit l'apprendre
+    // même si elle n'ouvre pas l'application aujourd'hui. L'envoi ne peut pas
+    // faire échouer l'ouverture du litige (emailLitigeOuvert ne lève jamais).
+    try {
+      const dest = (await db.collection("users").doc(autre).get()).data() || {};
+      if (dest.email) {
+        await emails.emailLitigeOuvert({
+          to: dest.email,
+          prenom: dest.username || null,
+          article: resultat.title,
+        });
+      }
+    } catch (e) {
+      console.error("E-mail litige non envoyé:", e.message);
+    }
 
     return res.json({success: true, data: {status: "open", transactionRef}});
   } catch (error) {
