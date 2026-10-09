@@ -602,17 +602,34 @@ function buildWalletUpdate(existingWallet, patch) {
  * @param {Object} p Montants de la vente.
  * @return {Object} La ventilation, à stocker sur la transaction.
  */
-function partAblony({total, prixVendeur, fraisLivraison}) {
+function partAblony({total, partExterne, prixVendeur, fraisLivraison}) {
   const t = Math.round(Number(total) || 0);
   const v = Math.round(Number(prixVendeur) || 0);
   const l = Math.round(Number(fraisLivraison) || 0);
+  // Seule la part réellement encaissée par le prestataire est prélevée. Un
+  // paiement au porte-monnaie ne traverse pas nyole : sa commission a déjà été
+  // payée lors de la recharge, la compter deux fois minorerait la marge.
+  const externe = Math.max(0, Math.min(Math.round(Number(partExterne) || 0), t));
+  const fraisFournisseur = Math.round(externe * PROVIDER_FEE_RATE);
+
+  // Le vendeur touche son prix entier : c'est la promesse qui lui est faite.
+  // La livraison, elle, est versée nette — celui qui livre supporte la part
+  // de commission prélevée sur ses propres frais.
+  const versementLivraison = Math.round(l * (1 - PROVIDER_FEE_RATE));
+
   return {
-    // Ce qui reste une fois le vendeur et la livraison servis.
-    protection: Math.max(0, t - v - l),
-    // Encaissé pour le compte de qui livre : de passage, pas un gain.
-    livraison: l,
-    versementVendeur: v,
     totalEncaisse: t,
+    partExterne: externe,
+    fraisFournisseur,
+    netRecu: t - fraisFournisseur,
+    versementVendeur: v,
+    versementLivraison,
+    // Facturé à l'acheteur, à distinguer de ce qui est reversé.
+    livraison: l,
+    // Brut, avant commission : utile pour vérifier le taux appliqué.
+    protectionBrute: Math.max(0, t - v - l),
+    // **Ce qui reste réellement à Ablony**, une fois tout le monde servi.
+    marge: t - fraisFournisseur - v - versementLivraison,
   };
 }
 
@@ -636,6 +653,9 @@ async function finalizePurchase({
   const encaisse = Math.round(Number(totalPaye) || 0) || totalAmount;
   const ventilation = partAblony({
     total: encaisse,
+    // Ce qui a traversé le prestataire : le total moins ce qui venait du
+    // porte-monnaie.
+    partExterne: Math.max(0, encaisse - walletDeduction),
     prixVendeur: productPrice,
     fraisLivraison: Math.round(Number(delivery?.feeXof) || 0),
   });
@@ -5134,6 +5154,7 @@ exports.comptabilite = onRequest(async (req, res) => {
     let volumeVentes = 0;
     let nbVentes = 0;
     let sansVentilation = 0;
+    let commissionFournisseur = 0;
 
     txs.forEach((d) => {
       const t = d.data();
@@ -5146,8 +5167,12 @@ exports.comptabilite = onRequest(async (req, res) => {
         // externe en paiement mixte, et les taux ont changé depuis.
         const v = t.ablony;
         if (v) {
-          protection += Math.round(Number(v.protection || 0));
-          livraisonCollectee += Math.round(Number(v.livraison || 0));
+          // `marge` est le net, commission du prestataire déduite — c'est elle
+          // qui finit dans la poche d'Ablony, pas la protection brute.
+          protection += Math.round(Number(v.marge ?? v.protection ?? 0));
+          commissionFournisseur += Math.round(Number(v.fraisFournisseur || 0));
+          livraisonCollectee += Math.round(Number(v.versementLivraison ??
+            v.livraison ?? 0));
           volumeVentes += Math.round(Number(v.versementVendeur || 0));
         } else {
           // Ventes antérieures à la ventilation : reconstitution au mieux,
@@ -5165,10 +5190,15 @@ exports.comptabilite = onRequest(async (req, res) => {
         }
         nbVentes += 1;
       } else if (type === "boost" || type === "boostpack") {
-        // Service rendu par Ablony seule : aucun tiers à servir, donc le prix
-        // entier lui revient — que le membre ait payé au porte-monnaie ou en
-        // mobile money. Ici `amount` porte bien le prix total.
-        boosts += montant;
+        // Service rendu par Ablony seule : aucun tiers à servir, donc tout lui
+        // revient — mais **net** de la commission du prestataire quand le
+        // paiement est passé par lui. Au porte-monnaie, elle a déjà été
+        // prélevée à la recharge : le prix entier reste acquis.
+        const partWallet = Math.round(Number(t.walletDeduction || 0));
+        const externe = Math.max(0, montant - partWallet);
+        const frais = Math.round(externe * PROVIDER_FEE_RATE);
+        boosts += montant - frais;
+        commissionFournisseur += frais;
       } else if (type === "pickup") {
         ramassages += montant;
       }
@@ -5189,6 +5219,7 @@ exports.comptabilite = onRequest(async (req, res) => {
         },
         revenus: {
           protectionAcheteur: protection,
+          commissionFournisseur: commissionFournisseur,
           fraisDeRetrait: fraisRetraits,
           boosts: boosts,
           total: revenuBrut,
@@ -7515,6 +7546,16 @@ exports.resolveDispute = onRequest(async (req, res) => {
 //                 nez trois jours plus tard.
 
 const PURGE_REJECTED_DAYS = 10;
+/**
+ * Ce que le prestataire de paiement prélève sur tout ce qui transite.
+ *
+ * Mesuré, pas supposé : trois paiements réels chez nyole donnent 5,0 % exacts,
+ * sans part fixe (voir docs/produit/27-economie-frais.md). S'applique
+ * uniquement à l'argent qui passe par lui — un règlement au porte-monnaie en
+ * a déjà été frappé à la recharge.
+ */
+const PROVIDER_FEE_RATE = 0.05;
+
 const RELEASE_AFTER_DELIVERY_DAYS = 3;
 
 /**

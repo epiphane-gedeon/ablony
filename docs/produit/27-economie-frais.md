@@ -183,3 +183,31 @@ comptabilité qui se recalcule au taux du jour réécrit le passé.
 Les ventes antérieures à cette ventilation sont comptées à part
 (`ventesSansVentilation`), pour qu'un écart reste visible plutôt que fondu dans
 le total.
+
+### La commission du prestataire est déduite — et seulement sur ce qui transite
+
+Premier jet corrigé : la ventilation reportait la protection **brute**. Sur une
+vente à 1 000 F avec 1 000 F de livraison, elle annonçait 60 F alors qu'il ne
+reste que **7 F**. Facteur neuf.
+
+Le flux réel :
+
+```
+acheteur paie            2 060
+− commission 5 %           103
+= net reçu               1 957
+− versé au vendeur       1 000   (prix entier : c'est la promesse)
+− versé à la livraison     950   (net : qui livre supporte la part sur ses frais)
+= marge Ablony               7
+```
+
+Ce qui retrouve exactement `prix × (0,95 × taux − 0,05)` du tableau plus haut.
+
+**La commission ne s'applique qu'à la part réellement passée par le
+prestataire.** Un règlement au porte-monnaie ne le traverse pas : elle a déjà
+été prélevée à la recharge, la compter deux fois minorerait la marge. Le même
+achat payé au solde laisse donc 110 F au lieu de 7 F — ce qui redit, en
+chiffres, pourquoi le porte-monnaie est le meilleur levier.
+
+Même règle pour les **boosts** : tout revient à Ablony, mais net de commission
+quand le paiement est passé par le prestataire.
