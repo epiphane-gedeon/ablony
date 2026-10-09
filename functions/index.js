@@ -584,9 +584,41 @@ function buildWalletUpdate(existingWallet, patch) {
  * @param {string} params.paymentMethod - Méthode de paiement utilisée
  * @param {number} params.totalAmount - Montant total de la transaction (incluant les frais éventuels)
  */
+/**
+ * Fige la part qui revient à Ablony au moment où la vente se dénoue.
+ *
+ * **Calculée ici, pas reconstituée plus tard.** Deux raisons, l'une de
+ * justesse, l'autre de principe.
+ *
+ * La justesse : `amount` ne veut pas dire la même chose selon le type. Sur un
+ * achat mixte il ne porte que la part payée par mobile money, le reste étant
+ * dans `walletDeduction` ; sur un boost il porte le prix entier. Un calcul
+ * fait après coup sur `amount` sous-estimerait donc tout achat mixte.
+ *
+ * Le principe : les taux changent (la protection est passée de 5 % à 6 %).
+ * Une comptabilité qui se recalcule au taux du jour réécrit le passé. Ce qui
+ * est figé ici est ce qui a réellement été prélevé, ce jour-là.
+ *
+ * @param {Object} p Montants de la vente.
+ * @return {Object} La ventilation, à stocker sur la transaction.
+ */
+function partAblony({total, prixVendeur, fraisLivraison}) {
+  const t = Math.round(Number(total) || 0);
+  const v = Math.round(Number(prixVendeur) || 0);
+  const l = Math.round(Number(fraisLivraison) || 0);
+  return {
+    // Ce qui reste une fois le vendeur et la livraison servis.
+    protection: Math.max(0, t - v - l),
+    // Encaissé pour le compte de qui livre : de passage, pas un gain.
+    livraison: l,
+    versementVendeur: v,
+    totalEncaisse: t,
+  };
+}
+
 async function finalizePurchase({
   buyerId, sellerId, productId, productPrice, walletDeduction,
-  transactionRef, paymentMethod, totalAmount, delivery,
+  transactionRef, paymentMethod, totalAmount, totalPaye, delivery,
 }) {
   // Le XOF n'a pas de décimales. Tout montant qui touche un solde doit être un
   // entier : un demi-franc (frais de protection non arrondi, prix négocié
@@ -596,6 +628,17 @@ async function finalizePurchase({
   productPrice = Math.round(Number(productPrice) || 0);
   walletDeduction = Math.round(Number(walletDeduction) || 0);
   totalAmount = Math.round(Number(totalAmount) || 0);
+
+  // `totalPaye` est fourni par l'appelant, jamais déduit. La convention de
+  // `totalAmount` change selon le chemin — total complet en wallet-only, part
+  // externe seule en mixte — et aucune règle fiable ne permet de distinguer
+  // les deux après coup. Deviner ici fausserait la comptabilité en silence.
+  const encaisse = Math.round(Number(totalPaye) || 0) || totalAmount;
+  const ventilation = partAblony({
+    total: encaisse,
+    prixVendeur: productPrice,
+    fraisLivraison: Math.round(Number(delivery?.feeXof) || 0),
+  });
 
   const buyerRef = db.collection("users").doc(buyerId);
   const sellerRef = db.collection("users").doc(sellerId);
@@ -680,6 +723,8 @@ async function finalizePurchase({
       // Transaction déjà créée (par initiatePayment), on la met à jour
       dbTx.update(txDocRef, {
         status: "completed",
+        // Figé au dénouement : c'est ce qui a réellement été prélevé.
+        ablony: ventilation,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     } else {
@@ -695,6 +740,7 @@ async function finalizePurchase({
         sellerId: sellerId,
         productPrice: productPrice,
         walletDeduction: walletDeduction || 0,
+        ablony: ventilation,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
@@ -2030,6 +2076,8 @@ exports.initiatePayment = onRequest(async (req, res) => {
         transactionRef: reference,
         paymentMethod: "wallet",
         totalAmount: Number(amount),
+        // Wallet-only : tout vient du porte-monnaie, le total est le montant.
+        totalPaye: Number(amount),
         delivery: deliveryChoice,
       });
 
@@ -2266,6 +2314,9 @@ async function finaliserSelonType(transaction, reference) {
       transactionRef: reference,
       paymentMethod: transaction.paymentMethod,
       totalAmount: Number(transaction.amount),
+        // Mixte : la part externe et celle du porte-monnaie font le total.
+        totalPaye: Number(transaction.amount) +
+          Number(transaction.walletDeduction || 0),
       delivery: transaction.delivery || null,
     });
   } else if (transaction.type === "boost") {
@@ -2560,6 +2611,7 @@ exports.geniusPayWebhook = onRequest(async (req, res) => {
           transactionRef: transactionRef,
           paymentMethod: transaction.paymentMethod,
           totalAmount: amount,
+          totalPaye: amount + walletDeduction,
           delivery: transaction.delivery || null,
         });
       } else if (transaction.type === "boost") {
@@ -5081,6 +5133,7 @@ exports.comptabilite = onRequest(async (req, res) => {
     let ramassages = 0;
     let volumeVentes = 0;
     let nbVentes = 0;
+    let sansVentilation = 0;
 
     txs.forEach((d) => {
       const t = d.data();
@@ -5088,18 +5141,33 @@ exports.comptabilite = onRequest(async (req, res) => {
       const type = t.type || "recharge";
 
       if (type === "purchase") {
-        const prix = Math.round(Number(t.productPrice || 0));
-        const livraison = Math.round(Number(t.delivery?.feeXof || 0));
-        // La commission n'est pas stockée : elle est ce qui reste une fois le
-        // vendeur et la livraison servis. Reconstituée ainsi, elle reflète le
-        // taux appliqué le jour de la vente.
-        const commission = Math.max(0, montant - prix - livraison);
-        protection += commission;
-        livraisonCollectee += livraison;
-        volumeVentes += prix;
+        // La ventilation est figée au dénouement de la vente (`partAblony`).
+        // On la lit, on ne la recalcule pas : `amount` ne porte que la part
+        // externe en paiement mixte, et les taux ont changé depuis.
+        const v = t.ablony;
+        if (v) {
+          protection += Math.round(Number(v.protection || 0));
+          livraisonCollectee += Math.round(Number(v.livraison || 0));
+          volumeVentes += Math.round(Number(v.versementVendeur || 0));
+        } else {
+          // Ventes antérieures à la ventilation : reconstitution au mieux,
+          // comptée à part pour qu'un écart reste visible plutôt que fondu
+          // dans le total.
+          const prix = Math.round(Number(t.productPrice || 0));
+          const livraison = Math.round(Number(t.delivery?.feeXof || 0));
+          const walletPart = Math.round(Number(t.walletDeduction || 0));
+          const totalEstime = montant + (walletPart && walletPart !== montant ?
+            walletPart : 0);
+          protection += Math.max(0, totalEstime - prix - livraison);
+          livraisonCollectee += livraison;
+          volumeVentes += prix;
+          sansVentilation += 1;
+        }
         nbVentes += 1;
       } else if (type === "boost" || type === "boostpack") {
-        // Service rendu par Ablony seule : aucun tiers à servir.
+        // Service rendu par Ablony seule : aucun tiers à servir, donc le prix
+        // entier lui revient — que le membre ait payé au porte-monnaie ou en
+        // mobile money. Ici `amount` porte bien le prix total.
         boosts += montant;
       } else if (type === "pickup") {
         ramassages += montant;
@@ -5131,6 +5199,7 @@ exports.comptabilite = onRequest(async (req, res) => {
         },
         activite: {
           nombreVentes: nbVentes,
+          ventesSansVentilation: sansVentilation,
           volumeVentes: volumeVentes,
           nombreMembres: users.size,
         },
@@ -7796,6 +7865,7 @@ async function reconcilierPaiementsEnAttente() {
           transactionRef: doc.id,
           paymentMethod: tx.paymentMethod,
           totalAmount: Number(tx.amount),
+          totalPaye: Number(tx.amount) + Number(tx.walletDeduction || 0),
           delivery: tx.delivery || null,
         });
       } else if (tx.type === "boost") {

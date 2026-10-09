@@ -142,3 +142,44 @@ qui en a vu 5 % serait pire que l'écart de marge.
 - Séparer solde rechargé / solde gagné.
 - Confirmer le coût réel de sortie de nyole sur un reversement effectif
   (2,5 % annoncé pour le Togo, jamais mesuré).
+
+
+## Comptabilité — séparer l'argent d'Ablony de celui des membres
+
+Ajouté le 2026-10-09. Onglet « Comptabilité » dans l'admin.
+
+Tout transite par un compte nyole unique, qui mélange l'argent d'Ablony et
+celui des membres. Le risque n'est pas de mal estimer un chiffre d'affaires :
+**c'est de retirer l'argent de quelqu'un d'autre.**
+
+D'où le sens du calcul : on part de ce qu'on **doit**, et le retirable est ce
+qui dépasse. Une erreur fait alors retirer trop peu plutôt que trop.
+
+**Passif** (jamais retirable) = porte-monnaie des membres + séquestre vendeurs
++ retraits demandés non versés. Lu dans les porte-monnaie eux-mêmes, qui font
+foi — aucun journal parallèle, donc aucune dérive.
+
+**Revenus** = protection acheteur + frais de retrait + boosts. La livraison et
+les ramassages sont présentés à part : encaissés pour le compte de qui livre,
+ce ne sont pas des gains.
+
+**Retirable** = solde nyole (saisi à la main, leur API ne l'expose pas) −
+passif.
+
+### La ventilation est figée à la transaction, jamais reconstituée
+
+`partAblony()` écrit la ventilation sur la transaction au moment où la vente se
+dénoue. Deux raisons.
+
+**La justesse.** `amount` ne veut pas dire la même chose selon le cas : sur un
+achat **mixte** il ne porte que la part mobile money, le reste étant dans
+`walletDeduction` ; sur un **boost** il porte le prix entier. Un calcul fait
+après coup sur `amount` perdait **la totalité de la commission** d'un achat
+mixte — vérifié : 0 F au lieu de 600 F sur une vente à 10 000 F.
+
+**Le principe.** Les taux changent (protection passée de 5 % à 6 %). Une
+comptabilité qui se recalcule au taux du jour réécrit le passé.
+
+Les ventes antérieures à cette ventilation sont comptées à part
+(`ventesSansVentilation`), pour qu'un écart reste visible plutôt que fondu dans
+le total.
