@@ -41,5 +41,127 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+
+  <!-- ============================================================
+       AIDE À L'INSTALLATION (PWA)
+       ============================================================
+       Écrit ici, en JavaScript simple, plutôt que dans l'application
+       Flutter : cela s'affiche **avant** que Flutter ne démarre, ne
+       demande aucune release mobile, et reste modifiable par un simple
+       redéploiement web.
+
+       Deux chemins, parce que les plateformes ne se valent pas :
+
+       - Android/Chrome expose `beforeinstallprompt`. On l'intercepte
+         pour proposer l'installation au bon moment, avec notre propre
+         bouton, au lieu de la bannière grise du navigateur que tout le
+         monde ignore.
+
+       - iOS n'expose **rien**. Apple ne permet pas de déclencher
+         l'installation par du code. La seule voie est Partager → « Sur
+         l'écran d'accueil ». On ne peut donc que l'expliquer — mais
+         l'expliquer au moment exact où la personne veut installer vaut
+         infiniment mieux que de la laisser chercher.
+
+       `?install=1` ouvre l'aide immédiatement : c'est ce que vise le
+       bouton du site vitrine, qui ne peut pas installer lui-même
+       (l'invite appartient à l'origine de l'application).
+       ============================================================ -->
+  <style>
+    .abl-inst{position:fixed;left:0;right:0;bottom:0;z-index:9999;
+      background:#fff;color:#111;font-family:system-ui,-apple-system,sans-serif;
+      box-shadow:0 -6px 24px rgba(0,0,0,.18);padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+      transform:translateY(110%);transition:transform .28s ease;border-radius:18px 18px 0 0}
+    .abl-inst.on{transform:translateY(0)}
+    .abl-inst h3{margin:0 0 6px;font-size:17px}
+    .abl-inst p{margin:0 0 14px;font-size:14px;line-height:1.45;color:#444}
+    .abl-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .abl-row img{width:44px;height:44px;border-radius:10px;flex:none}
+    .abl-btn{display:block;width:100%;background:#2385AE;color:#fff;border:0;
+      border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer}
+    .abl-close{background:none;border:0;color:#777;font-size:14px;padding:10px;
+      width:100%;cursor:pointer;margin-top:4px}
+    .abl-steps{margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.7;color:#333}
+    .abl-steps b{color:#2385AE}
+    @media(prefers-color-scheme:dark){
+      .abl-inst{background:#1e1e1e;color:#fff}
+      .abl-inst p{color:#bbb}.abl-steps{color:#ddd}
+    }
+  </style>
+  <div class="abl-inst" id="ablInst" role="dialog" aria-label="Installer Ablony"></div>
+  <script>
+  (function () {
+    var boite = document.getElementById('ablInst');
+    var invite = null;             // l'événement Chrome, s'il arrive
+    var forcee = location.search.indexOf('install=1') !== -1;
+
+    // Déjà installée : ne jamais importuner quelqu'un qui a fait le geste.
+    var posee = window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+    if (posee) return;
+
+    var iOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    // Sur iOS, seul Safari sait poser une icône : inutile de l'expliquer
+    // dans Chrome ou Firefox iOS, où le menu Partager n'a pas l'option.
+    var safariIOS = iOS && !/crios|fxios|edgios|opt\//i.test(navigator.userAgent);
+
+    function montrer(html) {
+      boite.innerHTML = html;
+      requestAnimationFrame(function () { boite.classList.add('on'); });
+      var f = boite.querySelector('[data-fermer]');
+      if (f) f.onclick = function () {
+        boite.classList.remove('on');
+        try { localStorage.setItem('ablInstVu', String(Date.now())); } catch (e) {}
+      };
+    }
+
+    var entete =
+      '<div class="abl-row">' +
+      '<img src="icons/Icon-192.png" alt="">' +
+      '<div><h3>Installer Ablony</h3>' +
+      '<p style="margin:0">Accès direct depuis votre écran d\'accueil, sans passer par le navigateur.</p></div></div>';
+
+    function proposerAndroid() {
+      montrer(entete +
+        '<button class="abl-btn" data-installer>Installer l\'application</button>' +
+        '<button class="abl-close" data-fermer>Plus tard</button>');
+      boite.querySelector('[data-installer]').onclick = function () {
+        if (!invite) return;
+        invite.prompt();
+        invite.userChoice.then(function () {
+          invite = null;
+          boite.classList.remove('on');
+        });
+      };
+    }
+
+    function guiderIOS() {
+      montrer(entete +
+        '<ol class="abl-steps">' +
+        '<li>Touchez <b>Partager</b> en bas de l\'écran</li>' +
+        '<li>Faites défiler et choisissez <b>Sur l\'écran d\'accueil</b></li>' +
+        '<li>Touchez <b>Ajouter</b></li>' +
+        '</ol>' +
+        '<button class="abl-close" data-fermer>J\'ai compris</button>');
+    }
+
+    // Chrome/Edge/Android : on garde l'invite pour la rejouer nous-mêmes.
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      invite = e;
+      if (forcee) proposerAndroid();
+      else setTimeout(proposerAndroid, 2500); // laisser la page s'afficher d'abord
+    });
+
+    if (safariIOS) {
+      // Pas d'événement sur iOS : on décide nous-mêmes du moment.
+      var vu = 0;
+      try { vu = Number(localStorage.getItem('ablInstVu') || 0); } catch (e) {}
+      var recent = Date.now() - vu < 7 * 24 * 3600 * 1000;
+      if (forcee || !recent) setTimeout(guiderIOS, forcee ? 400 : 3000);
+    }
+  })();
+  </script>
 </body>
 </html>
