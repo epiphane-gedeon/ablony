@@ -5005,6 +5005,147 @@ exports.onSupportMessage = onDocumentCreated(
 );
 
 // ============================================================================
+// COMPTABILITÉ : CE QUI EST À ABLONY, ET CE QUI NE L'EST PAS
+// ============================================================================
+//
+// Tout l'argent transite par un compte nyole unique. Ce compte contient donc,
+// mélangés, l'argent d'Ablony et celui des membres. Le risque n'est pas de mal
+// calculer un chiffre d'affaires : c'est de **retirer l'argent de quelqu'un
+// d'autre**.
+//
+// D'où le sens du calcul. On ne part pas des revenus pour en déduire ce qu'on
+// peut retirer — on part de ce qu'on **doit**, et tout ce qui dépasse est à
+// Ablony. Si une erreur se glisse, elle fait retirer trop peu plutôt que trop.
+//
+// Le passif est lu dans les porte-monnaie eux-mêmes, qui font foi : ce sont
+// eux que les membres voient et peuvent réclamer. Aucun journal parallèle à
+// tenir, donc aucune dérive possible entre deux sources.
+//
+// Les revenus, eux, sont reconstitués transaction par transaction avec les
+// montants **de l'époque** — et non recalculés au taux du jour. La protection
+// est passée de 5 % à 6 % : appliquer 6 % aux ventes anciennes gonflerait le
+// résultat d'un argent jamais encaissé.
+
+/**
+ * L'état comptable complet. Réservé aux administrateurs.
+ *
+ * `soldeFournisseur` (facultatif) est le solde lu sur l'espace nyole. Fourni,
+ * il permet la réconciliation : disponible = solde − passif.
+ */
+exports.comptabilite = onRequest(async (req, res) => {
+  const decoded = await authenticate(req, res);
+  if (!decoded) return;
+  if (await roleOf(decoded.uid) !== "admin") {
+    return res.status(403).json({
+      success: false, error: {message: "Réservé aux administrateurs"},
+    });
+  }
+
+  try {
+    const [users, txs, retraits] = await Promise.all([
+      db.collection("users").get(),
+      db.collection("transactions").where("status", "==", "completed").get(),
+      db.collection("withdrawals").get(),
+    ]);
+
+    // ---- PASSIF : l'argent des autres ----------------------------------
+    let disponibleMembres = 0;
+    let sequestre = 0;
+    users.forEach((d) => {
+      const w = d.data().wallet || {};
+      disponibleMembres += Math.round(Number(w.availableAmount || 0));
+      sequestre += Math.round(Number(w.pendingAmount || 0));
+    });
+
+    // Retraits demandés mais pas encore versés : l'argent est sorti du
+    // porte-monnaie sans avoir atteint son destinataire. Il reste dû.
+    let retraitsEnCours = 0;
+    let fraisRetraits = 0;
+    retraits.forEach((d) => {
+      const r = d.data();
+      if (r.status === "requested") {
+        retraitsEnCours += Math.round(Number(r.netAmountXof || 0));
+      }
+      // Les frais ne sont acquis que sur un retrait réellement versé.
+      if (r.status === "completed" || r.status === "paid") {
+        fraisRetraits += Math.round(Number(r.feeXof || 0));
+      }
+    });
+
+    const passif = disponibleMembres + sequestre + retraitsEnCours;
+
+    // ---- REVENUS : reconstitués au montant de l'époque -------------------
+    let protection = 0;
+    let boosts = 0;
+    let livraisonCollectee = 0;
+    let ramassages = 0;
+    let volumeVentes = 0;
+    let nbVentes = 0;
+
+    txs.forEach((d) => {
+      const t = d.data();
+      const montant = Math.round(Number(t.amount || 0));
+      const type = t.type || "recharge";
+
+      if (type === "purchase") {
+        const prix = Math.round(Number(t.productPrice || 0));
+        const livraison = Math.round(Number(t.delivery?.feeXof || 0));
+        // La commission n'est pas stockée : elle est ce qui reste une fois le
+        // vendeur et la livraison servis. Reconstituée ainsi, elle reflète le
+        // taux appliqué le jour de la vente.
+        const commission = Math.max(0, montant - prix - livraison);
+        protection += commission;
+        livraisonCollectee += livraison;
+        volumeVentes += prix;
+        nbVentes += 1;
+      } else if (type === "boost" || type === "boostpack") {
+        // Service rendu par Ablony seule : aucun tiers à servir.
+        boosts += montant;
+      } else if (type === "pickup") {
+        ramassages += montant;
+      }
+      // Les recharges ne sont pas un revenu : elles déplacent de l'argent vers
+      // un porte-monnaie, donc vers le passif.
+    });
+
+    const revenuBrut = protection + boosts + fraisRetraits;
+
+    return res.json({
+      success: true,
+      data: {
+        passif: {
+          portefeuillesMembres: disponibleMembres,
+          sequestreVendeurs: sequestre,
+          retraitsADecaisser: retraitsEnCours,
+          total: passif,
+        },
+        revenus: {
+          protectionAcheteur: protection,
+          fraisDeRetrait: fraisRetraits,
+          boosts: boosts,
+          total: revenuBrut,
+        },
+        reversements: {
+          livraisonCollectee: livraisonCollectee,
+          ramassagesCollectes: ramassages,
+        },
+        activite: {
+          nombreVentes: nbVentes,
+          volumeVentes: volumeVentes,
+          nombreMembres: users.size,
+        },
+        calculeLe: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("comptabilite:", error);
+    return res.status(500).json({
+      success: false, error: {message: error.message},
+    });
+  }
+});
+
+// ============================================================================
 // LES DEUX DÉNOUEMENTS D'UNE VENTE
 // ============================================================================
 //
