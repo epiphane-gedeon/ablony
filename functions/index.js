@@ -4850,6 +4850,98 @@ exports.productShare = onRequest(async (req, res) => {
 });
 
 // ============================================================================
+// MOT DE PASSE OUBLIÉ
+// ============================================================================
+
+/** Délai minimum entre deux envois pour une même adresse. */
+const RESET_INTERVALLE_MS = 60 * 1000;
+
+/**
+ * Envoie un e-mail de réinitialisation, avec notre gabarit et notre adresse.
+ *
+ * Firebase sait déjà envoyer ce message, mais depuis son propre domaine et
+ * avec sa propre mise en page. Un e-mail de réinitialisation venant d'une
+ * adresse inconnue ressemble à une tentative d'hameçonnage — or c'est
+ * exactement le moment où l'on demande à quelqu'un de cliquer. On engendre
+ * donc le lien ici et on l'expédie nous-mêmes.
+ *
+ * Deux protections, parce que cet endpoint est forcément public (qui a oublié
+ * son mot de passe ne peut pas s'authentifier) :
+ *
+ * - **Réponse identique que le compte existe ou non.** Répondre « compte
+ *   inconnu » transformerait ce formulaire en outil de vérification
+ *   d'adresses : on saurait qui est inscrit sur Ablony en essayant des
+ *   e-mails un par un.
+ * - **Une minute entre deux envois** pour une même adresse, afin qu'on ne
+ *   puisse pas inonder la boîte de quelqu'un en répétant la demande.
+ */
+exports.demanderReinitialisation = onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  if (req.method === "OPTIONS") {
+    res.set("Access-Control-Allow-Methods", "POST");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(204).send("");
+  }
+
+  const email = String((req.body || {}).email || "").trim().toLowerCase();
+  // Réponse unique, construite une fois : toute sortie doit être identique,
+  // sans quoi la différence elle-même renseigne.
+  const reponse = () => res.status(200).json({
+    success: true,
+    data: {message: "Si un compte existe, un e-mail vient d'être envoyé."},
+  });
+
+  if (!email || !email.includes("@")) return reponse();
+
+  try {
+    // L'adresse est hachée : cette collection technique n'a pas à constituer
+    // une seconde liste d'e-mails en clair.
+    const cle = crypto.createHash("sha256").update(email).digest("hex");
+    const ref = db.collection("passwordResets").doc(cle);
+    const snap = await ref.get();
+    const dernier = snap.exists ? snap.data().lastSentAt?.toMillis?.() || 0 : 0;
+    if (Date.now() - dernier < RESET_INTERVALLE_MS) {
+      console.log("[reset] Demande trop rapprochée, ignorée");
+      return reponse();
+    }
+
+    let lien = null;
+    try {
+      lien = await admin.auth().generatePasswordResetLink(email, {
+        url: `${APP_PUBLIC_URL}/auth/reset-password`,
+        handleCodeInApp: true,
+      });
+    } catch (e) {
+      // `auth/user-not-found` entre ici : on sort par la même porte que le
+      // cas nominal, sans rien dire de plus.
+      console.log(`[reset] Lien non engendré (${e.code || e.message})`);
+      return reponse();
+    }
+
+    await ref.set({
+      lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, {merge: true});
+
+    let prenom = null;
+    try {
+      const u = await db.collection("users")
+          .where("email", "==", email).limit(1).get();
+      if (!u.empty) prenom = u.docs[0].data().username || null;
+    } catch (_) {
+      // Le prénom n'est qu'un agrément : son absence ne justifie pas de
+      // priver quelqu'un de son lien.
+    }
+
+    await emails.emailMotDePasseOublie({to: email, prenom, lien});
+    return reponse();
+  } catch (error) {
+    console.error("demanderReinitialisation:", error);
+    // Même en cas de panne : ne rien laisser deviner.
+    return reponse();
+  }
+});
+
+// ============================================================================
 // SUPPORT : PRÉVENIR L'UTILISATEUR QUAND L'ÉQUIPE ÉCRIT
 // ============================================================================
 

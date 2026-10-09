@@ -204,4 +204,53 @@ async function emailMessageEquipe({to, prenom, message}) {
   });
 }
 
-module.exports = {envoyer, emailLitigeOuvert, emailMessageEquipe};
+/**
+ * Mot de passe oublié.
+ *
+ * Le lien est engendré par le SDK admin puis envoyé par nous, plutôt que de
+ * laisser Firebase expédier son propre message : c'est le seul moyen d'avoir
+ * notre gabarit et notre adresse. Un e-mail de réinitialisation venant d'un
+ * domaine inconnu ressemble à une tentative d'hameçonnage — or c'est
+ * précisément le moment où l'on demande à quelqu'un de cliquer.
+ *
+ * Le délai d'expiration est rappelé : sans lui, un lien ouvert le lendemain
+ * donne une erreur que l'on prend pour une panne.
+ *
+ * @param {Object} p Destinataire, nom et lien de réinitialisation.
+ * @return {Promise<boolean>} Vrai si l'e-mail est parti.
+ */
+async function emailMotDePasseOublie({to, prenom, lien}) {
+  const titre = "Réinitialisation de votre mot de passe";
+  const intro =
+    `Bonjour${prenom ? " " + esc(prenom) : ""},<br><br>` +
+    `Vous avez demandé à réinitialiser le mot de passe de votre compte Ablony. ` +
+    `Le lien ci-dessous est valable <strong>une heure</strong>.`;
+  const bloc =
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f9fa;border-left:3px solid ${BLEU};border-radius:6px;margin:4px 0 2px;">
+<tr><td style="padding:14px 16px;">
+<p style="margin:0;font-family:'Be Vietnam Pro',sans-serif;font-size:14px;line-height:1.6;color:#444;">
+<strong>Vous n'êtes pas à l'origine de cette demande ?</strong> Ignorez cet e-mail :
+votre mot de passe reste inchangé tant que le lien n'est pas utilisé.</p>
+</td></tr></table>`;
+  return envoyer({
+    to,
+    sujet: "Ablony — réinitialisation de votre mot de passe",
+    html: gabarit({
+      titre, intro, bloc,
+      bouton: "Choisir un nouveau mot de passe", lien,
+      pied: "Ce lien expire dans une heure et ne peut servir qu'une fois. " +
+        "Si le bouton ne fonctionne pas, copiez cette adresse dans votre " +
+        "navigateur :<br><span style=\"word-break:break-all;color:#8a9199;\">" +
+        esc(lien) + "</span>",
+    }),
+    texte:
+      `Vous avez demandé à réinitialiser votre mot de passe Ablony.\n\n` +
+      `Ouvrez ce lien (valable une heure) :\n${lien}\n\n` +
+      `Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : ` +
+      `votre mot de passe reste inchangé.`,
+  });
+}
+
+module.exports = {
+  envoyer, emailLitigeOuvert, emailMessageEquipe, emailMotDePasseOublie,
+};

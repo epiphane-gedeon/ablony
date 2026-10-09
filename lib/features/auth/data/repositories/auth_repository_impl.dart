@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -896,29 +898,34 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> sendPasswordResetEmail({required String email}) async {
+    // Passe par notre Cloud Function plutôt que par
+    // `FirebaseAuth.sendPasswordResetEmail` : Firebase expédierait son propre
+    // gabarit depuis son propre domaine. Un e-mail de réinitialisation venant
+    // d'une adresse inconnue ressemble à de l'hameçonnage — et c'est
+    // justement le moment où l'on demande de cliquer.
+    //
+    // Le serveur répond la même chose que le compte existe ou non : savoir
+    // lequel renseignerait sur qui est inscrit sur Ablony.
     try {
-      await _firebaseAuth.sendPasswordResetEmail(
-        email: email,
-        // Fait pointer le lien directement vers notre propre page (plutôt
-        // que la page générique hébergée par Firebase), sans dépendre du
-        // réglage "URL d'action personnalisée" de la console Firebase —
-        // ce réglage vit dans l'éditeur de templates, qui peut être
-        // indisponible pour certains projets (erreur connue côté Firebase).
-        // `handleCodeInApp: true` avec seulement une `url` web (pas de
-        // androidPackageName/iOSBundleId) ne fait qu'un lien web classique,
-        // ouvert dans le navigateur — pas besoin de Firebase Dynamic Links
-        // ni de configuration App Links/Universal Links.
-        actionCodeSettings: firebase_auth.ActionCodeSettings(
-          url: AppUrls.passwordReset,
-          handleCodeInApp: true,
+      final reponse = await http.post(
+        Uri.parse(
+          'https://us-central1-ablony-a5db9.cloudfunctions.net'
+          '/demanderReinitialisation',
         ),
+        headers: const {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email.trim()}),
       );
-    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
-      throw handleFirebaseException(e, stackTrace: stackTrace);
+      if (reponse.statusCode != 200) {
+        throw UnknownException(
+          message: 'Erreur lors de l\'envoi de l\'email de réinitialisation',
+        );
+      }
+    } on AppException {
+      rethrow;
     } catch (e, stackTrace) {
       throw UnknownException(
         message: 'Erreur lors de l\'envoi de l\'email de réinitialisation',
-        originalException: e as Exception?,
+        originalException: e is Exception ? e : null,
         stackTrace: stackTrace,
       );
     }
