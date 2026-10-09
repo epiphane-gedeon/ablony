@@ -2296,6 +2296,10 @@
   "withdrawAmountRequested": "Requested amount",
   "withdrawFee": "Transfer fee",
   "withdrawYouReceive": "You receive",
+  "withdrawFeeWaivedFounder": "Waived (Founder)",
+  "@withdrawFeeWaivedFounder": {
+    "description": "Shown instead of the fee amount on a founder's first free withdrawal."
+  },
   "withdrawFeeExplained": "This fee covers the transfer to your mobile money account. It is proportional to the amount withdrawn.",
   "withdrawInsufficient": "Your available balance does not cover this amount.",
   "withdrawAlreadyPending": "A request is already being processed. You can make another, but they will be paid out separately.",

@@ -2320,6 +2320,10 @@
   "withdrawAmountRequested": "Montant demandé",
   "withdrawFee": "Frais de transfert",
   "withdrawYouReceive": "Vous recevez",
+  "withdrawFeeWaivedFounder": "Offerts (Fondateur)",
+  "@withdrawFeeWaivedFounder": {
+    "description": "Shown instead of the fee amount on a founder's first free withdrawal."
+  },
   "withdrawFeeExplained": "Ces frais couvrent le transfert vers votre compte mobile money. Ils sont proportionnels au montant retiré.",
   "withdrawInsufficient": "Votre solde disponible ne couvre pas ce montant.",
   "withdrawAlreadyPending": "Une demande est déjà en cours de traitement. Vous pouvez en faire une autre, mais elles seront versées séparément.",

@@ -5864,8 +5864,19 @@ exports.requestWithdrawal = onRequest(async (req, res) => {
 
       // Les frais sont **déduits** du montant demandé, et non ajoutés par
       // dessus : le vendeur qui demande tout son solde doit pouvoir le faire.
-      const frais = withdrawalFee(montant);
+      //
+      // Premier retrait offert aux fondateurs. Le marqueur est posé sur le
+      // compte plutôt que déduit de l'historique : compter les retraits passés
+      // deviendrait faux le jour où l'on en archive un, et l'exonération
+      // repartirait à zéro sans que personne ne l'ait décidé.
+      const estFondateur = data.isFounder === true;
+      const dejaUtilise = data.founderWithdrawalUsed === true;
+      const offert = estFondateur && !dejaUtilise;
+      const frais = offert ? 0 : withdrawalFee(montant);
       const net = montant - frais;
+      if (offert) {
+        dbTx.update(userRef, {founderWithdrawalUsed: true});
+      }
 
       const now = admin.firestore.FieldValue.serverTimestamp();
       const withdrawalRef = db.collection("withdrawals").doc(reference);
@@ -7679,25 +7690,104 @@ const REGLAGES_BADGES = () => db.collection("config").doc("badges");
  * En cas de doute — réglage absent ou illisible — on n'attribue rien. Un badge
  * donné à tort se retire à la main ; c'est le sens le moins coûteux à corriger.
  */
+/** Nombre de boosts offerts avec le statut de fondateur. */
+const FOUNDER_BOOSTS_OFFERTS = 5;
+
+/** Normalise une adresse pour en faire une clé d'invitation stable. */
+function cleInvitation(email) {
+  return String(email || "").replace(/^﻿/, "").trim().toLowerCase();
+}
+
 exports.onUserCreated = onDocumentCreated("users/{userId}", async (event) => {
   const snap = event.data;
   if (!snap) return;
+  const uid = event.params.userId;
+  const email = cleInvitation(snap.data().email);
 
-  let ouverte = false;
+  let decision = {fondateur: false, raison: "fenêtre fermée"};
+
   try {
-    const reglages = await REGLAGES_BADGES().get();
-    ouverte = reglages.exists && reglages.data().foundersOpen === true;
+    decision = await db.runTransaction(async (tx) => {
+      const reglagesRef = REGLAGES_BADGES();
+      const reglagesDoc = await tx.get(reglagesRef);
+      const reglages = reglagesDoc.exists ? reglagesDoc.data() : {};
+
+      if (reglages.foundersOpen !== true) {
+        return {fondateur: false, raison: "fenêtre fermée"};
+      }
+
+      // 1. Invitation nominative (liste d'attente) : honorée hors quota.
+      //    Ces personnes se sont inscrites avant l'ouverture ; leur opposer un
+      //    quota décidé après coup reviendrait à leur reprocher d'être venues
+      //    tôt.
+      if (email) {
+        const inviteRef = db.collection("founderInvites").doc(email);
+        const invite = await tx.get(inviteRef);
+        if (invite.exists && !invite.data().claimedBy) {
+          tx.update(inviteRef, {
+            claimedBy: uid,
+            claimedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          return {fondateur: true, raison: "invitation " + (invite.data().source || "?")};
+        }
+        if (invite.exists && invite.data().claimedBy) {
+          // Déjà réclamée par un autre compte : on ne la sert pas deux fois.
+          return {fondateur: false, raison: "invitation déjà réclamée"};
+        }
+      }
+
+      // 2. Quota général. Le compteur est lu ET écrit dans la même
+      //    transaction : sans cela, deux inscriptions simultanées sur la
+      //    99ᵉ place en donneraient 101 — ce qui arrive précisément le jour
+      //    où une publication fonctionne.
+      const utilise = Number(reglages.founderQuotaUsed || 0);
+      const maximum = Number(reglages.founderQuotaMax || 100);
+      if (utilise >= maximum) {
+        return {fondateur: false, raison: `quota atteint (${utilise}/${maximum})`};
+      }
+
+      tx.set(reglagesRef, {founderQuotaUsed: utilise + 1}, {merge: true});
+      if (email) {
+        tx.set(db.collection("founderInvites").doc(email), {
+          email,
+          source: "inscription",
+          horsQuota: false,
+          claimedBy: uid,
+          claimedAt: admin.firestore.FieldValue.serverTimestamp(),
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+      return {fondateur: true, raison: `quota ${utilise + 1}/${maximum}`};
+    });
   } catch (error) {
-    console.error("Réglages badges illisibles, aucun fondateur attribué:", error);
+    // En cas de doute, on n'attribue rien : un badge donné à tort se retire à
+    // la main, c'est le sens le moins coûteux à corriger.
+    console.error("Attribution fondateur impossible:", error);
+    decision = {fondateur: false, raison: "erreur"};
   }
 
-  const dejaPose = snap.data().isFounder === true;
-  if (dejaPose === ouverte) return; // rien à corriger
+  const maj = {isFounder: decision.fondateur};
+  if (decision.fondateur) {
+    // Les boosts promis arrivent avec le badge, sans intervention.
+    maj.boostCredits = admin.firestore.FieldValue.increment(FOUNDER_BOOSTS_OFFERTS);
+  }
+  await snap.ref.update(maj);
 
-  await snap.ref.update({isFounder: ouverte});
   console.log(
-    `Badge fondateur ${ouverte ? "attribué" : "retiré"} à ${event.params.userId}`,
+      `Fondateur ${decision.fondateur ? "attribué" : "refusé"} à ${uid} ` +
+    `(${decision.raison})`,
   );
+
+  if (decision.fondateur) {
+    await notifyUser(
+        uid,
+        "Vous êtes Fondateur d'Ablony",
+        `Bienvenue parmi les premiers. Votre badge est sur votre profil, et ` +
+      `${FOUNDER_BOOSTS_OFFERTS} boosts vous sont offerts pour mettre vos ` +
+      `annonces en avant.`,
+        {type: "founder_granted"},
+    ).catch((e) => console.error("Notif fondateur échouée:", e.message));
+  }
 });
 
 /**

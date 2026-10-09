@@ -3572,6 +3572,12 @@ abstract class AppLocalizations {
   /// **'Vous recevez'**
   String get withdrawYouReceive;
 
+  /// Shown instead of the fee amount on a founder's first free withdrawal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Offerts (Fondateur)'**
+  String get withdrawFeeWaivedFounder;
+
   /// No description provided for @withdrawFeeExplained.
   ///
   /// In fr, this message translates to:

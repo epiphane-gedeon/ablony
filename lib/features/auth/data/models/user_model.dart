@@ -67,6 +67,7 @@ class UserModel extends User {
     super.followingCount,
     super.role,
     super.isFounder,
+    super.founderWithdrawalUsed,
     super.isStar,
     super.boostCredits,
     super.wallet,
@@ -118,6 +119,7 @@ class UserModel extends User {
       followingCount: user.followingCount,
       role: user.role,
       isFounder: user.isFounder,
+      founderWithdrawalUsed: user.founderWithdrawalUsed,
       isStar: user.isStar,
       wallet: user.wallet,
     );
@@ -252,6 +254,8 @@ class UserModel extends User {
         // RÔLE — absent chez l'immense majorité des comptes : `member`.
         role: UserRole.fromWire(data['role'] as String?),
         isFounder: data['isFounder'] as bool? ?? false,
+        founderWithdrawalUsed:
+            data['founderWithdrawalUsed'] as bool? ?? false,
         isStar: data['isStar'] as bool? ?? false,
         boostCredits: (data['boostCredits'] as num?)?.toInt() ?? 0,
 
@@ -317,6 +321,8 @@ class UserModel extends User {
       followingCount: json['followingCount'] as int? ?? 0,
       role: UserRole.fromWire(json['role'] as String?),
       isFounder: json['isFounder'] as bool? ?? false,
+      founderWithdrawalUsed:
+          json['founderWithdrawalUsed'] as bool? ?? false,
       isStar: json['isStar'] as bool? ?? false,
       boostCredits: (json['boostCredits'] as num?)?.toInt() ?? 0,
       wallet: json['wallet'] != null

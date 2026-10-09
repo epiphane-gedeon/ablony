@@ -287,6 +287,14 @@ class User extends Equatable {
   /// uniquement (reprise, ou inscription pendant la fenêtre de lancement).
   final bool isFounder;
 
+  /// Le premier retrait offert aux fondateurs a-t-il été consommé ?
+  ///
+  /// Lu par l'écran de retrait pour annoncer les frais **justes** avant
+  /// validation : sans ce drapeau, un fondateur verrait des frais puis
+  /// recevrait la somme entière. Bonne surprise, mais incohérence — et cet
+  /// écran est précisément celui où l'on promet qu'il n'y en a pas.
+  final bool founderWithdrawalUsed;
+
   /// Membre star : distinction attribuée **à la main** par l'administration.
   /// Jamais automatique, jamais modifiable depuis l'application.
   final bool isStar;
@@ -346,6 +354,7 @@ class User extends Equatable {
     this.followingCount = 0,
     this.role = UserRole.member,
     this.isFounder = false,
+    this.founderWithdrawalUsed = false,
     this.isStar = false,
     this.boostCredits = 0,
     this.wallet,
@@ -399,6 +408,7 @@ class User extends Equatable {
     int? followersCount,
     int? followingCount,
     bool? isFounder,
+    bool? founderWithdrawalUsed,
     bool? isStar,
     int? boostCredits,
     Wallet? wallet,
@@ -430,6 +440,8 @@ class User extends Equatable {
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
       isFounder: isFounder ?? this.isFounder,
+      founderWithdrawalUsed:
+          founderWithdrawalUsed ?? this.founderWithdrawalUsed,
       isStar: isStar ?? this.isStar,
       boostCredits: boostCredits ?? this.boostCredits,
       wallet: wallet ?? this.wallet,
@@ -471,6 +483,10 @@ class User extends Equatable {
     reviewsCount,
     followersCount,
     followingCount,
+    // Sans ces deux-là, l'écran de retrait ne se reconstruit pas quand le
+    // premier retrait offert est consommé, et continue d'annoncer « offert ».
+    isFounder,
+    founderWithdrawalUsed,
   ];
 
   /// Retourne une représentation textuelle de l'utilisateur

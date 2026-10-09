@@ -1892,6 +1892,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get withdrawYouReceive => 'Vous recevez';
 
   @override
+  String get withdrawFeeWaivedFounder => 'Offerts (Fondateur)';
+
+  @override
   String get withdrawFeeExplained =>
       'Ces frais couvrent le transfert vers votre compte mobile money. Ils sont proportionnels au montant retiré.';
 

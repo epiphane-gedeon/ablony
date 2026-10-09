@@ -51,10 +51,20 @@ class _WithdrawPageState extends ConsumerState<WithdrawPage> {
     final disponible = wallet?.availableAmount ?? 0;
     final enAttente = ref.watch(hasPendingWithdrawalProvider);
 
+    // Premier retrait offert aux fondateurs : l'écran doit annoncer les frais
+    // RÉELS, pas le barème général. Le serveur applique la même règle ; les
+    // deux doivent dire la même chose, sans quoi cet écran — celui où l'on
+    // promet qu'il n'y a pas de surprise — en crée une.
+    final membre = ref.watch(currentUserProvider).value;
+    final retraitOffert =
+        (membre?.isFounder ?? false) && !(membre?.founderWithdrawalUsed ?? false);
+
     final montant = _montant;
-    final frais = montant >= WithdrawalFees.minimumXof
-        ? WithdrawalFees.of(montant)
-        : 0;
+    final frais = retraitOffert
+        ? 0
+        : (montant >= WithdrawalFees.minimumXof
+            ? WithdrawalFees.of(montant)
+            : 0);
     final net = montant - frais;
 
     final valide = montant >= WithdrawalFees.minimumXof &&
@@ -163,7 +173,9 @@ class _WithdrawPageState extends ConsumerState<WithdrawPage> {
                     ),
                     _Ligne(
                       libelle: l10n.withdrawFee,
-                      valeur: '− ${nombres.format(frais)} FCFA',
+                      valeur: retraitOffert
+                          ? l10n.withdrawFeeWaivedFounder
+                          : '− ${nombres.format(frais)} FCFA',
                       discret: true,
                     ),
                     const Divider(height: 20),
