@@ -10,6 +10,7 @@ import '../../domain/entities/entities.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../../wallet/domain/models/wallet.dart';
 import '../models/user_model.dart';
+import '../../../../core/config/app_urls.dart';
 
 /// Implémentation concrète du [AuthRepository] utilisant Firebase.
 ///
@@ -908,7 +909,7 @@ class AuthRepositoryImpl implements AuthRepository {
         // ouvert dans le navigateur — pas besoin de Firebase Dynamic Links
         // ni de configuration App Links/Universal Links.
         actionCodeSettings: firebase_auth.ActionCodeSettings(
-          url: 'https://ablony-a5db9.web.app/auth/reset-password',
+          url: AppUrls.passwordReset,
           handleCodeInApp: true,
         ),
       );

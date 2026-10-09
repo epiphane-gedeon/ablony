@@ -23,6 +23,34 @@ abstract final class AppUrls {
   /// — une page qu'il ne peut pas lire bloque la publication.
   static const String siteBase = 'https://ablony-site.web.app';
 
+  /// **L'adresse publique de l'application web elle-même.**
+  ///
+  /// À distinguer de [siteBase], qui désigne le site vitrine. Celle-ci est
+  /// l'adresse à laquelle un utilisateur ouvre Ablony — et surtout celle qui
+  /// part dans les liens partagés et les e-mails de réinitialisation. Un
+  /// lien d'annonce envoyé sur WhatsApp porte cette adresse : c'est la plus
+  /// visible de toutes.
+  ///
+  /// Surchargeable au build sans toucher au code :
+  /// ```
+  /// flutter build web --dart-define=APP_PUBLIC_URL=https://app.ablony.net
+  /// ```
+  /// Compilé plutôt que lu à l'exécution : ce n'est pas un secret, et cela
+  /// évite d'ajouter un paquet et une étape de démarrage pour une valeur qui
+  /// ne change qu'au déménagement.
+  ///
+  /// Pas de barre oblique finale.
+  static const String appBase = String.fromEnvironment(
+    'APP_PUBLIC_URL',
+    defaultValue: 'https://ablony-a5db9.web.app',
+  );
+
+  /// Base des liens d'annonce partagés (`$appBase/product/<id>`).
+  static const String productShareBase = '$appBase/product';
+
+  /// Page d'atterrissage du lien de réinitialisation de mot de passe.
+  static const String passwordReset = '$appBase/auth/reset-password';
+
   /// Conditions générales d'utilisation.
   static const String termsOfService = '$siteBase/cgu.html';
 

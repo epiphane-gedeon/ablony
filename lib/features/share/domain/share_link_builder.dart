@@ -1,3 +1,4 @@
+import '../../../core/config/app_urls.dart';
 import 'models/shareable_content.dart';
 
 /// Construit l'URL publique d'un contenu partagé. Cette URL pointe vers
@@ -7,14 +8,13 @@ import 'models/shareable_content.dart';
 class ShareLinkBuilder {
   const ShareLinkBuilder._();
 
-  /// Domaine Firebase Hosting par défaut du projet `ablony-a5db9`.
-  /// À remplacer ici si un nom de domaine personnalisé est configuré.
-  static const String baseUrl = 'https://ablony-a5db9.web.app';
-
   static String build(ShareableContent content) {
     switch (content.type) {
+      // L'adresse vient d'AppUrls : un lien d'annonce est ce qui circule le
+      // plus loin d'Ablony, et il ne doit pas pointer vers un domaine qu'on
+      // aurait oublié de mettre à jour ici.
       case ShareableType.product:
-        return '$baseUrl/product/${content.id}';
+        return '${AppUrls.productShareBase}/${content.id}';
     }
   }
 }

@@ -11,6 +11,22 @@ const db = admin.firestore();
 
 setGlobalOptions({maxInstances: 10});
 
+/**
+ * L'adresse publique de l'application web.
+ *
+ * Elle part dans les liens partagés, les aperçus de lien et les URLs de retour
+ * de paiement — autant d'endroits où un domaine périmé se voit tout de suite.
+ * D'où la variable d'environnement : un déménagement se règle dans
+ * `functions/.env` puis un redéploiement, sans chercher les occurrences une à
+ * une dans le code.
+ *
+ * Doit rester synchronisée avec `AppUrls.appBase` côté client, et ne porte pas
+ * de barre oblique finale.
+ */
+const APP_PUBLIC_URL =
+  (process.env.APP_PUBLIC_URL || "https://ablony-a5db9.web.app")
+      .replace(/\/+$/, "");
+
 // Configuration de GeniusPay
 // Ces clés seront lues depuis les variables d'environnement
 const GENIUSPAY_CONFIG = {
@@ -2052,8 +2068,8 @@ exports.initiatePayment = onRequest(async (req, res) => {
         // comptent. Sur le web, la fermeture est pilotée par le statut de la
         // transaction en base, pas par ce retour — d'où l'importance du
         // webhook sur ce chemin.
-        successUrl: "https://ablony-a5db9.web.app/paiement/success",
-        cancelUrl: "https://ablony-a5db9.web.app/paiement/cancel",
+        successUrl: `${APP_PUBLIC_URL}/paiement/success`,
+        cancelUrl: `${APP_PUBLIC_URL}/paiement/cancel`,
         metadata: {
           reference: reference,
           type: type || "recharge",
@@ -4713,7 +4729,7 @@ exports.nyoleConfigWebhook = onRequest(async (req, res) => {
 // complet qui démarre Flutter normalement (base href = "/") — pas de
 // redirection, pas de boucle, pas de reniflage d'User-Agent.
 
-const OG_HOST = "https://ablony-a5db9.web.app";
+const OG_HOST = APP_PUBLIC_URL;
 const OG_IMAGE_DEFAUT = `${OG_HOST}/icons/Icon-512.png`;
 let _indexHtmlCache = {html: null, at: 0};
 
