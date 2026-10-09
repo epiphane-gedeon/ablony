@@ -75,8 +75,12 @@ function gabarit({titre, intro, bloc, bouton, lien, pied}) {
 <tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06);">
 
-<tr><td style="background:${BLEU};padding:22px 28px;">
-<span style="font-family:'Be Vietnam Pro',sans-serif;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:.3px;">Ablony</span>
+<tr><td style="background:${BLEU};padding:20px 28px;">
+<!-- Le logo est blanc sur fond transparent : il n'est lisible que sur ce
+     bandeau bleu. L'attribut alt reprend le nom en blanc, pour les clients
+     qui bloquent les images par défaut — Outlook le fait encore. -->
+<img src="${APP_URL}/assets/assets/images/logo.png" alt="Ablony" width="132"
+     style="display:block;border:0;width:132px;height:auto;font-family:'Be Vietnam Pro',sans-serif;color:#ffffff;font-size:20px;font-weight:700;">
 </td></tr>
 
 <tr><td style="padding:28px;">
