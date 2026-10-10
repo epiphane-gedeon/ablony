@@ -53,13 +53,29 @@ class PushNotificationService {
   }) : _messaging = messaging ?? FirebaseMessaging.instance,
        _firestore = firestore ?? FirebaseFirestore.instance;
 
-  /// Clé publique Web Push (VAPID) du projet, si on en déclare une.
+  /// Clé publique Web Push (VAPID) du projet.
   ///
-  /// Facultative : sans elle, le SDK utilise sa propre clé publique par
-  /// défaut et les notifications web fonctionnent. La renseigner (console
-  /// Firebase → Cloud Messaging → Certificats Web Push) rattache les
-  /// abonnements au projet plutôt qu'à la clé partagée de Firebase.
-  static const String _cleVapid = String.fromEnvironment('FCM_VAPID_KEY');
+  /// **Pas facultative, contrairement à ce que je croyais.** Le projet n'avait
+  /// aucun certificat Web Push : le SDK retombait alors sur la clé publique
+  /// partagée de Firebase. Chrome l'accepte, Safari non — ce qui explique
+  /// qu'après avoir accordé la permission dans l'application installée sur
+  /// iPhone, aucun jeton n'était délivré et aucune notification ne pouvait
+  /// arriver.
+  ///
+  /// Écrite ici plutôt que passée en `--dart-define` : un drapeau oublié à un
+  /// build remettrait la panne en place, sans rien afficher. Elle est publique
+  /// par conception — livrée dans le code de la page, comme la clé d'API — et
+  /// n'autorise rien à elle seule : elle identifie l'abonnement, elle ne
+  /// permet pas d'émettre (c'est la clé privée, restée chez Firebase, qui
+  /// signe les envois).
+  ///
+  /// Console Firebase → Paramètres du projet → Cloud Messaging → Certificats
+  /// Web Push.
+  static const String _cleVapid = String.fromEnvironment(
+    'FCM_VAPID_KEY',
+    defaultValue:
+        'BJ2HZ7KkfPzRA_tfWh8XkptJ3hC3vn4qFoGpIoEYkvTzVTs5fYVzvSK7e52Pnnafs88sdb5TsRzgB_Ccjc58jac',
+  );
 
   final FirebaseMessaging _messaging;
   final FirebaseFirestore _firestore;
