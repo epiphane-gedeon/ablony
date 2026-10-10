@@ -47,6 +47,12 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+                <!-- Le domaine public. Les liens partagés le portent depuis
+                     la bascule ; sans cette ligne ils s'ouvriraient dans le
+                     navigateur au lieu de l'application. -->
+                <data android:scheme="https" android:host="app.ablony.net"/>
+                <!-- L'ancien domaine reste déclaré : les liens déjà partagés
+                     le portent encore, et Firebase ne le retirera jamais. -->
                 <data android:scheme="https" android:host="ablony-a5db9.web.app"/>
             </intent-filter>
         </activity>

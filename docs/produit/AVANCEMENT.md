@@ -665,3 +665,21 @@ son article**, livreur avec un colis que le système ne reconnaissait plus.
   déjà pour l'auto-expédition (la tâche saute `shipmentStatus` pending/approved)
   ; il manque son équivalent pour la collecte. Inutile tant que le fondateur
   collecte lui-même et sait quand il part.
+
+**App Links et clé Maps après la bascule de domaine (2026-10-10).**
+- Le manifeste Android ne déclarait que `ablony-a5db9.web.app`. Les liens
+  partagés portant désormais `app.ablony.net`, **ils se seraient ouverts dans
+  le navigateur au lieu de l'application** — exactement ce que les App Links
+  servent à éviter. Les deux hôtes sont maintenant déclarés : l'ancien reste,
+  puisque les liens déjà partagés le portent et que Firebase ne le retire
+  jamais. Vérifié : `assetlinks.json` est servi sur les deux domaines (même
+  site), et Google valide les déclarations pour `app.ablony.net`.
+  Release **1.0.5+9** (le manifeste est natif : un patch Shorebird ne l'aurait
+  pas embarqué).
+- **À FAIRE — la clé Google Maps n'a aucune restriction de référent.** Testée
+  depuis deux domaines inventés : acceptée dans les deux cas. N'importe qui
+  peut donc l'utiliser et faire porter la facture au projet. À restreindre dans
+  Google Cloud Console (Identifiants → clé → Restrictions de l'application →
+  Référents HTTP) avec `app.ablony.net/*`, `ablony-a5db9.web.app/*` et
+  `localhost:*`. Ajouter le nouveau domaine ne suffit pas : il faut d'abord
+  qu'une restriction existe.
