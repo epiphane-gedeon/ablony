@@ -8507,3 +8507,64 @@ exports.setUserStar = onRequest(async (req, res) => {
     },
   });
 });
+
+/**
+ * Chiffres publics affichés sur le site vitrine.
+ *
+ * Le site remplaçait ce bloc par deux jauges à 100 % (« Application : en
+ * ligne », « Livraison : active »). Une jauge pleine ne dit rien à personne :
+ * elle décrit l'état d'un chantier, pas celui d'une communauté. Le nombre de
+ * comptes, lui, répond à la seule question que se pose un vendeur hésitant —
+ * est-ce que quelqu'un d'autre est déjà là ?
+ *
+ * Deux conséquences sur la forme :
+ *
+ * - **Aucune authentification.** Ce sont des chiffres destinés à être affichés
+ *   publiquement. Rien ici ne distingue un visiteur d'un autre et rien n'est
+ *   nominatif.
+ * - **Une heure de cache.** Un compteur de comptes n'a aucun besoin d'être
+ *   à la seconde, et le site vitrine peut recevoir des pics de trafic lors
+ *   d'une campagne. L'agrégat `count()` ne lit pas les documents, mais le
+ *   cache évite même de l'appeler.
+ *
+ * `foundersOpen` sert à ne pas promettre le badge Fondateur quand la fenêtre
+ * est fermée. Le site n'affiche la promesse que si cette réponse l'autorise :
+ * en cas de panne de cette fonction, il ne promet rien — la seule direction
+ * d'échec acceptable quand il s'agit d'un engagement pris à un inscrit.
+ */
+exports.statsPubliques = onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  if (req.method === "OPTIONS") {
+    res.set("Access-Control-Allow-Methods", "GET");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+    res.status(204).send("");
+    return;
+  }
+  res.set("Cache-Control", "public, max-age=3600, s-maxage=3600");
+
+  try {
+    const [membres, badges] = await Promise.all([
+      db.collection("users").count().get(),
+      db.doc("config/badges").get(),
+    ]);
+    const b = badges.exists ? badges.data() : {};
+    const max = Number(b.founderQuotaMax || 100);
+    const utilise = Number(b.founderQuotaUsed || 0);
+
+    return res.json({
+      success: true,
+      data: {
+        membres: membres.data().count,
+        fondateursOuverts: b.foundersOpen === true,
+        placesFondateurs: Math.max(0, max - utilise),
+        quotaFondateurs: max,
+      },
+    });
+  } catch (e) {
+    console.error("statsPubliques", e);
+    return res.status(500).json({
+      success: false,
+      error: {message: "Indisponible"},
+    });
+  }
+});
