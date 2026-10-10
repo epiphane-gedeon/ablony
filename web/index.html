@@ -102,9 +102,13 @@
 
     var iOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    // Sur iOS, seul Safari sait poser une icône : inutile de l'expliquer
-    // dans Chrome ou Firefox iOS, où le menu Partager n'a pas l'option.
+    // Sur iOS, seul Safari pose une icône de façon fiable : le geste expliqué
+    // dans Chrome ou Firefox iOS ne mène pas au même menu.
     var safariIOS = iOS && !/crios|fxios|edgios|opt\//i.test(navigator.userAgent);
+    // Mais ne rien afficher du tout dans ces navigateurs-là laissait quelqu'un
+    // venu exprès pour installer devant une page muette — après avoir touché
+    // un bouton « Installer sur iPhone ». On lui dit où aller.
+    var autreNavigateurIOS = iOS && !safariIOS;
 
     function montrer(html) {
       boite.innerHTML = html;
@@ -153,6 +157,35 @@
       if (forcee) proposerAndroid();
       else setTimeout(proposerAndroid, 2500); // laisser la page s'afficher d'abord
     });
+
+    function orienterVersSafari() {
+      montrer(entete +
+        '<p>Sur iPhone, seul <b>Safari</b> sait poser une icône sur l\'écran ' +
+        'd\'accueil. Ouvrez cette page dans Safari, puis Partager › ' +
+        '<b>Sur l\'écran d\'accueil</b>.</p>' +
+        '<button class="abl-btn" data-copier>Copier le lien</button>' +
+        '<button class="abl-close" data-fermer>Continuer ici</button>');
+      var b = boite.querySelector('[data-copier]');
+      b.onclick = function () {
+        var lien = location.origin + '/?install=1';
+        var fini = function () { b.textContent = 'Lien copié'; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lien).then(fini, function () {});
+        } else {
+          // Sans presse-papiers (contexte non sécurisé, vieux Safari), on
+          // affiche le lien : il reste sélectionnable à la main.
+          b.textContent = lien;
+        }
+      };
+    }
+
+    if (autreNavigateurIOS) {
+      var vuAutre = 0;
+      try { vuAutre = Number(localStorage.getItem('ablInstVu') || 0); } catch (e) {}
+      if (forcee || Date.now() - vuAutre >= 7 * 24 * 3600 * 1000) {
+        setTimeout(orienterVersSafari, forcee ? 400 : 3000);
+      }
+    }
 
     if (safariIOS) {
       // Pas d'événement sur iOS : on décide nous-mêmes du moment.
