@@ -448,28 +448,40 @@ class AuthRepositoryImpl implements AuthRepository {
   /// un nom d'utilisateur lui parvenait tel quel et revenait en
   /// `invalid-email`, un code jamais traduit, donc affiché brut.
   ///
-  /// La correspondance se lit sur `users.usernameLower`, renseigné pour tous
-  /// les comptes. Pas sur la collection `usernames`, dont les identifiants de
-  /// document conservent la casse : « Anita » ne s'y trouverait pas sous
-  /// « anita », et exiger la casse exacte à la connexion serait absurde.
+  /// La correspondance se lit sur la collection `usernames`, dont chaque
+  /// identifiant de document **est** le nom d'utilisateur, casse comprise.
   ///
-  /// Aucune exposition nouvelle : les profils et les noms d'utilisateur sont
-  /// déjà en lecture publique — c'est ce qui fait marcher la recherche de
-  /// membres — et cette requête ne lit rien d'autre.
+  /// **La casse compte.** C'est elle qui décide de l'unicité à l'inscription :
+  /// « Prince » et « prince » sont deux documents, donc deux comptes
+  /// distincts, et les noms déjà réservés le montrent (« Anita »,
+  /// « Elizam-Daniela », « Kams_Bk »). Chercher sur une forme minuscule
+  /// rendrait donc deux comptes indiscernables et en renverrait un au hasard
+  /// — l'utilisateur de « prince » se verrait proposer l'adresse de
+  /// « Prince ». Un nom mal saisi doit échouer, pas être deviné.
+  ///
+  /// Un seul document lu, par son identifiant : ni requête, ni index.
+  ///
+  /// Aucune exposition nouvelle : noms d'utilisateur et profils sont déjà en
+  /// lecture publique — c'est ce qui fait marcher la recherche de membres.
   Future<String> _adresseDeLIdentifiant(String identifiant) async {
     final saisie = identifiant.trim();
     if (saisie.contains('@')) return saisie;
 
-    final correspondance = await _firestore
-        .collection('users')
-        .where('usernameLower', isEqualTo: saisie.toLowerCase())
-        .limit(1)
-        .get();
-
-    if (correspondance.docs.isEmpty) {
+    // Une barre oblique découperait le chemin du document : Firestore lèverait
+    // au lieu de répondre « inconnu ».
+    if (saisie.isEmpty || saisie.contains('/')) {
       throw UserNotFoundException();
     }
-    final adresse = correspondance.docs.first.data()['email'] as String?;
+
+    final reservation =
+        await _firestore.collection('usernames').doc(saisie).get();
+    final uid = reservation.data()?['userId'] as String?;
+    if (uid == null || uid.isEmpty) {
+      throw UserNotFoundException();
+    }
+
+    final profil = await _firestore.collection('users').doc(uid).get();
+    final adresse = profil.data()?['email'] as String?;
     if (adresse == null || adresse.isEmpty) {
       // Compte créé par un fournisseur sans adresse exploitable : le mot de
       // passe ne le rouvrira pas, et le dire vaut mieux que d'échouer sur un
