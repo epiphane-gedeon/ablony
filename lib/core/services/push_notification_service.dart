@@ -104,12 +104,6 @@ class PushNotificationService {
     final token = await _obtenirToken();
     if (token != null) {
       await _saveToken(uid, token);
-      // Trace du succès aussi : savoir qu'un chemin a été parcouru jusqu'au
-      // bout vaut autant que connaître son échec, et distingue « ça a marché »
-      // de « cette version du code ne tourne pas encore sur l'appareil ».
-      await _noterEchec(uid, 'ok : jeton ${token.substring(0, 12)}… enregistré');
-    } else {
-      await _noterEchec(uid, _derniereErreurJeton ?? 'jeton nul sans erreur');
     }
 
     _tokenRefreshSubscription?.cancel();
@@ -191,7 +185,6 @@ class PushNotificationService {
       await registerDevice(uid);
     } catch (e) {
       debugPrint('Activation des notifications échouée : $e');
-      await _noterEchec(uid, e.toString());
       return EtatNotifications.indisponible;
     }
     return etatActuel(uid: uid);
@@ -219,26 +212,6 @@ class PushNotificationService {
     }
   }
 
-  /// Garde la trace du dernier échec sur le profil.
-  ///
-  /// Une panne de notification ne se voit nulle part : il n'y a ni message
-  /// d'erreur, ni journal côté serveur — seulement un silence identique à
-  /// « personne ne vous a écrit ». Sans cette trace, diagnostiquer exige
-  /// d'avoir l'appareil en main. À retirer une fois la cause connue.
-  Future<void> _noterEchec(String uid, String raison) async {
-    try {
-      await _firestore.collection('users').doc(uid).update({
-        'pushDiagnostic': {
-          'raison': raison.length > 400 ? raison.substring(0, 400) : raison,
-          'plateforme': kIsWeb ? 'web' : defaultTargetPlatform.name,
-          'le': FieldValue.serverTimestamp(),
-        },
-      });
-    } catch (_) {
-      // Le diagnostic ne doit jamais devenir lui-même une source d'échec.
-    }
-  }
-
   /// Demande le jeton FCM, en signalant un échec plutôt que de laisser
   /// remonter une erreur asynchrone que personne n'attrape.
   Future<String?> _obtenirToken() async {
@@ -248,13 +221,10 @@ class PushNotificationService {
       );
     } catch (e) {
       debugPrint('Jeton FCM indisponible : $e');
-      _derniereErreurJeton = e.toString();
       return null;
     }
   }
 
-  /// Dernière erreur rencontrée en demandant un jeton, pour la consigner.
-  String? _derniereErreurJeton;
 
   Future<void> _saveToken(String uid, String token) async {
     try {
@@ -263,10 +233,6 @@ class PushNotificationService {
       });
     } catch (e) {
       debugPrint('⚠️ Impossible d\'enregistrer le token FCM: $e');
-      // Angle mort du premier jet : seule l'absence de jeton était consignée.
-      // Un jeton obtenu puis refusé à l'écriture ne laissait aucune trace —
-      // exactement le cas qu'on cherchait.
-      await _noterEchec(uid, 'écriture du jeton refusée : $e');
     }
   }
 
