@@ -27,6 +27,14 @@ class PushNotificationService {
   }) : _messaging = messaging ?? FirebaseMessaging.instance,
        _firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// Clé publique Web Push (VAPID) du projet, si on en a déclaré une.
+  ///
+  /// Facultative : sans elle, le SDK Firebase utilise sa propre clé publique
+  /// par défaut et les notifications web fonctionnent. La renseigner (console
+  /// Firebase → Cloud Messaging → Certificats Web Push) rattache les
+  /// abonnements au projet plutôt qu'à la clé partagée de Firebase.
+  static const String _vapidKey = String.fromEnvironment('FCM_VAPID_KEY');
+
   final FirebaseMessaging _messaging;
   final FirebaseFirestore _firestore;
   StreamSubscription<String>? _tokenRefreshSubscription;
@@ -45,7 +53,11 @@ class PushNotificationService {
       return;
     }
 
-    final token = await _messaging.getToken();
+    // Sur le web, l'obtention du jeton dépend de l'enregistrement du service
+    // worker `firebase-messaging-sw.js`. Une erreur ici est silencieuse pour
+    // l'utilisateur — il a accordé la permission et ne verra simplement jamais
+    // de notification — d'où le message explicite dans la console.
+    final token = await _obtenirToken();
     if (token != null) {
       await _saveToken(uid, token);
     }
@@ -63,7 +75,7 @@ class PushNotificationService {
     _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = null;
 
-    final token = await _messaging.getToken();
+    final token = await _obtenirToken();
     if (token == null) return;
 
     try {
@@ -72,6 +84,24 @@ class PushNotificationService {
       });
     } catch (e) {
       debugPrint('⚠️ Impossible de retirer le token FCM: $e');
+    }
+  }
+
+  /// Demande le jeton FCM du device, en signalant clairement un échec plutôt
+  /// que de laisser remonter une erreur asynchrone que personne n'attrape.
+  Future<String?> _obtenirToken() async {
+    try {
+      return await _messaging.getToken(
+        vapidKey: kIsWeb && _vapidKey.isNotEmpty ? _vapidKey : null,
+      );
+    } catch (e) {
+      debugPrint(
+        '⚠️ Jeton FCM indisponible : $e'
+        '${kIsWeb ? "\n   Sur le web, vérifier que /firebase-messaging-sw.js "
+            "est bien servi en JavaScript (la réécriture SPA renvoie sinon "
+            "index.html, que le navigateur refuse d'enregistrer)." : ""}',
+      );
+      return null;
     }
   }
 

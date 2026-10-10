@@ -1101,6 +1101,16 @@ async function sendPushToUser(uid, {title, body}, data) {
     data: Object.fromEntries(
         Object.entries(data || {}).map(([k, v]) => [k, String(v)]),
     ),
+    // Le web n'hérite ni de l'icône de l'application ni de sa destination au
+    // clic : sans ce bloc, la notification porte l'icône du navigateur et
+    // ouvre la page d'accueil. Les jetons Android ignorent la section.
+    webpush: {
+      notification: {
+        icon: `${APP_PUBLIC_URL}/icons/Icon-192.png`,
+        badge: `${APP_PUBLIC_URL}/icons/Icon-192.png`,
+      },
+      fcmOptions: {link: `${APP_PUBLIC_URL}/`},
+    },
   });
 
   // Nettoyer les tokens invalides/désinstallés pour éviter de les renvoyer plus tard
