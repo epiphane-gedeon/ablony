@@ -2789,5 +2789,7 @@
   "pushNotificationsDeniedHint": "Blocked. Allow notifications for Ablony in your browser settings, then reload the page.",
   "pushNotificationsUnavailable": "Not available here",
   "pushNotificationsIosHint": "On iPhone and iPad, notifications only work when Ablony is installed on the home screen.",
-  "pushNotificationsFailed": "Could not turn them on right now."
+  "pushNotificationsFailed": "Could not turn them on right now.",
+  "pushNotificationsNoToken": "Permission granted, but the subscription failed. Try again.",
+  "pushNotificationsRetry": "Try again"
 }

@@ -2837,5 +2837,13 @@
   "pushNotificationsFailed": "Activation impossible pour le moment.",
   "@pushNotificationsFailed": {
     "description": "Message d'échec de l'activation des notifications"
+  },
+  "pushNotificationsNoToken": "Permission accordée, mais l'abonnement a échoué. Réessayez.",
+  "@pushNotificationsNoToken": {
+    "description": "État : permission accordée mais aucun jeton push obtenu"
+  },
+  "pushNotificationsRetry": "Réessayer",
+  "@pushNotificationsRetry": {
+    "description": "Bouton pour relancer l'activation des notifications"
   }
 }

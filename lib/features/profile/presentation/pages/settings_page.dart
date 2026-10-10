@@ -483,8 +483,12 @@ class _NotificationsPushTile extends ConsumerStatefulWidget {
 
 class _NotificationsPushTileState
     extends ConsumerState<_NotificationsPushTile> {
-  late Future<EtatNotifications> _etat =
-      ref.read(pushNotificationServiceProvider).etatActuel();
+  late Future<EtatNotifications> _etat = _lireEtat();
+
+  Future<EtatNotifications> _lireEtat() async {
+    final uid = ref.read(currentUserProvider).value?.uid;
+    return ref.read(pushNotificationServiceProvider).etatActuel(uid: uid);
+  }
   bool _enCours = false;
 
   Future<void> _activer(String uid) async {
@@ -542,6 +546,21 @@ class _NotificationsPushTileState
                   color: theme.colorScheme.onSurface.withOpacity(0.5),
                 ),
               ),
+            ),
+          // Permission accordée sans abonnement : le dire, au lieu
+          // d'afficher « Activées » sur un dispositif qui ne recevra rien.
+          EtatNotifications.sansJeton => (
+              l10n.pushNotificationsNoToken,
+              _enCours
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : TextButton(
+                      onPressed: () => _activer(user.uid),
+                      child: Text(l10n.pushNotificationsRetry),
+                    ),
             ),
           EtatNotifications.aActiver => (null, _enCours
               ? const SizedBox(

@@ -2578,4 +2578,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pushNotificationsFailed => 'Activation impossible pour le moment.';
+
+  @override
+  String get pushNotificationsNoToken =>
+      'Permission accordée, mais l\'abonnement a échoué. Réessayez.';
+
+  @override
+  String get pushNotificationsRetry => 'Réessayer';
 }

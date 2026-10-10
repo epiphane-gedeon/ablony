@@ -24,6 +24,14 @@ enum EtatNotifications {
 
   /// En place.
   activees,
+
+  /// Permission accordée, mais aucun jeton obtenu.
+  ///
+  /// Cet état existe parce qu'il s'est produit : l'écran affichait
+  /// « Activées » en lisant la seule permission du navigateur, alors que
+  /// `getToken()` échouait et qu'aucune notification ne pouvait arriver.
+  /// Une permission n'est pas un abonnement.
+  sansJeton,
 }
 
 /// Gère l'enregistrement du device pour les notifications push (FCM) et
@@ -80,6 +88,8 @@ class PushNotificationService {
     final token = await _obtenirToken();
     if (token != null) {
       await _saveToken(uid, token);
+    } else {
+      await _noterEchec(uid, _derniereErreurJeton ?? 'jeton nul sans erreur');
     }
 
     _tokenRefreshSubscription?.cancel();
@@ -124,13 +134,18 @@ class PushNotificationService {
   ///
   /// `getNotificationSettings` lit l'état courant sans ouvrir d'invite : un
   /// écran de réglages doit pouvoir afficher la situation sans la provoquer.
-  Future<EtatNotifications> etatActuel() async {
+  Future<EtatNotifications> etatActuel({String? uid}) async {
     if (!await estDisponible()) return EtatNotifications.indisponible;
     try {
       final reglages = await _messaging.getNotificationSettings();
       switch (reglages.authorizationStatus) {
         case AuthorizationStatus.authorized:
         case AuthorizationStatus.provisional:
+          // La permission ne suffit pas : sans jeton, le serveur n'a personne
+          // à qui écrire. On le vérifie au lieu de l'annoncer.
+          if (uid != null && !await _jetonEnregistre(uid)) {
+            return EtatNotifications.sansJeton;
+          }
           return EtatNotifications.activees;
         case AuthorizationStatus.denied:
           return EtatNotifications.refusees;
@@ -156,9 +171,44 @@ class PushNotificationService {
       await registerDevice(uid);
     } catch (e) {
       debugPrint('Activation des notifications échouée : $e');
+      await _noterEchec(uid, e.toString());
       return EtatNotifications.indisponible;
     }
-    return etatActuel();
+    return etatActuel(uid: uid);
+  }
+
+  /// Ce device a-t-il un jeton côté serveur ?
+  Future<bool> _jetonEnregistre(String uid) async {
+    final token = await _obtenirToken();
+    if (token == null) return false;
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      final jetons = (doc.data()?['fcmTokens'] as List?) ?? const [];
+      return jetons.contains(token);
+    } catch (e) {
+      debugPrint('Lecture des jetons impossible : $e');
+      return false;
+    }
+  }
+
+  /// Garde la trace du dernier échec sur le profil.
+  ///
+  /// Une panne de notification ne se voit nulle part : il n'y a ni message
+  /// d'erreur, ni journal côté serveur — seulement un silence identique à
+  /// « personne ne vous a écrit ». Sans cette trace, diagnostiquer exige
+  /// d'avoir l'appareil en main. À retirer une fois la cause connue.
+  Future<void> _noterEchec(String uid, String raison) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'pushDiagnostic': {
+          'raison': raison.length > 400 ? raison.substring(0, 400) : raison,
+          'plateforme': kIsWeb ? 'web' : defaultTargetPlatform.name,
+          'le': FieldValue.serverTimestamp(),
+        },
+      });
+    } catch (_) {
+      // Le diagnostic ne doit jamais devenir lui-même une source d'échec.
+    }
   }
 
   /// Demande le jeton FCM, en signalant un échec plutôt que de laisser
@@ -170,9 +220,13 @@ class PushNotificationService {
       );
     } catch (e) {
       debugPrint('Jeton FCM indisponible : $e');
+      _derniereErreurJeton = e.toString();
       return null;
     }
   }
+
+  /// Dernière erreur rencontrée en demandant un jeton, pour la consigner.
+  String? _derniereErreurJeton;
 
   Future<void> _saveToken(String uid, String token) async {
     try {

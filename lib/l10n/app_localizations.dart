@@ -4813,6 +4813,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Activation impossible pour le moment.'**
   String get pushNotificationsFailed;
+
+  /// État : permission accordée mais aucun jeton push obtenu
+  ///
+  /// In fr, this message translates to:
+  /// **'Permission accordée, mais l\'abonnement a échoué. Réessayez.'**
+  String get pushNotificationsNoToken;
+
+  /// Bouton pour relancer l'activation des notifications
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get pushNotificationsRetry;
 }
 
 class _AppLocalizationsDelegate

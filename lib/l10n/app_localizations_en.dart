@@ -2557,4 +2557,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pushNotificationsFailed => 'Could not turn them on right now.';
+
+  @override
+  String get pushNotificationsNoToken =>
+      'Permission granted, but the subscription failed. Try again.';
+
+  @override
+  String get pushNotificationsRetry => 'Try again';
 }
