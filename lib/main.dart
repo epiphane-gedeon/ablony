@@ -182,53 +182,12 @@ class MainApp extends ConsumerWidget {
 
     // Enregistre le token FCM du device dès qu'un utilisateur est connecté,
     // pour qu'il puisse recevoir les notifications push (achat, vente, etc.).
-    //
-    // `fireImmediately` est indispensable, pas une précaution. `ref.listen`
-    // ne se déclenche que sur un *changement* postérieur à l'abonnement. Or
-    // le routeur lit déjà `authStateProvider` dans sa redirection, avant que
-    // ce widget ne se construise : quand on arrive **déjà connecté**, la
-    // valeur est résolue depuis longtemps, aucun changement ne suit, et le
-    // token n'est jamais demandé.
-    //
-    // Sur mobile, la panne restait invisible — on finit toujours par se
-    // connecter une fois, et cette connexion-là est bien un changement. Sur
-    // le web, la session persiste et chaque chargement de page arrive déjà
-    // connecté : le token n'était jamais enregistré, donc aucune
-    // notification ne pouvait arriver.
     ref.listen(authStateProvider, (previous, next) {
       final user = next.value;
       if (user != null) {
-        ref
-            .read(pushNotificationServiceProvider)
-            .registerDeviceSansRisque(user.uid);
+        ref.read(pushNotificationServiceProvider).registerDevice(user.uid);
       }
     });
-    // Le cas « déjà connecté à l'arrivée », que l'écoute ci-dessus ne voit
-    // pas. `registerDevice` ignore un uid déjà traité, donc l'appeler à
-    // chaque reconstruction ne coûte rien.
-    //
-    // **Pas sur le web.** Cet appel au démarrage y a laissé l'application
-    // blanche dans la PWA installée sur iPhone — là où `isSupported()`
-    // répond vrai, le SDK va jusqu'à enregistrer son service worker, et
-    // c'est ce qui n'aboutit pas. L'onglet Safari ordinaire, lui, s'arrêtait
-    // avant et chargeait normalement : c'est ce contraste qui désigne le
-    // chemin fautif.
-    //
-    // Sur le web, l'enregistrement ne se fait donc plus qu'à une connexion
-    // effective — le comportement qui a toujours tenu. Le relier à un geste
-    // de l'utilisateur serait mieux encore, et c'est de toute façon ce
-    // qu'exige iOS pour demander la permission ; à faire posément, pas dans
-    // un correctif d'urgence.
-    if (!kIsWeb) {
-      final dejaConnecte = ref.read(authStateProvider).value;
-      if (dejaConnecte != null) {
-        Future.microtask(() {
-          ref
-              .read(pushNotificationServiceProvider)
-              .registerDeviceSansRisque(dejaConnecte.uid);
-        });
-      }
-    }
 
     Future.microtask(
       () => ref.read(localeProvider.notifier).loadSavedLanguage(),

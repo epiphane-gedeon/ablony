@@ -89,6 +89,24 @@
     }
   </style>
   <div class="abl-inst" id="ablInst" role="dialog" aria-label="Installer Ablony"></div>
+  <!-- NETTOYAGE DES SERVICE WORKERS
+       Des essais d'intégration des notifications push ont pu laisser un
+       service worker enregistré sur cette origine. Un service worker survit
+       aux déploiements : tant qu'il n'est pas retiré, il continue de
+       s'interposer, et aucune mise en ligne ne le corrige. Ce bloc le retire.
+       Il ne recharge pas la page : un désenregistrement n'exige rien de tel,
+       et provoquer un rechargement ici créerait une boucle. -->
+  <script>
+  (function () {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.getRegistrations().then(function (liste) {
+      liste.forEach(function (r) {
+        r.unregister().catch(function () {});
+      });
+    }).catch(function () {});
+  })();
+  </script>
+
   <script>
   (function () {
     var boite = document.getElementById('ablInst');

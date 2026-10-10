@@ -27,59 +27,14 @@ class PushNotificationService {
   }) : _messaging = messaging ?? FirebaseMessaging.instance,
        _firestore = firestore ?? FirebaseFirestore.instance;
 
-  /// Clé publique Web Push (VAPID) du projet, si on en a déclaré une.
-  ///
-  /// Facultative : sans elle, le SDK Firebase utilise sa propre clé publique
-  /// par défaut et les notifications web fonctionnent. La renseigner (console
-  /// Firebase → Cloud Messaging → Certificats Web Push) rattache les
-  /// abonnements au projet plutôt qu'à la clé partagée de Firebase.
-  static const String _vapidKey = String.fromEnvironment('FCM_VAPID_KEY');
-
   final FirebaseMessaging _messaging;
   final FirebaseFirestore _firestore;
   StreamSubscription<String>? _tokenRefreshSubscription;
   bool _listenersInitialized = false;
 
-  /// Dernier uid pour lequel l'enregistrement a été tenté.
-  ///
-  /// [registerDevice] est appelé à la fois sur changement d'authentification
-  /// et à chaque reconstruction du widget racine, pour couvrir l'arrivée
-  /// « déjà connecté ». Sans cette mémoire, chaque reconstruction
-  /// redemanderait la permission et réécrirait en base.
-  String? _uidEnregistre;
-
   /// Demande la permission de notification, enregistre le token FCM du
   /// device pour [uid] et le maintient à jour lors d'un renouvellement.
-  ///
-  /// Ne lève jamais : appelée au démarrage, une erreur ici empêcherait
-  /// l'application de s'ouvrir.
   Future<void> registerDevice(String uid) async {
-    if (_uidEnregistre == uid) return;
-    // Posé avant l'await : deux reconstructions rapprochées ne doivent pas
-    // lancer deux enregistrements en parallèle.
-    _uidEnregistre = uid;
-
-    // **Rien ne doit partir d'ici avant d'avoir vérifié que le navigateur
-    // sait le recevoir.** Safari sur iOS n'expose Firebase Messaging que
-    // dans une application installée sur l'écran d'accueil : dans un onglet
-    // ordinaire, `Notification` n'existe pas et le SDK lève. Tant que cet
-    // appel n'avait lieu qu'à la connexion, le cas ne se présentait jamais
-    // au chargement de la page ; depuis qu'il a lieu au démarrage, il
-    // décidait du sort de l'application entière.
-    //
-    // D'où la double protection : on demande au SDK s'il est utilisable, et
-    // on enveloppe quand même — une notification qu'on n'affiche pas est un
-    // désagrément, une application qui ne s'ouvre pas est une panne.
-    try {
-      if (!await _messaging.isSupported()) {
-        debugPrint('Messagerie push non disponible sur ce navigateur.');
-        return;
-      }
-    } catch (e) {
-      debugPrint('Messagerie push non disponible : $e');
-      return;
-    }
-
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
@@ -90,16 +45,9 @@ class PushNotificationService {
       return;
     }
 
-    // Sur le web, l'obtention du jeton dépend de l'enregistrement du service
-    // worker `firebase-messaging-sw.js`. Une erreur ici est silencieuse pour
-    // l'utilisateur — il a accordé la permission et ne verra simplement jamais
-    // de notification — d'où le message explicite dans la console.
-    final token = await _obtenirToken();
+    final token = await _messaging.getToken();
     if (token != null) {
       await _saveToken(uid, token);
-    } else {
-      // Échec passager : ne pas condamner les tentatives suivantes.
-      _uidEnregistre = null;
     }
 
     _tokenRefreshSubscription?.cancel();
@@ -110,20 +58,12 @@ class PushNotificationService {
     _initListenersOnce();
   }
 
-  /// Variante sans risque pour les appels qu'on ne surveille pas.
-  void registerDeviceSansRisque(String uid) {
-    registerDevice(uid).catchError((Object e) {
-      debugPrint('Enregistrement push ignoré : $e');
-    });
-  }
-
   /// Retire le token FCM du device courant (utile à la déconnexion).
   Future<void> unregisterDevice(String uid) async {
-    _uidEnregistre = null;
     _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = null;
 
-    final token = await _obtenirToken();
+    final token = await _messaging.getToken();
     if (token == null) return;
 
     try {
@@ -132,24 +72,6 @@ class PushNotificationService {
       });
     } catch (e) {
       debugPrint('⚠️ Impossible de retirer le token FCM: $e');
-    }
-  }
-
-  /// Demande le jeton FCM du device, en signalant clairement un échec plutôt
-  /// que de laisser remonter une erreur asynchrone que personne n'attrape.
-  Future<String?> _obtenirToken() async {
-    try {
-      return await _messaging.getToken(
-        vapidKey: kIsWeb && _vapidKey.isNotEmpty ? _vapidKey : null,
-      );
-    } catch (e) {
-      debugPrint(
-        '⚠️ Jeton FCM indisponible : $e'
-        '${kIsWeb ? "\n   Sur le web, vérifier que /firebase-messaging-sw.js "
-            "est bien servi en JavaScript (la réécriture SPA renvoie sinon "
-            "index.html, que le navigateur refuse d'enregistrer)." : ""}',
-      );
-      return null;
     }
   }
 
