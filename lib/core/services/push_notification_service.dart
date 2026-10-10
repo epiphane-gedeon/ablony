@@ -50,11 +50,35 @@ class PushNotificationService {
 
   /// Demande la permission de notification, enregistre le token FCM du
   /// device pour [uid] et le maintient à jour lors d'un renouvellement.
+  ///
+  /// Ne lève jamais : appelée au démarrage, une erreur ici empêcherait
+  /// l'application de s'ouvrir.
   Future<void> registerDevice(String uid) async {
     if (_uidEnregistre == uid) return;
     // Posé avant l'await : deux reconstructions rapprochées ne doivent pas
     // lancer deux enregistrements en parallèle.
     _uidEnregistre = uid;
+
+    // **Rien ne doit partir d'ici avant d'avoir vérifié que le navigateur
+    // sait le recevoir.** Safari sur iOS n'expose Firebase Messaging que
+    // dans une application installée sur l'écran d'accueil : dans un onglet
+    // ordinaire, `Notification` n'existe pas et le SDK lève. Tant que cet
+    // appel n'avait lieu qu'à la connexion, le cas ne se présentait jamais
+    // au chargement de la page ; depuis qu'il a lieu au démarrage, il
+    // décidait du sort de l'application entière.
+    //
+    // D'où la double protection : on demande au SDK s'il est utilisable, et
+    // on enveloppe quand même — une notification qu'on n'affiche pas est un
+    // désagrément, une application qui ne s'ouvre pas est une panne.
+    try {
+      if (!await _messaging.isSupported()) {
+        debugPrint('Messagerie push non disponible sur ce navigateur.');
+        return;
+      }
+    } catch (e) {
+      debugPrint('Messagerie push non disponible : $e');
+      return;
+    }
 
     final settings = await _messaging.requestPermission(
       alert: true,
@@ -84,6 +108,13 @@ class PushNotificationService {
     });
 
     _initListenersOnce();
+  }
+
+  /// Variante sans risque pour les appels qu'on ne surveille pas.
+  void registerDeviceSansRisque(String uid) {
+    registerDevice(uid).catchError((Object e) {
+      debugPrint('Enregistrement push ignoré : $e');
+    });
   }
 
   /// Retire le token FCM du device courant (utile à la déconnexion).

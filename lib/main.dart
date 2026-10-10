@@ -198,15 +198,25 @@ class MainApp extends ConsumerWidget {
     ref.listen(authStateProvider, (previous, next) {
       final user = next.value;
       if (user != null) {
-        ref.read(pushNotificationServiceProvider).registerDevice(user.uid);
+        ref
+            .read(pushNotificationServiceProvider)
+            .registerDeviceSansRisque(user.uid);
       }
     });
     // Le cas « déjà connecté à l'arrivée », que l'écoute ci-dessus ne voit
     // pas. `registerDevice` ignore un uid déjà traité, donc l'appeler à
     // chaque reconstruction ne coûte rien.
+    //
+    // Hors de la construction, et sans jamais laisser remonter d'erreur :
+    // l'enregistrement push est un confort, l'ouverture de l'application ne
+    // doit en aucun cas en dépendre.
     final dejaConnecte = ref.read(authStateProvider).value;
     if (dejaConnecte != null) {
-      ref.read(pushNotificationServiceProvider).registerDevice(dejaConnecte.uid);
+      Future.microtask(() {
+        ref
+            .read(pushNotificationServiceProvider)
+            .registerDeviceSansRisque(dejaConnecte.uid);
+      });
     }
 
     Future.microtask(
