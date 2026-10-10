@@ -182,12 +182,32 @@ class MainApp extends ConsumerWidget {
 
     // Enregistre le token FCM du device dès qu'un utilisateur est connecté,
     // pour qu'il puisse recevoir les notifications push (achat, vente, etc.).
+    //
+    // `fireImmediately` est indispensable, pas une précaution. `ref.listen`
+    // ne se déclenche que sur un *changement* postérieur à l'abonnement. Or
+    // le routeur lit déjà `authStateProvider` dans sa redirection, avant que
+    // ce widget ne se construise : quand on arrive **déjà connecté**, la
+    // valeur est résolue depuis longtemps, aucun changement ne suit, et le
+    // token n'est jamais demandé.
+    //
+    // Sur mobile, la panne restait invisible — on finit toujours par se
+    // connecter une fois, et cette connexion-là est bien un changement. Sur
+    // le web, la session persiste et chaque chargement de page arrive déjà
+    // connecté : le token n'était jamais enregistré, donc aucune
+    // notification ne pouvait arriver.
     ref.listen(authStateProvider, (previous, next) {
       final user = next.value;
       if (user != null) {
         ref.read(pushNotificationServiceProvider).registerDevice(user.uid);
       }
     });
+    // Le cas « déjà connecté à l'arrivée », que l'écoute ci-dessus ne voit
+    // pas. `registerDevice` ignore un uid déjà traité, donc l'appeler à
+    // chaque reconstruction ne coûte rien.
+    final dejaConnecte = ref.read(authStateProvider).value;
+    if (dejaConnecte != null) {
+      ref.read(pushNotificationServiceProvider).registerDevice(dejaConnecte.uid);
+    }
 
     Future.microtask(
       () => ref.read(localeProvider.notifier).loadSavedLanguage(),

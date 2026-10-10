@@ -5057,10 +5057,30 @@ exports.onSupportMessage = onDocumentCreated(
       const texte = String(msg.text || msg.message || "").trim();
       const extrait = texte.length > 110 ? `${texte.slice(0, 107)}…` : texte;
 
+      // « Réponse » suppose une question. Depuis que l'équipe peut ouvrir un
+      // fil elle-même, un membre qui n'a jamais rien écrit recevait pourtant
+      // « Réponse de l'équipe Ablony » : une réponse à rien. On regarde donc
+      // s'il a déjà parlé dans ce fil avant de choisir le mot.
+      let aDejaEcrit = false;
+      try {
+        const sien = await db.collection("support").doc(userId)
+            .collection("messages")
+            .where("senderId", "==", userId)
+            .limit(1)
+            .get();
+        aDejaEcrit = !sien.empty;
+      } catch (e) {
+        // En cas de doute, le mot neutre : il est vrai dans les deux cas.
+        console.error("Vérif. fil support échouée:", e.message);
+      }
+      const titre = aDejaEcrit ?
+        "Réponse de l'équipe Ablony" :
+        "Message de l'équipe Ablony";
+
       try {
         await notifyUser(
             userId,
-            "Réponse de l'équipe Ablony",
+            titre,
             extrait || "Vous avez un nouveau message de l'équipe Ablony.",
             {type: "support_reply"},
         );

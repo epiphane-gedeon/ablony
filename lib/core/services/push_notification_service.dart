@@ -40,9 +40,22 @@ class PushNotificationService {
   StreamSubscription<String>? _tokenRefreshSubscription;
   bool _listenersInitialized = false;
 
+  /// Dernier uid pour lequel l'enregistrement a été tenté.
+  ///
+  /// [registerDevice] est appelé à la fois sur changement d'authentification
+  /// et à chaque reconstruction du widget racine, pour couvrir l'arrivée
+  /// « déjà connecté ». Sans cette mémoire, chaque reconstruction
+  /// redemanderait la permission et réécrirait en base.
+  String? _uidEnregistre;
+
   /// Demande la permission de notification, enregistre le token FCM du
   /// device pour [uid] et le maintient à jour lors d'un renouvellement.
   Future<void> registerDevice(String uid) async {
+    if (_uidEnregistre == uid) return;
+    // Posé avant l'await : deux reconstructions rapprochées ne doivent pas
+    // lancer deux enregistrements en parallèle.
+    _uidEnregistre = uid;
+
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
@@ -60,6 +73,9 @@ class PushNotificationService {
     final token = await _obtenirToken();
     if (token != null) {
       await _saveToken(uid, token);
+    } else {
+      // Échec passager : ne pas condamner les tentatives suivantes.
+      _uidEnregistre = null;
     }
 
     _tokenRefreshSubscription?.cancel();
@@ -72,6 +88,7 @@ class PushNotificationService {
 
   /// Retire le token FCM du device courant (utile à la déconnexion).
   Future<void> unregisterDevice(String uid) async {
+    _uidEnregistre = null;
     _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = null;
 
