@@ -104,6 +104,10 @@ class PushNotificationService {
     final token = await _obtenirToken();
     if (token != null) {
       await _saveToken(uid, token);
+      // Trace du succès aussi : savoir qu'un chemin a été parcouru jusqu'au
+      // bout vaut autant que connaître son échec, et distingue « ça a marché »
+      // de « cette version du code ne tourne pas encore sur l'appareil ».
+      await _noterEchec(uid, 'ok : jeton ${token.substring(0, 12)}… enregistré');
     } else {
       await _noterEchec(uid, _derniereErreurJeton ?? 'jeton nul sans erreur');
     }
@@ -198,7 +202,15 @@ class PushNotificationService {
     final token = await _obtenirToken();
     if (token == null) return false;
     try {
-      final doc = await _firestore.collection('users').doc(uid).get();
+      // **Depuis le serveur, explicitement.** Le cache local garde les
+      // écritures en attente : un enregistrement refusé par les règles y
+      // figurerait quand même, et l'écran annoncerait « Activées » pour un
+      // jeton que le serveur n'a jamais accepté. C'est l'état du serveur qui
+      // décide, puisque c'est lui qui enverra les notifications.
+      final doc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .get(const GetOptions(source: Source.server));
       final jetons = (doc.data()?['fcmTokens'] as List?) ?? const [];
       return jetons.contains(token);
     } catch (e) {
@@ -251,6 +263,10 @@ class PushNotificationService {
       });
     } catch (e) {
       debugPrint('⚠️ Impossible d\'enregistrer le token FCM: $e');
+      // Angle mort du premier jet : seule l'absence de jeton était consignée.
+      // Un jeton obtenu puis refusé à l'écriture ne laissait aucune trace —
+      // exactement le cas qu'on cherchait.
+      await _noterEchec(uid, 'écriture du jeton refusée : $e');
     }
   }
 
