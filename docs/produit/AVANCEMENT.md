@@ -676,10 +676,67 @@ son article**, livreur avec un colis que le système ne reconnaissait plus.
   site), et Google valide les déclarations pour `app.ablony.net`.
   Release **1.0.5+9** (le manifeste est natif : un patch Shorebird ne l'aurait
   pas embarqué).
-- **À FAIRE — la clé Google Maps n'a aucune restriction de référent.** Testée
-  depuis deux domaines inventés : acceptée dans les deux cas. N'importe qui
-  peut donc l'utiliser et faire porter la facture au projet. À restreindre dans
-  Google Cloud Console (Identifiants → clé → Restrictions de l'application →
-  Référents HTTP) avec `app.ablony.net/*`, `ablony-a5db9.web.app/*` et
-  `localhost:*`. Ajouter le nouveau domaine ne suffit pas : il faut d'abord
-  qu'une restriction existe.
+- **Clé Google Maps : fausse alerte, le test était invalide.** J'avais conclu
+  à l'absence de restriction après avoir appelé l'API avec des en-têtes
+  `Referer` inventés et reçu une réponse dans les deux cas. Les deux réponses
+  faisaient exactement 320 651 octets : c'était le même script générique.
+  **La restriction de référent ne s'applique pas au téléchargement du script,
+  elle s'applique aux appels que le script passe ensuite depuis la page.** Un
+  curl ne pouvait donc rien prouver. Les restrictions étaient bien en place.
+  Ajouter `app.ablony.net/*` à la liste reste nécessaire après la bascule de
+  domaine.
+
+
+## Site vitrine refondu pour le lancement (2026-10-10)
+
+**Cible corrigée : les vendeurs.** La page était écrite pour des acheteurs, à
+rebours de la stratégie. Un vendeur ne craint pas de mal acheter, il craint
+d'envoyer son article et de ne jamais voir l'argent — d'où l'axe retenu :
+*l'acheteur a déjà payé avant que tu emballes*.
+
+**Google Play, absent, est devenu le chemin principal.** Le badge dormait en
+commentaire depuis l'époque où la fiche n'était pas publiée. Les boutons
+s'adaptent maintenant à l'appareil :
+
+| Appareil | Chemin |
+|---|---|
+| Android | fiche Google Play, badge officiel |
+| iPhone / iPad | `app.ablony.net/?install=1`, l'aide guidée s'ouvre à l'arrivée |
+| Ordinateur | Ablony dans le navigateur, fiche Play en second |
+
+Le défaut écrit dans le HTML reste Google Play : c'est ce que voit celui dont
+le script ne tourne pas, et c'est ce qui sert la grande majorité du trafic.
+**Pas de fenêtre modale sur le site pour expliquer iOS** : l'explication serait
+sur le mauvais domaine. Le geste se fait dans le navigateur qui affiche
+`app.ablony.net`, et c'est là que la feuille apparaît au bon moment, à côté du
+bouton Partager.
+
+**Angle mort comblé côté application :** l'aide à l'installation ne se
+déclenchait que dans Safari iOS. Chrome et Firefox iOS reçoivent désormais leur
+propre feuille (« seul Safari pose une icône, voici le lien à y ouvrir »).
+
+**Les deux pages SEO étaient illisibles.** Elles utilisaient `.legal-page` /
+`.legal-content`, dont le CSS n'existait que dans le `<style>` en ligne de
+`mention_legal.html` : texte brut d'un bord à l'autre de l'écran, titre caché
+sous la barre fixe. Les styles vivent maintenant dans `styles.css`, partagés.
+
+**Les jauges à 100 % ont cédé la place au nombre de comptes**
+(`statsPubliques`, public, une heure de cache). Une jauge pleine décrit
+l'avancement d'un chantier ; le vendeur qui hésite veut savoir si quelqu'un
+d'autre est déjà là.
+
+**La promesse Fondateurs est devenue conditionnelle.** La fenêtre était fermée
+pendant l'examen Play et la page promettait quand même le badge aux « 100
+premiers inscrits ». Elle ne s'affiche désormais que si le serveur confirme que
+la fenêtre est ouverte, et ne s'affiche pas si la fonction ne répond pas.
+L'asymétrie est voulue : un nombre daté ne coûte rien, un badge promis et non
+donné coûte un premier utilisateur.
+
+**Fenêtre Fondateurs rouverte le 2026-10-10** après l'examen Google Play —
+24 places utilisées, 76 restantes. À ne plus refermer puis rouvrir une fois la
+rareté annoncée publiquement.
+
+**Faux arguments retirés** : « des milliers de vendeurs » (27 comptes réels),
+« des milliers d'articles », la newsletter qui ne sauvegardait rien
+(`// Simulate submission`), le bandeau « bientôt disponible » sur une
+application en ligne.
