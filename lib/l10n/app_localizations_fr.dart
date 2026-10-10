@@ -2551,4 +2551,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paymentMethodCardCvv => 'Code de sécurité';
+
+  @override
+  String get pushNotificationsTitle => 'Notifications push';
+
+  @override
+  String get pushNotificationsSubtitle =>
+      'Être prévenu d\'une vente, d\'un message ou d\'une livraison';
+
+  @override
+  String get pushNotificationsEnabled => 'Activées';
+
+  @override
+  String get pushNotificationsEnable => 'Activer';
+
+  @override
+  String get pushNotificationsDeniedHint =>
+      'Bloquées. Autorisez les notifications pour Ablony dans les réglages de votre navigateur, puis rechargez la page.';
+
+  @override
+  String get pushNotificationsUnavailable => 'Indisponible ici';
+
+  @override
+  String get pushNotificationsIosHint =>
+      'Sur iPhone et iPad, les notifications ne fonctionnent que si Ablony est installée sur l\'écran d\'accueil.';
+
+  @override
+  String get pushNotificationsFailed => 'Activation impossible pour le moment.';
 }

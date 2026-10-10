@@ -2781,5 +2781,13 @@
   "paymentMethodCardCvv": "Security code",
   "@paymentMethodCardCvv": {
     "description": "Formulaire carte (masqué pour le moment)"
-  }
+  },
+  "pushNotificationsTitle": "Push notifications",
+  "pushNotificationsSubtitle": "Get told about a sale, a message or a delivery",
+  "pushNotificationsEnabled": "On",
+  "pushNotificationsEnable": "Turn on",
+  "pushNotificationsDeniedHint": "Blocked. Allow notifications for Ablony in your browser settings, then reload the page.",
+  "pushNotificationsUnavailable": "Not available here",
+  "pushNotificationsIosHint": "On iPhone and iPad, notifications only work when Ablony is installed on the home screen.",
+  "pushNotificationsFailed": "Could not turn them on right now."
 }

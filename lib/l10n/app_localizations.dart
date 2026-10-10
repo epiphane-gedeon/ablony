@@ -4765,6 +4765,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Code de sécurité'**
   String get paymentMethodCardCvv;
+
+  /// Titre du réglage des notifications push
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications push'**
+  String get pushNotificationsTitle;
+
+  /// Sous-titre expliquant à quoi servent les notifications push
+  ///
+  /// In fr, this message translates to:
+  /// **'Être prévenu d\'une vente, d\'un message ou d\'une livraison'**
+  String get pushNotificationsSubtitle;
+
+  /// État : les notifications push sont actives
+  ///
+  /// In fr, this message translates to:
+  /// **'Activées'**
+  String get pushNotificationsEnabled;
+
+  /// Bouton pour activer les notifications push
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer'**
+  String get pushNotificationsEnable;
+
+  /// Aide affichée quand l'utilisateur a refusé les notifications
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquées. Autorisez les notifications pour Ablony dans les réglages de votre navigateur, puis rechargez la page.'**
+  String get pushNotificationsDeniedHint;
+
+  /// État : le navigateur ne gère pas les notifications push
+  ///
+  /// In fr, this message translates to:
+  /// **'Indisponible ici'**
+  String get pushNotificationsUnavailable;
+
+  /// Aide affichée sur iOS hors application installée
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur iPhone et iPad, les notifications ne fonctionnent que si Ablony est installée sur l\'écran d\'accueil.'**
+  String get pushNotificationsIosHint;
+
+  /// Message d'échec de l'activation des notifications
+  ///
+  /// In fr, this message translates to:
+  /// **'Activation impossible pour le moment.'**
+  String get pushNotificationsFailed;
 }
 
 class _AppLocalizationsDelegate

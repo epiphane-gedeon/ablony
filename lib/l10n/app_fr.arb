@@ -2805,5 +2805,37 @@
   "paymentMethodCardCvv": "Code de sécurité",
   "@paymentMethodCardCvv": {
     "description": "Formulaire carte (masqué pour le moment)"
+  },
+  "pushNotificationsTitle": "Notifications push",
+  "@pushNotificationsTitle": {
+    "description": "Titre du réglage des notifications push"
+  },
+  "pushNotificationsSubtitle": "Être prévenu d'une vente, d'un message ou d'une livraison",
+  "@pushNotificationsSubtitle": {
+    "description": "Sous-titre expliquant à quoi servent les notifications push"
+  },
+  "pushNotificationsEnabled": "Activées",
+  "@pushNotificationsEnabled": {
+    "description": "État : les notifications push sont actives"
+  },
+  "pushNotificationsEnable": "Activer",
+  "@pushNotificationsEnable": {
+    "description": "Bouton pour activer les notifications push"
+  },
+  "pushNotificationsDeniedHint": "Bloquées. Autorisez les notifications pour Ablony dans les réglages de votre navigateur, puis rechargez la page.",
+  "@pushNotificationsDeniedHint": {
+    "description": "Aide affichée quand l'utilisateur a refusé les notifications"
+  },
+  "pushNotificationsUnavailable": "Indisponible ici",
+  "@pushNotificationsUnavailable": {
+    "description": "État : le navigateur ne gère pas les notifications push"
+  },
+  "pushNotificationsIosHint": "Sur iPhone et iPad, les notifications ne fonctionnent que si Ablony est installée sur l'écran d'accueil.",
+  "@pushNotificationsIosHint": {
+    "description": "Aide affichée sur iOS hors application installée"
+  },
+  "pushNotificationsFailed": "Activation impossible pour le moment.",
+  "@pushNotificationsFailed": {
+    "description": "Message d'échec de l'activation des notifications"
   }
 }

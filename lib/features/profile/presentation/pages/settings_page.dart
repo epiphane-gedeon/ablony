@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,8 @@ import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/account_deletion_service.dart';
+import '../../../../core/providers/push_notification_provider.dart';
+import '../../../../core/services/push_notification_service.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Page des paramètres de l'application.
@@ -61,6 +64,11 @@ class SettingsPage extends ConsumerWidget {
             // QUE le promotionnel — les emails de sécurité/vérification partent
             // quoi qu'il arrive.
             const _MarketingEmailToggle(),
+            // Les notifications push s'activent ici, et nulle part ailleurs.
+            // iOS n'autorise la demande de permission qu'à partir d'un geste,
+            // et la version qui la lançait à l'ouverture empêchait
+            // l'application de se charger sur iPhone.
+            const _NotificationsPushTile(),
 
             const SizedBox(height: 32),
 
@@ -446,6 +454,133 @@ class _MarketingEmailToggleState extends ConsumerState<_MarketingEmailToggle> {
         value: value,
         onChanged: _saving ? null : (v) => _onChanged(v, user.uid),
       ),
+    );
+  }
+}
+
+
+/// Réglage des notifications push, déclenché par un geste et par rien d'autre.
+///
+/// Cet écran est le **seul** endroit d'où part une demande de permission sur
+/// le web. Deux raisons, et la seconde a coûté cher :
+///
+/// - iOS n'autorise la demande qu'à partir d'une interaction de
+///   l'utilisateur ; lancée au chargement, elle ne donne rien.
+/// - Une version qui l'exécutait à l'ouverture a empêché l'application
+///   entière de se charger sur iPhone. Du code de confort placé sur le chemin
+///   d'ouverture transforme un désagrément en panne.
+///
+/// L'état est lu sans rien provoquer : `getNotificationSettings` ne fait
+/// apparaître aucune invite. Un écran de réglages doit montrer la situation,
+/// pas la créer.
+class _NotificationsPushTile extends ConsumerStatefulWidget {
+  const _NotificationsPushTile();
+
+  @override
+  ConsumerState<_NotificationsPushTile> createState() =>
+      _NotificationsPushTileState();
+}
+
+class _NotificationsPushTileState
+    extends ConsumerState<_NotificationsPushTile> {
+  late Future<EtatNotifications> _etat =
+      ref.read(pushNotificationServiceProvider).etatActuel();
+  bool _enCours = false;
+
+  Future<void> _activer(String uid) async {
+    setState(() => _enCours = true);
+    final service = ref.read(pushNotificationServiceProvider);
+    final obtenu = await service.activerSurDemande(uid);
+    if (!mounted) return;
+    setState(() {
+      _etat = Future.value(obtenu);
+      _enCours = false;
+    });
+    if (obtenu != EtatNotifications.activees) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.pushNotificationsFailed)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final user = ref.watch(currentUserProvider).value;
+    if (user == null) return const SizedBox.shrink();
+
+    return FutureBuilder<EtatNotifications>(
+      future: _etat,
+      builder: (context, snapshot) {
+        // Tant que l'état n'est pas connu, la tuile reste absente plutôt que
+        // de clignoter entre deux libellés contradictoires.
+        if (!snapshot.hasData) return const SizedBox.shrink();
+        final etat = snapshot.data!;
+
+        final (String? aide, Widget fin) = switch (etat) {
+          EtatNotifications.activees => (null, Text(
+              l10n.pushNotificationsEnabled,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            )),
+          EtatNotifications.refusees => (
+              l10n.pushNotificationsDeniedHint,
+              const SizedBox.shrink(),
+            ),
+          // Sur iPhone, l'indisponibilité a une cause précise et une issue :
+          // installer l'application. Le dire vaut mieux qu'un « indisponible »
+          // qui ressemble à une panne.
+          EtatNotifications.indisponible => (
+              kIsWeb ? l10n.pushNotificationsIosHint : null,
+              Text(
+                l10n.pushNotificationsUnavailable,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                ),
+              ),
+            ),
+          EtatNotifications.aActiver => (null, _enCours
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : TextButton(
+                  onPressed: () => _activer(user.uid),
+                  child: Text(l10n.pushNotificationsEnable),
+                )),
+        };
+
+        return Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: theme.dividerColor.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+          ),
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            title: Text(
+              l10n.pushNotificationsTitle,
+              style: theme.textTheme.bodyLarge,
+            ),
+            subtitle: Text(
+              aide ?? l10n.pushNotificationsSubtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+            ),
+            trailing: fin,
+          ),
+        );
+      },
     );
   }
 }

@@ -188,6 +188,29 @@ class MainApp extends ConsumerWidget {
         ref.read(pushNotificationServiceProvider).registerDevice(user.uid);
       }
     });
+    // `ref.listen` ne voit que les changements **postérieurs** à
+    // l'abonnement. Le routeur lit déjà `authStateProvider` dans sa
+    // redirection : quand on arrive déjà connecté, la valeur est résolue et
+    // aucun changement ne suit. Sans cette lecture, le jeton n'est demandé
+    // qu'aux connexions effectives.
+    //
+    // **Hors du web, et c'est délibéré.** Sur le web, les notifications
+    // s'activent depuis les réglages, par un geste. Un appel ici y a déjà
+    // empêché l'application entière de se charger sur iPhone : le chemin
+    // d'ouverture ne doit rien porter dont on puisse se passer.
+    if (!kIsWeb) {
+      final dejaConnecte = ref.read(authStateProvider).value;
+      if (dejaConnecte != null) {
+        Future.microtask(() {
+          ref
+              .read(pushNotificationServiceProvider)
+              .registerDevice(dejaConnecte.uid)
+              .catchError((Object e) {
+                debugPrint('Enregistrement push ignoré : $e');
+              });
+        });
+      }
+    }
 
     Future.microtask(
       () => ref.read(localeProvider.notifier).loadSavedLanguage(),

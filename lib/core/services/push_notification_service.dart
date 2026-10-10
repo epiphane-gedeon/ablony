@@ -8,6 +8,24 @@ import 'package:go_router/go_router.dart';
 import '../../features/notifications/application/notification_router.dart';
 import '../navigation/navigator_key.dart';
 
+/// Ce que l'utilisateur a décidé des notifications, tel qu'un écran de
+/// réglages doit pouvoir l'afficher sans rien provoquer.
+enum EtatNotifications {
+  /// Le navigateur ne sait pas les recevoir — Safari iOS hors application
+  /// installée, notamment.
+  indisponible,
+
+  /// Rien n'a encore été demandé.
+  aActiver,
+
+  /// Refusées : seule la page des réglages du navigateur peut revenir
+  /// dessus, une seconde demande ne rouvrirait aucune invite.
+  refusees,
+
+  /// En place.
+  activees,
+}
+
 /// Gère l'enregistrement du device pour les notifications push (FCM) et
 /// le routage vers l'écran concerné lors d'un tap sur une notification.
 ///
@@ -27,6 +45,14 @@ class PushNotificationService {
   }) : _messaging = messaging ?? FirebaseMessaging.instance,
        _firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// Clé publique Web Push (VAPID) du projet, si on en déclare une.
+  ///
+  /// Facultative : sans elle, le SDK utilise sa propre clé publique par
+  /// défaut et les notifications web fonctionnent. La renseigner (console
+  /// Firebase → Cloud Messaging → Certificats Web Push) rattache les
+  /// abonnements au projet plutôt qu'à la clé partagée de Firebase.
+  static const String _cleVapid = String.fromEnvironment('FCM_VAPID_KEY');
+
   final FirebaseMessaging _messaging;
   final FirebaseFirestore _firestore;
   StreamSubscription<String>? _tokenRefreshSubscription;
@@ -35,6 +61,12 @@ class PushNotificationService {
   /// Demande la permission de notification, enregistre le token FCM du
   /// device pour [uid] et le maintient à jour lors d'un renouvellement.
   Future<void> registerDevice(String uid) async {
+    // **Rien ne part avant d'avoir vérifié que le navigateur sait recevoir.**
+    // Safari sur iOS n'expose Firebase Messaging que dans une application
+    // installée sur l'écran d'accueil ; dans un onglet ordinaire, le SDK
+    // lève. Sur mobile natif, la réponse est toujours vraie.
+    if (!await estDisponible()) return;
+
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
@@ -45,7 +77,7 @@ class PushNotificationService {
       return;
     }
 
-    final token = await _messaging.getToken();
+    final token = await _obtenirToken();
     if (token != null) {
       await _saveToken(uid, token);
     }
@@ -63,7 +95,7 @@ class PushNotificationService {
     _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = null;
 
-    final token = await _messaging.getToken();
+    final token = await _obtenirToken();
     if (token == null) return;
 
     try {
@@ -72,6 +104,73 @@ class PushNotificationService {
       });
     } catch (e) {
       debugPrint('⚠️ Impossible de retirer le token FCM: $e');
+    }
+  }
+
+  /// Le navigateur (ou l'appareil) sait-il recevoir des notifications push ?
+  ///
+  /// Ne lève jamais : sur un navigateur où même la question échoue, la
+  /// réponse est « non ».
+  Future<bool> estDisponible() async {
+    try {
+      return await _messaging.isSupported();
+    } catch (e) {
+      debugPrint('Messagerie push indisponible : $e');
+      return false;
+    }
+  }
+
+  /// Ce que l'utilisateur a déjà décidé, **sans rien lui demander**.
+  ///
+  /// `getNotificationSettings` lit l'état courant sans ouvrir d'invite : un
+  /// écran de réglages doit pouvoir afficher la situation sans la provoquer.
+  Future<EtatNotifications> etatActuel() async {
+    if (!await estDisponible()) return EtatNotifications.indisponible;
+    try {
+      final reglages = await _messaging.getNotificationSettings();
+      switch (reglages.authorizationStatus) {
+        case AuthorizationStatus.authorized:
+        case AuthorizationStatus.provisional:
+          return EtatNotifications.activees;
+        case AuthorizationStatus.denied:
+          return EtatNotifications.refusees;
+        case AuthorizationStatus.notDetermined:
+          return EtatNotifications.aActiver;
+      }
+    } catch (e) {
+      debugPrint('État des notifications illisible : $e');
+      return EtatNotifications.indisponible;
+    }
+  }
+
+  /// Active les notifications **à la demande explicite de l'utilisateur**.
+  ///
+  /// C'est le seul chemin sur le web, et ce n'est pas un détail de confort :
+  /// iOS n'autorise la demande de permission qu'à partir d'un geste, et une
+  /// version précédente qui s'exécutait à l'ouverture empêchait purement et
+  /// simplement l'application de se charger sur iPhone.
+  ///
+  /// Renvoie l'état obtenu, pour que l'écran dise ce qui s'est passé.
+  Future<EtatNotifications> activerSurDemande(String uid) async {
+    try {
+      await registerDevice(uid);
+    } catch (e) {
+      debugPrint('Activation des notifications échouée : $e');
+      return EtatNotifications.indisponible;
+    }
+    return etatActuel();
+  }
+
+  /// Demande le jeton FCM, en signalant un échec plutôt que de laisser
+  /// remonter une erreur asynchrone que personne n'attrape.
+  Future<String?> _obtenirToken() async {
+    try {
+      return await _messaging.getToken(
+        vapidKey: kIsWeb && _cleVapid.isNotEmpty ? _cleVapid : null,
+      );
+    } catch (e) {
+      debugPrint('Jeton FCM indisponible : $e');
+      return null;
     }
   }
 
