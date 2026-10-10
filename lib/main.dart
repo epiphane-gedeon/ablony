@@ -207,16 +207,27 @@ class MainApp extends ConsumerWidget {
     // pas. `registerDevice` ignore un uid déjà traité, donc l'appeler à
     // chaque reconstruction ne coûte rien.
     //
-    // Hors de la construction, et sans jamais laisser remonter d'erreur :
-    // l'enregistrement push est un confort, l'ouverture de l'application ne
-    // doit en aucun cas en dépendre.
-    final dejaConnecte = ref.read(authStateProvider).value;
-    if (dejaConnecte != null) {
-      Future.microtask(() {
-        ref
-            .read(pushNotificationServiceProvider)
-            .registerDeviceSansRisque(dejaConnecte.uid);
-      });
+    // **Pas sur le web.** Cet appel au démarrage y a laissé l'application
+    // blanche dans la PWA installée sur iPhone — là où `isSupported()`
+    // répond vrai, le SDK va jusqu'à enregistrer son service worker, et
+    // c'est ce qui n'aboutit pas. L'onglet Safari ordinaire, lui, s'arrêtait
+    // avant et chargeait normalement : c'est ce contraste qui désigne le
+    // chemin fautif.
+    //
+    // Sur le web, l'enregistrement ne se fait donc plus qu'à une connexion
+    // effective — le comportement qui a toujours tenu. Le relier à un geste
+    // de l'utilisateur serait mieux encore, et c'est de toute façon ce
+    // qu'exige iOS pour demander la permission ; à faire posément, pas dans
+    // un correctif d'urgence.
+    if (!kIsWeb) {
+      final dejaConnecte = ref.read(authStateProvider).value;
+      if (dejaConnecte != null) {
+        Future.microtask(() {
+          ref
+              .read(pushNotificationServiceProvider)
+              .registerDeviceSansRisque(dejaConnecte.uid);
+        });
+      }
     }
 
     Future.microtask(
