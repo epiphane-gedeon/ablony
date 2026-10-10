@@ -89,16 +89,29 @@
     }
   </style>
   <div class="abl-inst" id="ablInst" role="dialog" aria-label="Installer Ablony"></div>
-  <!-- NETTOYAGE DES SERVICE WORKERS
+  <!-- NETTOYAGE DES SERVICE WORKERS — une seule fois par appareil.
        Des essais d'intégration des notifications push ont pu laisser un
        service worker enregistré sur cette origine. Un service worker survit
        aux déploiements : tant qu'il n'est pas retiré, il continue de
-       s'interposer, et aucune mise en ligne ne le corrige. Ce bloc le retire.
-       Il ne recharge pas la page : un désenregistrement n'exige rien de tel,
-       et provoquer un rechargement ici créerait une boucle. -->
+       s'interposer, et aucune mise en ligne ne le corrige.
+
+       **Une seule fois**, et c'est important : laissé à chaque chargement,
+       ce bloc interdirait pour toujours la moindre mise en cache par un
+       service worker. Le nettoyage d'un incident ne doit pas devenir une
+       règle permanente.
+
+       Il ne recharge pas la page : un désenregistrement ne l'exige pas, et
+       en provoquer un ici créerait une boucle. -->
   <script>
   (function () {
     if (!('serviceWorker' in navigator)) return;
+    try {
+      if (localStorage.getItem('ablSwNettoye') === '1') return;
+      localStorage.setItem('ablSwNettoye', '1');
+    } catch (e) {
+      // Stockage indisponible (navigation privée) : on nettoie quand même,
+      // ce qui ne coûte qu'un appel sans réseau.
+    }
     navigator.serviceWorker.getRegistrations().then(function (liste) {
       liste.forEach(function (r) {
         r.unregister().catch(function () {});
