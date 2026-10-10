@@ -740,3 +740,97 @@ rareté annoncée publiquement.
 « des milliers d'articles », la newsletter qui ne sauvegardait rien
 (`// Simulate submission`), le bandeau « bientôt disponible » sur une
 application en ligne.
+
+## Notifications push web (2026-10-10)
+
+Elles n'avaient jamais fonctionné. Trois causes empilées, découvertes dans
+cet ordre inverse de leur importance.
+
+**1. Aucune clé Web Push (VAPID) dans le projet.** Sans certificat, le SDK
+retombe sur la clé publique partagée de Firebase. Chrome l'accepte, **Safari
+non** : permission accordée, aucun jeton délivré. La clé est écrite dans le
+code et non passée en `--dart-define` — un drapeau oublié à un build
+remettrait la panne en place sans rien afficher. Elle est publique par
+conception et n'autorise pas à émettre : c'est la clé privée, chez Firebase,
+qui signe.
+
+**2. `firebase-messaging-sw.js` n'existait pas.** Le SDK l'enregistre avant de
+délivrer un jeton. Piège : la réécriture SPA répondait **200** à cette adresse
+avec le HTML de l'application — pas de 404 dans l'onglet réseau, mais un
+`text/html` que le navigateur refuse d'enregistrer comme service worker.
+
+**3. L'application était servie depuis un cache d'une heure.** La règle
+`no-cache` ne valait que pour le chemin littéral `/index.html`, jamais demandé :
+l'application s'ouvre sur `/`, `/home`, `/product/<id>`. Une application
+installée sur l'écran d'accueil gardait donc un ancien paquet bien plus
+longtemps.
+
+C'est la troisième qui a coûté le plus cher, et pas en temps de correction :
+elle a fait diagnostiquer du code qui ne tournait pas. **Vérifier que le
+serveur sert la bonne version ne dit rien de ce que l'appareil exécute.**
+
+### Le principe à ne pas reperdre
+
+Une première tentative plaçait l'enregistrement push **au démarrage**, pour
+rattraper les sessions déjà ouvertes. Sur Safari iOS, Firebase Messaging n'est
+exposé que dans une application installée ; ailleurs le SDK lève. Résultat :
+l'application entière ne se chargeait plus sur iPhone, trois fois de suite.
+
+Les notifications s'activent donc depuis **un bouton** dans les réglages, et de
+nulle part ailleurs sur le web. C'est aussi ce qu'iOS exige — la permission ne
+se demande qu'à partir d'un geste. Le rattrapage au démarrage subsiste sur
+mobile natif uniquement.
+
+> Une notification qu'on n'affiche pas est un désagrément. Une application qui
+> ne s'ouvre pas est une panne. Rien de facultatif sur le chemin d'ouverture.
+
+### Une permission n'est pas un abonnement
+
+L'écran a un temps affiché « Activées » en lisant la seule permission du
+navigateur, alors qu'aucun jeton n'était enregistré. Il vérifie désormais que
+le jeton **figure côté serveur**, lecture forcée depuis le serveur : le cache
+local garde les écritures en attente, et un jeton refusé par les règles y
+figurerait quand même.
+
+### Limite Apple, à dire aux utilisateurs
+
+Sur iPhone et iPad, les notifications web ne fonctionnent **que** si Ablony est
+installée sur l'écran d'accueil. Dans un onglet Safari, jamais. L'écran des
+réglages l'explique au lieu d'afficher « indisponible ».
+
+### À noter pour plus tard
+
+Les documents `users` sont en lecture publique (`allow read: if true`). C'est
+ce qui fait marcher la recherche de membres et la connexion par nom
+d'utilisateur — mais **l'adresse e-mail de chaque membre est donc lisible par
+n'importe qui**. Resserrer la règle casserait les deux fonctions : il faudrait
+d'abord les passer par une Cloud Function. Non urgent, à ne pas oublier.
+
+## Chargement du web allégé (2026-10-10)
+
+Génération de PDF (reçus, étiquettes) passée en chargement différé : elle ne
+sert qu'à deux écrans rarement ouverts et était téléchargée par tout le monde
+avant l'accueil.
+
+    main.dart.js   6 246 485 → 5 198 756 octets   (-17 %)
+    transféré      1 307 → 1 110 Ko en brotli     (-197 Ko)
+
+Mesuré aussi, pour ne pas refaire l'essai : différer le scanner de colis et le
+choix du point relais ne gagne que **6 Ko**. Sur le web, le poids de
+`mobile_scanner` et `google_maps_flutter` est dans leur partie JavaScript,
+chargée au démarrage par le registre de plugins, pas dans leur code Dart.
+
+Les parties différées sont en `no-cache` : leur nom ne porte ni version ni
+empreinte, et une partie périmée servie avec un programme principal neuf donne
+un écran cassé, pas une page un peu datée.
+
+## Connexion par nom d'utilisateur (2026-10-10)
+
+L'écran annonçait « e-mail ou nom d'utilisateur » et seule l'adresse
+fonctionnait : le nom partait tel quel à Firebase Auth et revenait en
+`invalid-email`, code jamais traduit, donc affiché brut.
+
+La correspondance se lit sur `usernames/{nom}`, **par identifiant de
+document**. La casse compte : c'est elle qui décide de l'unicité à
+l'inscription, « Prince » et « prince » sont deux comptes. Un premier jet
+cherchait sur `usernameLower` et en aurait renvoyé un au hasard.
