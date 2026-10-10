@@ -440,15 +440,58 @@ class AuthRepositoryImpl implements AuthRepository {
   // AUTHENTIFICATION PAR EMAIL
   // ============================================================
 
+  /// Traduit un identifiant de connexion en adresse e-mail.
+  ///
+  /// L'écran de connexion annonce « e-mail ou nom d'utilisateur », et c'est
+  /// bien ce qu'il faut : le nom d'utilisateur est ce qu'on retient de soi,
+  /// l'adresse ce qu'on oublie. Mais Firebase Auth ne connaît que l'adresse —
+  /// un nom d'utilisateur lui parvenait tel quel et revenait en
+  /// `invalid-email`, un code jamais traduit, donc affiché brut.
+  ///
+  /// La correspondance se lit sur `users.usernameLower`, renseigné pour tous
+  /// les comptes. Pas sur la collection `usernames`, dont les identifiants de
+  /// document conservent la casse : « Anita » ne s'y trouverait pas sous
+  /// « anita », et exiger la casse exacte à la connexion serait absurde.
+  ///
+  /// Aucune exposition nouvelle : les profils et les noms d'utilisateur sont
+  /// déjà en lecture publique — c'est ce qui fait marcher la recherche de
+  /// membres — et cette requête ne lit rien d'autre.
+  Future<String> _adresseDeLIdentifiant(String identifiant) async {
+    final saisie = identifiant.trim();
+    if (saisie.contains('@')) return saisie;
+
+    final correspondance = await _firestore
+        .collection('users')
+        .where('usernameLower', isEqualTo: saisie.toLowerCase())
+        .limit(1)
+        .get();
+
+    if (correspondance.docs.isEmpty) {
+      throw UserNotFoundException();
+    }
+    final adresse = correspondance.docs.first.data()['email'] as String?;
+    if (adresse == null || adresse.isEmpty) {
+      // Compte créé par un fournisseur sans adresse exploitable : le mot de
+      // passe ne le rouvrira pas, et le dire vaut mieux que d'échouer sur un
+      // code d'erreur Firebase.
+      throw UserNotFoundException();
+    }
+    return adresse;
+  }
+
   @override
   Future<User> signInWithEmail({
     required String email,
     required String password,
   }) async {
     try {
+      // `email` porte ce que l'utilisateur a tapé : une adresse, ou un nom
+      // d'utilisateur à traduire.
+      final adresse = await _adresseDeLIdentifiant(email);
+
       // Se connecter avec email et mot de passe
       final firebase_auth.UserCredential userCredential = await _firebaseAuth
-          .signInWithEmailAndPassword(email: email, password: password);
+          .signInWithEmailAndPassword(email: adresse, password: password);
 
       final firebase_auth.User? firebaseUser = userCredential.user;
 

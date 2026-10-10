@@ -38,10 +38,13 @@ import '../../features/relay_point/presentation/pages/select_relay_point_page.da
 import '../../features/follow/presentation/pages/followers_page.dart';
 import '../../features/follow/presentation/pages/following_page.dart';
 import '../../features/dispute/presentation/pages/open_dispute_page.dart';
-import '../../features/receipt/presentation/pages/receipt_page.dart';
+// Chargées à la demande : voir [_EcranDiffere] plus bas.
+import '../../features/receipt/presentation/pages/receipt_page.dart'
+    deferred as recu;
 import '../../features/reviews/presentation/pages/rate_seller_page.dart';
 import '../../features/delivery/data/parcel_repository.dart';
-import '../../features/delivery/presentation/pages/parcel_label_page.dart';
+import '../../features/delivery/presentation/pages/parcel_label_page.dart'
+    deferred as etiquette;
 import '../../features/delivery/presentation/pages/scan_parcel_page.dart';
 import '../../features/delivery/presentation/pages/stuck_parcels_page.dart';
 import '../../features/product/presentation/pages/product_detail_page.dart';
@@ -787,7 +790,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'receipt',
         builder: (context, state) {
           final receiptId = state.pathParameters['receiptId']!;
-          return ReceiptPage(receiptId: receiptId);
+          return _EcranDiffere(
+            charger: recu.loadLibrary,
+            construire: () => recu.ReceiptPage(receiptId: receiptId),
+          );
         },
       ),
 
@@ -848,7 +854,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     ? const Scaffold(
                         body: Center(child: Text('Colis introuvable')),
                       )
-                    : ParcelLabelPage(parcel: colis),
+                    : _EcranDiffere(
+                        charger: etiquette.loadLibrary,
+                        construire: () =>
+                            etiquette.ParcelLabelPage(parcel: colis),
+                      ),
                 loading: () => const Scaffold(
                   body: Center(child: CircularProgressIndicator()),
                 ),
@@ -918,3 +928,67 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+
+/// Affiche un écran dont le code n'est téléchargé qu'à son ouverture.
+///
+/// **Mesuré, pour éviter de refaire l'essai.** Différer le scanner de colis
+/// et le choix du point relais ne gagne que 6 Ko compressés : sur le web, le
+/// poids de `mobile_scanner` et `google_maps_flutter` est dans leur partie
+/// JavaScript, chargée au démarrage par le registre de plugins, pas dans leur
+/// code Dart. Seule la génération de PDF valait le détour.
+///
+/// La génération de PDF (reçus, étiquettes de colis) pèse lourd et ne sert
+/// qu'à deux écrans, ouverts rarement. Comprise dans le programme principal,
+/// elle était téléchargée par tout le monde avant même de voir l'accueil —
+/// ce qui se paie en secondes sur une connexion mobile.
+///
+/// `loadLibrary()` renvoie toujours le même Future une fois appelée : le
+/// second passage sur l'écran n'attend plus. Il est gardé dans l'état plutôt
+/// que recréé à chaque construction, pour ne pas relancer le FutureBuilder.
+class _EcranDiffere extends StatefulWidget {
+  const _EcranDiffere({required this.charger, required this.construire});
+
+  final Future<void> Function() charger;
+  final Widget Function() construire;
+
+  @override
+  State<_EcranDiffere> createState() => _EcranDiffereState();
+}
+
+class _EcranDiffereState extends State<_EcranDiffere> {
+  late final Future<void> _chargement = widget.charger();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _chargement,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          // Connexion coupée pendant le téléchargement de la partie : on le
+          // dit, plutôt que de laisser un écran vide. Revenir puis rouvrir
+          // réessaie.
+          return Scaffold(
+            appBar: AppBar(),
+            body: const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Cet écran n\'a pas pu être chargé. '
+                  'Vérifiez votre connexion et réessayez.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
+        }
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return widget.construire();
+      },
+    );
+  }
+}

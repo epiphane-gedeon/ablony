@@ -144,7 +144,10 @@ class UserDisabledException extends AuthException {
 class UserNotFoundException extends AuthException {
   UserNotFoundException({Exception? originalException, StackTrace? stackTrace})
     : super(
-        message: 'Aucun compte n\'est associé à cet email',
+        // « identifiant » et non « email » : depuis que la connexion accepte
+        // aussi le nom d'utilisateur, parler d'email désignerait la mauvaise
+        // chose à qui vient d'en saisir un autre.
+        message: 'Aucun compte ne correspond à cet identifiant',
         code: 'USER_NOT_FOUND',
         originalException: originalException,
         stackTrace: stackTrace,
@@ -532,6 +535,12 @@ AppException handleFirebaseException(
     return UserNotFoundException(originalException: e, stackTrace: stackTrace);
   }
   // Codes pour mot de passe/identifiants incorrects (ancien et nouveau)
+  // Jamais traduit jusqu'ici : le message brut de Firebase remontait tel quel
+  // à l'écran. Il survient quand l'identifiant saisi n'est ni une adresse
+  // valide, ni un nom d'utilisateur connu.
+  if (code == 'invalid-email') {
+    return UserNotFoundException(originalException: e, stackTrace: stackTrace);
+  }
   if (code == 'wrong-password' || code == 'invalid-credential') {
     return InvalidCredentialsException(
       originalException: e,
