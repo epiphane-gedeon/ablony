@@ -834,3 +834,42 @@ La correspondance se lit sur `usernames/{nom}`, **par identifiant de
 document**. La casse compte : c'est elle qui décide de l'unicité à
 l'inscription, « Prince » et « prince » sont deux comptes. Un premier jet
 cherchait sur `usernameLower` et en aurait renvoyé un au hasard.
+
+## Site vitrine — état au 2026-10-11
+
+Onze pages, un seul `styles.css`. Les cinq blocs `<style>` dupliqués dans les
+pages légales (1 987 octets identiques, md5 `ddbcaba317`) ont été supprimés :
+ils redéfinissaient les mêmes `.legal-*` avec d'autres valeurs, d'où des pages
+légales qui ne ressemblaient pas aux pages de contenu, et une allure
+impossible à changer sans éditer cinq fichiers.
+
+Menu et pied de page repris de l'accueil sur toutes les pages, par extraction
+programmatique plutôt qu'à la main — c'est ce qui garantit qu'ils restent
+identiques.
+
+**Le Bénin a été retiré partout**, pages et documents légaux compris. Le
+sélecteur de pays accepte `BJ` et un compte existe à Cotonou, mais un pays
+configuré n'est pas un service ouvert.
+
+Nouvelle page `a-propos.html` : ~960 mots, dix sections, balisage `AboutPage`
+relié à l'`Organization`, ajoutée au sitemap et liée depuis le pied de page de
+toutes les pages. Elle vise les requêtes de fond que l'accueil ne peut pas
+couvrir, et porte l'argument qui ne se copie pas — conçue pour l'Afrique de
+l'Ouest, pas traduite depuis l'Europe.
+
+### À faire plus tard — back-office du site
+
+Décidé le 2026-10-11 : les contenus du site passeront par une administration
+plutôt que par des fichiers.
+
+**La contrainte à ne pas oublier en le concevant.** Les pages légales chargent
+leur texte à l'exécution (`fetch('cgu.md')`). C'est sans conséquence pour un
+document légal, mais **une page qu'on veut indexer ne peut pas fonctionner
+ainsi** : son contenu serait absent du HTML servi, et c'est précisément ce
+qu'on cherche à faire voir. Un back-office doit donc produire du HTML au
+moment de la publication, pas au moment de l'affichage.
+
+### Reste à faire côté site
+
+- Déploiement chez LWS (manuel, par le fondateur).
+- Vérifier l'adresse LWS saisie de mémoire dans `mention_legal.md`.
