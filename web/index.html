@@ -20,6 +20,23 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Ablony">
 
+  <!-- Cette balise manquait, et c'est elle qui manquait à tout le reste.
+       Sans `viewport`, Safari suppose une page de 980 px de large et la réduit
+       pour la faire tenir : l'application paraissait à la bonne taille, mais
+       chaque champ touché déclenchait un zoom automatique, et « dézoomer »
+       ramenait à cette vue faussée au lieu de l'affichage normal.
+
+       `viewport-fit=cover` permet au contenu d'aller sous l'encoche et la
+       barre d'accueil, que Flutter compense lui-même.
+
+       **Ni `maximum-scale`, ni `user-scalable=no`**, qu'on voit souvent ici.
+       Ils empêchent d'agrandir la page pour la lire, ce qui est une barrière
+       pour qui voit mal ; Safari les ignore de toute façon depuis iOS 10 pour
+       le pincement. Le zoom automatique se règle par la taille de police des
+       champs, plus bas — à la cause, pas en interdisant le zoom. -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -73,6 +90,18 @@
       box-shadow:0 -6px 24px rgba(0,0,0,.18);padding:18px 18px calc(18px + env(safe-area-inset-bottom));
       transform:translateY(110%);transition:transform .28s ease;border-radius:18px 18px 0 0}
     .abl-inst.on{transform:translateY(0)}
+    /* Safari sur iOS zoome automatiquement dès qu'on touche un champ dont
+       la police fait moins de 16 px — il « aide » à lire, et la page reste
+       agrandie ensuite. Flutter crée ses propres champs de saisie dans le
+       document (invisibles, ils servent au clavier et à la correction) et
+       leur donne la taille du texte dessiné, souvent plus petite.
+
+       `!important` est nécessaire et non paresseux : ces tailles sont posées
+       en style en ligne par le moteur, et seule une déclaration importante
+       d'une feuille de style passe devant. Le champ étant transparent, sa
+       police ne change rien à ce qui s'affiche. */
+    input, textarea, [contenteditable="true"] { font-size: 16px !important; }
+
     .abl-inst h3{margin:0 0 6px;font-size:17px}
     .abl-inst p{margin:0 0 14px;font-size:14px;line-height:1.45;color:#444}
     .abl-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
