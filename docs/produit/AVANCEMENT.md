@@ -869,7 +869,109 @@ ainsi** : son contenu serait absent du HTML servi, et c'est précisément ce
 qu'on cherche à faire voir. Un back-office doit donc produire du HTML au
 moment de la publication, pas au moment de l'affichage.
 
-### Reste à faire côté site
 
-- Déploiement chez LWS (manuel, par le fondateur).
+## Site vitrine — six pages de contenu (2026-10-11)
+
+Deux pages ajoutées aux quatre existantes, choisies pour couvrir ce que
+personne ne cherche par le nom d'Ablony mais que tout le monde se demande
+avant d'installer :
+
+| Page | Mots | Balisage |
+|---|---|---|
+| `a-propos.html` | 985 | `AboutPage` |
+| `comment-fonctionne-ablony.html` | 798 | `Article` + `MobileApplication` |
+| `bien-demarrer-sur-ablony.html` | 677 | `HowTo`, sept étapes |
+| `vendre-vetements-lome.html` | 464 | — |
+| `acheter-occasion-togo.html` | 280 | — |
+
+Les ancres des sept étapes du `HowTo` correspondent aux identifiants des `h2`
+de la page : un balisage qui désigne des sections absentes est une déclaration
+fausse, et Google la traite comme telle.
+
+**Chaque affirmation de ces pages a été relue contre le code**, et trois
+étaient fausses : la connexion Facebook (`_facebookDisponible = false`), la
+connexion Apple (conditionnée à `isIOS`), et surtout le ramassage à domicile
+annoncé payant 1 500 F alors qu'en mode « beg » la collecte chez le vendeur
+est **gratuite** — treize endroits à corriger. La leçon tient en une ligne :
+lire une fonction ne suffit pas, il faut regarder **d'où elle est appelée**.
+
+### Pas de version anglaise
+
+Question posée le 2026-10-11, réponse non. Le trafic visé parle français ;
+une traduction doublerait les pages à maintenir, diluerait les signaux entre
+deux versions et ferait concurrence à l'originale sur les mêmes requêtes. Des
+pages de fond en français rapportent davantage que les mêmes pages en deux
+langues.
+
+### Menu, pied de page, et un bouton devenu invisible
+
+« À propos » est passé **au menu**, pas dans la FAQ : c'est une page de
+confiance, elle doit être atteignable depuis n'importe où sans chercher.
+
+Le pied de page est désormais identique sur les douze pages — vérifié par
+empreinte md5 après normalisation des espaces. La seule différence subsistante
+est voulue : sur `index.html` les liens de section restent `#how`, ailleurs ils
+deviennent `index.html#how`.
+
+Le bouton d'installation des pages de contenu s'affichait **vide**. La règle
+unifiée `.legal-content a` (spécificité 0,1,1) passait devant `.btn-primary`
+(0,1,0) et peignait le texte en bleu sur fond bleu. Corrigé en restreignant la
+règle aux liens dans un paragraphe ou une liste, et en rendant sa couleur au
+bouton.
+
+### `synchroniser-menu.py`
+
+Menu (1,6 Ko) et pied (9 Ko) répétés sur douze pages : modifiés à la main,
+c'est la page oubliée qui finit par mentir. Le script recopie les deux depuis
+`index.html`, en conservant la classe du menu propre à chaque page (`navbar
+scrolled` là où il n'y a pas d'image d'en-tête) et en réécrivant les ancres.
+Une modification du menu se fait donc en un endroit, puis une commande.
+
+C'est ce script qui a révélé que `contact.html` portait encore l'ancien menu
+avec le bouton « liste d'attente ». Le constat initial était d'ailleurs faux :
+la page locale était à jour, c'est **le site en ligne** qui montrait l'ancienne
+version — rien n'a jamais été déployé chez LWS. Voir le reste à faire.
+
+### La page liste d'attente est retirée
+
+Supprimée du site et du linktree : l'application est publiée, inviter à
+attendre n'a plus de sens. Le formulaire du pied de page continue de poster
+vers `submit_waitlist.php` — l'adresse n'est pas une promesse faite à
+l'utilisateur, et la renommer casserait l'envoi pour rien.
+
+## Web : la balise viewport manquait (2026-10-12)
+
+Symptôme signalé : dans Safari sur iPhone, toucher un champ zoomait
+l'application, et « dézoomer » ne revenait pas à un affichage correct.
+
+`web/index.html` ne contenait **aucune balise `<meta name="viewport">`** — ni
+la source, ni le build, ni la page servie. Sans elle, Safari suppose une page
+de 980 px de large et la réduit pour la faire tenir : l'application paraissait
+à la bonne taille, mais c'était déjà une vue réduite, et « dézoomer » y
+ramenait. Les deux symptômes n'en faisaient qu'un.
+
+Ajouté `width=device-width, initial-scale=1, viewport-fit=cover`.
+
+**Ni `maximum-scale`, ni `user-scalable=no`**, qu'on trouve dans toutes les
+recettes pour Flutter web. Ils empêchent d'agrandir la page pour la lire —
+une barrière réelle — et Safari les ignore de toute façon depuis iOS 10 pour
+le pincement. Le zoom automatique a une cause précise : Safari ne zoome que si
+la police du champ touché fait moins de 16 px. Les champs de saisie que
+Flutter crée dans le document (invisibles, ils servent au clavier et à la
+correction) héritent de la taille du texte dessiné. D'où une règle qui les
+force à 16 px, en `!important` — ces tailles sont posées en style en ligne par
+le moteur, et seule une déclaration importante d'une feuille de style passe
+devant. Le champ étant transparent, sa police ne change rien à l'affichage.
+
+## Reste à faire côté site
+
+- **Déploiement chez LWS** (manuel, par le fondateur). **Rien n'a jamais été
+  déployé** : `ablony.net` sert encore une version antérieure à tout ce qui
+  précède. C'est la raison de plusieurs écarts constatés entre le site observé
+  et les fichiers.
 - Vérifier l'adresse LWS saisie de mémoire dans `mention_legal.md`.
+- **`aide.md` décrit le mode « def », pas le mode actuel.** Il demande au
+  vendeur de « déposer le paquet au point relais indiqué » sous « cinq
+  jours », alors qu'en mode « beg » un coursier vient le chercher
+  gratuitement. Un utilisateur qui suit l'aide fait donc le mauvais geste.
+  À réécrire.
