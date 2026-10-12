@@ -963,6 +963,57 @@ force à 16 px, en `!important` — ces tailles sont posées en style en ligne p
 le moteur, et seule une déclaration importante d'une feuille de style passe
 devant. Le champ étant transparent, sa police ne change rien à l'affichage.
 
+## Aide et CGU remis au mode « beg » (2026-10-12)
+
+`aide.md` décrivait le mode « def » : elle demandait au vendeur de déposer son
+colis **en point relais** sous cinq jours. En mode « beg », un livreur vient le
+chercher **gratuitement** à Lomé, et hors de Lomé c'est le vendeur qui
+**expédie lui-même**. Quelqu'un qui suivait l'aide faisait donc le mauvais
+geste, ou cherchait un relais qui n'existe pas chez lui.
+
+L'aide expose maintenant les deux chemins tels que le code les décide :
+
+- le choix appartient à **l'acheteur** au paiement ;
+- la livraison Ablony n'apparaît que si **acheteur et vendeur sont tous deux à
+  Lomé** (`COVERED_CITY_KEYS = {"lome"}`, vérifié aussi côté serveur) ;
+- l'auto-expédition demande une **preuve d'envoi obligatoire**, modérée, qui
+  met le compte à rebours en pause et le reprend là où il s'était arrêté si
+  elle est refusée ;
+- la libération automatique **trois jours après remise constatée** ne vaut que
+  pour les colis que nous acheminons : en auto-expédition, aucun agent n'a rien
+  vu, et seule la confirmation de l'acheteur ou un litige libère les fonds.
+
+### Trois erreurs de plus, trouvées en vérifiant chaque phrase
+
+**Les frais de retrait annoncés étaient ceux de l'ancienne grille** — 100 F
++ 1 %, plafonnés à 2 100 F — abandonnée le 2026-10-02 parce qu'elle était en
+dessous du coût réel de sortie. Le taux appliqué par le client **et** par le
+serveur est de **5 % sans plafond** : 500 F sur un retrait de 10 000, pas 200.
+Annoncer moins que ce qu'on prélève est la pire des erreurs possibles sur
+cette page ; c'est celle qui a motivé de tout relire.
+
+**Le virement bancaire manquait** : `WithdrawalMethod` en propose trois,
+l'aide en citait deux.
+
+**« Votre article repart en vente »** après un remboursement est faux — la
+notification envoyée dit l'inverse : l'annonce est masquée et doit être
+republiée à la main.
+
+### CGU, article 7
+
+Le tableau des frais annonçait **5 %** de protection et l'ancienne grille de
+retrait, quand l'article 14 **du même document** annonce 6 % et 5 %. Un
+acheteur pouvait désigner l'article 7 pour contester le prélèvement. Les
+chiffres de l'article 7 sont alignés sur le code ; la duplication des deux
+articles reste à traiter (voir le reste à faire).
+
+### Listes numérotées
+
+`styles.css` n'avait aucune règle pour `ol` — il n'en existait nulle part. Un
+`ol` héritait donc de la puce ronde de `.legal-content li::before` **par-dessus**
+sa propre numérotation. Les étapes de l'auto-expédition en étant une, la règle
+manquante a été écrite plutôt que la liste contournée.
+
 ## Reste à faire côté site
 
 - **Déploiement chez LWS** (manuel, par le fondateur). **Rien n'a jamais été
@@ -970,8 +1021,18 @@ devant. Le champ étant transparent, sa police ne change rien à l'affichage.
   précède. C'est la raison de plusieurs écarts constatés entre le site observé
   et les fichiers.
 - Vérifier l'adresse LWS saisie de mémoire dans `mention_legal.md`.
-- **`aide.md` décrit le mode « def », pas le mode actuel.** Il demande au
-  vendeur de « déposer le paquet au point relais indiqué » sous « cinq
-  jours », alors qu'en mode « beg » un coursier vient le chercher
-  gratuitement. Un utilisateur qui suit l'aide fait donc le mauvais geste.
-  À réécrire.
+- **Redéployer aussi `ablony-site` sur Firebase**, et pas seulement LWS :
+  `AppUrls.siteBase` vaut `https://ablony-site.web.app`, donc **c'est cette
+  copie que l'application installée ouvre** pour l'aide, les CGU et la
+  confidentialité. Une mise en ligne chez LWS ne corrige pas l'aide vue depuis
+  l'application. Depuis `ablony_landing` : `firebase deploy --only hosting`
+  (les `.md` y sont servis en `no-cache`, l'effet est immédiat).
+- **CGU : deux articles « Frais » coexistent** (7 et 14). Les chiffres sont
+  désormais les mêmes, mais un contrat qui traite deux fois du même sujet
+  finira par se contredire à la prochaine révision. À fusionner, avec les
+  autres retouches légales — c'est de la rédaction juridique, pas une
+  correction de valeur.
+- **CGU : l'article 2 décrit encore le mode « def »** (« nous acheminons
+  nous-mêmes les colis, en point relais ou à domicile »), et l'article 6
+  parle de « déposer le colis ». Exact à Lomé, faux ailleurs, où le vendeur
+  expédie lui-même. À reprendre en même temps que la fusion ci-dessus.
