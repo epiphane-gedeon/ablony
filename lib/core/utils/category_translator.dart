@@ -57,7 +57,11 @@ class CategoryTranslator {
   }
 
   /// Traduit les valeurs d'attributs (état du produit, couleurs, matières…)
-  static String translateAttributeValue(AppLocalizations l10n, String value) {
+  static String translateAttributeValue(
+    AppLocalizations l10n,
+    String value, [
+    String? attributeId,
+  ]) {
     final normalizedValue = _normalizeKey(value);
 
     switch (normalizedValue) {
@@ -171,6 +175,9 @@ class CategoryTranslator {
       case 'bague':
         return l10n.jewelryTypeRing;
       case 'broche':
+        if (attributeId == 'book_format') {
+          return l10n.localeName == 'en' ? 'Paperback' : 'Broché';
+        }
         return l10n.jewelryTypeBrooch;
       case 'montrebracelet':
         return l10n.jewelryTypeWatchBracelet;
@@ -185,6 +192,43 @@ class CategoryTranslator {
       case 'numerique':
         return l10n.watchMovementDigital;
 
+      // Langues
+      case 'francais':
+        return l10n.localeName == 'en' ? 'French' : 'Français';
+      case 'anglais':
+        return l10n.localeName == 'en' ? 'English' : 'Anglais';
+      case 'bilingue':
+        return l10n.localeName == 'en' ? 'Bilingual' : 'Bilingue';
+
+      // Niveaux scolaires
+      case 'maternelle':
+        return l10n.localeName == 'en' ? 'Preschool' : 'Maternelle';
+      case 'primaire':
+        return l10n.localeName == 'en' ? 'Elementary' : 'Primaire';
+      case 'college':
+        return l10n.localeName == 'en' ? 'Middle school' : 'Collège';
+      case 'lycee':
+        return l10n.localeName == 'en' ? 'High school' : 'Lycée';
+      case 'universite':
+        return l10n.localeName == 'en' ? 'University' : 'Université';
+      case 'concoursexamens':
+      case 'concours':
+        return l10n.localeName == 'en' ? 'Exams & competitions' : 'Concours & examens';
+
+      // Formats de livres
+      case 'relie':
+        return l10n.localeName == 'en' ? 'Hardcover' : 'Relié';
+      case 'poche':
+        return l10n.localeName == 'en' ? 'Pocket edition' : 'Poche';
+      case 'grandformat':
+        return l10n.localeName == 'en' ? 'Large format' : 'Grand format';
+
+      // Autres conditions
+      case 'neufsansetiquette':
+        return l10n.localeName == 'en' ? 'New without tags' : 'Neuf sans étiquette';
+      case 'pourpieces':
+        return l10n.localeName == 'en' ? 'For parts' : 'Pour pièces';
+
       // Autres
       case 'autre':
         return l10n.brandOther;
@@ -194,33 +238,68 @@ class CategoryTranslator {
     return value;
   }
 
-  /// Traduit les noms d'attributs (Marque, Taille, Couleur…)
+  /// Traduit les noms d'attributs (Marque, Taille, Couleur, Langue, Niveau…)
   static String translateAttributeName(AppLocalizations l10n, String name) {
     final normalizedKey = _normalizeKey(name);
+    final isEn = l10n.localeName == 'en';
 
     switch (normalizedKey) {
       case 'etat':
+      case 'condition':
         return l10n.attributeEtat;
       case 'marque':
+      case 'brand':
+      case 'techbrand':
         return l10n.attributeMarque;
       case 'taille':
+      case 'size':
+      case 'sizehaut':
+      case 'sizebas':
+      case 'sizeenfant':
         return l10n.attributeTaille;
       case 'pointure':
+      case 'sizechaussures':
+      case 'sizechaussuresenfant':
         return l10n.attributePointure;
       case 'couleur':
+      case 'color':
         return l10n.attributeCouleur;
       case 'matiere':
+      case 'material':
         return l10n.attributeMatiere;
       case 'longueur':
+      case 'length':
+      case 'dresslength':
+      case 'hairlength':
         return l10n.attributeLongueur;
-      case 'type de sac':
+      case 'typedesac':
       case 'typesac':
+      case 'bagtype':
         return l10n.attributeTypeSac;
-      case 'type de bijou':
+      case 'typedebijou':
       case 'typebijou':
+      case 'jewelrytype':
         return l10n.attributeTypeBijou;
       case 'mouvement':
+      case 'watchmovement':
         return l10n.attributeMouvement;
+      case 'langue':
+      case 'language':
+      case 'booklanguage':
+        return isEn ? 'Language' : 'Langue';
+      case 'niveau':
+      case 'level':
+      case 'schoollevel':
+        return isEn ? 'Level' : 'Niveau';
+      case 'format':
+      case 'bookformat':
+        return 'Format';
+      case 'stockage':
+      case 'storage':
+        return isEn ? 'Storage' : 'Stockage';
+      case 'type':
+      case 'hairtype':
+        return 'Type';
     }
 
     return name;

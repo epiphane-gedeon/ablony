@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/utils/category_translator.dart';
 import '../../../delivery/domain/models/delivery_pricing.dart';
 import '../../../../shared/widgets/user_badges.dart';
 import '../../../../core/responsive/responsive.dart';
@@ -64,6 +65,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
   bool _isLoadingSeller =
       true; // Indicateur de chargement des données du vendeur
   String? _subcategoryName; // Nom de la sous-catégorie finale
+  Subcategory? _subcategory; // Sous-catégorie complète
+  List<ProductAttribute> _categoryAttributes = []; // Attributs configurés pour la sous-catégorie
   List<Product> _sellerProducts = []; // Liste des autres produits du vendeur
   List<Product> _similarProducts =
       []; // Liste des produits similaires (même sous-catégorie)
@@ -259,8 +262,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         // Charger les données du vendeur
         _loadSeller(product.sellerId);
 
-        // Charger le nom de la sous-catégorie
-        _loadSubcategoryName(product.subcategoryId);
+        // Charger la sous-catégorie et ses attributs configurés
+        _loadSubcategoryAndAttributes(product.subcategoryId);
 
         // Charger les produits du vendeur et similaires
         _loadTabData(product);
@@ -302,24 +305,36 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     }
   }
 
-  /// Charge le nom de la sous-catégorie depuis Firestore
+  /// Charge la sous-catégorie et ses attributs configurés depuis Firestore
   ///
-  /// Récupère le nom de la sous-catégorie finale pour l'afficher
-  /// dans la section "Catégorie" des détails du produit
-  Future<void> _loadSubcategoryName(String subcategoryId) async {
+  /// Récupère la sous-catégorie pour afficher son nom localisé et ses attributs
+  /// spécifiques dans la section des détails du produit.
+  Future<void> _loadSubcategoryAndAttributes(String subcategoryId) async {
     try {
       final categoryRepository = ref.read(categoryRepositoryProvider);
       final subcategory = await categoryRepository.getSubcategoryById(
         subcategoryId,
       );
 
+      List<ProductAttribute> attributes = [];
+      if (subcategory.attributes.isNotEmpty) {
+        try {
+          attributes = await categoryRepository.getAttributesByIds(
+            subcategory.attributes,
+          );
+          attributes.sort((a, b) => (a.order ?? 99).compareTo(b.order ?? 99));
+        } catch (_) {}
+      }
+
       if (mounted) {
         setState(() {
+          _subcategory = subcategory;
           _subcategoryName = subcategory.name;
+          _categoryAttributes = attributes;
         });
       }
     } catch (e) {
-      // En cas d'erreur, on laisse _subcategoryName à null
+      // En cas d'erreur, on laisse _subcategory et _categoryAttributes par défaut
     }
   }
 
@@ -556,15 +571,18 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
                               // État
                               Text(
-                                ref
-                                        .watch(
-                                          attributeLabelProvider((
-                                            attributeId: 'condition',
-                                            value: product.condition.index,
-                                          )),
-                                        )
-                                        .value ??
-                                    product.condition.label,
+                                CategoryTranslator.translateAttributeValue(
+                                  AppLocalizations.of(context)!,
+                                  ref
+                                          .watch(
+                                            attributeLabelProvider((
+                                              attributeId: 'condition',
+                                              value: product.condition.index,
+                                            )),
+                                          )
+                                          .value ??
+                                      product.condition.label,
+                                ),
                                 style: theme.textTheme.bodyMedium,
                               ),
 
@@ -694,107 +712,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           if (_isDescriptionExpanded) ...[
                             const Divider(height: 32),
 
-                            // Catégorie finale (sous-catégorie) → recherche
-                            // filtrée sur cette sous-catégorie.
-                            _buildDetailRow(
+                            ..._buildDynamicDetailRows(
+                              context,
                               theme,
-                              AppLocalizations.of(context)!.productCategory,
-                              _subcategoryName ?? product.subcategoryId,
-                              showArrow: true,
-                              onTap: () => context.pushNamed(
-                                'search-results',
-                                extra: <String, dynamic>{
-                                  'query': '',
-                                  'categoryId': product.subcategoryId,
-                                  'categoryName':
-                                      _subcategoryName ?? product.subcategoryId,
-                                },
-                              ),
-                            ),
-                            const Divider(height: 1),
-
-                            // Taille → recherche filtrée sur cette taille (seul
-                            // le cas renseigné est cliquable).
-                            _buildDetailRow(
-                              theme,
-                              AppLocalizations.of(context)!.productSize,
-                              product.primarySizeValue != null
-                                  ? ref
-                                            .watch(
-                                              attributeLabelProvider((
-                                                attributeId: product
-                                                    .primarySizeAttributeId!,
-                                                value: product.primarySizeValue,
-                                              )),
-                                            )
-                                            .value ??
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.notSpecified
-                                  : AppLocalizations.of(context)!.notSpecified,
-                              showArrow: product.primarySizeValue != null,
-                              onTap: product.primarySizeValue != null
-                                  ? () => context.pushNamed(
-                                      'search-results',
-                                      extra: <String, dynamic>{
-                                        'query': '',
-                                        'size':
-                                            '${product.primarySizeAttributeId}:${product.primarySizeValue}',
-                                      },
-                                    )
-                                  : null,
-                            ),
-                            const Divider(height: 1),
-
-                            // État → recherche filtrée sur cet état.
-                            _buildDetailRow(
-                              theme,
-                              AppLocalizations.of(context)!.productCondition,
-                              ref
-                                      .watch(
-                                        attributeLabelProvider((
-                                          attributeId: 'condition',
-                                          value: product.condition.index,
-                                        )),
-                                      )
-                                      .value ??
-                                  product.condition.label,
-                              showArrow: true,
-                              onTap: () => context.pushNamed(
-                                'search-results',
-                                extra: <String, dynamic>{
-                                  'query': '',
-                                  'condition': product.condition.index.toString(),
-                                },
-                              ),
-                            ),
-                            const Divider(height: 1),
-
-                            // Couleur
-                            if (product.attributes['color'] != null)
-                              _buildDetailRow(
-                                theme,
-                                AppLocalizations.of(context)!.productColor,
-                                ref
-                                        .watch(
-                                          attributeLabelProvider((
-                                            attributeId: 'color',
-                                            value: product.attributes['color'],
-                                          )),
-                                        )
-                                        .value ??
-                                    product.attributes['color'].toString(),
-                                showArrow: false,
-                              ),
-                            if (product.attributes['color'] != null)
-                              const Divider(height: 1),
-
-                            // Date d'ajout
-                            _buildDetailRow(
-                              theme,
-                              AppLocalizations.of(context)!.productAddedDate,
-                              _formatTimeSince(context, product.createdAt),
-                              showArrow: false,
+                              AppLocalizations.of(context)!,
+                              product,
                             ),
 
                             const SizedBox(height: 16),
@@ -1439,6 +1361,249 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
       error: (error, stack) =>
           PrimaryButton(text: l10n.productAlreadySold, onPressed: null),
     );
+  }
+
+  /// Construit dynamiquement la liste des lignes de détails pour le produit
+  /// en fonction des attributs configurés pour sa sous-catégorie.
+  List<Widget> _buildDynamicDetailRows(
+    BuildContext context,
+    ThemeData theme,
+    AppLocalizations l10n,
+    Product product,
+  ) {
+    final rows = <Widget>[];
+    final handledKeys = <String>{};
+
+    void addDetailRow({
+      required String label,
+      required String value,
+      bool showArrow = false,
+      VoidCallback? onTap,
+    }) {
+      if (rows.isNotEmpty) {
+        rows.add(const Divider(height: 1));
+      }
+      rows.add(
+        _buildDetailRow(
+          theme,
+          label,
+          value,
+          showArrow: showArrow,
+          onTap: onTap,
+        ),
+      );
+    }
+
+    // 1. Catégorie
+    final categoryDisplayName = _subcategory != null
+        ? CategoryTranslator.translate(
+            l10n,
+            _subcategory!.id,
+            nameFr: _subcategory!.name,
+            nameEn: _subcategory!.nameEn,
+          )
+        : (_subcategoryName ?? product.subcategoryId);
+
+    addDetailRow(
+      label: l10n.productCategory,
+      value: categoryDisplayName,
+      showArrow: true,
+      onTap: () => context.pushNamed(
+        'search-results',
+        extra: <String, dynamic>{
+          'query': '',
+          'categoryId': product.subcategoryId,
+          'categoryName': categoryDisplayName,
+        },
+      ),
+    );
+
+    // Fonction d'aide pour formatter une valeur
+    String formatAttributeValue(dynamic rawValue, [ProductAttribute? attr]) {
+      if (rawValue == null) return '';
+      if (attr != null &&
+          rawValue is int &&
+          rawValue >= 0 &&
+          rawValue < attr.values.length) {
+        return CategoryTranslator.translateAttributeValue(
+          l10n,
+          attr.values[rawValue],
+        );
+      }
+      if (rawValue is List) {
+        return rawValue
+            .map((item) => CategoryTranslator.translateAttributeValue(
+                  l10n,
+                  item.toString(),
+                ))
+            .join(', ');
+      }
+      return CategoryTranslator.translateAttributeValue(
+        l10n,
+        rawValue.toString(),
+      );
+    }
+
+    // 2. Attributs définis par la catégorie
+    if (_categoryAttributes.isNotEmpty) {
+      for (final attr in _categoryAttributes) {
+        handledKeys.add(attr.id);
+
+        if (attr.id == 'condition') {
+          final conditionLabel = CategoryTranslator.translateAttributeValue(
+            l10n,
+            product.condition.label,
+          );
+          addDetailRow(
+            label: CategoryTranslator.translateAttributeName(l10n, attr.name),
+            value: conditionLabel,
+            showArrow: true,
+            onTap: () => context.pushNamed(
+              'search-results',
+              extra: <String, dynamic>{
+                'query': '',
+                'condition': product.condition.index.toString(),
+              },
+            ),
+          );
+          continue;
+        }
+
+        // Récupérer la valeur de l'attribut
+        dynamic rawValue = product.attributes[attr.id];
+
+        final isSizeAttr = attr.id.contains('size') ||
+            attr.id.contains('taille') ||
+            attr.id.contains('pointure');
+        if (rawValue == null && isSizeAttr) {
+          rawValue = product.primarySizeValue;
+        }
+
+        final isBrandAttr =
+            attr.id == 'brand' || attr.id == 'tech_brand' || attr.id == 'marque';
+        if (rawValue == null && isBrandAttr) {
+          rawValue = product.primaryBrandValue;
+        }
+
+        if (rawValue != null && rawValue.toString().trim().isNotEmpty) {
+          final displayLabel =
+              CategoryTranslator.translateAttributeName(l10n, attr.name);
+          final displayValue = formatAttributeValue(rawValue, attr);
+
+          if (isSizeAttr) {
+            addDetailRow(
+              label: displayLabel,
+              value: displayValue,
+              showArrow: true,
+              onTap: () => context.pushNamed(
+                'search-results',
+                extra: <String, dynamic>{
+                  'query': '',
+                  'size': '${attr.id}:$rawValue',
+                },
+              ),
+            );
+          } else if (isBrandAttr) {
+            addDetailRow(
+              label: displayLabel,
+              value: displayValue,
+              showArrow: true,
+              onTap: () => context.pushNamed(
+                'search-results',
+                extra: <String, dynamic>{
+                  'query': '',
+                  'brand': rawValue.toString(),
+                },
+              ),
+            );
+          } else {
+            addDetailRow(
+              label: displayLabel,
+              value: displayValue,
+              showArrow: false,
+            );
+          }
+        }
+      }
+    }
+
+    // 3. Si 'condition' n'a pas encore été affiché
+    if (!handledKeys.contains('condition')) {
+      handledKeys.add('condition');
+      final conditionLabel = CategoryTranslator.translateAttributeValue(
+        l10n,
+        product.condition.label,
+      );
+      addDetailRow(
+        label: l10n.productCondition,
+        value: conditionLabel,
+        showArrow: true,
+        onTap: () => context.pushNamed(
+          'search-results',
+          extra: <String, dynamic>{
+            'query': '',
+            'condition': product.condition.index.toString(),
+          },
+        ),
+      );
+    }
+
+    // 4. Si _categoryAttributes était vide (fallback temporaire de chargement)
+    if (_categoryAttributes.isEmpty && product.primarySizeValue != null) {
+      final sizeAttrId = product.primarySizeAttributeId ?? 'size';
+      handledKeys.add(sizeAttrId);
+      addDetailRow(
+        label: l10n.productSize,
+        value: formatAttributeValue(product.primarySizeValue),
+        showArrow: true,
+        onTap: () => context.pushNamed(
+          'search-results',
+          extra: <String, dynamic>{
+            'query': '',
+            'size': '$sizeAttrId:${product.primarySizeValue}',
+          },
+        ),
+      );
+    }
+
+    // 5. Parcourir les autres attributs présents dans product.attributes non encore affichés
+    for (final entry in product.attributes.entries) {
+      final key = entry.key;
+      final val = entry.value;
+
+      if (handledKeys.contains(key)) continue;
+      if (key == 'condition' || key.startsWith('_')) continue;
+      if (val == null || val.toString().trim().isEmpty) continue;
+
+      handledKeys.add(key);
+      final displayLabel = CategoryTranslator.translateAttributeName(l10n, key);
+      final displayValue = formatAttributeValue(val);
+
+      final isBrand = key == 'brand' || key == 'tech_brand' || key == 'marque';
+      addDetailRow(
+        label: displayLabel,
+        value: displayValue,
+        showArrow: isBrand,
+        onTap: isBrand
+            ? () => context.pushNamed(
+                  'search-results',
+                  extra: <String, dynamic>{
+                    'query': '',
+                    'brand': val.toString(),
+                  },
+                )
+            : null,
+      );
+    }
+
+    // 6. Date d'ajout
+    addDetailRow(
+      label: l10n.productAddedDate,
+      value: _formatTimeSince(context, product.createdAt),
+      showArrow: false,
+    );
+
+    return rows;
   }
 
   /// Construit une ligne de détail avec label et valeur
