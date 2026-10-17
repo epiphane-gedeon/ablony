@@ -3,34 +3,43 @@ import '../../l10n/app_localizations.dart';
 /// Utilitaire pour traduire les noms de catégories, sous-catégories et attributs
 /// venant de la base de données.
 ///
-/// Les données sont stockées en français dans Firestore, mais on veut
-/// les afficher dans la langue de l'utilisateur.
+/// ## Stratégie de traduction des noms de catégories
+///
+/// Les noms sont stockés en français dans Firestore (champ `name`).
+/// Le champ optionnel `nameEn` stocke directement la traduction anglaise
+/// dans le document Firestore, ce qui évite de maintenir une liste
+/// hardcodée dans le code.
+///
+/// Usage typique (catégorie) :
+/// ```dart
+/// CategoryTranslator.translate(l10n, category.id,
+///   nameFr: category.name,
+///   nameEn: category.nameEn,
+/// )
+/// ```
+///
+/// Si `nameEn` n'est pas renseigné dans Firestore, on retourne `nameFr`
+/// comme fallback — ce qui garantit que l'app est toujours affichable,
+/// même sur des catégories créées avant l'introduction de `nameEn`.
 class CategoryTranslator {
-  /// Traduit le nom d'une catégorie, sous-catégorie ou attribut selon son ID ou nom.
+  /// Retourne le nom localisé d'une catégorie ou sous-catégorie.
   ///
-  /// Exemples:
-  /// - 'femme' → 'Femme' (FR) ou 'Women' (EN)
-  /// - 'haut_femme' → 'Haut' (FR) ou 'Top' (EN)
-  /// - 'Chemise' → 'Chemise' (FR) ou 'Shirt' (EN)
-  /// - 'Marque' → 'Marque' (FR) ou 'Brand' (EN)
+  /// - En **français** (ou toute locale non anglaise) : retourne [nameFr].
+  /// - En **anglais** : retourne [nameEn] si disponible, sinon [nameFr].
   ///
-  /// Si aucune traduction n'existe, retourne le nom original.
+  /// Les quelques catégories de niveau 1 (`femme`, `homme`) conservent
+  /// une traduction hardcodée pour la rétrocompatibilité avec les écrans
+  /// qui n'ont pas encore accès aux entités (ex : chips de filtre sur la home).
   static String translate(
     AppLocalizations l10n,
-    String key,
-    String fallbackName,
-  ) {
-    // Normaliser la clé pour la recherche (minuscules, sans accents)
-    String normalizedKey = _normalizeKey(key);
+    String id, {
+    required String nameFr,
+    String? nameEn,
+  }) {
+    final isEnglish = l10n.localeName == 'en';
 
-    // Pour les sous-catégories avec format "haut_femme", "chemise_homme", etc.
-    // extraire juste la première partie avant le underscore
-    if (normalizedKey.contains('_')) {
-      normalizedKey = normalizedKey.split('_').first;
-    }
-
-    // Catégories principales
-    switch (normalizedKey) {
+    // Traductions hardcodées pour les catégories racine (rétrocompatibilité)
+    switch (id) {
       case 'femme':
         return l10n.categoryFemme;
       case 'homme':
@@ -39,84 +48,15 @@ class CategoryTranslator {
         return l10n.seeAll;
     }
 
-    // Sous-catégories
-    switch (normalizedKey) {
-      case 'haut':
-        return l10n.subcategoryHaut;
-      case 'bas':
-        return l10n.subcategoryBas;
-      case 'chaussures':
-        return l10n.subcategoryChaussures;
-      case 'accessoires':
-        return l10n.subcategoryAccessoires;
-      case 'chemise':
-        return l10n.subcategoryChemise;
-      case 't-shirt':
-      case 'tshirt':
-        return l10n.subcategoryTshirt;
-      case 'debardeur':
-        return l10n.subcategoryDebardeur;
-      case 'pull':
-        return l10n.subcategoryPull;
-      case 'veste':
-        return l10n.subcategoryVeste;
-      case 'pantalon':
-        return l10n.subcategoryPantalon;
-      case 'jupe':
-        return l10n.subcategoryJupe;
-      case 'short':
-        return l10n.subcategoryShort;
-      case 'robe':
-        return l10n.subcategoryRobe;
-      case 'baskets':
-        return l10n.subcategoryBaskets;
-      case 'sandales':
-        return l10n.subcategorySandales;
-      case 'talons':
-        return l10n.subcategoryTalons;
-      case 'sac':
-        return l10n.subcategorySac;
-      case 'bijoux':
-        return l10n.subcategoryBijoux;
-      case 'casquette':
-        return l10n.subcategoryCasquette;
-      case 'ceinture':
-        return l10n.subcategoryCeinture;
-      case 'montre':
-        return l10n.subcategoryMontre;
+    // Pour toutes les autres catégories/sous-catégories :
+    // utilise nameEn si disponible et si locale EN, sinon nameFr.
+    if (isEnglish && nameEn != null && nameEn.isNotEmpty) {
+      return nameEn;
     }
-
-    // Attributs
-    switch (normalizedKey) {
-      case 'etat':
-        return l10n.attributeEtat;
-      case 'marque':
-        return l10n.attributeMarque;
-      case 'taille':
-        return l10n.attributeTaille;
-      case 'pointure':
-        return l10n.attributePointure;
-      case 'couleur':
-        return l10n.attributeCouleur;
-      case 'matiere':
-        return l10n.attributeMatiere;
-      case 'longueur':
-        return l10n.attributeLongueur;
-      case 'type de sac':
-      case 'typesac':
-        return l10n.attributeTypeSac;
-      case 'type de bijou':
-      case 'typebijou':
-        return l10n.attributeTypeBijou;
-      case 'mouvement':
-        return l10n.attributeMouvement;
-    }
-
-    // Si aucune traduction trouvée, retourner le nom original
-    return fallbackName;
+    return nameFr;
   }
 
-  /// Traduit les valeurs d'attributs (comme les conditions de produit)
+  /// Traduit les valeurs d'attributs (état du produit, couleurs, matières…)
   static String translateAttributeValue(AppLocalizations l10n, String value) {
     final normalizedValue = _normalizeKey(value);
 
@@ -254,6 +194,38 @@ class CategoryTranslator {
     return value;
   }
 
+  /// Traduit les noms d'attributs (Marque, Taille, Couleur…)
+  static String translateAttributeName(AppLocalizations l10n, String name) {
+    final normalizedKey = _normalizeKey(name);
+
+    switch (normalizedKey) {
+      case 'etat':
+        return l10n.attributeEtat;
+      case 'marque':
+        return l10n.attributeMarque;
+      case 'taille':
+        return l10n.attributeTaille;
+      case 'pointure':
+        return l10n.attributePointure;
+      case 'couleur':
+        return l10n.attributeCouleur;
+      case 'matiere':
+        return l10n.attributeMatiere;
+      case 'longueur':
+        return l10n.attributeLongueur;
+      case 'type de sac':
+      case 'typesac':
+        return l10n.attributeTypeSac;
+      case 'type de bijou':
+      case 'typebijou':
+        return l10n.attributeTypeBijou;
+      case 'mouvement':
+        return l10n.attributeMouvement;
+    }
+
+    return name;
+  }
+
   /// Traduit les help texts des attributs
   static String translateHelpText(
     AppLocalizations l10n,
@@ -288,7 +260,7 @@ class CategoryTranslator {
     }
   }
 
-  /// Normalise une clé pour la recherche (minuscules, sans accents)
+  /// Normalise une clé pour la recherche (minuscules, sans accents, sans espaces)
   static String _normalizeKey(String key) {
     return key
         .toLowerCase()

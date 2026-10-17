@@ -7,6 +7,7 @@ import '../../../../core/presentation/pages/selection_screen.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/category_translator.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../product/domain/entities/subcategory.dart';
 import '../../../product/presentation/providers/category_provider.dart';
 
 /// Page de recherche et navigation dans les catégories. principales et offre
@@ -103,7 +104,8 @@ class SearchPage extends ConsumerWidget {
                                   CategoryTranslator.translate(
                                     l10n,
                                     category.id,
-                                    category.name,
+                                    nameFr: category.name,
+                                    nameEn: category.nameEn,
                                   );
 
                               return InkWell(
@@ -156,8 +158,8 @@ class SearchPage extends ConsumerWidget {
     );
   }
 
-  /// Recherche récursive du nom de catégorie par ID pour l'affichage final
-  Future<String?> _findCategoryName(
+  /// Recherche récursive de la sous-catégorie par ID pour l'affichage final
+  Future<Subcategory?> _findSubcategory(
     WidgetRef ref,
     String categoryId,
     String? parentId,
@@ -167,12 +169,12 @@ class SearchPage extends ConsumerWidget {
 
     for (final subcat in subcats) {
       if (subcat.id == categoryId) {
-        return subcat.name;
+        return subcat;
       }
       if (subcat.isBranch) {
-        final foundName = await _findCategoryName(ref, categoryId, subcat.id);
-        if (foundName != null) {
-          return foundName;
+        final found = await _findSubcategory(ref, categoryId, subcat.id);
+        if (found != null) {
+          return found;
         }
       }
     }
@@ -219,7 +221,8 @@ class SearchPage extends ConsumerWidget {
                         'name': CategoryTranslator.translate(
                           l10n,
                           sub.id,
-                          sub.name,
+                          nameFr: sub.name,
+                          nameEn: sub.nameEn,
                         ),
                         'hasChildren': sub.isBranch,
                       },
@@ -248,17 +251,18 @@ class SearchPage extends ConsumerWidget {
 
           if (selectedId != parentId) {
             finalCategoryId = selectedId;
-            // Trouver le vrai nom de la catégorie (car it might be deep)
-            final foundName = await _findCategoryName(
+            // Trouver la sous-catégorie (peut être en profondeur dans l'arborescence)
+            final foundSub = await _findSubcategory(
               ref,
               selectedId,
               parentId,
             );
-            if (foundName != null) {
+            if (foundSub != null) {
               finalCategoryName = CategoryTranslator.translate(
                 l10n,
                 selectedId,
-                foundName,
+                nameFr: foundSub.name,
+                nameEn: foundSub.nameEn,
               );
             }
           }

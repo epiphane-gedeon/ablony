@@ -14,6 +14,7 @@ class CategoryModel {
     return Category(
       id: snapshot.id,
       name: data['name'] as String,
+      nameEn: data['nameEn'] as String?,
       children: List<String>.from(data['children'] ?? []),
       order: data['order'] as int?,
       iconUrl: data['iconUrl'] as String?,
@@ -27,6 +28,7 @@ class CategoryModel {
   static Map<String, dynamic> toFirestore(Category category) {
     return {
       'name': category.name,
+      if (category.nameEn != null) 'nameEn': category.nameEn,
       'children': category.children,
       'order': category.order,
       'iconUrl': category.iconUrl,
@@ -41,6 +43,7 @@ class CategoryModel {
     return Category(
       id: id,
       name: data['name'] as String,
+      nameEn: data['nameEn'] as String?,
       children: List<String>.from(data['children'] ?? []),
       order: data['order'] as int?,
       iconUrl: data['iconUrl'] as String?,

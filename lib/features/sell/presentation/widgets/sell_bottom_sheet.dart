@@ -162,7 +162,7 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
       final subcat = await categoryRepo.getSubcategoryById(_selectedCategoryId!);
 
       setState(() {
-        _selectedCategory = CategoryTranslator.translate(l10n, subcat.id, subcat.name);
+        _selectedCategory = CategoryTranslator.translate(l10n, subcat.id, nameFr: subcat.name, nameEn: subcat.nameEn);
       });
 
       // 2. Charger les attributs dynamiques
@@ -508,9 +508,8 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
     AppLocalizations l10n,
   ) {
     // Traduire le nom de l'attribut
-    final translatedName = CategoryTranslator.translate(
+    final translatedName = CategoryTranslator.translateAttributeName(
       l10n,
-      attr.name,
       attr.name,
     );
 
@@ -648,7 +647,8 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
                         'name': CategoryTranslator.translate(
                           l10n,
                           c.id,
-                          c.name,
+                          nameFr: c.name,
+                          nameEn: c.nameEn,
                         ),
                         'iconUrl': c.iconUrl,
                         'hasChildren': c.children.isNotEmpty,
@@ -668,7 +668,8 @@ class _SellBottomSheetState extends ConsumerState<SellBottomSheet> {
                         'name': CategoryTranslator.translate(
                           l10n,
                           s.id,
-                          s.name,
+                          nameFr: s.name,
+                          nameEn: s.nameEn,
                         ),
                         'iconUrl': s.iconUrl,
                         'hasChildren': s.children.isNotEmpty,

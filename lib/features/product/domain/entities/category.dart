@@ -1,14 +1,21 @@
 /// Entité représentant une catégorie de niveau 1 (racine).
 ///
 /// Exemples : Femme, Homme, Enfant, Maison, Électronique...
-/// 
+///
 /// Une catégorie peut avoir des sous-catégories (children).
 class Category {
   /// Identifiant unique de la catégorie
   final String id;
 
-  /// Nom affiché de la catégorie
+  /// Nom affiché de la catégorie (français, langue de référence)
   final String name;
+
+  /// Nom en anglais, stocké directement dans Firestore (optionnel).
+  ///
+  /// Quand ce champ est renseigné, il est utilisé à la place de [name]
+  /// lorsque la locale de l'utilisateur est l'anglais.
+  /// Cela évite de maintenir des traductions hardcodées dans le code.
+  final String? nameEn;
 
   /// Liste des IDs des sous-catégories directes
   final List<String> children;
@@ -31,6 +38,7 @@ class Category {
   const Category({
     required this.id,
     required this.name,
+    this.nameEn,
     this.children = const [],
     this.order,
     this.iconUrl,
@@ -43,6 +51,7 @@ class Category {
   Category copyWith({
     String? id,
     String? name,
+    String? nameEn,
     List<String>? children,
     int? order,
     String? iconUrl,
@@ -53,6 +62,7 @@ class Category {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
+      nameEn: nameEn ?? this.nameEn,
       children: children ?? this.children,
       order: order ?? this.order,
       iconUrl: iconUrl ?? this.iconUrl,

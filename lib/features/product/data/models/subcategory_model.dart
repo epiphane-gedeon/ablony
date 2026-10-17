@@ -14,6 +14,7 @@ class SubcategoryModel {
     return Subcategory(
       id: snapshot.id,
       name: data['name'] as String,
+      nameEn: data['nameEn'] as String?,
       parentId: data['parentId'] as String,
       children: List<String>.from(data['children'] ?? []),
       attributes: List<String>.from(data['attributes'] ?? []),
@@ -29,6 +30,7 @@ class SubcategoryModel {
   static Map<String, dynamic> toFirestore(Subcategory subcategory) {
     return {
       'name': subcategory.name,
+      if (subcategory.nameEn != null) 'nameEn': subcategory.nameEn,
       'parentId': subcategory.parentId,
       'children': subcategory.children,
       'attributes': subcategory.attributes,
@@ -45,6 +47,7 @@ class SubcategoryModel {
     return Subcategory(
       id: id,
       name: data['name'] as String,
+      nameEn: data['nameEn'] as String?,
       parentId: data['parentId'] as String,
       children: List<String>.from(data['children'] ?? []),
       attributes: List<String>.from(data['attributes'] ?? []),

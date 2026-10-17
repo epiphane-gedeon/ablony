@@ -684,20 +684,20 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
     ).whenComplete(() => _filterSheetRebuild = null);
   }
 
-  /// Recherche récursive du nom de catégorie par ID
-  Future<String?> _findCategoryName(String categoryId, String? parentId) async {
+  /// Recherche récursive de la sous-catégorie par ID
+  Future<Subcategory?> _findSubcategory(String categoryId, String? parentId) async {
     final categoryRepo = ref.read(categoryRepositoryProvider);
     final subcats = await categoryRepo.getSubcategoriesByParent(parentId ?? '');
 
     for (final subcat in subcats) {
       if (subcat.id == categoryId) {
-        return subcat.name;
+        return subcat;
       }
       // Recherche récursive si c'est une branche
       if (subcat.isBranch) {
-        final foundName = await _findCategoryName(categoryId, subcat.id);
-        if (foundName != null) {
-          return foundName;
+        final found = await _findSubcategory(categoryId, subcat.id);
+        if (found != null) {
+          return found;
         }
       }
     }
@@ -743,7 +743,8 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                       'name': CategoryTranslator.translate(
                         l10n,
                         cat.id,
-                        cat.name,
+                        nameFr: cat.name,
+                        nameEn: cat.nameEn,
                       ),
                       'hasChildren': true,
                     },
@@ -760,7 +761,8 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
                         'name': CategoryTranslator.translate(
                           l10n,
                           sub.id,
-                          sub.name,
+                          nameFr: sub.name,
+                          nameEn: sub.nameEn,
                         ),
                         'hasChildren': sub.isBranch,
                       },
@@ -804,20 +806,21 @@ class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
           var selectedName = categoriesAsync
               .where((cat) => cat.id == selectedId)
               .map(
-                (cat) => CategoryTranslator.translate(l10n, cat.id, cat.name),
+                (cat) => CategoryTranslator.translate(l10n, cat.id, nameFr: cat.name, nameEn: cat.nameEn),
               )
               .firstOrNull;
 
           // If not found in main categories, search recursively in subcategories
           if (selectedName == null) {
             for (final category in categoriesAsync) {
-              selectedName = await _findCategoryName(selectedId, category.id);
-              if (selectedName != null) {
+              final foundSub = await _findSubcategory(selectedId, category.id);
+              if (foundSub != null) {
                 // Traduire le nom trouvé
                 selectedName = CategoryTranslator.translate(
                   l10n,
                   selectedId,
-                  selectedName,
+                  nameFr: foundSub.name,
+                  nameEn: foundSub.nameEn,
                 );
                 break;
               }

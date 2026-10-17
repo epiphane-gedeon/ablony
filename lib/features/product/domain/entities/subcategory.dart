@@ -11,8 +11,15 @@ class Subcategory {
   /// Identifiant unique de la sous-catégorie
   final String id;
 
-  /// Nom affiché de la sous-catégorie
+  /// Nom affiché de la sous-catégorie (français, langue de référence)
   final String name;
+
+  /// Nom en anglais, stocké directement dans Firestore (optionnel).
+  ///
+  /// Quand ce champ est renseigné, il est utilisé à la place de [name]
+  /// lorsque la locale de l'utilisateur est l'anglais.
+  /// Cela évite de maintenir des traductions hardcodées dans le code.
+  final String? nameEn;
 
   /// ID de la catégorie ou sous-catégorie parente
   final String parentId;
@@ -21,7 +28,7 @@ class Subcategory {
   final List<String> children;
 
   /// Liste des IDs des attributs applicables aux produits (uniquement pour les feuilles)
-  /// 
+  ///
   /// Exemples : ['brand', 'size_haut', 'color', 'material', 'dressLength']
   final List<String> attributes;
 
@@ -43,6 +50,7 @@ class Subcategory {
   const Subcategory({
     required this.id,
     required this.name,
+    this.nameEn,
     required this.parentId,
     this.children = const [],
     this.attributes = const [],
@@ -63,6 +71,7 @@ class Subcategory {
   Subcategory copyWith({
     String? id,
     String? name,
+    String? nameEn,
     String? parentId,
     List<String>? children,
     List<String>? attributes,
@@ -75,6 +84,7 @@ class Subcategory {
     return Subcategory(
       id: id ?? this.id,
       name: name ?? this.name,
+      nameEn: nameEn ?? this.nameEn,
       parentId: parentId ?? this.parentId,
       children: children ?? this.children,
       attributes: attributes ?? this.attributes,

@@ -253,7 +253,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             (category.id == _selectedCategoryId);
 
         return FilterItem(
-          label: CategoryTranslator.translate(l10n, category.id, category.name),
+          label: CategoryTranslator.translate(l10n, category.id, nameFr: category.name, nameEn: category.nameEn),
           isSelected: isSelected,
           onTap: () {
             setState(() {
